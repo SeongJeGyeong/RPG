@@ -22,4 +22,22 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	UCharacterMovementComponent* m_Movement;
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	float fMoveSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	bool bIsMove;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	FVector	vLocalVelocity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	FVector	vCameraLookAt;
+
+public:
+	virtual void NativeInitializeAnimation() override;
+	virtual void NativeBeginPlay() override;
+	virtual void NativeUpdateAnimation(float _DT) override;
 };

@@ -45,6 +45,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	UCameraComponent* GetCamera() { return m_Camera; }
+	USpringArmComponent* GetArm() { return m_Arm; }
+
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
