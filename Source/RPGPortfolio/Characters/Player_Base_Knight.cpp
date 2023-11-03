@@ -102,7 +102,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 
 	if (vInput.Y != 0.f)
 	{
-		GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.Y);
+		GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
 	}
 
 }
