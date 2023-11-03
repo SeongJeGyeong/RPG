@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include "../System/DataAsset/DA_InputAction.h"
 #include "InputMappingContext.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CoreMinimal.h"
@@ -29,7 +31,7 @@ private:
 	TSoftObjectPtr<UInputMappingContext> m_IMC;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
-
+	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
 
 protected:

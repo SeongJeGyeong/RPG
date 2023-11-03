@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Enum.h"
-#include "InputAction"
+#include "InputAction.h"
 #include "CoreMinimal.h"
 #include "Struct.generated.h"
 

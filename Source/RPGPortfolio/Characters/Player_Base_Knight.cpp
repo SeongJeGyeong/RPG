@@ -63,17 +63,75 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	{
 		return;
 	}
+
+	if (!m_IA_Setting.IsNull())
+	{
+		UDA_InputAction* pIADA = m_IA_Setting.LoadSynchronous();
+	
+		for (int32 i = 0; i < pIADA->IADataArr.Num(); ++i)
+		{
+			switch (pIADA->IADataArr[i].Type)
+			{
+			case EInputActionType::MOVE:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::MoveAction);
+				break;
+			case EInputActionType::ROTATION:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::RotateAction);
+				break;
+			case EInputActionType::JUMP:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::JumpAction);
+				break;
+
+			default:
+				break;
+			}
+		}
+
+	}
+
 }
 
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
+	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
+
+	if (vInput.X != 0.f)
+	{
+		GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
+	}
+
+	if (vInput.Y != 0.f)
+	{
+		GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.Y);
+	}
+
 }
 
 void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
+	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
+
+	AddControllerYawInput(vInput.X);
+
+	float DT = GetWorld()->GetDeltaSeconds();
+
+	FRotator rCameraRotation = m_Arm->GetRelativeRotation();
+	rCameraRotation.Pitch += vInput.Y * 100.f * DT;
+
+	if (rCameraRotation.Pitch > 45)
+	{
+		rCameraRotation.Pitch = 45.f;
+	}
+	else if (rCameraRotation.Pitch < -45.f)
+	{
+		rCameraRotation.Pitch = -45.f;
+	}
+
+	m_Arm->SetRelativeRotation(rCameraRotation);
 }
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
+	ACharacter::Jump();
 }
 
