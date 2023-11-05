@@ -15,7 +15,6 @@ void UAnimInstance_Knight::NativeBeginPlay()
 	{
 		m_Movement = m_Player->GetCharacterMovement();
 	}
-
 }
 
 void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
@@ -38,9 +37,11 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 
 	vLocalVelocity = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
 
-	FVector vCameraLocation = m_Player->GetCamera()->GetComponentLocation();
-	FVector vCameraLookLocation = m_Player->GetCamera()->GetForwardVector() * 1000;
+	bIsInAir = m_Movement->IsFalling();
 
-	vCameraLookAt = vCameraLocation + vCameraLookLocation;
+	//FVector vCameraLocation = m_Player->GetCamera()->GetComponentLocation();
+	//FVector vCameraLookLocation = m_Player->GetCamera()->GetForwardVector() * 1000;
+
+	//vCameraLookAt = vCameraLocation + vCameraLookLocation;
 
 }

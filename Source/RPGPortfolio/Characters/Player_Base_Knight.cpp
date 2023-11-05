@@ -5,9 +5,11 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "../CharacterAnim/AnimInstance_Knight.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
+	: bEnableJump(true)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,12 +20,13 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Arm->SetupAttachment(GetRootComponent());
 	m_Camera->SetupAttachment(m_Arm);
 
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> Skel_Mesh(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGreystone/Characters/Heroes/Greystone/Meshes/Greystone.Greystone'"));
+	/*ConstructorHelpers::FObjectFinder<USkeletalMesh> Skel_Mesh(TEXT("/Script/Engine.SkeletalMesh'/Game/GKnight/Meshes/SK_GothicKnight_VA.SK_GothicKnight_VA'"));
 	if (Skel_Mesh.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(Skel_Mesh.Object);
-	}
+	}*/
 
+	AccTime = 0.f;
 }
 
 // Called when the game starts or when spawned
@@ -49,6 +52,23 @@ void APlayer_Base_Knight::BeginPlay()
 void APlayer_Base_Knight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (GetCharacterMovement()->IsFalling())
+	{
+		bEnableJump = false;
+	}
+
+	if (!GetCharacterMovement()->IsFalling() && !bEnableJump)
+	{
+		AccTime += DeltaTime;
+
+		if (AccTime > 0.5f)
+		{
+			bEnableJump = true;
+			AccTime = 0.f;
+		}
+
+	}
 
 }
 
@@ -81,6 +101,9 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::JUMP:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::JumpAction);
 				break;
+			case EInputActionType::SPRINT:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SprintToggleAction);
+				break;
 
 			default:
 				break;
@@ -95,16 +118,18 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (vInput.X != 0.f)
+	if (bEnableJump)
 	{
-		GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
-	}
+		if (vInput.X != 0.f)
+		{
+			GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
+		}
 
-	if (vInput.Y != 0.f)
-	{
-		GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
+		if (vInput.Y != 0.f)
+		{
+			GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
+		}
 	}
-
 }
 
 void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
@@ -132,6 +157,26 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	ACharacter::Jump();
+	if (bEnableJump)
+	{
+		ACharacter::Jump();
+	}
+}
+
+void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instance)
+{
+	bool bToggle = _Instance.GetValue().Get<bool>();
+
+	UE_LOG(LogTemp, Warning, TEXT("Sprint"));
+
+	if (bToggle)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
+
 }
 

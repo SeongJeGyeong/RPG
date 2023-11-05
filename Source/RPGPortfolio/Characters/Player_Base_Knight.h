@@ -11,6 +11,8 @@
 #include "GameFramework/Character.h"
 #include "Player_Base_Knight.generated.h"
 
+class UAnimInstance_Knight;
+
 UCLASS()
 class RPGPORTFOLIO_API APlayer_Base_Knight : public ACharacter
 {
@@ -24,7 +26,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* m_Camera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Component")
 	USpringArmComponent* m_Arm;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
@@ -33,6 +35,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UAnimInstance_Knight* m_Anim;
 
 protected:
 	// Called when the game starts or when spawned
@@ -49,9 +53,13 @@ public:
 	UCameraComponent* GetCamera() { return m_Camera; }
 	USpringArmComponent* GetArm() { return m_Arm; }
 
+	bool bEnableJump;
+	float AccTime;
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);
 	void JumpAction(const FInputActionInstance& _Instance);
+	void SprintToggleAction(const FInputActionInstance& _Instance);
+
 };

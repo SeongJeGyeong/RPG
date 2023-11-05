@@ -3,7 +3,6 @@
 #pragma once
 
 #include "../Characters/Player_Base_Knight.h"
-
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Knight.generated.h"
@@ -35,6 +34,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	FVector	vCameraLookAt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	bool bIsInAir;
 
 public:
 	virtual void NativeInitializeAnimation() override;
