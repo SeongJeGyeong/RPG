@@ -6,6 +6,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "../CharacterAnim/AnimInstance_Knight.h"
+#include "../System/Component/LockOnTargetComponent.h"
+#include "../Header/Enum.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -22,7 +24,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 300.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	m_Arm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SpringArm"));
@@ -40,6 +42,12 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	}*/
 
 	AccTime = 0.f;
+
+	LockonControlRotationRate = 10.f;
+	TargetSwitchMouseDelta = 3.f;
+	TargetSwitchMinDelaySeconds = .5f;
+	BreakLockMouseDelta = 10.f;
+	BrokeLockAimingCooldown = .5f;
 }
 
 // Called when the game starts or when spawned
@@ -81,6 +89,19 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 			AccTime = 0.f;
 		}
 	}
+
+	if (m_Arm->IsCameraLockedToTarget())
+	{
+		// Vector from player to target
+		FVector TargetVect = m_Arm->CameraTarget->GetComponentLocation() - m_Arm->GetComponentLocation();
+		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
+		FRotator CurrentRot = GetControlRotation();
+		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
+
+		// Update control rotation to face target
+		GetController()->SetControlRotation(NewRot);
+	}
+
 }
 
 // Called to bind functionality to input
@@ -118,12 +139,14 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::GUARD:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::GuardAction);
 				break;
+			case EInputActionType::LOCKON:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLock);
+				break;
 
 			default:
 				break;
 			}
 		}
-
 	}
 
 }
@@ -137,7 +160,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
 			// find out which way is forward
-			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator Rotation = m_Arm->CameraTarget == nullptr ? Controller->GetControlRotation() : (m_Arm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 			// get forward vector
@@ -151,7 +174,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 		if ((Controller != NULL) && (vInput.Y != 0.0f))
 		{
 			// find out which way is right
-			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator Rotation = m_Arm->CameraTarget == nullptr ? Controller->GetControlRotation() : (m_Arm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 			// get right vector 
@@ -171,27 +194,43 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 	UE_LOG(LogTemp, Warning, TEXT("X : %f"), vInput.X);
 	UE_LOG(LogTemp, Warning, TEXT("Y : %f"), vInput.Y);
 
-	AddControllerYawInput(vInput.X);
-	AddControllerPitchInput(-vInput.Y);
+	/*AddControllerYawInput(vInput.X);
+	AddControllerPitchInput(-vInput.Y);*/
 
-	/*float DT = GetWorld()->GetDeltaSeconds();
+	float TimeSinceLastTargetSwitch = GetWorld()->GetRealTimeSeconds() - LastTargetSwitchTime;
 
-	FRotator rCameraRotation = m_Arm->GetRelativeRotation();
-
-	rCameraRotation.Yaw += vInput.X * 100.f * DT;
-
-	rCameraRotation.Pitch += vInput.Y * 100.f * DT;
-
-	if (rCameraRotation.Pitch > 40.f)
+	if (m_Arm->IsCameraLockedToTarget())
 	{
-		rCameraRotation.Pitch = 40.f;
-	}
-	else if (rCameraRotation.Pitch < -40.f)
-	{
-		rCameraRotation.Pitch = -40.f;
-	}
+		// Should break soft-lock?
+		if (m_Arm->bUseSoftLock && FMath::Abs(vInput.X) > BreakLockMouseDelta)
+		{
+			m_Arm->BreakTargetLock();
+			BrokeLockTime = GetWorld()->GetRealTimeSeconds();
+			m_Arm->bSoftlockRequiresReset = true;
+		}
+		// Should try switch target?
+		else if (FMath::Abs(vInput.X) > TargetSwitchMouseDelta
+			&& TimeSinceLastTargetSwitch > TargetSwitchMinDelaySeconds)	// Prevent switching multiple times using a single movement
+		{
+			if (vInput.X < 0)
+				m_Arm->SwitchTarget(ELockOnDirection::Left);
+			else
+				m_Arm->SwitchTarget(ELockOnDirection::Right);
 
-	m_Arm->SetRelativeRotation(rCameraRotation);*/
+			LastTargetSwitchTime = GetWorld()->GetRealTimeSeconds();
+		}
+	}
+	else
+	{
+		// If camera lock was recently broken by a large mouse delta, allow a cooldown time to prevent erratic camera movement
+		bool bRecentlyBrokeLock = (GetWorld()->GetRealTimeSeconds() - BrokeLockTime) < BrokeLockAimingCooldown;
+		if (!bRecentlyBrokeLock)
+		{
+			AddControllerYawInput(vInput.X);
+		}
+
+		AddControllerPitchInput(-vInput.Y);
+	}
 }
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)

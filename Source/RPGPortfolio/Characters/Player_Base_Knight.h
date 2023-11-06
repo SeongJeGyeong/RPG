@@ -54,6 +54,14 @@ public:
 	UCameraComponent* GetCamera() { return m_Camera; }
 	USpringArmComponent* GetArm() { return m_Arm; }
 
+	float LockonControlRotationRate;
+	float TargetSwitchMouseDelta;
+	float TargetSwitchMinDelaySeconds;
+	float LastTargetSwitchTime;
+	float BreakLockMouseDelta;
+	float BrokeLockAimingCooldown;
+	float BrokeLockTime;
+
 	bool bEnableJump;
 	float AccTime;
 	bool bLockOn = false;
