@@ -61,5 +61,5 @@ private:
 	void RotateAction(const FInputActionInstance& _Instance);
 	void JumpAction(const FInputActionInstance& _Instance);
 	void SprintToggleAction(const FInputActionInstance& _Instance);
-
+	void GuardAction(const FInputActionInstance& _Instance);
 };

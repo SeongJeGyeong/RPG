@@ -38,6 +38,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "ตฅภฬลอ", meta = (AllowPrivateAccess = "true"))
+	float		GuardBlendWeight;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bIsGuard;
+
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;

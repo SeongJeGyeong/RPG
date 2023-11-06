@@ -7,4 +7,7 @@ enum class EInputActionType : uint8
 	ROTATION,
 	JUMP,
 	SPRINT,
+	ATTACK,
+	GUARD,
+	ROLLING,
 };

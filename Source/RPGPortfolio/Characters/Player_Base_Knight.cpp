@@ -27,6 +27,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	}*/
 
 	AccTime = 0.f;
+
 }
 
 // Called when the game starts or when spawned
@@ -104,6 +105,9 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::SPRINT:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SprintToggleAction);
 				break;
+			case EInputActionType::GUARD:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::GuardAction);
+				break;
 
 			default:
 				break;
@@ -178,5 +182,13 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 
+}
+
+void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Guard"));
+	m_Anim = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
+
+	m_Anim->bIsGuard = _Instance.GetValue().Get<bool>();
 }
 

@@ -39,6 +39,16 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 
 	bIsInAir = m_Movement->IsFalling();
 
+	if (bIsGuard && !bIsInAir)
+	{
+		GuardBlendWeight = FMath::Clamp(GuardBlendWeight + _DT * 8.f, 0.f, 1.f);
+		UE_LOG(LogTemp, Warning, TEXT("BlendWeight : %f"), GuardBlendWeight);
+	}
+	else
+	{
+		GuardBlendWeight = FMath::Clamp(GuardBlendWeight - _DT * 8.f, 0.f, 1.f);
+	}
+
 	//FVector vCameraLocation = m_Player->GetCamera()->GetComponentLocation();
 	//FVector vCameraLookLocation = m_Player->GetCamera()->GetForwardVector() * 1000;
 
