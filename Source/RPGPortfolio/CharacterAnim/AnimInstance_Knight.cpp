@@ -49,6 +49,8 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		GuardBlendWeight = FMath::Clamp(GuardBlendWeight - _DT * 8.f, 0.f, 1.f);
 	}
 
+	bIsTargeting = m_Player->bLockOn;
+
 	//FVector vCameraLocation = m_Player->GetCamera()->GetComponentLocation();
 	//FVector vCameraLookLocation = m_Player->GetCamera()->GetForwardVector() * 1000;
 

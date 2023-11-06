@@ -14,11 +14,24 @@ APlayer_Base_Knight::APlayer_Base_Knight()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	m_Arm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	// Don't rotate when the controller rotates. Let that just affect the camera.
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->AirControl = 0.2f;
+
+	m_Arm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SpringArm"));
 	m_Arm->SetupAttachment(GetRootComponent());
-	m_Camera->SetupAttachment(m_Arm);
+	m_Arm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
+
+	m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	m_Camera->SetupAttachment(m_Arm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	/*ConstructorHelpers::FObjectFinder<USkeletalMesh> Skel_Mesh(TEXT("/Script/Engine.SkeletalMesh'/Game/GKnight/Meshes/SK_GothicKnight_VA.SK_GothicKnight_VA'"));
 	if (Skel_Mesh.Succeeded())
@@ -27,7 +40,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	}*/
 
 	AccTime = 0.f;
-
 }
 
 // Called when the game starts or when spawned
@@ -68,9 +80,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 			bEnableJump = true;
 			AccTime = 0.f;
 		}
-
 	}
-
 }
 
 // Called to bind functionality to input
@@ -124,14 +134,32 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 
 	if (bEnableJump)
 	{
-		if (vInput.X != 0.f)
+		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
-			GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, vInput.X);
+
+			//AddMovementInput(GetActorForwardVector(), vInput.X);
+			//GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
 		}
 
-		if (vInput.Y != 0.f)
+		if ((Controller != NULL) && (vInput.Y != 0.0f))
 		{
-			GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
+			// find out which way is right
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get right vector 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			AddMovementInput(Direction, vInput.Y);
+
+			//AddMovementInput(GetActorRightVector(), vInput.Y);
+			//GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
 		}
 	}
 }
@@ -140,23 +168,30 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	AddControllerYawInput(vInput.X);
+	UE_LOG(LogTemp, Warning, TEXT("X : %f"), vInput.X);
+	UE_LOG(LogTemp, Warning, TEXT("Y : %f"), vInput.Y);
 
-	float DT = GetWorld()->GetDeltaSeconds();
+	AddControllerYawInput(vInput.X);
+	AddControllerPitchInput(-vInput.Y);
+
+	/*float DT = GetWorld()->GetDeltaSeconds();
 
 	FRotator rCameraRotation = m_Arm->GetRelativeRotation();
+
+	rCameraRotation.Yaw += vInput.X * 100.f * DT;
+
 	rCameraRotation.Pitch += vInput.Y * 100.f * DT;
 
-	if (rCameraRotation.Pitch > 45)
+	if (rCameraRotation.Pitch > 40.f)
 	{
-		rCameraRotation.Pitch = 45.f;
+		rCameraRotation.Pitch = 40.f;
 	}
-	else if (rCameraRotation.Pitch < -45.f)
+	else if (rCameraRotation.Pitch < -40.f)
 	{
-		rCameraRotation.Pitch = -45.f;
+		rCameraRotation.Pitch = -40.f;
 	}
 
-	m_Arm->SetRelativeRotation(rCameraRotation);
+	m_Arm->SetRelativeRotation(rCameraRotation);*/
 }
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)

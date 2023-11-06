@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Player_CameraArm.h"
 #include "../System/DataAsset/DA_InputAction.h"
 #include "InputMappingContext.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -26,8 +27,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* m_Camera;
 
-	UPROPERTY(VisibleAnywhere, Category = "Component")
-	USpringArmComponent* m_Arm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPlayer_CameraArm* m_Arm;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UInputMappingContext> m_IMC;
@@ -55,6 +56,7 @@ public:
 
 	bool bEnableJump;
 	float AccTime;
+	bool bLockOn = false;
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

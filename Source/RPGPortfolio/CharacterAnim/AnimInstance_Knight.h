@@ -38,8 +38,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "ตฅภฬลอ", meta = (AllowPrivateAccess = "true"))
-	float		GuardBlendWeight;
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	float GuardBlendWeight;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	bool bIsTargeting;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
