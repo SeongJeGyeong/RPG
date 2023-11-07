@@ -2,17 +2,16 @@
 
 #pragma once
 
-#include "Player_CameraArm.h"
 #include "../System/DataAsset/DA_InputAction.h"
 #include "InputMappingContext.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Player_Base_Knight.generated.h"
 
 class UAnimInstance_Knight;
+class UPlayer_CameraArm;
 
 UCLASS()
 class RPGPORTFOLIO_API APlayer_Base_Knight : public ACharacter
@@ -52,7 +51,9 @@ public:
 
 public:
 	UCameraComponent* GetCamera() { return m_Camera; }
-	USpringArmComponent* GetArm() { return m_Arm; }
+	UPlayer_CameraArm* GetArm() { return m_Arm; }
+
+	void SetOrientRotation(bool _Val);
 
 	float LockonControlRotationRate;
 	float TargetSwitchMouseDelta;

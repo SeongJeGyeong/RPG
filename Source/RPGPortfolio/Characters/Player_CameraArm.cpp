@@ -6,57 +6,51 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/Pawn.h"
+#include "Player_Base_Knight.h"
 
 UPlayer_CameraArm::UPlayer_CameraArm()
 {
-	MaxTargetLockDistance = 750.f;
-	bDrawDebug = true;
-
-	TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	// 스프링 암 내장 설정
+	TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	bUsePawnControlRotation = true; // Rotate the arm based on the controller
 	bEnableCameraLag = true;
 	bEnableCameraRotationLag = false;
 	CameraLagSpeed = 3.f;
 	CameraRotationLagSpeed = 2.f;
 	CameraLagMaxDistance = 100.f;
+	
+	MaxTargetLockDistance = 750.f;
+	bDrawDebug = true;
+	bToggleLockOn = false;
+
+	m_Player = Cast<APlayer_Base_Knight>(GetOwner());
+	if (!IsValid(m_Player))
+	{
+		UE_LOG(LogTemp, Error, TEXT("스프링 암의 루트 액터 찾지 못함"));
+	}
 }
 
 void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (IsCameraLockedToTarget())
+	if (bToggleLockOn)
 	{
-		DrawDebugSphere(GetWorld(), CameraTarget->GetComponentLocation(), 20.f, 16, FColor::Red);
-
-		if ((CameraTarget->GetComponentLocation() - GetComponentLocation()).Size() > MaxTargetLockDistance + CameraTarget->GetScaledSphereRadius())
+		if (IsCameraLockedToTarget())
 		{
-			if (bUseSoftLock)
-			{
-				if (ULockOnTargetComponent* NewLockOnTarget = GetLockTarget())
-				{
-					LockToTarget(NewLockOnTarget);
-				}
-				else
-				{
-					BreakTargetLock();
-				}
-			}
-			else
+			DrawDebugSphere(GetWorld(), CameraTarget->GetComponentLocation(), 20.f, 16, FColor::Red);
+
+			if ((CameraTarget->GetComponentLocation() - GetComponentLocation()).Size() > MaxTargetLockDistance + CameraTarget->GetScaledSphereRadius())
 			{
 				BreakTargetLock();
 			}
 		}
-	}
-	else
-	{
-		if (ULockOnTargetComponent* NewLockOnTarget = GetLockTarget())
-		{
-			LockToTarget(NewLockOnTarget);
-		}
 		else
 		{
-			bSoftlockRequiresReset = false;
+			if (ULockOnTargetComponent* NewLockOnTarget = GetLockTarget())
+			{
+				LockToTarget(NewLockOnTarget);
+			}
 		}
 	}
 
@@ -69,52 +63,38 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), MaxTargetLockDistance, 32, FColor::Cyan);
 
-		UKismetSystemLibrary::DrawDebugString(this, FVector::ZeroVector, bUseSoftLock ? "Soft-lock Enabled" : "Soft-lock Disabled", GetOwner(), FLinearColor::Green);
-
-		if (bSoftlockRequiresReset)
-		{
-			UKismetSystemLibrary::DrawDebugString(this, FVector(0.f, 0.f, -10.f), "Soft-lock Requires Reset", GetOwner(), FLinearColor::Green);
-		}
-
+		UKismetSystemLibrary::DrawDebugString(this, FVector::ZeroVector, "LockOn-Line", GetOwner(), FLinearColor::Green);
 	}
 
 }
 
 // Toggle Lock On
-void UPlayer_CameraArm::ToggleCameraLock()
+void UPlayer_CameraArm::ToggleCameraLock(const FInputActionInstance& _Instance)
 {
-	if (bUseSoftLock)
+	bToggleLockOn = (bToggleLockOn != _Instance.GetValue().Get<bool>());
+
+	if (bToggleLockOn)
 	{
-		bSoftlockRequiresReset = false;
-		return;
-	}
+		UE_LOG(LogTemp, Warning, TEXT("LockOn : True"));
+		ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
 
-	if (IsCameraLockedToTarget())
-	{
-		BreakTargetLock();
-		return;
-	}
-
-	ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
-
-	if (NewLockOnTarget != nullptr)
-	{
-		LockToTarget(NewLockOnTarget);
-	}
-
-}
-
-void UPlayer_CameraArm::ToggleSoftLock()
-{
-	bUseSoftLock = !bUseSoftLock;
-
-	if (bUseSoftLock)
-	{
-		bSoftlockRequiresReset = false;
+		if (NewLockOnTarget != nullptr)
+		{
+			LockToTarget(NewLockOnTarget);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
+			bToggleLockOn = false;
+		}
 	}
 	else
 	{
-		BreakTargetLock();
+		if (IsCameraLockedToTarget())
+		{
+			BreakTargetLock();
+			return;
+		}
 	}
 }
 
@@ -122,6 +102,7 @@ void UPlayer_CameraArm::LockToTarget(ULockOnTargetComponent* NewTargetComponent)
 {
 	CameraTarget = NewTargetComponent;
 	bEnableCameraRotationLag = true;
+	m_Player->SetOrientRotation(false);
 }
 
 void UPlayer_CameraArm::BreakTargetLock()
@@ -130,6 +111,9 @@ void UPlayer_CameraArm::BreakTargetLock()
 	{
 		CameraTarget = nullptr;
 		bEnableCameraRotationLag = false;
+		UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
+		bToggleLockOn = false;
+		m_Player->SetOrientRotation(true);
 	}
 }
 
@@ -146,7 +130,15 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 
 	for (int32 i = 0; i < AvailableTargets.Num(); ++i)
 	{
+		// 씬 컴포넌트의 정면 방향벡터와 씬 컴포넌트에서 타겟으로의 방향벡터의 내적을 구한다.
+		// 내적 구하기 : A . B = Ax * Bx + Ay * By + Az * Bz
+
 		float Dot = FVector::DotProduct(GetForwardVector(), (AvailableTargets[i]->GetComponentLocation() - GetComponentLocation()).GetSafeNormal());
+		UE_LOG(LogTemp, Warning, TEXT("내적 : %f"), Dot);
+		float acosAngle = FMath::Acos(Dot); //내적을 각도로 변환
+		float fAngle = FMath::RadiansToDegrees(acosAngle); // 각도를 라디안 각도로 변환
+		UE_LOG(LogTemp, Warning, TEXT("각도 : %f"), fAngle);
+
 		if (Dot > ClosestDotToCenter)
 		{
 			ClosestDotToCenter = Dot;

@@ -8,6 +8,7 @@
 #include "../CharacterAnim/AnimInstance_Knight.h"
 #include "../System/Component/LockOnTargetComponent.h"
 #include "../Header/Enum.h"
+#include "Player_CameraArm.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -22,9 +23,10 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
+
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 300.f;
+	GetCharacterMovement()->JumpZVelocity = 500.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	m_Arm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SpringArm"));
@@ -151,6 +153,11 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 }
 
+void APlayer_Base_Knight::SetOrientRotation(bool _Val)
+{
+	GetCharacterMovement()->bOrientRotationToMovement = _Val;
+}
+
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
@@ -191,9 +198,6 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	UE_LOG(LogTemp, Warning, TEXT("X : %f"), vInput.X);
-	UE_LOG(LogTemp, Warning, TEXT("Y : %f"), vInput.Y);
-
 	/*AddControllerYawInput(vInput.X);
 	AddControllerPitchInput(-vInput.Y);*/
 
@@ -201,16 +205,8 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 	if (m_Arm->IsCameraLockedToTarget())
 	{
-		// Should break soft-lock?
-		if (m_Arm->bUseSoftLock && FMath::Abs(vInput.X) > BreakLockMouseDelta)
-		{
-			m_Arm->BreakTargetLock();
-			BrokeLockTime = GetWorld()->GetRealTimeSeconds();
-			m_Arm->bSoftlockRequiresReset = true;
-		}
 		// Should try switch target?
-		else if (FMath::Abs(vInput.X) > TargetSwitchMouseDelta
-			&& TimeSinceLastTargetSwitch > TargetSwitchMinDelaySeconds)	// Prevent switching multiple times using a single movement
+		if (FMath::Abs(vInput.X) > TargetSwitchMouseDelta && TimeSinceLastTargetSwitch > TargetSwitchMinDelaySeconds)	// Prevent switching multiple times using a single movement
 		{
 			if (vInput.X < 0)
 				m_Arm->SwitchTarget(ELockOnDirection::Left);
