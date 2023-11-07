@@ -53,6 +53,8 @@ public:
 	UCameraComponent* GetCamera() { return m_Camera; }
 	UPlayer_CameraArm* GetArm() { return m_Arm; }
 
+	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
+
 	void SetOrientRotation(bool _Val);
 
 	float LockonControlRotationRate;
@@ -66,7 +68,7 @@ public:
 	bool bEnableJump;
 	float AccTime;
 	bool bLockOn = false;
-
+	
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);

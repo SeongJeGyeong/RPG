@@ -20,34 +20,29 @@ public:
 	UPlayer_CameraArm();
 
 public:
-	/* Max Distance from the character for an actor to be targetable */
+	// 록온 가능 거리
 	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera")
-	float MaxTargetLockDistance;
+	float fMaxTargetLockDistance;
 
-	/*UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera")
-	bool bUseSoftLock;*/
-
-	/* Turn debug visuals on/off */
+	// 디버그 온오프
 	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera")
 	bool bDrawDebug;
 
-	/* True if lock was recently broken and mouse delta is still high */
-	//bool bSoftlockRequiresReset;
+	// 록온 토글
+	bool bToggleLockOn;
 
 	class APlayer_Base_Knight* m_Player;
 
-	bool bToggleLockOn;
-
-	/* The component the camera is currently locked on to */
+	// 록온 타겟 컴포넌트
 	UPROPERTY(BlueprintReadOnly)
-	class ULockOnTargetComponent* CameraTarget;
+	class ULockOnTargetComponent* m_Target;
 
 public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void ToggleCameraLock(const FInputActionInstance& _Instance);
-	void LockToTarget(ULockOnTargetComponent* NewTargetComponent);
-	void BreakTargetLock();
+	void ToggleCameraLockOn(const FInputActionInstance& _Instance);
+	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
+	void BreakLockOnTarget();
 	class ULockOnTargetComponent* GetLockTarget();
 	void SwitchTarget(ELockOnDirection SwitchDirection);
 	TArray<class ULockOnTargetComponent*> GetTargetComponents();

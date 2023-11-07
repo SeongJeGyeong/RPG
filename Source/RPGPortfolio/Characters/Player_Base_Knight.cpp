@@ -95,7 +95,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	if (m_Arm->IsCameraLockedToTarget())
 	{
 		// Vector from player to target
-		FVector TargetVect = m_Arm->CameraTarget->GetComponentLocation() - m_Arm->GetComponentLocation();
+		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - (m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 200.f));
 		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
 		FRotator CurrentRot = GetControlRotation();
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
@@ -142,7 +142,7 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::GuardAction);
 				break;
 			case EInputActionType::LOCKON:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLock);
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLockOn);
 				break;
 
 			default:
@@ -166,30 +166,26 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	{
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
-			// find out which way is forward
-			const FRotator Rotation = m_Arm->CameraTarget == nullptr ? Controller->GetControlRotation() : (m_Arm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
+			const FRotator Rotation = m_Arm->m_Target == nullptr ? Controller->GetControlRotation() : (m_Arm->m_Target->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 			// get forward vector
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, vInput.X);
 
-			//AddMovementInput(GetActorForwardVector(), vInput.X);
 			//GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
 		}
 
 		if ((Controller != NULL) && (vInput.Y != 0.0f))
 		{
-			// find out which way is right
-			const FRotator Rotation = m_Arm->CameraTarget == nullptr ? Controller->GetControlRotation() : (m_Arm->CameraTarget->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
+			const FRotator Rotation = m_Arm->m_Target == nullptr ? Controller->GetControlRotation() : (m_Arm->m_Target->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
 			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 			// get right vector 
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			AddMovementInput(Direction, vInput.Y);
 
-			//AddMovementInput(GetActorRightVector(), vInput.Y);
-			//GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
+			// GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
 		}
 	}
 }
@@ -224,8 +220,10 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 		{
 			AddControllerYawInput(vInput.X);
 		}
-
-		AddControllerPitchInput(-vInput.Y);
+		if (GetControlRotation().Pitch < 40.f && GetControlRotation().Pitch > -40.f)
+		{
+			AddControllerPitchInput(-vInput.Y);
+		}
 	}
 }
 
