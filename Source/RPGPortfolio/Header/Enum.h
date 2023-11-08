@@ -9,8 +9,10 @@ enum class EInputActionType : uint8
 	SPRINT,
 	ATTACK,
 	GUARD,
-	ROLLING,
+	DODGE,
 	LOCKON,
+	CHANGELOCKON,
+	PRIMARYATTACK,
 };
 
 UENUM(BlueprintType)

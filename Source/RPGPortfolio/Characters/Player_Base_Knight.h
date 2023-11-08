@@ -75,4 +75,8 @@ private:
 	void JumpAction(const FInputActionInstance& _Instance);
 	void SprintToggleAction(const FInputActionInstance& _Instance);
 	void GuardAction(const FInputActionInstance& _Instance);
+	void AttackAction(const FInputActionInstance& _Instance);
+	void PrimaryAttackAction(const FInputActionInstance& _Instance);
+	void DodgeAction(const FInputActionInstance& _Instance);
+
 };

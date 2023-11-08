@@ -95,7 +95,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	if (m_Arm->IsCameraLockedToTarget())
 	{
 		// Vector from player to target
-		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - (m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 200.f));
+		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - (m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 100.f));
 		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
 		FRotator CurrentRot = GetControlRotation();
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
@@ -144,7 +144,15 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::LOCKON:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLockOn);
 				break;
-
+			case EInputActionType::ATTACK:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::AttackAction);
+				break;
+			case EInputActionType::PRIMARYATTACK:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::PrimaryAttackAction);
+				break;
+			case EInputActionType::DODGE:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::DodgeAction);
+				break;
 			default:
 				break;
 			}
@@ -220,10 +228,11 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 		{
 			AddControllerYawInput(vInput.X);
 		}
-		if (GetControlRotation().Pitch < 40.f && GetControlRotation().Pitch > -40.f)
-		{
-			AddControllerPitchInput(-vInput.Y);
-		}
+		AddControllerPitchInput(-vInput.Y);
+		//if (GetControlRotation().Pitch < 40.f && GetControlRotation().Pitch > -40.f)
+		//{
+		//	AddControllerPitchInput(-vInput.Y);
+		//}
 	}
 }
 
@@ -239,8 +248,6 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 {
 	bool bToggle = _Instance.GetValue().Get<bool>();
 
-	UE_LOG(LogTemp, Warning, TEXT("Sprint"));
-
 	if (bToggle)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
@@ -254,9 +261,23 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Guard"));
 	m_Anim = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
 
 	m_Anim->bIsGuard = _Instance.GetValue().Get<bool>();
+}
+
+void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+}
+
+void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Instance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("PrimaryAttack"));
+}
+
+void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
 }
 

@@ -25,7 +25,7 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 
 	bDrawDebug = true;
 	bToggleLockOn = false;
-
+	UCameraComponent* m_Camera = Cast<UCameraComponent>(GetChildComponent(0));
 	m_Player = Cast<APlayer_Base_Knight>(GetOwner());
 	if (!IsValid(m_Player))
 	{
@@ -61,11 +61,11 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		for (ULockOnTargetComponent* Target : GetTargetComponents())
 		{
-			DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), Target->GetComponentLocation(), FColor::Green);
+			DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
 		}
-		FVector CameraLine = GetOwner()->GetActorLocation() + (m_Player->GetCamera()->GetForwardVector()) * 500.f;
+		FVector CameraLine = GetComponentLocation() + (m_Player->GetCamera()->GetForwardVector()) * 500.f;
 		
-		DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), CameraLine, FColor::Blue);
+		DrawDebugLine(GetWorld(), GetComponentLocation(), CameraLine, FColor::Blue);
 		
 		//DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
 	}
