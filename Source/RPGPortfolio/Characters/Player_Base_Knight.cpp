@@ -13,6 +13,12 @@
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
 	: bEnableJump(true)
+	, bEnableMove(true)
+	, bIsAttack(false)
+	, bAttackToggle(false)
+	, bLockOn(false)
+	, CurrentCombo(1)
+	, MaxCombo(4)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -37,12 +43,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->SetupAttachment(m_Arm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	/*ConstructorHelpers::FObjectFinder<USkeletalMesh> Skel_Mesh(TEXT("/Script/Engine.SkeletalMesh'/Game/GKnight/Meshes/SK_GothicKnight_VA.SK_GothicKnight_VA'"));
-	if (Skel_Mesh.Succeeded())
-	{
-		GetMesh()->SetSkeletalMesh(Skel_Mesh.Object);
-	}*/
-
 	AccTime = 0.f;
 
 	LockonControlRotationRate = 10.f;
@@ -50,6 +50,13 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	TargetSwitchMinDelaySeconds = .5f;
 	BreakLockMouseDelta = 10.f;
 	BrokeLockAimingCooldown = .5f;
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack.AM_Knight_Attack'"));
+	if (AtkMontage.Succeeded())
+	{
+		m_AttackMontage = AtkMontage.Object;
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +76,10 @@ void APlayer_Base_Knight::BeginPlay()
 			pSubsystem->AddMappingContext(m_IMC.LoadSynchronous(), 0);
 		}
 	}
+
+	m_AnimInst = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
+
+	m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
 }
 
 // Called every frame
@@ -83,11 +94,13 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 
 	if (!GetCharacterMovement()->IsFalling() && !bEnableJump)
 	{
+		bEnableMove = false;
 		AccTime += DeltaTime;
 
 		if (AccTime > 0.5f)
 		{
 			bEnableJump = true;
+			bEnableMove = true;
 			AccTime = 0.f;
 		}
 	}
@@ -103,6 +116,20 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		// Update control rotation to face target
 		GetController()->SetControlRotation(NewRot);
 	}
+
+	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()))
+	{
+		if (bAttackToggle)
+		{
+			
+		}
+	}
+	else
+	{
+		bIsAttack = false;
+	}
+
+	bAttackToggle = false;
 
 }
 
@@ -170,7 +197,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (bEnableJump)
+	if (bEnableMove && !bIsAttack)
 	{
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
@@ -238,7 +265,7 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (bEnableJump)
+	if (bEnableJump && !bIsAttack)
 	{
 		ACharacter::Jump();
 	}
@@ -261,14 +288,26 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	m_Anim = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
-
-	m_Anim->bIsGuard = _Instance.GetValue().Get<bool>();
+	m_AnimInst->bIsGuard = _Instance.GetValue().Get<bool>();
 }
 
 void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	bAttackToggle = _Instance.GetValue().Get<bool>();
+
+	if (!IsValid(m_AnimInst))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
+		return;
+	}
+
+	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) && !GetCharacterMovement()->IsFalling())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackStart"));
+		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
+		bIsAttack = true;
+		CurrentCombo = 1;
+	}
 }
 
 void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Instance)
@@ -281,3 +320,20 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
 }
 
+void APlayer_Base_Knight::NextAttackCheck()
+{
+	if (bAttackToggle)
+	{
+		if (CurrentCombo == MaxCombo)
+		{
+			CurrentCombo = 1;
+		}
+		else
+		{
+			CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+		}
+
+		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
+		m_AnimInst->Montage_JumpToSection(NextComboCount, m_AttackMontage.LoadSynchronous());
+	}
+}

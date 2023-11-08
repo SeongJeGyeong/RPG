@@ -7,6 +7,9 @@
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Knight.generated.h"
 
+
+
+DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
 /**
  * 
  */
@@ -39,7 +42,7 @@ private:
 	bool bIsInAir;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	float GuardBlendWeight;
+	float fGuardBlendWeight;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsTargeting;
@@ -47,6 +50,12 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
+
+	FOnNextAttackCheckDelegate OnNextAttackCheck;
+
+	// 다음콤보 체크
+	UFUNCTION()
+	void AnimNotify_NextAttackCheck();
 
 public:
 	virtual void NativeInitializeAnimation() override;

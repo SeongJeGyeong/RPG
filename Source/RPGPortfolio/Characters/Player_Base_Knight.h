@@ -36,7 +36,29 @@ private:
 	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UAnimInstance_Knight* m_Anim;
+	UAnimInstance_Knight* m_AnimInst;
+
+	UPROPERTY(Editanywhere, Category = "Animataion", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
+
+public:
+	float LockonControlRotationRate;
+	float TargetSwitchMouseDelta;
+	float TargetSwitchMinDelaySeconds;
+	float LastTargetSwitchTime;
+	float BreakLockMouseDelta;
+	float BrokeLockAimingCooldown;
+	float BrokeLockTime;
+
+	bool bEnableJump;
+	bool bEnableMove;
+	bool bIsAttack;
+	float AccTime;
+	bool bLockOn;
+	bool bAttackToggle;
+
+	int32 CurrentCombo;
+	int32 MaxCombo;
 
 protected:
 	// Called when the game starts or when spawned
@@ -54,21 +76,10 @@ public:
 	UPlayer_CameraArm* GetArm() { return m_Arm; }
 
 	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
-
 	void SetOrientRotation(bool _Val);
 
-	float LockonControlRotationRate;
-	float TargetSwitchMouseDelta;
-	float TargetSwitchMinDelaySeconds;
-	float LastTargetSwitchTime;
-	float BreakLockMouseDelta;
-	float BrokeLockAimingCooldown;
-	float BrokeLockTime;
+	void NextAttackCheck();
 
-	bool bEnableJump;
-	float AccTime;
-	bool bLockOn = false;
-	
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);
@@ -78,5 +89,4 @@ private:
 	void AttackAction(const FInputActionInstance& _Instance);
 	void PrimaryAttackAction(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
-
 };
