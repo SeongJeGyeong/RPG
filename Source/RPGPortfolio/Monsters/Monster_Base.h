@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Monster_Base.generated.h"
@@ -10,6 +12,22 @@ UCLASS()
 class RPGPORTFOLIO_API AMonster_Base : public ACharacter
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	FMonsterInfo	m_Info;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	EMONSTER_TYPE	m_Type;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	FDataTableRowHandle	m_TableRow;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	class UAnimInstance_Monster_Base* m_Anim;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	class ULockOnTargetComponent* m_TargetComp;
 
 public:
 	// Sets default values for this character's properties
