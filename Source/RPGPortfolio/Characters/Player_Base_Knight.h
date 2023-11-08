@@ -54,8 +54,10 @@ public:
 	bool bEnableMove;
 	bool bIsAttack;
 	float AccTime;
-	bool bLockOn;
 	bool bAttackToggle;
+	bool bLockOn;
+	bool bAutoLockOnMode;
+
 
 	int32 CurrentCombo;
 	int32 MaxCombo;
@@ -89,4 +91,5 @@ private:
 	void AttackAction(const FInputActionInstance& _Instance);
 	void PrimaryAttackAction(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
+	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
 };

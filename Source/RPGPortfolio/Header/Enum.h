@@ -11,7 +11,7 @@ enum class EInputActionType : uint8
 	GUARD,
 	DODGE,
 	LOCKON,
-	CHANGELOCKON,
+	SWITCHLOCKON,
 	PRIMARYATTACK,
 };
 

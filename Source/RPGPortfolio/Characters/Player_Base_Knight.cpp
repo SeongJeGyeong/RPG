@@ -17,6 +17,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bIsAttack(false)
 	, bAttackToggle(false)
 	, bLockOn(false)
+	, bAutoLockOnMode(false)
 	, CurrentCombo(1)
 	, MaxCombo(4)
 {
@@ -180,6 +181,9 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::DODGE:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::DodgeAction);
 				break;
+			case EInputActionType::SWITCHLOCKON:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SwitchLockOnTarget);
+				break;
 			default:
 				break;
 			}
@@ -237,14 +241,21 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 	if (m_Arm->IsCameraLockedToTarget())
 	{
 		// Should try switch target?
-		if (FMath::Abs(vInput.X) > TargetSwitchMouseDelta && TimeSinceLastTargetSwitch > TargetSwitchMinDelaySeconds)	// Prevent switching multiple times using a single movement
+		if (bAutoLockOnMode)
 		{
-			if (vInput.X < 0)
-				m_Arm->SwitchTarget(ELockOnDirection::Left);
-			else
-				m_Arm->SwitchTarget(ELockOnDirection::Right);
+			if (FMath::Abs(vInput.X) > TargetSwitchMouseDelta && TimeSinceLastTargetSwitch > TargetSwitchMinDelaySeconds)	// Prevent switching multiple times using a single movement
+			{
+				if (vInput.X < 0)
+				{
+					m_Arm->SwitchTarget(ELockOnDirection::Left);
+				}
+				else
+				{
+					m_Arm->SwitchTarget(ELockOnDirection::Right);
+				}
 
-			LastTargetSwitchTime = GetWorld()->GetRealTimeSeconds();
+				LastTargetSwitchTime = GetWorld()->GetRealTimeSeconds();
+			}
 		}
 	}
 	else
@@ -318,6 +329,23 @@ void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Insta
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
+}
+
+void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)
+{
+	float SwitchDirection = _Instance.GetValue().Get<float>();
+
+	UE_LOG(LogTemp, Warning, TEXT("SwitchDirection : %f"), SwitchDirection);
+
+	if (SwitchDirection > 0.f)
+	{
+		m_Arm->SwitchTarget(ELockOnDirection::Left);
+	}
+	else if (SwitchDirection < 0.f)
+	{
+		m_Arm->SwitchTarget(ELockOnDirection::Right);
+	}
+
 }
 
 void APlayer_Base_Knight::NextAttackCheck()
