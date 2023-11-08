@@ -21,3 +21,12 @@ enum class ELockOnDirection : uint8
 	Left	UMETA(DisplayName = "Left"),
 	Right	UMETA(DisplayName = "Right"),
 };
+
+UENUM(BlueprintType)
+enum class EMONSTER_TYPE : uint8
+{
+	Barghest,
+	Centaur,
+	Griffon,
+	MountainDragon,
+};
