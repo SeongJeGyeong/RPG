@@ -26,6 +26,12 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	bDrawDebug = true;
 	bToggleLockOn = false;
 	UCameraComponent* m_Camera = Cast<UCameraComponent>(GetChildComponent(0));
+}
+
+void UPlayer_CameraArm::BeginPlay()
+{
+	Super::BeginPlay();
+
 	m_Player = Cast<APlayer_Base_Knight>(GetOwner());
 	if (!IsValid(m_Player))
 	{

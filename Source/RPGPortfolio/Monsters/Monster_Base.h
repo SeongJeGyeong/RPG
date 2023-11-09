@@ -23,17 +23,35 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_TableRow;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	class UAnimInstance_Monster_Base* m_Anim;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class ULockOnTargetComponent* m_TargetComp;
+
+protected:
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
+	class UBehaviorTree* m_BehaviroTree;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
+	class UBlackboardData* m_Blackboard;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
+	class AAIC_Monster_Base* m_AIController;
+
+public:
+	UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
+	UBlackboardData* GetBlackboard() { return m_Blackboard; }
+	FMonsterInfo& GetMonsterInfo() { return m_Info; }
 
 public:
 	// Sets default values for this character's properties
 	AMonster_Base();
 
 protected:
+
+	virtual void OnConstruction(const FTransform& _Transform) override;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

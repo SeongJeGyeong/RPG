@@ -3,6 +3,8 @@
 
 #include "Monster_Base.h"
 #include "../System/Component/LockOnTargetComponent.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -18,11 +20,35 @@ AMonster_Base::AMonster_Base()
 	m_TargetComp->SetupAttachment(GetRootComponent());
 }
 
+void AMonster_Base::OnConstruction(const FTransform& _Transform)
+{
+	FMonsterInfo* pInfo = nullptr;
+
+	if (IsValid(m_TableRow.DataTable) && !m_TableRow.RowName.IsNone())
+	{
+		pInfo = m_TableRow.DataTable->FindRow<FMonsterInfo>(m_TableRow.RowName, TEXT(""));
+
+		if (nullptr != pInfo)
+		{
+			m_Info = *pInfo;
+		}
+	}
+}
+
 // Called when the game starts or when spawned
 void AMonster_Base::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AAIController* pAIController = Cast<AAIController>(GetController());
+
+	if (IsValid(pAIController))
+	{
+		pAIController->GetBlackboardComponent()->SetValueAsVector(FName("SpawnPosition"), GetActorLocation());
+		pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_Info.AtkRange);
+		pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_Info.DetectRange);
+	}
+
 }
 
 // Called every frame
