@@ -58,6 +58,11 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 		m_AttackMontage = AtkMontage.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> PrimaryAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_PrimaryAttack.AM_Knight_PrimaryAttack'"));
+	if (PrimaryAtkMontage.Succeeded())
+	{
+		m_PrimaryAttackMontage = PrimaryAtkMontage.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -106,6 +111,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		}
 	}
 
+	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
 	if (m_Arm->IsCameraLockedToTarget())
 	{
 		// Vector from player to target
@@ -260,17 +266,16 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 	}
 	else
 	{
-		// If camera lock was recently broken by a large mouse delta, allow a cooldown time to prevent erratic camera movement
-		bool bRecentlyBrokeLock = (GetWorld()->GetRealTimeSeconds() - BrokeLockTime) < BrokeLockAimingCooldown;
-		if (!bRecentlyBrokeLock)
+		if (!m_Arm->bToggleLockOn)
 		{
-			AddControllerYawInput(vInput.X);
+			// If camera lock was recently broken by a large mouse delta, allow a cooldown time to prevent erratic camera movement
+			bool bRecentlyBrokeLock = (GetWorld()->GetRealTimeSeconds() - BrokeLockTime) < BrokeLockAimingCooldown;
+			if (!bRecentlyBrokeLock)
+			{
+				AddControllerYawInput(vInput.X);
+			}
+			AddControllerPitchInput(-vInput.Y);
 		}
-		AddControllerPitchInput(-vInput.Y);
-		//if (GetControlRotation().Pitch < 40.f && GetControlRotation().Pitch > -40.f)
-		//{
-		//	AddControllerPitchInput(-vInput.Y);
-		//}
 	}
 }
 
@@ -312,10 +317,13 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) && !GetCharacterMovement()->IsFalling())
+	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) && 
+		!m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) && 
+		!GetCharacterMovement()->IsFalling())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AttackStart"));
 		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
+		SetAttackMontage(m_AttackMontage);
 		bIsAttack = true;
 		CurrentCombo = 1;
 	}
@@ -323,7 +331,23 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("PrimaryAttack"));
+	bAttackToggle = _Instance.GetValue().Get<bool>();
+
+	if (!IsValid(m_AnimInst))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
+		return;
+	}
+
+	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) && 
+		!m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) && 
+		!GetCharacterMovement()->IsFalling())
+	{
+		m_AnimInst->Montage_Play(m_PrimaryAttackMontage.LoadSynchronous());
+		SetAttackMontage(m_PrimaryAttackMontage);
+		bIsAttack = true;
+		CurrentCombo = 1;
+	}
 }
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
@@ -362,6 +386,6 @@ void APlayer_Base_Knight::NextAttackCheck()
 		}
 
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
-		m_AnimInst->Montage_JumpToSection(NextComboCount, m_AttackMontage.LoadSynchronous());
+		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
 	}
 }

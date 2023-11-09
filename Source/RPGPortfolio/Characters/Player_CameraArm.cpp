@@ -54,6 +54,18 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			{
 				LockOnTarget(NewLockOnTarget);
 			}
+			else
+			{
+				// 록온 대상 찾기 실패 시 캐릭터 정면 방향으로 카메라 회전
+				FRotator NewRot = FMath::RInterpTo(m_Player->GetControlRotation(), rForwardRotation, DeltaTime, 10.f);
+				m_Player->GetController()->SetControlRotation(NewRot);
+
+				if (m_Player->GetControlRotation().Equals(rForwardRotation, 1))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ToggleFalse"));
+					bToggleLockOn = false;
+				}
+			}
 		}
 	}
 
@@ -63,11 +75,10 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		{
 			DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
 		}
-		FVector CameraLine = GetComponentLocation() + (m_Player->GetCamera()->GetForwardVector()) * 500.f;
+		/*FVector CameraLine = GetComponentLocation() + (m_Player->GetCamera()->GetForwardVector()) * 500.f;
+		DrawDebugLine(GetWorld(), GetComponentLocation(), CameraLine, FColor::Blue);*/
 		
-		DrawDebugLine(GetWorld(), GetComponentLocation(), CameraLine, FColor::Blue);
-		
-		//DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
+		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
 	}
 
 }
@@ -88,8 +99,7 @@ void UPlayer_CameraArm::ToggleCameraLockOn(const FInputActionInstance& _Instance
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
-			bToggleLockOn = false;
+			rForwardRotation = m_Player->GetActorRotation();
 		}
 	}
 	else

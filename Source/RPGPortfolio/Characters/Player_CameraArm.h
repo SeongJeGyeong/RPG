@@ -31,6 +31,9 @@ public:
 	// 록온 토글
 	bool bToggleLockOn;
 
+	// 록온 실패시 카메라 정면 회전값
+	FRotator rForwardRotation;
+
 	class APlayer_Base_Knight* m_Player;
 
 	// 록온 타겟 컴포넌트

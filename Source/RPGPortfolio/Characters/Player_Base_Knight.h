@@ -41,6 +41,11 @@ private:
 	UPROPERTY(Editanywhere, Category = "Animataion", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
 
+	UPROPERTY(Editanywhere, Category = "Animataion", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UAnimMontage> m_PrimaryAttackMontage;
+
+	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
+
 public:
 	float LockonControlRotationRate;
 	float TargetSwitchMouseDelta;
@@ -57,7 +62,6 @@ public:
 	bool bAttackToggle;
 	bool bLockOn;
 	bool bAutoLockOnMode;
-
 
 	int32 CurrentCombo;
 	int32 MaxCombo;
@@ -76,6 +80,9 @@ public:
 public:
 	UCameraComponent* GetCamera() { return m_Camera; }
 	UPlayer_CameraArm* GetArm() { return m_Arm; }
+
+	TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
+	void SetAttackMontage(TSoftObjectPtr<UAnimMontage> _SettingAttackMontage) { m_SettingAttackMontage = _SettingAttackMontage; }
 
 	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
 	void SetOrientRotation(bool _Val);
