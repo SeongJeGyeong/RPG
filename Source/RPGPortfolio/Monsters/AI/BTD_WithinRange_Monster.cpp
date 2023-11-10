@@ -5,6 +5,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
+#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 
 UBTD_WithinRange_Monster::UBTD_WithinRange_Monster()
@@ -35,6 +36,8 @@ bool UBTD_WithinRange_Monster::CalculateRawConditionValue(UBehaviorTreeComponent
 	}
 
 	AAIController* pController = _OwnComp.GetAIOwner();
+
+	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController);
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController);
 
 	if (IsValid(pMonster))

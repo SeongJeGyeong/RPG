@@ -3,9 +3,11 @@
 
 #include "BTS_Detect.h"
 #include "AIController.h"
+#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/Character.h"
 
 UBTS_Detect::UBTS_Detect()
 	: bDetect(false)
@@ -30,7 +32,9 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 		return;
 	}
 
+	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+
 	if (!IsValid(pMonster))
 	{
 		return;

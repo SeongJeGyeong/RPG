@@ -3,10 +3,12 @@
 
 #include "BTT_Trace_Monster.h"
 #include "AIController.h"
+#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "GameFramework/Character.h"
 
 UBTT_Trace_Monster::UBTT_Trace_Monster()
 {
@@ -42,8 +44,8 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 
 	_OwnComp.GetBlackboardComponent()->SetValueAsVector(m_RecentTargetPos.SelectedKeyName, pCharacter->GetActorLocation());
 
+	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
-
 
 	return EBTNodeResult::InProgress;
 }
@@ -67,7 +69,9 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 
 	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
 	AAIController* pController = _OwnComp.GetAIOwner();
+	// AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+
 	if (!IsValid(pMonster))
 	{
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);

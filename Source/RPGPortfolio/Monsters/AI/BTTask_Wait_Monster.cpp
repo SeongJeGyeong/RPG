@@ -2,6 +2,7 @@
 
 
 #include "BTTask_Wait_Monster.h"
+#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
