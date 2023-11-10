@@ -38,7 +38,7 @@ bool UBTD_WithinRange_Monster::CalculateRawConditionValue(UBehaviorTreeComponent
 	AAIController* pController = _OwnComp.GetAIOwner();
 
 	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController);
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController);
+	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 
 	if (IsValid(pMonster))
 	{

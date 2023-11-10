@@ -42,6 +42,10 @@ EBTNodeResult::Type UBTT_NextPos_Monster::ExecuteTask(UBehaviorTreeComponent& _O
 
 	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
+	if (IsValid(pMonster))
+	{
+		pMonster->ChangeState(EMONSTER_STATE::WALK);
+	}
 
 	_OwnComp.GetBlackboardComponent()->SetValueAsVector(m_NextPosKey.SelectedKeyName, vNextPos);
 

@@ -30,3 +30,16 @@ enum class EMONSTER_TYPE : uint8
 	Griffon,
 	MountainDragon,
 };
+
+UENUM(BlueprintType)
+enum class EMONSTER_STATE : uint8
+{
+	IDLE,
+	LOOKAROUND,
+	WALK,
+	RUN,
+	BITE,
+	DIVE,
+	HIT,
+	DEAD,
+};

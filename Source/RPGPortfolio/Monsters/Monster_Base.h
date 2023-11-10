@@ -21,6 +21,9 @@ private:
 	EMONSTER_TYPE	m_Type;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	EMONSTER_STATE	m_State;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_TableRow;
 
 	UPROPERTY()
@@ -42,7 +45,11 @@ protected:
 public:
 	UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	UBlackboardData* GetBlackboard() { return m_Blackboard; }
-	FMonsterInfo& GetMonsterInfo() { return m_Info; }
+	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
+	EMONSTER_STATE GetState() { return m_State; }
+
+	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
+
 
 public:
 	// Sets default values for this character's properties

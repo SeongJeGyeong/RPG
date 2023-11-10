@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
+
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Monster_Base.generated.h"
@@ -14,4 +16,20 @@ class RPGPORTFOLIO_API UAnimInstance_Monster_Base : public UAnimInstance
 {
 	GENERATED_BODY()
 	
+public:
+	class AMonster_Base* m_Monster;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	EMONSTER_STATE m_State;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	bool bIsDead;
+
+	void SetDeadAnim() { bIsDead = true; }
+
+public:
+	virtual void NativeInitializeAnimation() override;
+	virtual void NativeBeginPlay() override;
+	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
+
 };

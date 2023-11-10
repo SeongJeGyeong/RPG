@@ -32,7 +32,6 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 		return;
 	}
 
-	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 
 	if (!IsValid(pMonster))
@@ -62,4 +61,10 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 	{
 		bIsAtkRange = true;
 	}
+
+#ifdef ENABLE_DRAW_DEBUG
+	FColor color;
+	bDetect ? color = FColor::Red : color = FColor::Green;
+	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().DetectRange, 40, color, false, 0.4f);
+#endif
 }

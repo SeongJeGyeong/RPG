@@ -63,7 +63,6 @@ void AMonster_Base::BeginPlay()
 void AMonster_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
