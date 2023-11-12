@@ -47,15 +47,24 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsTargeting;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	float fDodgeBlendWeight;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	bool bIsDodging;
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 
 	// 다음콤보 체크
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck();
+
+	UFUNCTION()
+	void AnimNotify_DodgeEnd();
 
 public:
 	virtual void NativeInitializeAnimation() override;

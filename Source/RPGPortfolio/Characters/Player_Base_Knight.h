@@ -38,13 +38,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UAnimInstance_Knight* m_AnimInst;
 
-	UPROPERTY(Editanywhere, Category = "Animataion", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
-
-	UPROPERTY(Editanywhere, Category = "Animataion", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UAnimMontage> m_PrimaryAttackMontage;
-
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
+
+	TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
+	TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
 
 public:
 	float LockonControlRotationRate;

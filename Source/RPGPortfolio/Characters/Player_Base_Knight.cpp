@@ -21,7 +21,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, CurrentCombo(1)
 	, MaxCombo(4)
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
@@ -61,6 +61,18 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	if (PrimaryAtkMontage.Succeeded())
 	{
 		m_PrimaryAttackMontage = PrimaryAtkMontage.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Dodge.AM_Knight_Dodge'"));
+	if (DodgeMontage.Succeeded())
+	{
+		m_DodgeMontage = DodgeMontage.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeBWMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Dodge_Backward.AM_Knight_Dodge_Backward'"));
+	if (DodgeMontage.Succeeded())
+	{
+		m_DodgeBWMontage = DodgeBWMontage.Object;
 	}
 }
 
@@ -303,6 +315,7 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
+	if(!GetCharacterMovement()->IsFalling())
 	m_AnimInst->bIsGuard = _Instance.GetValue().Get<bool>();
 }
 
@@ -352,6 +365,25 @@ void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Insta
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
+
+	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) &&
+		!m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) &&
+		!m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()) &&
+		!m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()) &&
+		!m_AnimInst->bIsGuard &&
+		!GetCharacterMovement()->IsFalling())
+	{
+		m_AnimInst->bIsDodging = _Instance.GetValue().Get<bool>();
+
+		if (GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Equals(FVector::ZeroVector, 1.f))
+		{
+			m_AnimInst->Montage_Play(m_DodgeBWMontage.LoadSynchronous());
+		}
+		else
+		{
+			m_AnimInst->Montage_Play(m_DodgeMontage.LoadSynchronous());
+		}
+	}
 }
 
 void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)
