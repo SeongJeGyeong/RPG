@@ -74,6 +74,12 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	{
 		m_DodgeBWMontage = DodgeBWMontage.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ParryMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Parry.AM_Knight_Parry'"));
+	if (DodgeMontage.Succeeded())
+	{
+		m_ParryMontage = ParryMontage.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -186,8 +192,8 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::GUARD:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::GuardAction);
 				break;
-			case EInputActionType::LOCKON:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLockOn);
+			case EInputActionType::DODGE:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::DodgeAction);
 				break;
 			case EInputActionType::ATTACK:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::AttackAction);
@@ -195,8 +201,11 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::PRIMARYATTACK:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::PrimaryAttackAction);
 				break;
-			case EInputActionType::DODGE:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::DodgeAction);
+			case EInputActionType::PARRY:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ParryAction);
+				break;
+			case EInputActionType::LOCKON:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLockOn);
 				break;
 			case EInputActionType::SWITCHLOCKON:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SwitchLockOnTarget);
@@ -384,6 +393,11 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 			m_AnimInst->Montage_Play(m_DodgeMontage.LoadSynchronous());
 		}
 	}
+}
+
+void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
+{
+	m_AnimInst->Montage_Play(m_ParryMontage.LoadSynchronous());
 }
 
 void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)

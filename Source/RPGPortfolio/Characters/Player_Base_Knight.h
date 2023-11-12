@@ -44,6 +44,7 @@ private:
 
 	TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
 	TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
+	TSoftObjectPtr<UAnimMontage> m_ParryMontage;
 
 public:
 	float LockonControlRotationRate;
@@ -97,5 +98,7 @@ private:
 	void AttackAction(const FInputActionInstance& _Instance);
 	void PrimaryAttackAction(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
+	void ParryAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
+	
 };

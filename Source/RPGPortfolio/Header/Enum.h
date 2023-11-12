@@ -7,12 +7,13 @@ enum class EInputActionType : uint8
 	ROTATION,
 	JUMP,
 	SPRINT,
-	ATTACK,
 	GUARD,
 	DODGE,
+	ATTACK,
+	PRIMARYATTACK,
+	PARRY,
 	LOCKON,
 	SWITCHLOCKON,
-	PRIMARYATTACK,
 };
 
 UENUM(BlueprintType)
