@@ -58,10 +58,12 @@ public:
 	bool bEnableJump;
 	bool bEnableMove;
 	bool bIsAttack;
-	float AccTime;
+	float fAccTime;
 	bool bAttackToggle;
 	bool bLockOn;
 	bool bAutoLockOnMode;
+	FVector vDodgeVector;
+	FRotator rDodgeRotation;
 
 	int32 CurrentCombo;
 	int32 MaxCombo;
@@ -100,5 +102,5 @@ private:
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
-	
+	bool CheckMontagePlaying();
 };

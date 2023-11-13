@@ -9,6 +9,7 @@
 #include "../System/Component/LockOnTargetComponent.h"
 #include "../Header/Enum.h"
 #include "Player_CameraArm.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -43,7 +44,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->SetupAttachment(m_Arm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	AccTime = 0.f;
+	fAccTime = 0.f;
 
 	LockonControlRotationRate = 10.f;
 	TargetSwitchMouseDelta = 3.f;
@@ -118,13 +119,13 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	if (!GetCharacterMovement()->IsFalling() && !bEnableJump)
 	{
 		bEnableMove = false;
-		AccTime += DeltaTime;
+		fAccTime += DeltaTime;
 
-		if (AccTime > 0.5f)
+		if (fAccTime > 0.5f)
 		{
 			bEnableJump = true;
 			bEnableMove = true;
-			AccTime = 0.f;
+			fAccTime = 0.f;
 		}
 	}
 
@@ -141,20 +142,22 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		GetController()->SetControlRotation(NewRot);
 	}
 
-	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()))
-	{
-		if (bAttackToggle)
-		{
-			
-		}
-	}
-	else
+	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()))
 	{
 		bIsAttack = false;
 	}
-
 	bAttackToggle = false;
 
+	if (m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()))
+	{
+		GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * DeltaTime);
+		SetActorRotation(rDodgeRotation);
+	}
+	else if (m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()))
+	{
+		AddMovementInput(vDodgeVector, 120.f * DeltaTime);
+		SetActorRotation(rDodgeRotation);
+	}
 }
 
 // Called to bind functionality to input
@@ -227,7 +230,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (bEnableMove && !bIsAttack)
+	if (CheckMontagePlaying())
 	{
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
@@ -301,7 +304,7 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (bEnableJump && !bIsAttack)
+	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		ACharacter::Jump();
 	}
@@ -324,8 +327,10 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	if(!GetCharacterMovement()->IsFalling())
-	m_AnimInst->bIsGuard = _Instance.GetValue().Get<bool>();
+	if (CheckMontagePlaying())
+	{
+		m_AnimInst->bIsGuard = _Instance.GetValue().Get<bool>();
+	}
 }
 
 void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
@@ -338,9 +343,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) && 
-		!m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) && 
-		!GetCharacterMovement()->IsFalling())
+	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AttackStart"));
 		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
@@ -360,9 +363,7 @@ void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Insta
 		return;
 	}
 
-	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) && 
-		!m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) && 
-		!GetCharacterMovement()->IsFalling())
+	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		m_AnimInst->Montage_Play(m_PrimaryAttackMontage.LoadSynchronous());
 		SetAttackMontage(m_PrimaryAttackMontage);
@@ -375,23 +376,21 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
 
-	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) &&
-		!m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) &&
-		!m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()) &&
-		!m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()) &&
-		!m_AnimInst->bIsGuard &&
-		!GetCharacterMovement()->IsFalling())
+	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
-		m_AnimInst->bIsDodging = _Instance.GetValue().Get<bool>();
-
-		if (GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Equals(FVector::ZeroVector, 1.f))
+		if(GetCharacterMovement()->GetLastInputVector().IsZero())
 		{
 			m_AnimInst->Montage_Play(m_DodgeBWMontage.LoadSynchronous());
+			vDodgeVector = GetActorForwardVector();
+			rDodgeRotation = GetActorRotation();
 		}
 		else
 		{
 			m_AnimInst->Montage_Play(m_DodgeMontage.LoadSynchronous());
+			vDodgeVector = GetCharacterMovement()->GetLastInputVector();
+			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 		}
+		
 	}
 }
 
@@ -415,6 +414,21 @@ void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instan
 		m_Arm->SwitchTarget(ELockOnDirection::Right);
 	}
 
+}
+
+bool APlayer_Base_Knight::CheckMontagePlaying()
+{
+	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) ||
+		m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) ||
+		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()) ||
+		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()) ||
+		GetCharacterMovement()->IsFalling()
+		)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void APlayer_Base_Knight::NextAttackCheck()

@@ -47,15 +47,9 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsTargeting;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	float fDodgeBlendWeight;
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool bIsDodging;
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 

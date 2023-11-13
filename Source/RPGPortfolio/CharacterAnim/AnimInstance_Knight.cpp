@@ -48,15 +48,6 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 9.f, 0.f, 1.f);
 	}
 
-	if (bIsDodging)
-	{
-		fDodgeBlendWeight += _DT;
-		if (fDodgeBlendWeight > 1.f)
-		{
-			bIsDodging = false;
-		}
-	}
-
 	bIsTargeting = m_Player->bLockOn;
 }
 
@@ -67,5 +58,5 @@ void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
 
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
-	bIsDodging = false;
+
 }
