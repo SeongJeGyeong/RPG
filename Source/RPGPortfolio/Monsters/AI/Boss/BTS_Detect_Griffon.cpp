@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BTS_Detect.h"
+#include "BTS_Detect_Griffon.h"
 #include "AIController.h"
-#include "../Monster_Base.h"
+#include "../../Monster_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 
-UBTS_Detect::UBTS_Detect()
+UBTS_Detect_Griffon::UBTS_Detect_Griffon()
 	: bDetect(false)
 	, bIsAtkRange(false)
 {
@@ -16,11 +16,11 @@ UBTS_Detect::UBTS_Detect()
 	Interval = 0.5f;
 }
 
-UBTS_Detect::~UBTS_Detect()
+UBTS_Detect_Griffon::~UBTS_Detect_Griffon()
 {
 }
 
-void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DT)
+void UBTS_Detect_Griffon::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DT)
 {
 	Super::TickNode(_OwnComp, _NodeMemory, _DT);
 

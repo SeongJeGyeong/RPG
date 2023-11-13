@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTT_Trace_Monster.generated.h"
+#include "BTT_Griffon_Around.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API UBTT_Trace_Monster : public UBTTaskNode
+class RPGPORTFOLIO_API UBTT_Griffon_Around : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
@@ -25,13 +25,10 @@ private:
 	float				   m_RevaluateRange;
 
 public:
-	FVector TarLoc;
-	FVector MonLoc;
-
-public:
-	UBTT_Trace_Monster();
+	UBTT_Griffon_Around();
 
 public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DeltaSeconds) override;
+
 };

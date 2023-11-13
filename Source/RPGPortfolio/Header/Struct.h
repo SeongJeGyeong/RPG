@@ -53,4 +53,7 @@ struct FMonsterInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AtkRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BOSS_PerceiveRange;
 };

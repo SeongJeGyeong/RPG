@@ -3,12 +3,12 @@
 
 #include "BTT_Trace_Monster.h"
 #include "AIController.h"
-#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UBTT_Trace_Monster::UBTT_Trace_Monster()
 {
@@ -25,7 +25,8 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 	if (m_TargetKey.IsNone() || m_RecentTargetPos.IsNone())
 	{
 		UE_LOG(LogTemp, Error, TEXT("추적 대상 설정 안됨"));
-		return EBTNodeResult::Failed;
+		return EBTNodeResult::Succeeded;
+		//return EBTNodeResult::Failed;
 	}
 
 	AAIController* pController = _OwnComp.GetAIOwner();
@@ -34,7 +35,8 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 
 	if (!IsValid(pCharacter))
 	{
-		return EBTNodeResult::Failed;
+		return EBTNodeResult::Succeeded;
+		//return EBTNodeResult::Failed;
 	}
 	else
 	{
@@ -48,6 +50,7 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 	pMonster->ChangeState(EMONSTER_STATE::RUN);
+	pMonster->GetCharacterMovement()->MaxWalkSpeed = 600.f;
 
 	return EBTNodeResult::InProgress;
 }
@@ -59,14 +62,17 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 	if (m_TargetKey.IsNone() || m_RecentTargetPos.IsNone())
 	{
 		UE_LOG(LogTemp, Error, TEXT("추적 대상 설정 안됨"));
-		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		
+		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
 	ACharacter* pTarget = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("TraceTarget")));
 	if (!IsValid(pTarget))
 	{
-		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
@@ -77,7 +83,8 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 
 	if (!IsValid(pMonster))
 	{
-		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
@@ -85,7 +92,8 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 
 	if (Distance < fAtkRange)
 	{
-		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		return;
 	}
 

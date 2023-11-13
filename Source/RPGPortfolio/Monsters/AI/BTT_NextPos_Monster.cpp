@@ -5,9 +5,9 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
-#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 #include "AIController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UBTT_NextPos_Monster::UBTT_NextPos_Monster()
 {
@@ -45,6 +45,7 @@ EBTNodeResult::Type UBTT_NextPos_Monster::ExecuteTask(UBehaviorTreeComponent& _O
 	if (IsValid(pMonster))
 	{
 		pMonster->ChangeState(EMONSTER_STATE::WALK);
+		pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 
 	_OwnComp.GetBlackboardComponent()->SetValueAsVector(m_NextPosKey.SelectedKeyName, vNextPos);

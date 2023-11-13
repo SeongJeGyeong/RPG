@@ -2,7 +2,6 @@
 
 
 #include "AIC_Monster_Base.h"
-#include "../Monsters_Base.h"
 #include "../Monster_Base.h"
 
 void AAIC_Monster_Base::OnPossess(APawn* _Owner)

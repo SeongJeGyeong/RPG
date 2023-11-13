@@ -15,26 +15,32 @@ UBTT_TurnToTarget_Monster::UBTT_TurnToTarget_Monster()
 
 EBTNodeResult::Type UBTT_TurnToTarget_Monster::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
+	Super::ExecuteTask(OwnerComp, NodeMemory);
+	//EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	AMonster_Base* pMonster = Cast<AMonster_Base>(OwnerComp.GetAIOwner()->GetPawn());
+	return EBTNodeResult::Succeeded;
+}
+
+void UBTT_TurnToTarget_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DeltaSeconds)
+{
+	Super::TickTask(_OwnComp, _NodeMemory, _DeltaSeconds);
+
+	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 
 	if (nullptr == pMonster)
 	{
-		return EBTNodeResult::Failed;
+		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 	}
 
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
 	if (nullptr == pPlayer)
 	{
-		return EBTNodeResult::Failed;
+		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 	}
 
 	FVector LookVector = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
 	LookVector.Z = 0.f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
-	pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 5.f));
-
-	return EBTNodeResult::Succeeded;
+	pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, _DeltaSeconds, 5.f));
 }
