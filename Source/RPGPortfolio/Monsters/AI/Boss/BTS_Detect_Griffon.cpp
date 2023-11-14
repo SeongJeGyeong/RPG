@@ -25,49 +25,35 @@ void UBTS_Detect_Griffon::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 	Super::TickNode(_OwnComp, _NodeMemory, _DT);
 
 	AAIController* pController = _OwnComp.GetAIOwner();
-
 	if (!IsValid(pController))
 	{
 		return;
 	}
 
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
-
 	if (!IsValid(pMonster))
 	{
 		return;
 	}
 
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	float Distance = FVector::Distance(pMonster->GetActorLocation(), pPlayer->GetActorLocation());
+	ACharacter* pTarget = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
+	if (!IsValid(pTarget))
+	{
+		return;
+	}
+	
+	float Distance = FVector::Distance(pMonster->GetActorLocation(), pTarget->GetActorLocation());
 
 	if (Distance < pMonster->GetMonsterInfo().DetectRange)
 	{
-		pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
 		bDetect = true;
 	}
 	else
 	{
-		pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), nullptr);
 		bDetect = false;
 	}
 
-	if (Distance < pMonster->GetMonsterInfo().AtkRange)
-	{
-		bIsAtkRange = true;
-	}
-	else
-	{
-		bIsAtkRange = false;
-	}
-
-#ifdef ENABLE_DRAW_DEBUG
 	FColor color;
 	bDetect ? color = FColor::Red : color = FColor::Green;
 	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().DetectRange, 40, color, false, 0.4f);
-
-	FColor AtkColor;
-	bIsAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
-	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().AtkRange, 40, AtkColor, false, 0.4f);
-#endif
 }

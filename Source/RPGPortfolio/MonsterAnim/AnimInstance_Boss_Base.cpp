@@ -3,7 +3,9 @@
 
 #include "AnimInstance_Boss_Base.h"
 #include "../Monsters/Monster_Base.h"
-#include "GameFramework/CharacterMovementComponent.h"
+//#include "GameFramework/CharacterMovementComponent.h"
+#include "../Characters/Player_Base_Knight.h"
+#include "Kismet/GameplayStatics.h"
 
 void UAnimInstance_Boss_Base::NativeInitializeAnimation()
 {
@@ -18,6 +20,13 @@ void UAnimInstance_Boss_Base::NativeBeginPlay()
 	{
 		m_Movement = m_Monster->GetCharacterMovement();
 	}
+
+	m_Player = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	if (!IsValid(m_Player))
+	{
+		UE_LOG(LogTemp, Error, TEXT("보스 애님인스턴스 : 플레이어 찾지 못함"));
+	}
 }
 
 void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
@@ -28,8 +37,6 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 	}
 
 	fMoveSpeed = m_Movement->Velocity.Size2D();
-
-	//if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
 	if (0.f < fMoveSpeed)
 	{
 		bIsMove = true;
@@ -42,4 +49,11 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 	}
 
 	vLocalVelocity = m_Monster->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
+
+	//vPlayerLoc = m_Player->GetActorLocation() - m_Monster->GetActorLocation();
+	// vPlayerLoc.Z = 0.f;
+	vPlayerLoc = m_Player->GetActorLocation();
+	UE_LOG(LogTemp, Warning, TEXT("X : %f"), vPlayerLoc.X);
+	UE_LOG(LogTemp, Warning, TEXT("Y : %f"), vPlayerLoc.Y);
+	UE_LOG(LogTemp, Warning, TEXT("Z : %f"), vPlayerLoc.Z);
 }

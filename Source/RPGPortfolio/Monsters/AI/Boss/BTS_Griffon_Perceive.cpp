@@ -47,8 +47,4 @@ void UBTS_Griffon_Perceive::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _N
 	}
 
 	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().BOSS_PerceiveRange, 40, FColor::Emerald, false, 0.4f);
-
-//#ifdef ENABLE_DRAW_DEBUG
-//	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().BOSS_PerceiveRange, 40, FColor::Emerald, false, 0.4f);
-//#endif
 }
