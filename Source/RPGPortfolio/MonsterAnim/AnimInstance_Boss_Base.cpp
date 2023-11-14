@@ -50,10 +50,14 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 
 	vLocalVelocity = m_Monster->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
 
-	//vPlayerLoc = m_Player->GetActorLocation() - m_Monster->GetActorLocation();
-	// vPlayerLoc.Z = 0.f;
 	vPlayerLoc = m_Player->GetActorLocation();
-	UE_LOG(LogTemp, Warning, TEXT("X : %f"), vPlayerLoc.X);
-	UE_LOG(LogTemp, Warning, TEXT("Y : %f"), vPlayerLoc.Y);
-	UE_LOG(LogTemp, Warning, TEXT("Z : %f"), vPlayerLoc.Z);
+
+	if (m_Movement->IsFalling())
+	{
+		bIsFly = true;
+	}
+	else
+	{
+		bIsFly = false;
+	}
 }

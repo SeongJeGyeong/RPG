@@ -44,3 +44,22 @@ enum class EMONSTER_STATE : uint8
 	HIT,
 	DEAD,
 };
+
+UENUM(BlueprintType)
+enum class EBOSS_STATE : uint8
+{
+	DEFAULT,
+	FLY,
+	WALK,
+	RUN,
+	BITE,
+	CLAW,
+	COMBO1,
+	COMBO2,
+	COMBO3,
+	RANGEATTACK,
+	FLYCLAW,
+	DIVE,
+	HIT,
+	DEAD,
+};

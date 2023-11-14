@@ -20,8 +20,9 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	EMONSTER_TYPE	m_Type;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	EMONSTER_STATE	m_State;
+
+	EBOSS_STATE		m_BState;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_TableRow;
@@ -49,7 +50,7 @@ public:
 	EMONSTER_STATE GetState() { return m_State; }
 
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
-
+	void ChangeBossState(EBOSS_STATE _BState) { m_BState = _BState; }
 
 public:
 	// Sets default values for this character's properties
