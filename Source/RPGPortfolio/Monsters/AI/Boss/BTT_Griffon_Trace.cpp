@@ -26,14 +26,16 @@ EBTNodeResult::Type UBTT_Griffon_Trace::ExecuteTask(UBehaviorTreeComponent& _Own
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 	if (nullptr == pMonster)
 	{
-		return EBTNodeResult::Succeeded;
+		//return EBTNodeResult::Succeeded;
+		return EBTNodeResult::Failed;
 	}
 	pMonster->GetCharacterMovement()->MaxWalkSpeed = 600.f;
 
 	ACharacter* pCharacter = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(m_TargetKey.SelectedKeyName));
 	if (!IsValid(pCharacter))
 	{
-		return EBTNodeResult::Succeeded;
+		//return EBTNodeResult::Succeeded;
+		return EBTNodeResult::Failed;
 	}
 	else
 	{
@@ -54,7 +56,8 @@ void UBTT_Griffon_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 	{
 		UE_LOG(LogTemp, Error, TEXT("추적 대상 설정 안됨"));
 
-		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
@@ -63,14 +66,16 @@ void UBTT_Griffon_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 	if (!IsValid(pMonster))
 	{
 		// InProgress 상태를 중단
-		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
 	ACharacter* pCharacter = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("TraceTarget")));
 	if (!IsValid(pCharacter))
 	{
-		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
@@ -80,8 +85,8 @@ void UBTT_Griffon_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 
 	if (Distance < fAtkRange)
 	{
-		// Task를 성공으로 반환해서 행동트리가 Patrol로 가는 것을 막음
-		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		//FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		return;
 	}
 	else

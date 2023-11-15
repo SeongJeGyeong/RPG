@@ -40,12 +40,10 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 	if (0.f < fMoveSpeed)
 	{
 		bIsMove = true;
-		UE_LOG(LogTemp, Warning, TEXT("bIsMove : True"));
 	}
 	else
 	{
 		bIsMove = false;
-		UE_LOG(LogTemp, Warning, TEXT("bIsMove : false"));
 	}
 
 	vLocalVelocity = m_Monster->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
@@ -60,4 +58,6 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 	{
 		bIsFly = false;
 	}
+
+	m_State = m_Monster->GetBossState();
 }

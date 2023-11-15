@@ -4,6 +4,8 @@
 #include "AIC_Monster_Base.h"
 #include "../Monster_Base.h"
 
+const FName AAIC_Monster_Base::PatternNumber(TEXT("PatternKey"));
+
 void AAIC_Monster_Base::OnPossess(APawn* _Owner)
 {
 	Super::OnPossess(_Owner);

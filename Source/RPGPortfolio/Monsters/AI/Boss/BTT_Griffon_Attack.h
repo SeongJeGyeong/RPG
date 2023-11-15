@@ -18,6 +18,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
 	FBlackboardKeySelector m_TargetKey;
 
+	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
+	class UAnimInstance_Boss_Base* m_AnimInst;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
+	class UAnimSequenceBase* m_AnimSeq;
+
 public:
 	UBTT_Griffon_Attack();
 

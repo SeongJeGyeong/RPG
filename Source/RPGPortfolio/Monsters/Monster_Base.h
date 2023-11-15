@@ -48,6 +48,7 @@ public:
 	UBlackboardData* GetBlackboard() { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	EMONSTER_STATE GetState() { return m_State; }
+	EBOSS_STATE	GetBossState() { return m_BState; }
 
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
 	void ChangeBossState(EBOSS_STATE _BState) { m_BState = _BState; }
