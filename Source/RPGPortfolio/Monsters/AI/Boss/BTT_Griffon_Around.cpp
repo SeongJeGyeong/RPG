@@ -28,6 +28,7 @@ EBTNodeResult::Type UBTT_Griffon_Around::ExecuteTask(UBehaviorTreeComponent& _Ow
 	}
 
 	pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	pMonster->ChangeBossState(EBOSS_STATE::DEFAULT);
 
 	return EBTNodeResult::InProgress;
 }
