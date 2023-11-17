@@ -42,7 +42,7 @@ private:
 	class APlayer_Base_Knight* m_Player;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
-	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
+	TSoftObjectPtr<UAnimMontage> m_Montage;
 
 public:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
@@ -54,6 +54,8 @@ public:
 	void SetDeadAnim() { bIsDead = true; }
 
 	bool bIsAttack;
+	bool bIsTurn;
+	bool bIsAtkMove;
 
 	//FOnAttackEndDelegate OnAttackEnd;
 
@@ -63,7 +65,15 @@ public:
 	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
 
 	void PlayAttackMontage(EBOSS_STATE _State);
+	void PlayTurnMontage(int32 _Dir);
 
 	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* _Montage, bool _bInterrupted);
+	void AnimNotify_BossAtkEnd();
+	UFUNCTION()
+	void AnimNotify_BossTurnEnd();
+	UFUNCTION()
+	void AnimNotify_MoveStart();
+	UFUNCTION()
+	void AnimNotify_MoveEnd();
+
 };

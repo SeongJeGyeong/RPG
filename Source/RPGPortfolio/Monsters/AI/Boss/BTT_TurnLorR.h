@@ -4,29 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTT_Griffon_Attack.generated.h"
+#include "BTT_TurnLorR.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API UBTT_Griffon_Attack : public UBTTaskNode
+class RPGPORTFOLIO_API UBTT_TurnLorR : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+public:
+	UBTT_TurnLorR();
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
-	FBlackboardKeySelector m_TargetKey;
-
-	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
 	class UAnimInstance_Boss_Base* m_AnimInst;
-
-	FVector vForward;
-	float fForwardDist;
-	class UCharacterMovementComponent* m_Movement;
-
-public:
-	UBTT_Griffon_Attack();
 
 public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) override;

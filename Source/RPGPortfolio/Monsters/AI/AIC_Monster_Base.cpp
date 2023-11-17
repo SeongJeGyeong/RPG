@@ -19,8 +19,15 @@ void AAIC_Monster_Base::OnPossess(APawn* _Owner)
 		return;
 	}
 
-	m_BehaviorTree = pMonster->GetBehaviorTree();
-	m_Blackboard = pMonster->GetBlackboard();
+	if (pMonster->GetBehaviorTree())
+	{
+		m_BehaviorTree = pMonster->GetBehaviorTree();
+	}
+
+	if (pMonster->GetBlackboard())
+	{
+		m_Blackboard = pMonster->GetBlackboard();
+	}
 
 	if (IsValid(m_Blackboard))
 	{

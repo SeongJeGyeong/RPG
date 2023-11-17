@@ -30,8 +30,6 @@ void UAnimInstance_Boss_Base::NativeBeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("보스 애님인스턴스 : 플레이어 찾지 못함"));
 	}
-
-	OnMontageEnded.AddDynamic(this, &UAnimInstance_Boss_Base::OnAttackMontageEnded);
 }
 
 void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
@@ -59,11 +57,17 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 
 	if (m_Movement->IsFalling())
 	{
-		bIsFly = true;
+		if (!Montage_IsPlaying(m_Montage.LoadSynchronous()))
+		{
+			//bIsFly = true;
+		}
 	}
 	else
 	{
-		bIsFly = false;
+		if (!Montage_IsPlaying(m_Montage.LoadSynchronous()))
+		{
+			//bIsFly = false;
+		}
 	}
 
 	m_State = m_Monster->GetBossState();
@@ -76,22 +80,57 @@ void UAnimInstance_Boss_Base::PlayAttackMontage(EBOSS_STATE _State)
 	switch (_State)
 	{
 	case EBOSS_STATE::COMBO1:
-		m_AttackMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Claw_1Combo.AM_Claw_1Combo'"));
+		m_Montage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Claw_1Combo.AM_Claw_1Combo'"));
 		break;
 	case EBOSS_STATE::COMBO2:
-		m_AttackMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Claw_2Combo.AM_Claw_2Combo'"));
+		m_Montage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Claw_2Combo.AM_Claw_2Combo'"));
 		break;
 	case EBOSS_STATE::COMBO3:
-		m_AttackMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Claw_3Combo.AM_Claw_3Combo'"));
+		m_Montage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Claw_3Combo.AM_Claw_3Combo'"));
 		break;
 	default:
 		break;
 	}
 
-	Montage_Play(m_AttackMontage.LoadSynchronous());
+	Montage_Play(m_Montage.LoadSynchronous());
 }
 
-void UAnimInstance_Boss_Base::OnAttackMontageEnded(UAnimMontage* _Montage, bool _bInterrupted)
+void UAnimInstance_Boss_Base::PlayTurnMontage(int32 _Dir)
+{
+	bIsTurn = true;
+
+	if (_Dir == 1)
+	{
+		// Left
+		m_Montage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Griffon_Trun_Left.AM_Griffon_Trun_Left'"));
+	}
+	else if (_Dir == -1)
+	{
+		// Right
+		m_Montage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Griffon_Trun_Right.AM_Griffon_Trun_Right'"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("TurnStart"));
+	Montage_Play(m_Montage.LoadSynchronous());
+}
+
+void UAnimInstance_Boss_Base::AnimNotify_BossAtkEnd()
 {
 	bIsAttack = false;
+}
+
+void UAnimInstance_Boss_Base::AnimNotify_BossTurnEnd()
+{
+	bIsTurn = false;
+	UE_LOG(LogTemp, Warning, TEXT("TurnEnd"));
+}
+
+void UAnimInstance_Boss_Base::AnimNotify_MoveStart()
+{
+	bIsAtkMove = true;
+}
+
+void UAnimInstance_Boss_Base::AnimNotify_MoveEnd()
+{
+	bIsAtkMove = false;
 }

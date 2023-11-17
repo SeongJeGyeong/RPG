@@ -61,8 +61,4 @@ void UBTT_Griffon_CheckRange::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* 
 		bInnerRange = false;
 		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("InnerChk"), 0);
 	}
-
-	/*FColor color;
-	bInnerRange ? color = FColor::Red : color = FColor::Green;
-	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().DetectRange, 40, color, false, 0.4f);*/
 }

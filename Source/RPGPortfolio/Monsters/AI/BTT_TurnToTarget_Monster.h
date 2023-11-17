@@ -17,7 +17,7 @@ class RPGPORTFOLIO_API UBTT_TurnToTarget_Monster : public UBTTaskNode
 public:
 	UBTT_TurnToTarget_Monster();
 
-	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DeltaSeconds) override;
 
 };

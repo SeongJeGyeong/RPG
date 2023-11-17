@@ -46,10 +46,12 @@ void UBTS_Detect_Griffon::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 
 	if (Distance < pMonster->GetMonsterInfo().DetectRange)
 	{
+		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("InnerChk"), 1);
 		bDetect = true;
 	}
 	else
 	{
+		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("InnerChk"), 0);
 		bDetect = false;
 	}
 

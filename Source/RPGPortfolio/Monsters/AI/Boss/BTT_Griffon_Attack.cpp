@@ -6,7 +6,7 @@
 #include "../../Monster_Base.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "../../../MonsterAnim/AnimInstance_Boss_Base.h"
-#include "Animation/AnimSequenceBase.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UBTT_Griffon_Attack::UBTT_Griffon_Attack()
 {
@@ -19,12 +19,12 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 
 	int32 PatternNum = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternKey"));
 
-	AAIController* pController = _OwnComp.GetAIOwner();
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if (nullptr == pMonster)
 	{
 		return EBTNodeResult::Succeeded;
 	}
+	m_Movement = pMonster->GetCharacterMovement();
 
 	m_AnimInst = Cast<UAnimInstance_Boss_Base>(pMonster->GetMesh()->GetAnimInstance());
 	if (!IsValid(m_AnimInst))
@@ -36,16 +36,20 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 	{
 	case 1:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO1);
+		fForwardDist = 25.f;
 		break;
 	case 2:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO2);
+		fForwardDist = 50.f;
 		break;
 	case 3:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO3);
+		fForwardDist = 100.f;
 		break;
 	default:
 		break;
 	}
+	vForward = pMonster->GetActorForwardVector();
 	m_AnimInst->PlayAttackMontage(pMonster->GetBossState());
 
 	return EBTNodeResult::InProgress;
@@ -54,6 +58,11 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 void UBTT_Griffon_Attack::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DeltaSeconds)
 {
 	Super::TickTask(_OwnComp, _NodeMemory, _DeltaSeconds);
+
+	if (m_AnimInst->bIsAtkMove)
+	{
+		m_Movement->AddInputVector(vForward * 150.f * _DeltaSeconds);
+	}
 
 	if (!m_AnimInst->bIsAttack)
 	{

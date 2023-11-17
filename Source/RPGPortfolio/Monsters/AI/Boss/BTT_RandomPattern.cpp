@@ -31,5 +31,6 @@ EBTNodeResult::Type UBTT_RandomPattern::ExecuteTask(UBehaviorTreeComponent& _Own
 		UE_LOG(LogTemp, Warning, TEXT("Pattern 3"));
 	}
 
-	return EBTNodeResult::Failed;
+	//return EBTNodeResult::Failed;
+	return EBTNodeResult::Succeeded;
 }
