@@ -7,6 +7,7 @@
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Boss_Base.generated.h"
 
+//DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 /**
  * 
  */
@@ -40,8 +41,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	class APlayer_Base_Knight* m_Player;
 
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
 
+public:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
 	EBOSS_STATE m_State;
 
@@ -50,9 +53,17 @@ public:
 
 	void SetDeadAnim() { bIsDead = true; }
 
+	bool bIsAttack;
+
+	//FOnAttackEndDelegate OnAttackEnd;
+
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
 
+	void PlayAttackMontage(EBOSS_STATE _State);
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* _Montage, bool _bInterrupted);
 };

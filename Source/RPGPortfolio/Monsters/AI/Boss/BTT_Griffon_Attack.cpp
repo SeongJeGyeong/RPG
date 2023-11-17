@@ -27,24 +27,26 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 	}
 
 	m_AnimInst = Cast<UAnimInstance_Boss_Base>(pMonster->GetMesh()->GetAnimInstance());
+	if (!IsValid(m_AnimInst))
+	{
+		return EBTNodeResult::Succeeded;
+	}
 
 	switch (PatternNum)
 	{
 	case 1:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO1);
-		m_AnimSeq = LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Script/Engine.AnimSequence'/Game/QuadrapedCreatures/Griffon/Animations/ANIM_Griffon_RightClawsAttack.ANIM_Griffon_RightClawsAttack'"));
 		break;
 	case 2:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO2);
-		m_AnimSeq = LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Script/Engine.AnimSequence'/Game/QuadrapedCreatures/Griffon/Animations/ANIM_Griffon_2HitComboAttack.ANIM_Griffon_2HitComboAttack'"));
 		break;
 	case 3:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO3);
-		m_AnimSeq = LoadObject<UAnimSequenceBase>(nullptr, TEXT("/Script/Engine.AnimSequence'/Game/QuadrapedCreatures/Griffon/Animations/ANIM_Griffon_3HitComboAttack.ANIM_Griffon_3HitComboAttack'"));
 		break;
 	default:
 		break;
 	}
+	m_AnimInst->PlayAttackMontage(pMonster->GetBossState());
 
 	return EBTNodeResult::InProgress;
 }
@@ -53,7 +55,7 @@ void UBTT_Griffon_Attack::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 {
 	Super::TickTask(_OwnComp, _NodeMemory, _DeltaSeconds);
 
-	if (!m_AnimInst->IsPlayingSlotAnimation(m_AnimSeq, FName("Attack")))
+	if (!m_AnimInst->bIsAttack)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AnimEnded"));
 		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
