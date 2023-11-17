@@ -44,32 +44,10 @@ void UBTT_Griffon_Around::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 		return;
 	}
 
-	//ACharacter* pCharacter = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(m_TargetKey.SelectedKeyName));
-
-	//if (!IsValid(pCharacter))
-	//{
-	//	FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
-	//	return;
-	//}
-
 	AAIController* pController = _OwnComp.GetAIOwner();
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 	if (nullptr == pMonster)
 	{
-<<<<<<< HEAD
-		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
-	}
-
-	pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
-
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-
-	if (nullptr == pPlayer)
-	{
-		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
-	}
-
-=======
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 	}
 
@@ -79,32 +57,12 @@ void UBTT_Griffon_Around::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 	}
 
->>>>>>> f2e5a476155a809ac961b49cbc0bf2a5420666c1
 	FVector LookVector = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
 	LookVector.Z = 0.f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
 	pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, _DeltaSeconds, 5.f));
-<<<<<<< HEAD
-
-
-	/*FVector TargetVect = pCharacter->GetActorLocation() - pMonster->GetActorLocation();
-	FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
-	FRotator CurrentRot = pMonster->GetActorRotation();
-	FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, _DeltaSeconds, 10.f);
-
-	pMonster->SetActorRotation(NewRot);*/
-
-	/*const FRotator Rotation = (pCharacter->GetOwner()->GetActorLocation() - pMonster->GetOwner()->GetActorLocation()).GetSafeNormal().Rotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
-=======
->>>>>>> f2e5a476155a809ac961b49cbc0bf2a5420666c1
 
 	const FRotator YawRotation(0, TargetRot.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-<<<<<<< HEAD
-	pMonster->AddMovementInput(Direction, 10.f);*/
-
-=======
 	pMonster->AddMovementInput(Direction, 1.f);
->>>>>>> f2e5a476155a809ac961b49cbc0bf2a5420666c1
 }
