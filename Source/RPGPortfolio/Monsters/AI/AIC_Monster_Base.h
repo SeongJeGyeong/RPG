@@ -26,4 +26,5 @@ public:
 	virtual void OnPossess(APawn* _Owner) override;
 	virtual void OnUnPossess() override;
 
+	static const FName PatternNumber;
 };

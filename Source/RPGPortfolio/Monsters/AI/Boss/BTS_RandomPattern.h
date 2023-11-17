@@ -16,7 +16,8 @@ class RPGPORTFOLIO_API UBTS_RandomPattern : public UBTService
 	
 public:
 	UBTS_RandomPattern();
+	~UBTS_RandomPattern();
 
 	virtual void OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) override;
-
+	virtual void TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DT) override;
 };

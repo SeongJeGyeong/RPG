@@ -61,7 +61,6 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 		bIsAtkRange = false;
 	}
 
-#ifdef ENABLE_DRAW_DEBUG
 	FColor color;
 	bDetect ? color = FColor::Red : color = FColor::Green;
 	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().DetectRange, 40, color, false, 0.4f);
@@ -69,5 +68,14 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 	FColor AtkColor;
 	bIsAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
 	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().AtkRange, 40, AtkColor, false, 0.4f);
-#endif
+
+//#ifdef ENABLE_DRAW_DEBUG
+//	FColor color;
+//	bDetect ? color = FColor::Red : color = FColor::Green;
+//	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().DetectRange, 40, color, false, 0.4f);
+//
+//	FColor AtkColor;
+//	bIsAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
+//	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().AtkRange, 40, AtkColor, false, 0.4f);
+//#endif
 }

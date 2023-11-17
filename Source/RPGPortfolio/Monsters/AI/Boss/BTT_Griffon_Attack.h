@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTT_Trace_Monster.generated.h"
+#include "BTT_Griffon_Attack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API UBTT_Trace_Monster : public UBTTaskNode
+class RPGPORTFOLIO_API UBTT_Griffon_Attack : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
@@ -19,13 +19,13 @@ private:
 	FBlackboardKeySelector m_TargetKey;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
-	FBlackboardKeySelector m_RecentTargetPos;
+	class UAnimInstance_Boss_Base* m_AnimInst;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
-	float				   m_RevaluateRange;
+	class UAnimSequenceBase* m_AnimSeq;
 
 public:
-	UBTT_Trace_Monster();
+	UBTT_Griffon_Attack();
 
 public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) override;

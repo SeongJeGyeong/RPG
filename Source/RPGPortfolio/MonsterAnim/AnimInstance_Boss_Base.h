@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Boss_Base.generated.h"
@@ -22,7 +23,13 @@ private:
 	bool bIsMove;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	bool bIsFly;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	FVector	vLocalVelocity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	FVector	vPlayerLoc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	class AMonster_Base* m_Monster;
@@ -30,8 +37,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	class UCharacterMovementComponent* m_Movement;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
+	class APlayer_Base_Knight* m_Player;
+
 public:
-	
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	EBOSS_STATE m_State;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
 	bool bIsDead;

@@ -46,7 +46,12 @@ void UBTS_Griffon_Perceive::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _N
 		pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), nullptr);
 	}
 
-#ifdef ENABLE_DRAW_DEBUG
 	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().BOSS_PerceiveRange, 40, FColor::Emerald, false, 0.4f);
-#endif
+<<<<<<< HEAD
+
+//#ifdef ENABLE_DRAW_DEBUG
+//	DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().BOSS_PerceiveRange, 40, FColor::Emerald, false, 0.4f);
+//#endif
+=======
+>>>>>>> f2e5a476155a809ac961b49cbc0bf2a5420666c1
 }
