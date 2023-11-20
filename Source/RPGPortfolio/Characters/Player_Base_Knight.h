@@ -90,6 +90,7 @@ public:
 	void SetOrientRotation(bool _Val);
 
 	void NextAttackCheck();
+	void AttackHitCheck();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

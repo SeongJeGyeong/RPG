@@ -56,6 +56,11 @@ void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
 	OnNextAttackCheck.Broadcast();
 }
 
+void UAnimInstance_Knight::AnimNotify_AttackHitCheck()
+{
+	OnAttackHitCheck.Broadcast();
+}
+
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
 

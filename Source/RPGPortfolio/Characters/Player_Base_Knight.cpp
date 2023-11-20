@@ -102,8 +102,11 @@ void APlayer_Base_Knight::BeginPlay()
 	}
 
 	m_AnimInst = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
-
-	m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
+	if (IsValid(m_AnimInst))
+	{
+		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
+		m_AnimInst->OnAttackHitCheck.AddUObject(this, &APlayer_Base_Knight::AttackHitCheck);
+	}
 }
 
 // Called every frame
@@ -446,5 +449,34 @@ void APlayer_Base_Knight::NextAttackCheck()
 
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
+	}
+}
+
+void APlayer_Base_Knight::AttackHitCheck()
+{
+	float AtkRange = 200.f;
+	float AtkRadius = 50.f;
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	bool bResult = GetWorld()->SweepSingleByChannel
+	(
+		HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AtkRange,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel5,
+		FCollisionShape::MakeCapsule(AtkRadius, AtkRange * 0.5f + AtkRadius),
+		Params
+	);
+	FColor color;
+	bResult ? color = FColor::Red : color = FColor::Green;
+	DrawDebugCapsule(GetWorld(), GetActorLocation() + GetActorForwardVector() * 100.f * 0.5f, AtkRange * 0.5f + AtkRadius, AtkRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector() * AtkRange).ToQuat(), color, false, 1.f);
+
+	if (bResult)
+	{
+		if (HitResult.GetActor()->IsValidLowLevel())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+		}
 	}
 }
