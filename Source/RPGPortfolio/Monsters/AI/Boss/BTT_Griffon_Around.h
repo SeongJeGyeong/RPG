@@ -24,6 +24,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
 	float				   m_RevaluateRange;
 
+	float				   fAroundDir;
+
 public:
 	UBTT_Griffon_Around();
 

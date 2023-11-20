@@ -42,11 +42,11 @@ void UBTS_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeM
 	FVector Cross = FVector::CrossProduct(vTarget, pMonster->GetActorForwardVector());
 	float Dot = FVector::DotProduct(Cross, pMonster->GetActorUpVector());
 
-	if (Dot >= 45.f)
+	if (Dot >= 180.f)
 	{
 		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), 1);
 	}
-	else if (Dot <= -45.f)
+	else if (Dot <= -180.f)
 	{
 		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), -1);
 	}

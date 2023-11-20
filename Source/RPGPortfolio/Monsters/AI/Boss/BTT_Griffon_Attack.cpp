@@ -36,15 +36,12 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 	{
 	case 1:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO1);
-		fForwardDist = 25.f;
 		break;
 	case 2:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO2);
-		fForwardDist = 50.f;
 		break;
 	case 3:
 		pMonster->ChangeBossState(EBOSS_STATE::COMBO3);
-		fForwardDist = 100.f;
 		break;
 	default:
 		break;
@@ -61,12 +58,18 @@ void UBTT_Griffon_Attack::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 
 	if (m_AnimInst->bIsAtkMove)
 	{
-		m_Movement->AddInputVector(vForward * 150.f * _DeltaSeconds);
+		m_Movement->AddInputVector(vForward * 50.f * _DeltaSeconds);
 	}
 
 	if (!m_AnimInst->bIsAttack)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AnimEnded"));
+		/*AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
+		if (nullptr == pMonster)
+		{
+			FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
+		}
+		pMonster->ChangeBossState(EBOSS_STATE::DEFAULT);*/
 		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		return;
 	}

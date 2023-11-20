@@ -67,6 +67,8 @@ void AMonster_Base::BeginPlay()
 void AMonster_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), GetMonsterInfo().AtkRange, 40, FColor::Cyan, false, 0.4f);
 }
 
 // Called to bind functionality to input

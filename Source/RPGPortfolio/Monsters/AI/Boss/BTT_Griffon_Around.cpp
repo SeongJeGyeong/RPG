@@ -30,6 +30,16 @@ EBTNodeResult::Type UBTT_Griffon_Around::ExecuteTask(UBehaviorTreeComponent& _Ow
 	pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	pMonster->ChangeBossState(EBOSS_STATE::DEFAULT);
 
+	int32 iRand = FMath::RandRange(0, 1);
+	if (iRand)
+	{
+		fAroundDir = -1.f;
+	}
+	else
+	{
+		fAroundDir = 1.f;
+	}
+
 	return EBTNodeResult::InProgress;
 }
 
@@ -64,5 +74,5 @@ void UBTT_Griffon_Around::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 
 	const FRotator YawRotation(0, TargetRot.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	pMonster->AddMovementInput(Direction, 1.f);
+	pMonster->AddMovementInput(Direction, fAroundDir);
 }

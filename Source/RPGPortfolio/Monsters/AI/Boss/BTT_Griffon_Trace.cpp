@@ -93,18 +93,4 @@ void UBTT_Griffon_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 	{
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(pController, pCharacter->GetActorLocation());
 	}
-
-	//FVector vRecentDest = _OwnComp.GetBlackboardComponent()->GetValueAsVector(m_RecentTargetPos.SelectedKeyName);
-
-	//// 현재 타겟의 위치가 몬스터의 이동 목적지와 재평가거리 이상 멀어지면
-	//if (m_RevaluateRange < FVector::Distance(pCharacter->GetActorLocation(), vRecentDest))
-	//{
-	//	// 현재 타겟의 위치로 다시 길찾기를 시도한다.
-	//	UAIBlueprintHelperLibrary::SimpleMoveToLocation(pController, pTarget->GetActorLocation());
-
-	//	// 현재 추적대상의 위치(최근 이동 목적지)를 블랙보드에 기록
-	//	OwnerComp.GetBlackboardComponent()->SetValueAsVector(m_RecentTargetPos.SelectedKeyName, pTarget->GetActorLocation());
-	//	OwnerComp.GetBlackboardComponent()->SetValueAsBool(FName("RecentPosSet"), true);
-
-	//}
 }

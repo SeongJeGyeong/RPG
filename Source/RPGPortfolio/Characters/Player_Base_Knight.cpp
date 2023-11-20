@@ -230,7 +230,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (CheckMontagePlaying())
+	if (CheckMontagePlaying() && bEnableMove)
 	{
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
