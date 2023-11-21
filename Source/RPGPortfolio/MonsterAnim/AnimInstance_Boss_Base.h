@@ -53,7 +53,7 @@ public:
 
 	void SetDeadAnim() { bIsDead = true; }
 
-	bool bIsAttack;
+	bool bBossAttack;
 	bool bIsTurn;
 	bool bIsAtkMove;
 

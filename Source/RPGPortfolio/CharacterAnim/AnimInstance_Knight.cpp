@@ -2,6 +2,7 @@
 
 
 #include "AnimInstance_Knight.h"
+#include "Animation/AnimNode_StateMachine.h"
 
 void UAnimInstance_Knight::NativeInitializeAnimation()
 {
@@ -24,8 +25,8 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		return;
 	}
 
+	// bIsMove = Idle->Move Trigger
 	fMoveSpeed = m_Movement->Velocity.Size2D();
-
 	if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
 	{
 		bIsMove = true;
@@ -48,7 +49,20 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 9.f, 0.f, 1.f);
 	}
 
-	bIsTargeting = m_Player->bLockOn;
+	const FAnimNode_StateMachine* state = GetStateMachineInstanceFromName(FName("Main"));
+	if (FName("Idle/Move").IsEqual(state->GetCurrentStateName()))
+	{
+		m_Player->SetbEnableJump(false);
+		m_Player->SetbEnableMove(true);
+	}
+	else
+	{
+		if (FName("Land").IsEqual(state->GetCurrentStateName()))
+		{
+			m_Player->SetbEnableMove(false);
+		}
+		m_Player->SetbEnableJump(true);
+	}
 }
 
 void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
@@ -56,12 +70,16 @@ void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
 	OnNextAttackCheck.Broadcast();
 }
 
-void UAnimInstance_Knight::AnimNotify_AttackHitCheck()
+void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
-	OnAttackHitCheck.Broadcast();
+	m_Player->SetbAtkTrace(true);
+}
+
+void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
+{
+	m_Player->SetbAtkTrace(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
-
 }

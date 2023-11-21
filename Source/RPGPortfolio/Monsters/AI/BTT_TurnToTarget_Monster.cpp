@@ -16,18 +16,14 @@ UBTT_TurnToTarget_Monster::UBTT_TurnToTarget_Monster()
 EBTNodeResult::Type UBTT_TurnToTarget_Monster::ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory)
 {
 	Super::ExecuteTask(_OwnComp, _NodeMemory);
-	//EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
-
 
 	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
-
 	if (nullptr == pMonster)
 	{
 		return EBTNodeResult::Failed;
 	}
 
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-
 	if (nullptr == pPlayer)
 	{
 		return EBTNodeResult::Failed;
@@ -37,7 +33,6 @@ EBTNodeResult::Type UBTT_TurnToTarget_Monster::ExecuteTask(UBehaviorTreeComponen
 	LookVector.Z = 0.f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
 	pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 5.f));
-
 
 	return EBTNodeResult::Succeeded;
 }

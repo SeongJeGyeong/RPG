@@ -17,8 +17,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bEnableMove(true)
 	, bIsAttack(false)
 	, bAttackToggle(false)
-	, bLockOn(false)
-	, bAutoLockOnMode(false)
 	, CurrentCombo(1)
 	, MaxCombo(4)
 {
@@ -44,13 +42,8 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->SetupAttachment(m_Arm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	fAccTime = 0.f;
-
 	LockonControlRotationRate = 10.f;
-	TargetSwitchMouseDelta = 3.f;
-	TargetSwitchMinDelaySeconds = .5f;
-	BreakLockMouseDelta = 10.f;
-	BrokeLockAimingCooldown = .5f;
+	BrokeLockAimingCooldown = 0.5f;
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack.AM_Knight_Attack'"));
 	if (AtkMontage.Succeeded())
@@ -105,7 +98,6 @@ void APlayer_Base_Knight::BeginPlay()
 	if (IsValid(m_AnimInst))
 	{
 		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
-		m_AnimInst->OnAttackHitCheck.AddUObject(this, &APlayer_Base_Knight::AttackHitCheck);
 	}
 }
 
@@ -113,24 +105,6 @@ void APlayer_Base_Knight::BeginPlay()
 void APlayer_Base_Knight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (GetCharacterMovement()->IsFalling())
-	{
-		bEnableJump = false;
-	}
-
-	if (!GetCharacterMovement()->IsFalling() && !bEnableJump)
-	{
-		bEnableMove = false;
-		fAccTime += DeltaTime;
-
-		if (fAccTime > 0.5f)
-		{
-			bEnableJump = true;
-			bEnableMove = true;
-			fAccTime = 0.f;
-		}
-	}
 
 	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
 	if (m_Arm->IsCameraLockedToTarget())
@@ -160,6 +134,11 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	{
 		AddMovementInput(vDodgeVector, 120.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
+	}
+
+	if (bAtkTrace)
+	{
+		AttackHitCheck();
 	}
 }
 
@@ -265,37 +244,16 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	/*AddControllerYawInput(vInput.X);
-	AddControllerPitchInput(-vInput.Y);*/
-
-	float TimeSinceLastTargetSwitch = GetWorld()->GetRealTimeSeconds() - LastTargetSwitchTime;
-
 	if (m_Arm->IsCameraLockedToTarget())
 	{
-		// Should try switch target?
-		if (bAutoLockOnMode)
-		{
-			if (FMath::Abs(vInput.X) > TargetSwitchMouseDelta && TimeSinceLastTargetSwitch > TargetSwitchMinDelaySeconds)	// Prevent switching multiple times using a single movement
-			{
-				if (vInput.X < 0)
-				{
-					m_Arm->SwitchTarget(ELockOnDirection::Left);
-				}
-				else
-				{
-					m_Arm->SwitchTarget(ELockOnDirection::Right);
-				}
-
-				LastTargetSwitchTime = GetWorld()->GetRealTimeSeconds();
-			}
-		}
+		// do not rotate
 	}
 	else
 	{
 		if (!m_Arm->bToggleLockOn)
 		{
 			// If camera lock was recently broken by a large mouse delta, allow a cooldown time to prevent erratic camera movement
-			bool bRecentlyBrokeLock = (GetWorld()->GetRealTimeSeconds() - BrokeLockTime) < BrokeLockAimingCooldown;
+			bool bRecentlyBrokeLock = GetWorld()->GetRealTimeSeconds() < BrokeLockAimingCooldown;
 			if (!bRecentlyBrokeLock)
 			{
 				AddControllerYawInput(vInput.X);
@@ -454,29 +412,34 @@ void APlayer_Base_Knight::NextAttackCheck()
 
 void APlayer_Base_Knight::AttackHitCheck()
 {
-	float AtkRange = 200.f;
-	float AtkRadius = 50.f;
+	float AtkRadius = 10.f;
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
+	FVector vSwordBottom = GetMesh()->GetSocketLocation("FX_Sword_Bottom");
+	FVector vSwordTop = GetMesh()->GetSocketLocation("FX_Sword_Top");
 	bool bResult = GetWorld()->SweepSingleByChannel
 	(
 		HitResult,
-		GetActorLocation(),
-		GetActorLocation() + GetActorForwardVector() * AtkRange,
+		vSwordBottom,
+		vSwordTop,
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel5,
-		FCollisionShape::MakeCapsule(AtkRadius, AtkRange * 0.5f + AtkRadius),
+		FCollisionShape::MakeCapsule(AtkRadius, (vSwordTop - vSwordBottom).Size() * 0.5f),
 		Params
 	);
+
 	FColor color;
 	bResult ? color = FColor::Red : color = FColor::Green;
-	DrawDebugCapsule(GetWorld(), GetActorLocation() + GetActorForwardVector() * 100.f * 0.5f, AtkRange * 0.5f + AtkRadius, AtkRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector() * AtkRange).ToQuat(), color, false, 1.f);
+	FVector vMidpoint = FMath::Lerp(vSwordTop, vSwordBottom, 0.5f);
+	// FVector vMidpoint2 = (vSwordBottom + vSwordTop) / 2;
+	DrawDebugCapsule(GetWorld(), vMidpoint, (vSwordTop - vSwordBottom).Size() * 0.5f, AtkRadius, FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(), color, false, 0.5f);
 
 	if (bResult)
 	{
 		if (HitResult.GetActor()->IsValidLowLevel())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+			bAtkTrace = false;
 		}
 	}
 }

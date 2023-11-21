@@ -10,7 +10,7 @@
 
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate); // 공격 히트판정 체크 델리게이트
+
 /**
  * 
  */
@@ -45,22 +45,21 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	bool bIsTargeting;
-
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
-	FOnAttackHitCheckDelegate OnAttackHitCheck;
 
 	// 다음콤보 체크
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck();
 
 	UFUNCTION()
-	void AnimNotify_AttackHitCheck();
+	void AnimNotify_HitCheckStart();
+
+	UFUNCTION()
+	void AnimNotify_HitCheckEnd();
 
 	UFUNCTION()
 	void AnimNotify_DodgeEnd();

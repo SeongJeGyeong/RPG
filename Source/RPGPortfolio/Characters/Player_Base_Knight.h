@@ -46,27 +46,41 @@ private:
 	TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
 	TSoftObjectPtr<UAnimMontage> m_ParryMontage;
 
-public:
+private:
+	////////// Lock On ///////////////
 	float LockonControlRotationRate;
-	float TargetSwitchMouseDelta;
-	float TargetSwitchMinDelaySeconds;
-	float LastTargetSwitchTime;
-	float BreakLockMouseDelta;
 	float BrokeLockAimingCooldown;
-	float BrokeLockTime;
+	//////////////////////////////////
 
 	bool bEnableJump;
 	bool bEnableMove;
 	bool bIsAttack;
-	float fAccTime;
 	bool bAttackToggle;
-	bool bLockOn;
-	bool bAutoLockOnMode;
+	bool bAtkTrace;
+	
 	FVector vDodgeVector;
 	FRotator rDodgeRotation;
 
 	int32 CurrentCombo;
 	int32 MaxCombo;
+
+public:
+	bool GetbAtkTrace() { return bAtkTrace; }
+	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace;}
+	bool GetbEnableJump() { return bEnableJump; }
+	void SetbEnableJump(bool _EnableJump) { bEnableJump = _EnableJump; }
+	bool GetbEnableMove() { return bEnableMove; }
+	void SetbEnableMove(bool _EnableMove) { bEnableMove = _EnableMove; }
+
+	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
+	void SetOrientRotation(bool _Val);
+
+	UCameraComponent* GetCamera() { return m_Camera; }
+	UPlayer_CameraArm* GetArm() { return m_Arm; }
+
+	TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
+	void SetAttackMontage(TSoftObjectPtr<UAnimMontage> _SettingAttackMontage) { m_SettingAttackMontage = _SettingAttackMontage; }
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -80,15 +94,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	UCameraComponent* GetCamera() { return m_Camera; }
-	UPlayer_CameraArm* GetArm() { return m_Arm; }
-
-	TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
-	void SetAttackMontage(TSoftObjectPtr<UAnimMontage> _SettingAttackMontage) { m_SettingAttackMontage = _SettingAttackMontage; }
-
-	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
-	void SetOrientRotation(bool _Val);
-
 	void NextAttackCheck();
 	void AttackHitCheck();
 

@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "../../../MonsterAnim/AnimInstance_Boss_Base.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 UBTT_Griffon_Attack::UBTT_Griffon_Attack()
 {
@@ -46,7 +47,6 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 	default:
 		break;
 	}
-	vForward = pMonster->GetActorForwardVector();
 	m_AnimInst->PlayAttackMontage(pMonster->GetBossState());
 
 	return EBTNodeResult::InProgress;
@@ -58,18 +58,23 @@ void UBTT_Griffon_Attack::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 
 	if (m_AnimInst->bIsAtkMove)
 	{
-		m_Movement->AddInputVector(vForward * 50.f * _DeltaSeconds);
+		AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
+		ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		if (!IsValid(pPlayer))
+		{
+			return;
+		}
+
+		FVector LookVector = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
+		LookVector.Z = 0.f;
+		FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
+		pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 3.f));
+		m_Movement->AddInputVector(pMonster->GetActorForwardVector() * 50.f * _DeltaSeconds);
 	}
 
-	if (!m_AnimInst->bIsAttack)
+	if (!m_AnimInst->bBossAttack)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AnimEnded"));
-		/*AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
-		if (nullptr == pMonster)
-		{
-			FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
-		}
-		pMonster->ChangeBossState(EBOSS_STATE::DEFAULT);*/
 		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		return;
 	}

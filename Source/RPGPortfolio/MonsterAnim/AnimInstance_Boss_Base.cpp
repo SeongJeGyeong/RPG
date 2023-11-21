@@ -75,7 +75,7 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 
 void UAnimInstance_Boss_Base::PlayAttackMontage(EBOSS_STATE _State)
 {
-	bIsAttack = true;
+	bBossAttack = true;
 
 	switch (_State)
 	{
@@ -116,7 +116,7 @@ void UAnimInstance_Boss_Base::PlayTurnMontage(int32 _Dir)
 
 void UAnimInstance_Boss_Base::AnimNotify_BossAtkEnd()
 {
-	bIsAttack = false;
+	bBossAttack = false;
 }
 
 void UAnimInstance_Boss_Base::AnimNotify_BossTurnEnd()
