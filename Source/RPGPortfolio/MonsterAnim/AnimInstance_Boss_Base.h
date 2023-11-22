@@ -38,10 +38,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	class UCharacterMovementComponent* m_Movement;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	class APlayer_Base_Knight* m_Player;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UAnimMontage> m_Montage;
 
 public:
@@ -51,13 +48,11 @@ public:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
 	bool bIsDead;
 
-	void SetDeadAnim() { bIsDead = true; }
-
 	bool bBossAttack;
 	bool bIsTurn;
 	bool bIsAtkMove;
-
-	//FOnAttackEndDelegate OnAttackEnd;
+	bool bAtkTrace;
+	int32 iComboIdx;
 
 public:
 	virtual void NativeInitializeAnimation() override;
@@ -66,14 +61,25 @@ public:
 
 	void PlayAttackMontage(EBOSS_STATE _State);
 	void PlayTurnMontage(int32 _Dir);
+	void SetDeadAnim() { bIsDead = true; }
+	void CheckAttackTrace(int32 _ComboIdx);
 
 	UFUNCTION()
-	void AnimNotify_BossAtkEnd();
+	void AnimNotify_BossAtkEnd() { bBossAttack = false; }
 	UFUNCTION()
-	void AnimNotify_BossTurnEnd();
+	void AnimNotify_BossTurnEnd() { bIsTurn = false; }
 	UFUNCTION()
-	void AnimNotify_MoveStart();
+	void AnimNotify_MoveStart() { bIsAtkMove = true; }
 	UFUNCTION()
-	void AnimNotify_MoveEnd();
-
+	void AnimNotify_MoveEnd() { bIsAtkMove = false; }
+	UFUNCTION()
+	void AnimNotify_HitCheckStart() { bAtkTrace = true; }
+	UFUNCTION()
+	void AnimNotify_HitCheckEnd() { bAtkTrace = false; }
+	UFUNCTION()
+	void AnimNotify_Combo1() { iComboIdx = 1; }
+	UFUNCTION()
+	void AnimNotify_Combo2() { iComboIdx = 2; }
+	UFUNCTION()
+	void AnimNotify_Combo3() { iComboIdx = 3; }
 };

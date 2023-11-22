@@ -20,18 +20,14 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	EMONSTER_TYPE	m_Type;
 
-	EMONSTER_STATE	m_State;
-
-	EBOSS_STATE		m_BState;
-
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_TableRow;
 
-	UPROPERTY()
-	class UAnimInstance_Monster_Base* m_Anim;
-
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class ULockOnTargetComponent* m_TargetComp;
+
+	EMONSTER_STATE	m_State;
+	EBOSS_STATE		m_BState;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")

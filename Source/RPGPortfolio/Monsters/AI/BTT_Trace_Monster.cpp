@@ -47,7 +47,6 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 
 	_OwnComp.GetBlackboardComponent()->SetValueAsVector(m_RecentTargetPos.SelectedKeyName, pCharacter->GetActorLocation());
 
-	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 	pMonster->ChangeState(EMONSTER_STATE::RUN);
 	pMonster->GetCharacterMovement()->MaxWalkSpeed = 600.f;
@@ -78,7 +77,6 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 
 	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
 	AAIController* pController = _OwnComp.GetAIOwner();
-	// AMonsters_Base* pMonster = Cast<AMonsters_Base>(pController->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 
 	if (!IsValid(pMonster))

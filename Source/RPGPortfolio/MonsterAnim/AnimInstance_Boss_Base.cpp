@@ -52,7 +52,6 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 	}
 
 	vLocalVelocity = m_Monster->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
-
 	vPlayerLoc = m_Player->GetActorLocation();
 
 	if (m_Movement->IsFalling())
@@ -68,6 +67,11 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 		{
 			//bIsFly = false;
 		}
+	}
+
+	if (bAtkTrace)
+	{
+		CheckAttackTrace(iComboIdx);
 	}
 
 	m_State = m_Monster->GetBossState();
@@ -114,23 +118,50 @@ void UAnimInstance_Boss_Base::PlayTurnMontage(int32 _Dir)
 	Montage_Play(m_Montage.LoadSynchronous());
 }
 
-void UAnimInstance_Boss_Base::AnimNotify_BossAtkEnd()
+void UAnimInstance_Boss_Base::CheckAttackTrace(int32 _ComboIdx)
 {
-	bBossAttack = false;
-}
+	FVector vAtkCollisonLoc;
 
-void UAnimInstance_Boss_Base::AnimNotify_BossTurnEnd()
-{
-	bIsTurn = false;
-	UE_LOG(LogTemp, Warning, TEXT("TurnEnd"));
-}
+	switch (_ComboIdx)
+	{
+	case 1:
+		vAtkCollisonLoc = m_Monster->GetMesh()->GetSocketLocation("GRIFFON_RightHand");
+		break;
+	case 2:
+		vAtkCollisonLoc = m_Monster->GetMesh()->GetSocketLocation("GRIFFON_LeftHand");
+		break;
+	case 3:
+		vAtkCollisonLoc = m_Monster->GetMesh()->GetSocketLocation("Head_Target");
+		break;
+	default:
+		break;
+	}
 
-void UAnimInstance_Boss_Base::AnimNotify_MoveStart()
-{
-	bIsAtkMove = true;
-}
+	float AtkRadius = 50.f;
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, m_Monster);
+	bool bResult = GetWorld()->SweepSingleByChannel
+	(
+		HitResult,
+		vAtkCollisonLoc,
+		vAtkCollisonLoc,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel5,
+		FCollisionShape::MakeSphere(AtkRadius),
+		Params
+	);
 
-void UAnimInstance_Boss_Base::AnimNotify_MoveEnd()
-{
-	bIsAtkMove = false;
+	FColor color;
+	bResult ? color = FColor::Red : color = FColor::Green;
+	DrawDebugSphere(GetWorld(), vAtkCollisonLoc, AtkRadius, 32, color);
+
+	if (bResult)
+	{
+		if (HitResult.GetActor()->IsValidLowLevel())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+			bAtkTrace = false;
+		}
+	}
+
 }

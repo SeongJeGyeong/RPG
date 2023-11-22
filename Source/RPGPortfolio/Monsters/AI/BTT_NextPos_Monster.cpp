@@ -40,7 +40,6 @@ EBTNodeResult::Type UBTT_NextPos_Monster::ExecuteTask(UBehaviorTreeComponent& _O
 		return EBTNodeResult::Failed;
 	}
 
-	//AMonsters_Base* pMonster = Cast<AMonsters_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if (IsValid(pMonster))
 	{
