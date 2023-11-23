@@ -3,7 +3,7 @@
 
 #include "BTT_Griffon_Around.h"
 #include "AIController.h"
-#include "../../Monster_Base.h"
+#include "../../Monster_Griffon.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTT_Griffon_Around::ExecuteTask(UBehaviorTreeComponent& _Ow
 	Super::ExecuteTask(_OwnComp, _NodeMemory);
 
 	AAIController* pController = _OwnComp.GetAIOwner();
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+	AMonster_Griffon* pMonster = Cast<AMonster_Griffon>(pController->GetPawn());
 	if (nullptr == pMonster)
 	{
 		return EBTNodeResult::Failed;
@@ -55,7 +55,7 @@ void UBTT_Griffon_Around::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Nod
 	}
 
 	AAIController* pController = _OwnComp.GetAIOwner();
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+	AMonster_Griffon* pMonster = Cast<AMonster_Griffon>(pController->GetPawn());
 	if (nullptr == pMonster)
 	{
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);

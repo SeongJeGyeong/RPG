@@ -3,3 +3,7 @@
 
 #include "LockOnTargetComponent.h"
 
+ULockOnTargetComponent::ULockOnTargetComponent()
+{
+	SetCollisionProfileName(FName("LOT"));
+}

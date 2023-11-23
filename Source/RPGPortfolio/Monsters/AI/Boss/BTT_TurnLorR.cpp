@@ -5,7 +5,7 @@
 #include "../AIC_Monster_Base.h"
 #include "../../../Monsters/Monster_Base.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "../../../MonsterAnim/AnimInstance_Boss_Base.h"
+#include "../../../MonsterAnim/Anim_Griffon.h"
 
 UBTT_TurnLorR::UBTT_TurnLorR()
 {
@@ -28,7 +28,7 @@ EBTNodeResult::Type UBTT_TurnLorR::ExecuteTask(UBehaviorTreeComponent& _OwnComp,
 		return EBTNodeResult::Failed;
 	}
 
-	m_AnimInst = Cast<UAnimInstance_Boss_Base>(pMonster->GetMesh()->GetAnimInstance());
+	m_AnimInst = Cast<UAnim_Griffon>(pMonster->GetMesh()->GetAnimInstance());
 	if (!IsValid(m_AnimInst))
 	{
 		return EBTNodeResult::Failed;

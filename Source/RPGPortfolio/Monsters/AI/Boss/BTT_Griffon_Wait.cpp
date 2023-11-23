@@ -2,12 +2,12 @@
 
 
 #include "BTT_Griffon_Wait.h"
-#include "../../Monster_Base.h"
+#include "../../Monster_Griffon.h"
 #include "AIController.h"
 
 EBTNodeResult::Type UBTT_Griffon_Wait::ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory)
 {
-	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
+	AMonster_Griffon* pMonster = Cast<AMonster_Griffon>(_OwnComp.GetAIOwner()->GetPawn());
 
 	if (IsValid(pMonster))
 	{

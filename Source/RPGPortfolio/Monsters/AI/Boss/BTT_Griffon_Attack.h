@@ -19,7 +19,7 @@ private:
 	FBlackboardKeySelector m_TargetKey;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
-	class UAnimInstance_Boss_Base* m_AnimInst;
+	class UAnim_Griffon* m_AnimInst;
 
 	FVector vForward;
 	float fForwardDist;

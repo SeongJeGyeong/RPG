@@ -3,9 +3,9 @@
 
 #include "BTT_Griffon_Attack.h"
 #include "AIController.h"
-#include "../../Monster_Base.h"
+#include "../../Monster_Griffon.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "../../../MonsterAnim/AnimInstance_Boss_Base.h"
+#include "../../../MonsterAnim/Anim_Griffon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -20,14 +20,14 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 
 	int32 PatternNum = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternKey"));
 
-	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
+	AMonster_Griffon* pMonster = Cast<AMonster_Griffon>(_OwnComp.GetAIOwner()->GetPawn());
 	if (nullptr == pMonster)
 	{
 		return EBTNodeResult::Succeeded;
 	}
 	m_Movement = pMonster->GetCharacterMovement();
 
-	m_AnimInst = Cast<UAnimInstance_Boss_Base>(pMonster->GetMesh()->GetAnimInstance());
+	m_AnimInst = Cast<UAnim_Griffon>(pMonster->GetMesh()->GetAnimInstance());
 	if (!IsValid(m_AnimInst))
 	{
 		return EBTNodeResult::Succeeded;
@@ -47,7 +47,7 @@ EBTNodeResult::Type UBTT_Griffon_Attack::ExecuteTask(UBehaviorTreeComponent& _Ow
 	default:
 		break;
 	}
-	m_AnimInst->PlayAttackMontage(pMonster->GetBossState());
+	m_AnimInst->MeleeAttack(pMonster->GetBossState());
 
 	return EBTNodeResult::InProgress;
 }

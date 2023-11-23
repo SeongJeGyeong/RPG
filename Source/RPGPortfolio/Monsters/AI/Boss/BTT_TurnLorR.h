@@ -19,7 +19,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
-	class UAnimInstance_Boss_Base* m_AnimInst;
+	class UAnim_Griffon* m_AnimInst;
 
 public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) override;

@@ -37,18 +37,28 @@ void UBTS_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeM
 
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
-	FVector vTarget = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
+	FVector vOffset = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
+	FVector Cross = FVector::CrossProduct(vOffset, pMonster->GetActorForwardVector());
+	float fDir = FVector::DotProduct(Cross, pMonster->GetActorUpVector());
+	vOffset = vOffset.GetSafeNormal();
+	float fAngle = FVector::DotProduct(pMonster->GetActorForwardVector(), vOffset);
 
-	FVector Cross = FVector::CrossProduct(vTarget, pMonster->GetActorForwardVector());
-	float Dot = FVector::DotProduct(Cross, pMonster->GetActorUpVector());
-
-	if (Dot >= 180.f)
+	UE_LOG(LogTemp, Warning, TEXT("player Direction : %f"), fDir);
+	UE_LOG(LogTemp, Warning, TEXT("player Angle : %f"), fAngle);
+	// fAngle : 1에 가까울 수록 몬스터의 정면에 가까우며, -1에 가까울 수록 몬스터의 후면에 가까움
+	// 0 = 몬스터의 90도 측면에 있음
+	if (fAngle <= 0.f)
 	{
-		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), 1);
-	}
-	else if (Dot <= -180.f)
-	{
-		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), -1);
+		// 몬스터 기준 왼쪽
+		if (fDir >= 1.f)
+		{
+			pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), 1);
+		}
+		// 몬스터 기준 오른쪽
+		else if (fDir <= -1.f)
+		{
+			pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), -1);
+		}
 	}
 	else
 	{
