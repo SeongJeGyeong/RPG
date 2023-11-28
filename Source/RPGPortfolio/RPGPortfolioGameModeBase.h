@@ -13,5 +13,18 @@ UCLASS()
 class RPGPORTFOLIO_API ARPGPortfolioGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	ARPGPortfolioGameModeBase();
+	~ARPGPortfolioGameModeBase();
+
+private:
+	TSubclassOf<UUserWidget> m_MainHUDClass;
+	class UUI_Base* m_MainHUD;
+
+public:
+	class UUI_Base* GetMainHUD() { return m_MainHUD; }
+
+public:
+	virtual void BeginPlay() override;
 };
