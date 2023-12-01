@@ -7,6 +7,8 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "AI/AIC_Monster_Base.h"
+#include "Components/WidgetComponent.h"
+#include "../UI/UI_Monster.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -25,6 +27,15 @@ AMonster_Base::AMonster_Base()
 		UE_LOG(LogTemp, Error, TEXT("타겟 컴포넌트 생성 실패"));
 	}
 	m_TargetComp->SetupAttachment(GetRootComponent());
+
+	// widgetComponent
+	m_WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	if (!IsValid(m_WidgetComponent))
+	{
+		UE_LOG(LogTemp, Error, TEXT("WidgetComponent Create Failed"));
+	}
+	m_WidgetComponent->SetupAttachment(GetRootComponent());
+
 }
 
 void AMonster_Base::OnConstruction(const FTransform& _Transform)
@@ -61,6 +72,19 @@ void AMonster_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("PerceiveRange"), m_Info.BOSS_PerceiveRange);
 		}
 	}
+
+	m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
+	if (!IsValid(m_MonsterWidget))
+	{
+		UE_LOG(LogTemp, Error, TEXT("MonsterWidget Casting Failed"));
+	}
+	else
+	{
+		m_MonsterWidget->SetName(m_Info.Name);
+		m_MonsterWidget->SetHPRatio(m_Info.MaxHP, m_Info.MaxHP);
+		m_Info.CurHP = m_Info.MaxHP;
+	}
+
 }
 
 // Called every frame

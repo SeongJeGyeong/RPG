@@ -26,6 +26,10 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class ULockOnTargetComponent* m_TargetComp;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	class UWidgetComponent* m_WidgetComponent;
+
+	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;
 
 protected:

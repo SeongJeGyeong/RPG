@@ -6,6 +6,7 @@
 #include "UI_Player_QuickSlot.h"
 #include "UI_Player_Soul.h"
 #include "UI_Menu_Main.h"
+#include "UI_Boss.h"
 
 void UUI_Base::NativeConstruct()
 {
@@ -15,6 +16,7 @@ void UUI_Base::NativeConstruct()
 	m_QuickSlotUI = Cast<UUI_Player_QuickSlot>(GetWidgetFromName(FName("UI_ItemSlotMain")));
 	m_SoulUI = Cast<UUI_Player_Soul>(GetWidgetFromName(FName("UI_MenuMain")));
 	m_MenuUI = Cast<UUI_Menu_Main>(GetWidgetFromName(FName("UI_MenuMain")));
+	m_BossUI = Cast<UUI_Boss>(GetWidgetFromName(FName("UI_Monster_Boss")));
 
 	if (!IsValid(m_MainUI))
 	{
@@ -28,7 +30,6 @@ void UUI_Base::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Amount Of Soul UI Casting Failed"));
 	}
-
 	if (!IsValid(m_MenuUI))
 	{
 		UE_LOG(LogTemp, Error, TEXT("MainMenu UI Casting Failed"));
@@ -37,6 +38,15 @@ void UUI_Base::NativeConstruct()
 	{
 		m_MenuUI->SetVisibility(ESlateVisibility::Hidden);
 	}
+	if (!IsValid(m_BossUI))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Boss UI Casting Failed"));
+	}
+	else
+	{
+		m_BossUI->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 
 }
 

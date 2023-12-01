@@ -49,7 +49,7 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 	pMonster->ChangeState(EMONSTER_STATE::RUN);
-	pMonster->GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	pMonster->GetCharacterMovement()->MaxWalkSpeed = 500.f;
 
 	return EBTNodeResult::InProgress;
 }

@@ -19,6 +19,7 @@ private:
 	class UUI_Player_QuickSlot* m_QuickSlotUI;
 	class UUI_Player_Soul* m_SoulUI;
 	class UUI_Menu_Main* m_MenuUI;
+	class UUI_Boss* m_BossUI;
 
 public:
 	class UUI_Player_Main* GetMainUIWidget() { return m_MainUI; }
