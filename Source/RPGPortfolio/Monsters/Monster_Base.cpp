@@ -84,7 +84,7 @@ void AMonster_Base::BeginPlay()
 		m_MonsterWidget->SetHPRatio(m_Info.MaxHP, m_Info.MaxHP);
 		m_Info.CurHP = m_Info.MaxHP;
 	}
-
+	m_WidgetComponent->SetVisibility(false);
 }
 
 // Called every frame
@@ -97,5 +97,10 @@ void AMonster_Base::Tick(float DeltaTime)
 void AMonster_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AMonster_Base::SetUIDisplay(bool _bToggle)
+{
+	m_WidgetComponent->SetVisibility(_bToggle);
 }
 

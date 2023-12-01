@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "Player_Base_Knight.h"
 #include "GameFramework/Controller.h"
+#include "../Monsters/Monster_Base.h"
 
 UPlayer_CameraArm::UPlayer_CameraArm()
 {
@@ -21,7 +22,7 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	CameraLagMaxDistance = 100.f;
 	
 	// 록온 범위
-	fMaxTargetLockDistance = 1000.f;
+	fMaxTargetLockDistance = 1200.f;
 
 	bDrawDebug = true;
 	bToggleLockOn = false;
@@ -121,6 +122,8 @@ void UPlayer_CameraArm::ToggleCameraLockOn(const FInputActionInstance& _Instance
 void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 {
 	m_Target = NewTargetComponent;
+	m_Monster = Cast<AMonster_Base>(m_Target->GetOwner());
+	m_Monster->SetUIDisplay(true);
 	bEnableCameraRotationLag = true;
 	m_Player->SetOrientRotation(false);
 }
@@ -130,6 +133,8 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 	if (IsCameraLockedToTarget())
 	{
 		m_Target = nullptr;
+		m_Monster->SetUIDisplay(false);
+		m_Monster = nullptr;
 		bEnableCameraRotationLag = false;
 		UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
 		bToggleLockOn = false;
