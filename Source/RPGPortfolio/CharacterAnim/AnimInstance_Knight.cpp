@@ -49,6 +49,15 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 9.f, 0.f, 1.f);
 	}
 
+	if (bIsAttack)
+	{
+		fAttackBlendWeight = 1.f;
+	}
+	else
+	{
+		fAttackBlendWeight = 0.f;
+	}
+
 	const FAnimNode_StateMachine* state = GetStateMachineInstanceFromName(FName("Main"));
 	if (FName("Idle/Move").IsEqual(state->GetCurrentStateName()))
 	{

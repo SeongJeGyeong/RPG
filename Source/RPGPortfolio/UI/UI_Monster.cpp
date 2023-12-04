@@ -39,10 +39,10 @@ void UUI_Monster::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 	Super::NativeTick(_Geo, _DeltaTime);
 }
 
-void UUI_Monster::SetHPRatio(float _MaxHP, float _CurHP)
+void UUI_Monster::SetHPRatio(float _Ratio)
 {
 	// ui 생성 전에 비율 저장
-	m_Ratio = _CurHP / _MaxHP;
+	m_Ratio = _Ratio;
 
 	if (IsValid(m_HPBar))
 	{

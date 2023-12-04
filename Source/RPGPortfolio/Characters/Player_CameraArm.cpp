@@ -88,6 +88,13 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
 	}
 
+	if (IsValid(m_Monster)) 
+	{
+		if (m_Monster->GetState() == EMONSTER_STATE::DEAD)
+		{
+			BreakLockOnTarget();
+		}
+	}
 }
 
 // Toggle Lock On
@@ -122,8 +129,11 @@ void UPlayer_CameraArm::ToggleCameraLockOn(const FInputActionInstance& _Instance
 void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 {
 	m_Target = NewTargetComponent;
-	m_Monster = Cast<AMonster_Base>(m_Target->GetOwner());
-	m_Monster->SetUIDisplay(true);
+	if (m_Target->GetOwner())
+	{
+		m_Monster = Cast<AMonster_Base>(m_Target->GetOwner());
+		m_Monster->SetUIDisplay(true);
+	}
 	bEnableCameraRotationLag = true;
 	m_Player->SetOrientRotation(false);
 }

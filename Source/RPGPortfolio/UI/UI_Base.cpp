@@ -14,7 +14,7 @@ void UUI_Base::NativeConstruct()
 
 	m_MainUI = Cast<UUI_Player_Main>(GetWidgetFromName(FName("UI_Progress")));
 	m_QuickSlotUI = Cast<UUI_Player_QuickSlot>(GetWidgetFromName(FName("UI_ItemSlotMain")));
-	m_SoulUI = Cast<UUI_Player_Soul>(GetWidgetFromName(FName("UI_MenuMain")));
+	m_SoulUI = Cast<UUI_Player_Soul>(GetWidgetFromName(FName("UI_Soul")));
 	m_MenuUI = Cast<UUI_Menu_Main>(GetWidgetFromName(FName("UI_MenuMain")));
 	m_BossUI = Cast<UUI_Boss>(GetWidgetFromName(FName("UI_Monster_Boss")));
 

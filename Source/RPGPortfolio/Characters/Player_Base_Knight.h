@@ -54,7 +54,6 @@ private:
 
 	bool bEnableJump;
 	bool bEnableMove;
-	bool bIsAttack;
 	bool bAttackToggle;
 	bool bAtkTrace;
 	

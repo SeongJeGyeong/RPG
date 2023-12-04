@@ -10,12 +10,12 @@
 #include "../Header/Enum.h"
 #include "Player_CameraArm.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
 	: bEnableJump(true)
 	, bEnableMove(true)
-	, bIsAttack(false)
 	, bAttackToggle(false)
 	, CurrentCombo(1)
 	, MaxCombo(4)
@@ -119,9 +119,13 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		GetController()->SetControlRotation(NewRot);
 	}
 
-	if (!m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()))
+	if (m_AnimInst->Montage_IsPlaying(GetAttackMontage().LoadSynchronous()))
 	{
-		bIsAttack = false;
+
+	}
+	else
+	{
+		m_AnimInst->bIsAttack = false;
 	}
 	bAttackToggle = false;
 
@@ -212,7 +216,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (CheckMontagePlaying() && bEnableMove)
+	if (!CheckMontagePlaying() && bEnableMove)
 	{
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
@@ -265,7 +269,7 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		ACharacter::Jump();
 	}
@@ -288,47 +292,72 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	if (CheckMontagePlaying())
+	if (!CheckMontagePlaying())
 	{
 		m_AnimInst->bIsGuard = _Instance.GetValue().Get<bool>();
+		if (m_AnimInst->bIsGuard)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("GuardTrue"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("GuardFalse"));
+		}
 	}
 }
 
 void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 {
-	bAttackToggle = _Instance.GetValue().Get<bool>();
-
 	if (!IsValid(m_AnimInst))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
 		return;
 	}
 
-	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	bAttackToggle = _Instance.GetValue().Get<bool>();
+
+	if (bAttackToggle)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AttackStart"));
+		UE_LOG(LogTemp, Warning, TEXT("AttackTrue"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackFalse"));
+	}
+	
+	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	{
 		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
+		AddMovementInput(GetActorForwardVector(), 10000.f);
 		SetAttackMontage(m_AttackMontage);
-		bIsAttack = true;
+		m_AnimInst->bIsAttack = true;
 		CurrentCombo = 1;
 	}
 }
 
 void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Instance)
 {
-	bAttackToggle = _Instance.GetValue().Get<bool>();
-
 	if (!IsValid(m_AnimInst))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
 		return;
 	}
 
-	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	bAttackToggle = _Instance.GetValue().Get<bool>();
+
+	if (bAttackToggle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("primaryTrue"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("primaryFalse"));
+	}
+	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		m_AnimInst->Montage_Play(m_PrimaryAttackMontage.LoadSynchronous());
 		SetAttackMontage(m_PrimaryAttackMontage);
-		bIsAttack = true;
+		m_AnimInst->bIsAttack = true;
 		CurrentCombo = 1;
 	}
 }
@@ -337,7 +366,7 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
 
-	if (CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		if(GetCharacterMovement()->GetLastInputVector().IsZero())
 		{
@@ -386,10 +415,10 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 		GetCharacterMovement()->IsFalling()
 		)
 	{
-		return false;
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 void APlayer_Base_Knight::NextAttackCheck()
@@ -407,6 +436,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
+		AddMovementInput(GetActorForwardVector(), 10000.f);
 	}
 }
 
@@ -439,6 +469,7 @@ void APlayer_Base_Knight::AttackHitCheck()
 		if (HitResult.GetActor()->IsValidLowLevel())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+			UGameplayStatics::ApplyDamage(HitResult.GetActor(), 200.f, GetController(), this, UDamageType::StaticClass());
 			bAtkTrace = false;
 		}
 	}

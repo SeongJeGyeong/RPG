@@ -23,7 +23,7 @@ private:
 	float m_Ratio;
 
 public:
-	void SetHPRatio(float _MaxHP, float _CurHP);
+	void SetHPRatio(float _Ratio);
 	void SetName(const FString& _Name);
 	void DisplayDMG(const int32 _DMG);
 

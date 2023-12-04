@@ -9,7 +9,7 @@
 #include "AI/AIC_Monster_Base.h"
 #include "Components/WidgetComponent.h"
 #include "../UI/UI_Monster.h"
-
+#include "Components/CapsuleComponent.h"
 // Sets default values
 AMonster_Base::AMonster_Base()
 {
@@ -26,7 +26,7 @@ AMonster_Base::AMonster_Base()
 	{
 		UE_LOG(LogTemp, Error, TEXT("타겟 컴포넌트 생성 실패"));
 	}
-	m_TargetComp->SetupAttachment(GetRootComponent());
+	m_TargetComp->SetupAttachment(GetMesh());
 
 	// widgetComponent
 	m_WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
@@ -81,7 +81,7 @@ void AMonster_Base::BeginPlay()
 	else
 	{
 		m_MonsterWidget->SetName(m_Info.Name);
-		m_MonsterWidget->SetHPRatio(m_Info.MaxHP, m_Info.MaxHP);
+		m_MonsterWidget->SetHPRatio(1.f);
 		m_Info.CurHP = m_Info.MaxHP;
 	}
 	m_WidgetComponent->SetVisibility(false);
@@ -91,12 +91,42 @@ void AMonster_Base::BeginPlay()
 void AMonster_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (m_State == EMONSTER_STATE::DEAD)
+	{
+		fDestroyRate += DeltaTime * 1.f;
+
+		if (fDestroyRate > 3.f)
+		{
+			Destroy();
+		}
+	}
 }
 
 // Called to bind functionality to input
 void AMonster_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
+
+	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
+
+	if (m_Info.CurHP <= 0.f && GetController())
+	{
+		m_State = EMONSTER_STATE::DEAD;
+		GetController()->UnPossess();
+		GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
+		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+		//GetMesh()->SetSimulatePhysics(true);
+	}
+
+	return 0.0f;
 }
 
 void AMonster_Base::SetUIDisplay(bool _bToggle)

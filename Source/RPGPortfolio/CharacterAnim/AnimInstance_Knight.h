@@ -45,9 +45,14 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	float fAttackBlendWeight;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
+
+	bool bIsAttack;
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 
