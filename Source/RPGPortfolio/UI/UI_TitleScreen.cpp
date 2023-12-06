@@ -3,6 +3,7 @@
 
 #include "UI_TitleScreen.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUI_TitleScreen::NativeConstruct()
 {
@@ -39,6 +40,7 @@ void UUI_TitleScreen::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_TitleScreen::NewBtnClicked()
 {
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("NewMap"));
 }
 
 void UUI_TitleScreen::NewBtnHovered()
@@ -87,6 +89,7 @@ void UUI_TitleScreen::LoadBtnUnHovered()
 
 void UUI_TitleScreen::QuitBtnClicked()
 {
+	UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit, true);
 }
 
 void UUI_TitleScreen::QuitBtnHovered()

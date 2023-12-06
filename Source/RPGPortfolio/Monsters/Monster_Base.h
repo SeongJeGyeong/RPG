@@ -33,6 +33,8 @@ private:
 	EMONSTER_STATE	m_State;
 
 	float fDestroyRate;
+	float fWidgetVisTime;
+	bool bLockedOn;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
@@ -49,6 +51,9 @@ public:
 	UBlackboardData* GetBlackboard() { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	EMONSTER_STATE GetState() { return m_State; }
+
+	bool GetbLockedOn() { return bLockedOn; }
+	void SetbLockedOn(bool _LockedOn);
 
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
 
@@ -71,6 +76,4 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
-	void SetUIDisplay(bool _bToggle);
 };

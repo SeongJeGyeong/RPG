@@ -469,7 +469,17 @@ void APlayer_Base_Knight::AttackHitCheck()
 		if (HitResult.GetActor()->IsValidLowLevel())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
-			UGameplayStatics::ApplyDamage(HitResult.GetActor(), 200.f, GetController(), this, UDamageType::StaticClass());
+			int32 iDamage;
+			if (GetAttackMontage() == m_AttackMontage)
+			{
+				iDamage = 200;
+			}
+			else if(GetAttackMontage() == m_PrimaryAttackMontage)
+			{
+				iDamage = 400;
+			}
+			UGameplayStatics::ApplyDamage(HitResult.GetActor(), iDamage, GetController(), this, UDamageType::StaticClass());
+
 			bAtkTrace = false;
 		}
 	}

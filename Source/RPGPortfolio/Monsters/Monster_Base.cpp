@@ -10,6 +10,7 @@
 #include "Components/WidgetComponent.h"
 #include "../UI/UI_Monster.h"
 #include "Components/CapsuleComponent.h"
+
 // Sets default values
 AMonster_Base::AMonster_Base()
 {
@@ -101,6 +102,18 @@ void AMonster_Base::Tick(float DeltaTime)
 			Destroy();
 		}
 	}
+
+	if (m_WidgetComponent->IsWidgetVisible() && !bLockedOn)
+	{
+		fWidgetVisTime += DeltaTime * 1.f;
+		UE_LOG(LogTemp, Warning, TEXT("%f"), fWidgetVisTime);
+
+		if (fWidgetVisTime > 3.f)
+		{
+			m_WidgetComponent->SetVisibility(false);
+			fWidgetVisTime = 0.f;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -116,6 +129,8 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
 
 	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
+	m_WidgetComponent->SetVisibility(true);
+	fWidgetVisTime = 0.f;
 
 	if (m_Info.CurHP <= 0.f && GetController())
 	{
@@ -129,8 +144,8 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return 0.0f;
 }
 
-void AMonster_Base::SetUIDisplay(bool _bToggle)
+void AMonster_Base::SetbLockedOn(bool _LockedOn)
 {
-	m_WidgetComponent->SetVisibility(_bToggle);
+	m_WidgetComponent->SetVisibility(_LockedOn);
+	bLockedOn = _LockedOn;
 }
-

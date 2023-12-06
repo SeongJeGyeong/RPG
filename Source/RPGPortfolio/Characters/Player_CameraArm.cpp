@@ -132,7 +132,7 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 	if (m_Target->GetOwner())
 	{
 		m_Monster = Cast<AMonster_Base>(m_Target->GetOwner());
-		m_Monster->SetUIDisplay(true);
+		m_Monster->SetbLockedOn(true);
 	}
 	bEnableCameraRotationLag = true;
 	m_Player->SetOrientRotation(false);
@@ -143,7 +143,8 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 	if (IsCameraLockedToTarget())
 	{
 		m_Target = nullptr;
-		m_Monster->SetUIDisplay(false);
+
+		m_Monster->SetbLockedOn(false);
 		m_Monster = nullptr;
 		bEnableCameraRotationLag = false;
 		UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
