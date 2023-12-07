@@ -21,4 +21,5 @@ void UAnimInstance_Monster_Base::NativeUpdateAnimation(float _fDeltaTime)
 	}
 
 	m_State = m_Monster->GetState();
+	
 }

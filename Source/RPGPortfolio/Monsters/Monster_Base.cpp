@@ -99,7 +99,26 @@ void AMonster_Base::Tick(float DeltaTime)
 
 		if (fDestroyRate > 3.f)
 		{
-			Destroy();
+			fDeadEffectRatio += DeltaTime * 0.3f;
+			TArray<USceneComponent*> ChildMeshArr;
+			GetMesh()->GetChildrenComponents(true, ChildMeshArr);
+			if (ChildMeshArr[0] != nullptr)
+			{
+				for (USceneComponent* ChildMesh : ChildMeshArr)
+				{
+					if ("TargetComponent" == ChildMesh->GetName())
+					{
+						continue;
+					}
+					USkeletalMeshComponent* ChildSkelMesh = Cast<USkeletalMeshComponent>(ChildMesh);
+					ChildSkelMesh->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
+				}
+			}
+			GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
+			if (fDeadEffectRatio > 1.f)
+			{
+				Destroy();
+			}
 		}
 	}
 
@@ -137,6 +156,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		m_State = EMONSTER_STATE::DEAD;
 		GetController()->UnPossess();
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
+		m_TargetComp->DestroyComponent();
 		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		//GetMesh()->SetSimulatePhysics(true);
 	}

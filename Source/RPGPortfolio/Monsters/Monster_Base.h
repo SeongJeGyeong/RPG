@@ -33,6 +33,7 @@ private:
 	EMONSTER_STATE	m_State;
 
 	float fDestroyRate;
+	float fDeadEffectRatio;
 	float fWidgetVisTime;
 	bool bLockedOn;
 
