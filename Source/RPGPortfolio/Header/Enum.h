@@ -14,6 +14,7 @@ enum class EInputActionType : uint8
 	PARRY,
 	LOCKON,
 	SWITCHLOCKON,
+	OPENMENU,
 };
 
 UENUM(BlueprintType)

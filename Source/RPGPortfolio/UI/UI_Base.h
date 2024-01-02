@@ -24,6 +24,8 @@ private:
 public:
 	class UUI_Player_Main* GetMainUIWidget() { return m_MainUI; }
 
+	void ShowMenu(bool _bShow);
+
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;

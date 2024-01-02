@@ -54,3 +54,15 @@ void UUI_Base::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 {
 	Super::NativeTick(_Geo, _DeltaTime);
 }
+
+void UUI_Base::ShowMenu(bool _bShow)
+{
+	if (_bShow)
+	{
+		m_MenuUI->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		m_MenuUI->SetVisibility(ESlateVisibility::Hidden);
+	}
+}

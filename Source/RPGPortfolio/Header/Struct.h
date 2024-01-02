@@ -127,3 +127,4 @@ struct FCharacterBasePower
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 AmountOfSoul;
 };
+

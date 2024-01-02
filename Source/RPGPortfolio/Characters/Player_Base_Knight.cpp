@@ -11,6 +11,7 @@
 #include "Player_CameraArm.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Manager/Player_Menu_Mgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -198,6 +199,9 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				break;
 			case EInputActionType::SWITCHLOCKON:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SwitchLockOnTarget);
+				break;
+			case EInputActionType::OPENMENU:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::OpenMenu);
 				break;
 			default:
 				break;
@@ -404,6 +408,11 @@ void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instan
 		m_Arm->SwitchTarget(ELockOnDirection::Right);
 	}
 
+}
+
+void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
+{
+	UPlayer_Menu_Mgr::GetInst(GetWorld())->ShowMenuUI();
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()

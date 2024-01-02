@@ -108,5 +108,7 @@ private:
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
+	void OpenMenu(const FInputActionInstance& _Instance);
+
 	bool CheckMontagePlaying();
 };
