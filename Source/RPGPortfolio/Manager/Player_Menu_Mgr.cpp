@@ -29,7 +29,7 @@ UPlayer_Menu_Mgr* UPlayer_Menu_Mgr::GetInst(UGameInstance* _GameInst)
     return pGameInst->m_MenuMgr;
 }
 
-void UPlayer_Menu_Mgr::ShowMenuUI()
+void UPlayer_Menu_Mgr::ShowMenuUI(bool _Show)
 {
     ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
     if (!IsValid(pGameMode))
@@ -38,15 +38,6 @@ void UPlayer_Menu_Mgr::ShowMenuUI()
         return;
     }
 
-    if (bShow)
-    {
-        bShow = false;
-    }
-    else
-    {
-        bShow = true;
-    }
-
     UUI_Base* MainUI = pGameMode->GetMainHUD();
-    MainUI->ShowMenu(bShow);
+    MainUI->ShowMenu(_Show);
 }

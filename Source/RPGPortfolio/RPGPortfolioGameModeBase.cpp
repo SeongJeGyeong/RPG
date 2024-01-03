@@ -38,8 +38,8 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 
 	APlayerController* pController = GetWorld()->GetFirstPlayerController();
 
-	FInputModeGameOnly GOnly;
-	pController->SetInputMode(GOnly);
+	FInputModeGameOnly GameOnly;
+	pController->SetInputMode(GameOnly);
 	pController->bShowMouseCursor = false;
 }
 

@@ -31,5 +31,4 @@ public:
 
 	void InitPlayerData(FCharacterStatSheet _PlayerStat);
 	void SetPlayerStat(FCharacterStatSheet _PlayerStat);
-
 };

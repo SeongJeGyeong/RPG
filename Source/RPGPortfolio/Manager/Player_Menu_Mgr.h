@@ -25,9 +25,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UPlayer_Menu_Mgr* GetInst(UGameInstance* _GameInst);
 
-	void ShowMenuUI();
-
-public:
-	bool bShow = false;
-
+	void ShowMenuUI(bool _Show);
 };

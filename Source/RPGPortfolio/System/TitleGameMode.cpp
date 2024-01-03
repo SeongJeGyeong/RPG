@@ -32,8 +32,8 @@ void ATitleGameMode::BeginPlay()
 
 		APlayerController* pController = GetWorld()->GetFirstPlayerController();
 
-		FInputModeUIOnly uimod;
-		pController->SetInputMode(uimod);
+		FInputModeUIOnly UIOnly;
+		pController->SetInputMode(UIOnly);
 		pController->bShowMouseCursor = true;
 	}
 }

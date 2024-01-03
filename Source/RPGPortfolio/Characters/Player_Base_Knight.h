@@ -63,6 +63,7 @@ private:
 	int32 CurrentCombo;
 	int32 MaxCombo;
 	int32 iBaseDamage;
+	bool bShowMenu;
 
 public:
 	bool GetbAtkTrace() { return bAtkTrace; }

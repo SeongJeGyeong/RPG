@@ -20,6 +20,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bAttackToggle(false)
 	, CurrentCombo(1)
 	, MaxCombo(4)
+	, bShowMenu(false)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -412,7 +413,32 @@ void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 {
-	UPlayer_Menu_Mgr::GetInst(GetWorld())->ShowMenuUI();
+	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
+
+	APlayerController* pController = Cast<APlayerController>(GetController());
+
+	if (!IsValid(pController))
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
+	}
+	else
+	{
+		if (bShowMenu)
+		{
+			FInputModeGameAndUI GAU;
+			pController->SetInputMode(GAU);
+		}
+		else
+		{
+			FInputModeGameOnly GameOnly;
+			pController->SetInputMode(GameOnly);
+		}
+		
+		pController->bShowMouseCursor = bShowMenu;
+		pController->SetPause(bShowMenu);
+	}
+
+	UPlayer_Menu_Mgr::GetInst(GetWorld())->ShowMenuUI(bShowMenu);
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()
