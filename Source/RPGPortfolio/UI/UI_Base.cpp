@@ -47,7 +47,6 @@ void UUI_Base::NativeConstruct()
 		m_BossUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-
 }
 
 void UUI_Base::NativeTick(const FGeometry& _Geo, float _DeltaTime)

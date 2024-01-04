@@ -16,6 +16,7 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 
 ARPGPortfolioGameModeBase::~ARPGPortfolioGameModeBase()
 {
+
 }
 
 void ARPGPortfolioGameModeBase::BeginPlay()

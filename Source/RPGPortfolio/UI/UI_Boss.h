@@ -13,5 +13,6 @@ UCLASS()
 class RPGPORTFOLIO_API UUI_Boss : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+
 };

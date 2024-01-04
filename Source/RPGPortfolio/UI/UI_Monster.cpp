@@ -23,7 +23,6 @@ void UUI_Monster::NativeConstruct()
 		m_HPBar->SetPercent(m_Ratio);
 	}
 
-
 	if (!IsValid(m_DMGFigure))
 	{
 		UE_LOG(LogTemp, Error, TEXT("DMGFigure Casting Failed"));
@@ -41,19 +40,19 @@ void UUI_Monster::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_Monster::SetHPRatio(float _Ratio)
 {
-	// ui »ı¼º Àü¿¡ ºñÀ² ÀúÀå
+	// ui ìƒì„± ì „ì— ë¹„ìœ¨ ì €ì¥
 	m_Ratio = _Ratio;
 
 	if (IsValid(m_HPBar))
 	{
-		// ui »ı¼º ÈÄ ºñÀ² Àç¼³Á¤½Ã »ç¿ë
+		// ui ìƒì„± í›„ ë¹„ìœ¨ ì¬ì„¤ì •ì‹œ ì‚¬ìš©
 		m_HPBar->SetPercent(m_Ratio);
 	}
 }
 
 void UUI_Monster::SetName(const FString& _Name)
 {
-	// ui »ı¼º Àü¿¡ ÀÌ¸§ ÀúÀå
+	// ui ìƒì„± ì „ì— ì´ë¦„ ì €ì¥
 	m_MonsterName = FText::FromString(_Name);
 
 	//if (IsValid(m_Name))

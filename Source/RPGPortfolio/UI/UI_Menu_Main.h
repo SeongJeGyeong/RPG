@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -20,7 +20,7 @@ private:
 	class UButton*	m_Status;
 	class UButton*	m_Tutorial;
 	class UButton*	m_Settings;
-	class UTextBlock*	m_MenuName;
+	class UTextBlock* m_MenuName;
 
 public:
 	virtual void NativeConstruct() override;

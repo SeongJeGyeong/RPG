@@ -20,6 +20,7 @@ public:
 	UGameInstance_Base();
 	~UGameInstance_Base();
 
-	// Player_Menu_Mgr¿¡¼­ GameInstanceÀÇ private ¸â¹ö¸¦ »ç¿ëÇÒ ¼ö ÀÖÀ½
+
+	// Player_Menu_Mgrì—ì„œ GameInstanceì˜ private ë©¤ë²„ë¥¼ ì‚¬ìš©í•  ìˆ˜ ìˆìŒ
 	friend class UPlayer_Menu_Mgr;
 };

@@ -100,7 +100,7 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 // Toggle Lock On
 void UPlayer_CameraArm::ToggleCameraLockOn(const FInputActionInstance& _Instance)
 {
-	bToggleLockOn = (bToggleLockOn != _Instance.GetValue().Get<bool>());
+	bToggleLockOn = ( bToggleLockOn != _Instance.GetValue().Get<bool>() );
 
 	if (bToggleLockOn)
 	{

@@ -45,16 +45,16 @@ void UBTS_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeM
 
 	UE_LOG(LogTemp, Warning, TEXT("player Direction : %f"), fDir);
 	UE_LOG(LogTemp, Warning, TEXT("player Angle : %f"), fAngle);
-	// fAngle : 1¿¡ °¡±î¿ï ¼ö·Ï ¸ó½ºÅÍÀÇ Á¤¸é¿¡ °¡±î¿ì¸ç, -1¿¡ °¡±î¿ï ¼ö·Ï ¸ó½ºÅÍÀÇ ÈÄ¸é¿¡ °¡±î¿ò
-	// 0 = ¸ó½ºÅÍÀÇ 90µµ Ãø¸é¿¡ ÀÖÀ½
+	// fAngle : 1ì— ê°€ê¹Œìš¸ ìˆ˜ë¡ ëª¬ìŠ¤í„°ì˜ ì •ë©´ì— ê°€ê¹Œìš°ë©°, -1ì— ê°€ê¹Œìš¸ ìˆ˜ë¡ ëª¬ìŠ¤í„°ì˜ í›„ë©´ì— ê°€ê¹Œì›€
+	// 0 = ëª¬ìŠ¤í„°ì˜ 90ë„ ì¸¡ë©´ì— ìˆìŒ
 	if (fAngle <= 0.f)
 	{
-		// ¸ó½ºÅÍ ±âÁØ ¿ŞÂÊ
+		// ëª¬ìŠ¤í„° ê¸°ì¤€ ì™¼ìª½
 		if (fDir >= 1.f)
 		{
 			pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), 1);
 		}
-		// ¸ó½ºÅÍ ±âÁØ ¿À¸¥ÂÊ
+		// ëª¬ìŠ¤í„° ê¸°ì¤€ ì˜¤ë¥¸ìª½
 		else if (fDir <= -1.f)
 		{
 			pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), -1);

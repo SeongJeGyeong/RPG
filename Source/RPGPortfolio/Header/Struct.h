@@ -70,22 +70,22 @@ struct FCharacterStatSheet : public FTableRowBase
 	int32 Level;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Vigor;		// »ı¸í·Â
+	uint8 Vigor;		// ìƒëª…ë ¥
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Attunement;	// ÁıÁß·Â
+	uint8 Attunement;	// ì§‘ì¤‘ë ¥
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Endurance;	// Áö±¸·Â
+	uint8 Endurance;	// ì§€êµ¬ë ¥
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Strength;	// ±Ù·Â
+	uint8 Strength;	// ê·¼ë ¥
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Dexterity;	// ±â·®
+	uint8 Dexterity;	// ê¸°ëŸ‰
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 Intelligence;// Áö·Â
+	uint8 Intelligence;// ì§€ë ¥
 };
 
 USTRUCT(Atomic, BlueprintType)
@@ -96,7 +96,7 @@ struct FCharacterBasePower
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHP;
 
-	// Transient : ÈÖ¹ß¼º
+	// Transient : íœ˜ë°œì„±
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient)
 	float CurHP;
 

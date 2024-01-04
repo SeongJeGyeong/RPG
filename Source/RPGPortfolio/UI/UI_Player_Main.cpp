@@ -14,10 +14,6 @@ void UUI_Player_Main::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("ListView Not Found"));
 	}
-	else
-	{
-
-	}
 
 }
 

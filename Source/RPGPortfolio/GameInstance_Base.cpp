@@ -7,6 +7,7 @@
 UGameInstance_Base::UGameInstance_Base()
 	:m_MenuMgr(nullptr)
 {
+
 }
 
 UGameInstance_Base::~UGameInstance_Base()
