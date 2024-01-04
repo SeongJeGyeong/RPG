@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI_Menu_Main.h"
@@ -60,7 +60,10 @@ void UUI_Menu_Main::EquipBtnClicked()
 
 void UUI_Menu_Main::EquipBtnHovered()
 {
-	m_MenuName->SetText(FText::FromString("Equip"));
+	FText text = FText::FromString("장비");
+	FString string = text.ToString();
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *string);
+	m_MenuName->SetText(text);
 }
 
 void UUI_Menu_Main::EquipBtnUnHovered()
