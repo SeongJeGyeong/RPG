@@ -60,10 +60,8 @@ void UUI_Menu_Main::EquipBtnClicked()
 
 void UUI_Menu_Main::EquipBtnHovered()
 {
-	FText text = FText::FromString("장비");
-	FString string = text.ToString();
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *string);
-	m_MenuName->SetText(FText::FromString("Equip"));
+	// 문자열 앞에 L을 붙여야 유니코드로 인식함
+	m_MenuName->SetText(FText::FromString(L"장비"));
 }
 
 void UUI_Menu_Main::EquipBtnUnHovered()
@@ -77,7 +75,7 @@ void UUI_Menu_Main::InventoryBtnClicked()
 
 void UUI_Menu_Main::InventoryBtnHovered()
 {
-	m_MenuName->SetText(FText::FromString("Inventory"));
+	m_MenuName->SetText(FText::FromString(L"인벤토리"));
 }
 
 void UUI_Menu_Main::InventoryBtnUnHovered()
@@ -91,7 +89,7 @@ void UUI_Menu_Main::StatusBtnClicked()
 
 void UUI_Menu_Main::StatusBtnHovered()
 {
-	m_MenuName->SetText(FText::FromString("Status"));
+	m_MenuName->SetText(FText::FromString(L"스테이터스"));
 }
 
 void UUI_Menu_Main::StatusBtnUnHovered()
@@ -105,7 +103,7 @@ void UUI_Menu_Main::TutorialBtnClicked()
 
 void UUI_Menu_Main::TutorialBtnHovered()
 {
-	m_MenuName->SetText(FText::FromString("Tutorial"));
+	m_MenuName->SetText(FText::FromString(L"튜토리얼"));
 }
 
 void UUI_Menu_Main::TutorialBtnUnHovered()
@@ -119,7 +117,7 @@ void UUI_Menu_Main::SettingsBtnClicked()
 
 void UUI_Menu_Main::SettingsBtnHovered()
 {
-	m_MenuName->SetText(FText::FromString("Settings"));
+	m_MenuName->SetText(FText::FromString(L"설정"));
 }
 
 void UUI_Menu_Main::SettingsBtnUnHovered()
