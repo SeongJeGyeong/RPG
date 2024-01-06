@@ -128,3 +128,37 @@ struct FCharacterBasePower
 	int32 AmountOfSoul;
 };
 
+USTRUCT(Atomic, BlueprintType)
+struct FGameItemInfo
+	: public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EITEM_ID		ID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EITEM_TYPE		Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString			ItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString			Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString			IconImgPath;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			ATK;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			DEF;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			Restore_HP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			Restore_MP;
+
+};

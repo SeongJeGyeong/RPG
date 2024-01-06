@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI_Menu_Main.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "../Manager/Inventory_Mgr.h"
 
 void UUI_Menu_Main::NativeConstruct()
 {
@@ -71,6 +72,7 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 
 void UUI_Menu_Main::InventoryBtnClicked()
 {
+	UInventory_Mgr::GetInst(GetWorld())->ShowInventoryUI();
 }
 
 void UUI_Menu_Main::InventoryBtnHovered()

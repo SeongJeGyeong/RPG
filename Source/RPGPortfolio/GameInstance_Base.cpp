@@ -2,10 +2,9 @@
 
 
 #include "GameInstance_Base.h"
-#include "Manager/Player_Menu_Mgr.h"
 
 UGameInstance_Base::UGameInstance_Base()
-	:m_MenuMgr(nullptr)
+	: m_InvenMgr(nullptr)
 {
 
 }

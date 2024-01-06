@@ -11,7 +11,8 @@
 #include "Player_CameraArm.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Manager/Player_Menu_Mgr.h"
+#include "../RPGPortfolioGameModeBase.h"
+#include "../UI/UI_Base.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -417,6 +418,14 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 
 	APlayerController* pController = Cast<APlayerController>(GetController());
 
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+
 	if (!IsValid(pController))
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
@@ -438,7 +447,8 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		pController->SetPause(bShowMenu);
 	}
 
-	UPlayer_Menu_Mgr::GetInst(GetWorld())->ShowMenuUI(bShowMenu);
+	UUI_Base* MainUI = pGameMode->GetMainHUD();
+	MainUI->ShowMenu(bShowMenu);
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()

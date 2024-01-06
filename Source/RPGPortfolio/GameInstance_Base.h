@@ -6,7 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "GameInstance_Base.generated.h"
 
-class UPlayer_Menu_Mgr;
+class UInventory_Mgr;
 
 UCLASS()
 class RPGPORTFOLIO_API UGameInstance_Base : public UGameInstance
@@ -14,13 +14,12 @@ class RPGPORTFOLIO_API UGameInstance_Base : public UGameInstance
 	GENERATED_BODY()
 	
 private:
-	UPlayer_Menu_Mgr* m_MenuMgr;
+	UInventory_Mgr*		m_InvenMgr;
 
 public:
 	UGameInstance_Base();
 	~UGameInstance_Base();
 
-
-	// Player_Menu_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음
-	friend class UPlayer_Menu_Mgr;
+	// Inventory_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음
+	friend class UInventory_Mgr;
 };
