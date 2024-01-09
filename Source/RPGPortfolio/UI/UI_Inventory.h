@@ -14,4 +14,15 @@ class RPGPORTFOLIO_API UUI_Inventory : public UUserWidget
 {
 	GENERATED_BODY()
 	
+private:
+	class UTileView* m_TileView;
+
+public:
+	void AddItem(UObject* _ItemData);
+	void Clear();
+
+public:
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+
 };

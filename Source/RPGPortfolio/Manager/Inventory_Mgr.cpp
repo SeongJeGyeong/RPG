@@ -40,7 +40,6 @@ UInventory_Mgr::UInventory_Mgr()
 	{
 		InvenWidgetClass = InvenClass.Class;
 	}
-
 }
 
 void UInventory_Mgr::ShowInventoryUI()

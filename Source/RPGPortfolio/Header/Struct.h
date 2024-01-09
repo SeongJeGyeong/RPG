@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Enum.h"
+#include "NiagaraSystem.h"
 #include "InputAction.h"
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -160,5 +161,21 @@ struct FGameItemInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float			Restore_MP;
+
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FGameItemData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EITEM_TYPE	Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UStaticMesh> Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UNiagaraSystem> Niagara;
 
 };
