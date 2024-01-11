@@ -4,8 +4,6 @@
 
 #include "../Header/Struct.h"
 #include "../System/DataAsset/DA_ItemData.h"
-#include "NiagaraComponent.h"
-#include "Components/SphereComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Item_Dropped_Base.generated.h"
@@ -29,13 +27,13 @@ public:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
-	USphereComponent* m_Trigger;
+	class USphereComponent* m_Trigger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UStaticMeshComponent* m_Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
-	UNiagaraComponent* m_Niagara;
+	class UNiagaraComponent* m_Niagara;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
 	EITEM_ID	m_IID;
@@ -47,6 +45,9 @@ public:
 private:
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
+
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);
 
 	UFUNCTION()
 	void OnNiagaraFinished(UNiagaraComponent* _Niagara);

@@ -20,11 +20,14 @@ private:
 	class UUI_Player_Soul* m_SoulUI;
 	class UUI_Menu_Main* m_MenuUI;
 	class UUI_Boss* m_BossUI;
+	class UUI_Message_Main* m_MainMessageUI;
+	class UUI_Message_Item* m_ItemMessageUI;
 
 public:
 	class UUI_Player_Main* GetMainUIWidget() { return m_MainUI; }
 
 	void ShowMenu(bool _bShow);
+	void ShowMessage(bool _bShow);
 
 
 public:
