@@ -25,10 +25,11 @@ private:
 
 public:
 	class UUI_Player_Main* GetMainUIWidget() { return m_MainUI; }
+	class UUI_Message_Main* GetMainMessageUI() { return m_MainMessageUI; }
+	class UUI_Message_Item* GetItemMessageUI() { return m_ItemMessageUI; }
 
 	void ShowMenu(bool _bShow);
 	void ShowMessage(bool _bShow);
-
 
 public:
 	virtual void NativeConstruct() override;

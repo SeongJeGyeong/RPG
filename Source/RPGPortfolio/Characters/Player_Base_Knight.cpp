@@ -13,6 +13,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
+#include "../UI/UI_Message_Main.h"
+#include "Components/CapsuleComponent.h"
+#include "../Item/Item_Dropped_Base.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -102,6 +105,17 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
 	}
+
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+	MainUI = pGameMode->GetMainHUD();
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
 }
 
 // Called every frame
@@ -205,12 +219,14 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::OPENMENU:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::OpenMenu);
 				break;
+			case EInputActionType::ACTION:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ActionCommand);
+				break;
 			default:
 				break;
 			}
 		}
 	}
-
 }
 
 void APlayer_Base_Knight::SetOrientRotation(bool _Val)
@@ -447,8 +463,13 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		pController->SetPause(bShowMenu);
 	}
 
-	UUI_Base* MainUI = pGameMode->GetMainHUD();
 	MainUI->ShowMenu(bShowMenu);
+}
+
+void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
+{
+
+
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()
@@ -526,6 +547,40 @@ void APlayer_Base_Knight::AttackHitCheck()
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), iDamage, GetController(), this, UDamageType::StaticClass());
 
 			bAtkTrace = false;
+		}
+	}
+}
+
+void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
+{
+	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
+	if(TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
+	{
+		UUI_Message_Main* Message = MainUI->GetMainMessageUI();
+		Message->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
+		MainUI->ShowMessage(true);
+		OverlapItemArr.Add(Cast<AItem_Dropped_Base>(_OtherActor));
+		
+		OverlapItemArr[0]->GetName();
+	}
+}
+
+void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
+{
+	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
+	if (TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
+	{
+		for (uint16 i = 0; i < OverlapItemArr.Num(); ++i)
+		{
+			if (OverlapItemArr[i]->GetName().Equals(_OtherActor->GetName()))
+			{
+				OverlapItemArr.RemoveAt(i);
+				break;
+			}
+		}
+		if (OverlapItemArr.IsEmpty())
+		{
+			MainUI->ShowMessage(false);
 		}
 	}
 }

@@ -65,6 +65,10 @@ private:
 	int32 iBaseDamage;
 	bool bShowMenu;
 
+	class UUI_Base* MainUI;
+
+	TArray<class AItem_Dropped_Base*> OverlapItemArr;
+
 public:
 	bool GetbAtkTrace() { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace;}
@@ -110,6 +114,14 @@ private:
 	void ParryAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
 	void OpenMenu(const FInputActionInstance& _Instance);
+	void ActionCommand(const FInputActionInstance& _Instance);
 
 	bool CheckMontagePlaying();
+
+private:
+	UFUNCTION()
+	void ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
+
+	UFUNCTION()
+	void ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);
 };

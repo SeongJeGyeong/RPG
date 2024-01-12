@@ -43,11 +43,11 @@ public:
 	TSoftObjectPtr<UDA_ItemData> m_ItemData;
 
 private:
-	UFUNCTION()
+	/*UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
 
 	UFUNCTION()
-	void EndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);
+	void EndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);*/
 
 	UFUNCTION()
 	void OnNiagaraFinished(UNiagaraComponent* _Niagara);

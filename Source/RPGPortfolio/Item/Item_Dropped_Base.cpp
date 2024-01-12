@@ -30,8 +30,8 @@ void AItem_Dropped_Base::BeginPlay()
 {
 	Super::BeginPlay();
 
-	m_Trigger->OnComponentBeginOverlap.AddDynamic(this, &AItem_Dropped_Base::BeginOverlap);
-	m_Trigger->OnComponentEndOverlap.AddDynamic(this, &AItem_Dropped_Base::EndOverlap);
+	//m_Trigger->OnComponentBeginOverlap.AddDynamic(this, &AItem_Dropped_Base::BeginOverlap);
+	//m_Trigger->OnComponentEndOverlap.AddDynamic(this, &AItem_Dropped_Base::EndOverlap);
 	
 }
 
@@ -42,31 +42,31 @@ void AItem_Dropped_Base::Tick(float DeltaTime)
 
 }
 
-void AItem_Dropped_Base::BeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
-{
-	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(pGameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
-		return;
-	}
-
-	UUI_Base* MainUI = pGameMode->GetMainHUD();
-	MainUI->ShowMessage(true);
-}
-
-void AItem_Dropped_Base::EndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
-{
-	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(pGameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
-		return;
-	}
-
-	UUI_Base* MainUI = pGameMode->GetMainHUD();
-	MainUI->ShowMessage(false);
-}
+//void AItem_Dropped_Base::BeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
+//{
+//	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+//	if ( !IsValid(pGameMode) )
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+//		return;
+//	}
+//
+//	UUI_Base* MainUI = pGameMode->GetMainHUD();
+//	MainUI->ShowMessage(true);
+//}
+//
+//void AItem_Dropped_Base::EndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
+//{
+//	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+//	if ( !IsValid(pGameMode) )
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+//		return;
+//	}
+//
+//	UUI_Base* MainUI = pGameMode->GetMainHUD();
+//	MainUI->ShowMessage(false);
+//}
 
 void AItem_Dropped_Base::OnNiagaraFinished(UNiagaraComponent* _Niagara)
 {

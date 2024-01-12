@@ -15,6 +15,7 @@ enum class EInputActionType : uint8
 	LOCKON,
 	SWITCHLOCKON,
 	OPENMENU,
+	ACTION,
 };
 
 UENUM(BlueprintType)
