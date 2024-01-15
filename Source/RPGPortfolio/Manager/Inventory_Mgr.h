@@ -26,7 +26,7 @@ private:
 	static UWorld* m_World;
 
 private:
-	UDataTable* m_ItemTable;
+	UDataTable* m_ItemDataTable;
 	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;
 	TMap<EITEM_ID, FInvenItemRow>	m_InvenStorage[(int32)EITEM_TYPE::END];
 	TSubclassOf<UUserWidget> InvenWidgetClass;
@@ -34,10 +34,18 @@ private:
 
 public:
 	static UInventory_Mgr* GetInst(UWorld* _World);
-
 	static UInventory_Mgr* GetInst(UGameInstance* _GameInst);
 
+	void SetItemDataTable(UDataTable* _ItemDataTable);
+	void AddGameItem(EITEM_ID _ID);
+
 	void ShowInventoryUI();
+	void CloseInventoryUI();
+
+	bool IsInventoryOpened();
+
+private:
+	void RenewInventoryUI();
 
 public:
 	UInventory_Mgr();

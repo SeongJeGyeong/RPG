@@ -115,6 +115,7 @@ private:
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
 	void OpenMenu(const FInputActionInstance& _Instance);
 	void ActionCommand(const FInputActionInstance& _Instance);
+	void BackToPrevMenu(const FInputActionInstance& _Instance);
 
 	bool CheckMontagePlaying();
 

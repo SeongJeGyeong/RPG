@@ -165,7 +165,7 @@ struct FGameItemInfo
 };
 
 USTRUCT(Atomic, BlueprintType)
-struct FGameItemData
+struct FDroppedItemData
 {
 	GENERATED_USTRUCT_BODY()
 

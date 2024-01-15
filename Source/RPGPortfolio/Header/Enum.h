@@ -16,6 +16,7 @@ enum class EInputActionType : uint8
 	SWITCHLOCKON,
 	OPENMENU,
 	ACTION,
+	BACKTOPREV,
 };
 
 UENUM(BlueprintType)
@@ -97,4 +98,6 @@ enum class EITEM_ID : uint8
 
 	WEA_SHIELD_KNIGHT,
 	WEA_SWORD_KNIGHT,
+
+	END,
 };

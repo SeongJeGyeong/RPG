@@ -16,6 +16,7 @@
 #include "../UI/UI_Message_Main.h"
 #include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
+#include "../Manager/Inventory_Mgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -221,6 +222,9 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				break;
 			case EInputActionType::ACTION:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ActionCommand);
+				break;
+			case EInputActionType::BACKTOPREV:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::BackToPrevMenu);
 				break;
 			default:
 				break;
@@ -432,44 +436,60 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 {
 	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
 
+	if (UInventory_Mgr::GetInst(GetWorld())->IsInventoryOpened())
+	{
+		return;
+	}
+
 	APlayerController* pController = Cast<APlayerController>(GetController());
+	if ( !IsValid(pController) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
+		return;
+	}
 
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
 	if ( !IsValid(pGameMode) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
 
-	if (!IsValid(pController))
+	if (bShowMenu)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
+		FInputModeGameAndUI GAU;
+		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
+		GAU.SetHideCursorDuringCapture(false);
+		pController->SetInputMode(GAU);
 	}
 	else
 	{
-		if (bShowMenu)
-		{
-			FInputModeGameAndUI GAU;
-			pController->SetInputMode(GAU);
-		}
-		else
-		{
-			FInputModeGameOnly GameOnly;
-			pController->SetInputMode(GameOnly);
-		}
-		
-		pController->bShowMouseCursor = bShowMenu;
-		pController->SetPause(bShowMenu);
+		FInputModeGameOnly GameOnly;
+		pController->SetInputMode(GameOnly);
 	}
+		
+	pController->bShowMouseCursor = bShowMenu;
+	pController->SetPause(bShowMenu);
 
 	MainUI->ShowMenu(bShowMenu);
 }
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 {
+	if (!OverlapItemArr.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 획득"));
+		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID);
+		OverlapItemArr[OverlapItemArr.Num() - 1]->Destroy();
+	}
+}
 
-
+void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
+{
+	if (UInventory_Mgr::GetInst(GetWorld())->IsInventoryOpened())
+	{
+		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
+	}
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()
@@ -559,9 +579,7 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 		UUI_Message_Main* Message = MainUI->GetMainMessageUI();
 		Message->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
 		MainUI->ShowMessage(true);
-		OverlapItemArr.Add(Cast<AItem_Dropped_Base>(_OtherActor));
-		
-		OverlapItemArr[0]->GetName();
+		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
 	}
 }
 
@@ -570,7 +588,17 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
 	if (TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
 	{
-		for (uint16 i = 0; i < OverlapItemArr.Num(); ++i)
+		/*for ( auto iter = OverlapItemArr.CreateIterator(); iter; ++iter )
+		{
+			AItem_Dropped_Base* item = *iter;
+			if (item->GetName().Equals(_OtherActor->GetName()))
+			{
+				OverlapItemArr[ iter.GetIndex() ];
+				break;
+			}
+		}*/
+
+		for (int32 i = 0; i < OverlapItemArr.Num(); ++i)
 		{
 			if (OverlapItemArr[i]->GetName().Equals(_OtherActor->GetName()))
 			{
@@ -578,6 +606,7 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 				break;
 			}
 		}
+
 		if (OverlapItemArr.IsEmpty())
 		{
 			MainUI->ShowMessage(false);

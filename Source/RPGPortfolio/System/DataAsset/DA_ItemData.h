@@ -18,6 +18,6 @@ class RPGPORTFOLIO_API UDA_ItemData : public UDataAsset
 	
 public:
 	UPROPERTY(EditDefaultsOnly, Category="Item", Meta = (DisplayName = "ItemData"))
-	TArray<FGameItemData> ItemDataArr;
+	TArray<FDroppedItemData> ItemDataArr;
 
 };

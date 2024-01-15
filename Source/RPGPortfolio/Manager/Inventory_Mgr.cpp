@@ -6,6 +6,8 @@
 #include "../UI/UI_Inventory.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "../UI/UI_Base.h"
+#include "../Item/Item_InvenData.h"
 
 UWorld* UInventory_Mgr::m_World = nullptr;
 
@@ -33,6 +35,53 @@ UInventory_Mgr* UInventory_Mgr::GetInst(UGameInstance* _GameInst)
 	return pGameInst->m_InvenMgr;
 }
 
+void UInventory_Mgr::SetItemDataTable(UDataTable* _ItemDataTable)
+{
+	m_ItemDataTable = _ItemDataTable;
+
+	//데이터 테이블의 정보를 TArray에 넣는다
+	FString str;
+	TArray<FGameItemInfo*> arrTableData;
+	m_ItemDataTable->GetAllRows<FGameItemInfo>(str, arrTableData);
+
+	// 아이템 정보를 아이템 ID를 키값으로 하는 TMap에 넣는다
+	for ( int32 i = 0; i < arrTableData.Num(); ++i )
+	{
+		m_MapItemInfo.Add(arrTableData[i]->ID, *arrTableData[i]);
+	}
+}
+
+void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
+{
+	//습득한 아이템과 동일한 ID의 아이템 정보를 가져온다
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+
+	if ( nullptr == pItemInfo )
+	{
+		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		return;
+	}
+
+	// 인벤토리에 해당 타입의 아이템이 이미 존재하는지 검사
+	// 없으면 인벤토리에 새 아이템을 추가한다.
+	// 있으면 인벤토리에 존재 하는 아이템의 스택을 1 올린다. 
+	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->Type].Find(_ID);
+	if ( nullptr == pItemRow )
+	{
+		m_InvenStorage[(int32)pItemInfo->Type].Add(_ID, FInvenItemRow{pItemInfo, 1});
+	}
+	else
+	{
+		++pItemRow->Stack;
+	}
+
+	//인벤토리  UI가 열려있을 경우 갱신
+	if (IsInventoryOpened())
+	{
+		RenewInventoryUI();
+	}
+}
+
 UInventory_Mgr::UInventory_Mgr()
 {
 	static ConstructorHelpers::FClassFinder<UUserWidget> InvenClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
@@ -44,13 +93,68 @@ UInventory_Mgr::UInventory_Mgr()
 
 void UInventory_Mgr::ShowInventoryUI()
 {
-	InvenUI = Cast<UUI_Inventory>(CreateWidget(m_World, InvenWidgetClass));
-	if ( IsValid(InvenUI) )
+	if(nullptr == InvenUI)
 	{
-		InvenUI->AddToViewport(5);
+		InvenUI = Cast<UUI_Inventory>(CreateWidget(m_World, InvenWidgetClass));
+		if (IsValid(InvenUI))
+		{
+			RenewInventoryUI();
+			InvenUI->AddToViewport(5);
+			InvenUI->SetVisibility(ESlateVisibility::Visible);
+			
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("인벤토리 UI 생성 실패"));
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("인벤토리 UI 생성 실패"));
+		RenewInventoryUI();
+		InvenUI->SetVisibility(ESlateVisibility::Visible);
 	}
+}
+
+void UInventory_Mgr::CloseInventoryUI()
+{
+	InvenUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UInventory_Mgr::RenewInventoryUI()
+{
+	// 인벤토리 위젯 내용 초기화
+	InvenUI->Clear();
+
+	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
+	for (int32 i = 0; i < (int32)EITEM_TYPE::END; ++i)
+	{
+		for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
+		{
+			UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+
+			pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+			pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+			pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+			pItemData->SetItemQnt(Iter.Value().Stack);
+
+			InvenUI->AddItem(pItemData);
+		}
+	}
+}
+
+bool UInventory_Mgr::IsInventoryOpened()
+{
+	if (nullptr != InvenUI)
+	{
+		if ( InvenUI->GetVisibility() == ESlateVisibility::Visible)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return false;
 }
