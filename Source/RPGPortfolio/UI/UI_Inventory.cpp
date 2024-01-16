@@ -18,7 +18,6 @@ void UUI_Inventory::NativeConstruct()
 	{
 
 	}
-
 }
 
 void UUI_Inventory::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -36,5 +35,17 @@ void UUI_Inventory::Clear()
 	if (IsValid(m_TileView))
 	{
 		m_TileView->ClearListItems();
+	}
+}
+
+bool UUI_Inventory::IsInventoryOpened()
+{
+	if (this->GetVisibility() == ESlateVisibility::Visible)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }

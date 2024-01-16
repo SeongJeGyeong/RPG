@@ -76,54 +76,54 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	}
 
 	//인벤토리  UI가 열려있을 경우 갱신
-	if (IsInventoryOpened())
+	if (CheckInventoryOpened())
 	{
 		RenewInventoryUI();
-	}
-}
-
-UInventory_Mgr::UInventory_Mgr()
-{
-	static ConstructorHelpers::FClassFinder<UUserWidget> InvenClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
-	if ( InvenClass.Succeeded())
-	{
-		InvenWidgetClass = InvenClass.Class;
 	}
 }
 
 void UInventory_Mgr::ShowInventoryUI()
 {
-	if(nullptr == InvenUI)
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	if (!IsValid(GameMode))
 	{
-		InvenUI = Cast<UUI_Inventory>(CreateWidget(m_World, InvenWidgetClass));
-		if (IsValid(InvenUI))
-		{
-			RenewInventoryUI();
-			InvenUI->AddToViewport(5);
-			InvenUI->SetVisibility(ESlateVisibility::Visible);
-			
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("인벤토리 UI 생성 실패"));
-		}
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
 	}
-	else
-	{
-		RenewInventoryUI();
-		InvenUI->SetVisibility(ESlateVisibility::Visible);
-	}
+
+	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
+	RenewInventoryUI();
+	InventoryUI->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UInventory_Mgr::CloseInventoryUI()
 {
-	InvenUI->SetVisibility(ESlateVisibility::Hidden);
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	if (!IsValid(GameMode))
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+
+	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
+	InventoryUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UInventory_Mgr::RenewInventoryUI()
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
+
 	// 인벤토리 위젯 내용 초기화
-	InvenUI->Clear();
+	InventoryUI->Clear();
 
 	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
 	for (int32 i = 0; i < (int32)EITEM_TYPE::END; ++i)
@@ -137,24 +137,20 @@ void UInventory_Mgr::RenewInventoryUI()
 			pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
 			pItemData->SetItemQnt(Iter.Value().Stack);
 
-			InvenUI->AddItem(pItemData);
+			InventoryUI->AddItem(pItemData);
 		}
 	}
 }
 
-bool UInventory_Mgr::IsInventoryOpened()
+bool UInventory_Mgr::CheckInventoryOpened()
 {
-	if (nullptr != InvenUI)
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+	if ( !IsValid(GameMode) )
 	{
-		if ( InvenUI->GetVisibility() == ESlateVisibility::Visible)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return false;
 	}
+	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
 
-	return false;
+	return InventoryUI->IsInventoryOpened();
 }

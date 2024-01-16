@@ -20,6 +20,7 @@ private:
 public:
 	void AddItem(UObject* _ItemData);
 	void Clear();
+	bool IsInventoryOpened();
 
 public:
 	virtual void NativeConstruct() override;

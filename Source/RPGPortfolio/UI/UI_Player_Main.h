@@ -15,7 +15,9 @@ class RPGPORTFOLIO_API UUI_Player_Main : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UListView* m_ListView;
+	class UProgressBar* m_HP;
+	class UProgressBar* m_MP;
+	class UProgressBar* m_Stamina;
 
 public:
 	virtual void NativeConstruct() override;

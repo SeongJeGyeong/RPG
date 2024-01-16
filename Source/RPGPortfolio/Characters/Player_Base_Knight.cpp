@@ -436,7 +436,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 {
 	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
 
-	if (UInventory_Mgr::GetInst(GetWorld())->IsInventoryOpened())
+	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
 	{
 		return;
 	}
@@ -486,7 +486,7 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 {
-	if (UInventory_Mgr::GetInst(GetWorld())->IsInventoryOpened())
+	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
 	{
 		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
 	}

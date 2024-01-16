@@ -29,8 +29,6 @@ private:
 	UDataTable* m_ItemDataTable;
 	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;
 	TMap<EITEM_ID, FInvenItemRow>	m_InvenStorage[(int32)EITEM_TYPE::END];
-	TSubclassOf<UUserWidget> InvenWidgetClass;
-	class UUI_Inventory* InvenUI;
 
 public:
 	static UInventory_Mgr* GetInst(UWorld* _World);
@@ -41,13 +39,9 @@ public:
 
 	void ShowInventoryUI();
 	void CloseInventoryUI();
-
-	bool IsInventoryOpened();
+	bool CheckInventoryOpened();
 
 private:
 	void RenewInventoryUI();
-
-public:
-	UInventory_Mgr();
 
 };
