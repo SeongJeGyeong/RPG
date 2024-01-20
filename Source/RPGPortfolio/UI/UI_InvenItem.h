@@ -21,6 +21,8 @@ private:
 	class UTextBlock*	m_ItemQnt;
 	class UImage*		m_ItemImg;
 
+	class UItem_InvenData* m_ItemData;
+
 public:
 	UFUNCTION()
 	void InitFromData(UObject* _Data);

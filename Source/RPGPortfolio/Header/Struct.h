@@ -162,6 +162,18 @@ struct FGameItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float			Restore_MP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32			Maximum_Stack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32			Require_Str;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32			Require_Dex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32			Require_Int;
+
 };
 
 USTRUCT(Atomic, BlueprintType)

@@ -32,18 +32,18 @@ void UUI_InvenItem::NativeOnListItemObjectSet(UObject* ListItemObject)
 
 void UUI_InvenItem::InitFromData(UObject* _Data)
 {
-	UItem_InvenData* pItemData = Cast<UItem_InvenData>(_Data);
+	m_ItemData = Cast<UItem_InvenData>(_Data);
 
-	if (!IsValid(pItemData))
+	if (!IsValid(m_ItemData))
 	{
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 위젯에 입력된 아이템 데이터가 올바르지 않음"));
 	}
 
 	// 아이템 이미지 세팅
-	FString ItemImgPath = pItemData->GetItemImgPath();
+	FString ItemImgPath = m_ItemData->GetItemImgPath();
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);
 
 	// 아이템 수량 세팅
-	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), pItemData->GetItemQnt())));
+	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), m_ItemData->GetItemQnt())));
 }

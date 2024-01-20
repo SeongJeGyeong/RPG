@@ -62,7 +62,7 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 		return;
 	}
 
-	// 인벤토리에 해당 타입의 아이템이 이미 존재하는지 검사
+	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
 	// 없으면 인벤토리에 새 아이템을 추가한다.
 	// 있으면 인벤토리에 존재 하는 아이템의 스택을 1 올린다. 
 	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->Type].Find(_ID);
@@ -126,7 +126,7 @@ void UInventory_Mgr::RenewInventoryUI()
 	InventoryUI->Clear();
 
 	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
-	for (int32 i = 0; i < (int32)EITEM_TYPE::END; ++i)
+	for (int32 i = 0; i < (int32)EITEM_ID::END; ++i)
 	{
 		for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
 		{
@@ -136,6 +136,15 @@ void UInventory_Mgr::RenewInventoryUI()
 			pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
 			pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
 			pItemData->SetItemQnt(Iter.Value().Stack);
+			pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+			pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+			pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+			pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+			pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+			pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+			pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+			pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+			pItemData->SetItemType(Iter.Value().ItemInfo->Type);
 
 			InventoryUI->AddItem(pItemData);
 		}

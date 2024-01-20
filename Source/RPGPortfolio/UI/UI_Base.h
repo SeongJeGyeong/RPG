@@ -31,8 +31,6 @@ public:
 	void ShowMenu(bool _bShow);
 	void ShowMessage(bool _bShow);
 
-	bool IsInventoryOpened();
-
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;

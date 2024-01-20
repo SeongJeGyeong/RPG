@@ -84,6 +84,17 @@ enum class EITEM_TYPE : uint8
 };
 
 UENUM(BlueprintType)
+enum class ECATEGORY_ARM : uint8
+{
+	HELMET,
+	CHEST,
+	GAUNTLET,
+	LEG,
+
+	END,
+};
+
+UENUM(BlueprintType)
 enum class EITEM_ID : uint8
 {
 	ARM_CHEST_KNIGHT,

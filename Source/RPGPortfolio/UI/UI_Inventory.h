@@ -16,7 +16,8 @@ class RPGPORTFOLIO_API UUI_Inventory : public UUserWidget
 	
 private:
 	class UTileView* m_TileView;
-
+	class UUI_ItemTooltip* m_Tooltip;
+	class UTextBlock* m_ItemName;
 public:
 	void AddItem(UObject* _ItemData);
 	void Clear();
@@ -25,5 +26,5 @@ public:
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
-
+	void OnTileHovered(UObject* _ItemData, bool _Hovered);
 };
