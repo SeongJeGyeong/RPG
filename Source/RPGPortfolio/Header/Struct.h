@@ -130,6 +130,19 @@ struct FCharacterBasePower
 };
 
 USTRUCT(Atomic, BlueprintType)
+struct FPlayerAmountOfSoul
+	: public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString PlayerName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 AmountOfSoul;
+};
+
+USTRUCT(Atomic, BlueprintType)
 struct FGameItemInfo
 	: public FTableRowBase
 {
@@ -161,6 +174,9 @@ struct FGameItemInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float			Restore_MP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32			Gained_Soul;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32			Maximum_Stack;

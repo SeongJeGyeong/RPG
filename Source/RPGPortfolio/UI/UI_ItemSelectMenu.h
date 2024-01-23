@@ -4,20 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UI_Player_Main.generated.h"
+#include "UI_ItemSelectMenu.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API UUI_Player_Main : public UUserWidget
+class RPGPORTFOLIO_API UUI_ItemSelectMenu : public UUserWidget
 {
 	GENERATED_BODY()
 	
 private:
-	class UProgressBar* m_HP;
-	class UProgressBar* m_MP;
-	class UProgressBar* m_Stamina;
+	class UButton* m_Btn_Use;
+	class UButton* m_Btn_Drop;
+	class UButton* m_Btn_Discard;
+	class UButton* m_Btn_DropAll;
+	class UButton* m_Btn_DiscardAll;
 
 public:
 	virtual void NativeConstruct() override;

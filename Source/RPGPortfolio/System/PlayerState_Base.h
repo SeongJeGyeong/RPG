@@ -21,14 +21,18 @@ public:
 
 private:
 	UPROPERTY()
-	FCharacterStatSheet PlayerStat;
+	FCharacterStatSheet m_PlayerStat;
 	UPROPERTY()
-	FCharacterBasePower PlayerBasePower;
+	FCharacterBasePower m_PlayerBasePower;
 
 public:
-	int32 GetPlayerLevel() const;
-	int32 GetPlayerSoul() const;
+	int32 GetPlayerLevel() const { return m_PlayerStat.Level; }
+	int32 GetPlayerSoul() const { return m_PlayerBasePower.AmountOfSoul; }
 
-	void InitPlayerData(FCharacterStatSheet _PlayerStat);
+	FCharacterStatSheet GetPlayerStatus() const { return m_PlayerStat; }
+	FCharacterBasePower GetPlayerBasePower() const { return m_PlayerBasePower; }
+
+	void InitPlayerStat(FCharacterStatSheet _PlayerStat);
 	void SetPlayerStat(FCharacterStatSheet _PlayerStat);
+	void InitPlayerData(FCharacterBasePower _PlayerBasePower);
 };

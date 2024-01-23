@@ -3,6 +3,7 @@
 
 #include "UI_ItemTooltip.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
 
 void UUI_ItemTooltip::NativeConstruct()
@@ -24,11 +25,12 @@ void UUI_ItemTooltip::NativeConstruct()
 	m_Req_Str = Cast<UTextBlock>(GetWidgetFromName(L"Sel_Req_Str"));
 	m_Req_Dex = Cast<UTextBlock>(GetWidgetFromName(L"Sel_Req_Dex"));
 	m_Req_Int = Cast<UTextBlock>(GetWidgetFromName(L"Sel_Req_Int"));
+	m_ItemImg = Cast<UImage>(GetWidgetFromName(L"Sel_ItemImg"));
 
 	if (!IsValid(m_ItemName) || !IsValid(m_Category) || !IsValid(m_SubCategory) || !IsValid(m_CurQnt_Inven) ||
 		!IsValid(m_MaxQnt_Inven) || !IsValid(m_CurQnt_Storage) || !IsValid(m_MaxQnt_Storage) || !IsValid(m_Atk) ||
 		!IsValid(m_Def) || !IsValid(m_Restore_HP) || !IsValid(m_Restore_MP) || !IsValid(m_Desc) || 
-		!IsValid(m_Req_Str) || !IsValid(m_Req_Dex) || !IsValid(m_Req_Int))
+		!IsValid(m_Req_Str) || !IsValid(m_Req_Dex) || !IsValid(m_Req_Int) || !IsValid(m_ItemImg))
 	{
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 툴팁 UI 캐스팅 실패"));
 	}
@@ -145,4 +147,8 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 	{
 		m_Req_Int->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetRequireInt())));
 	}
+
+	FString ItemImgPath = _InvenData->GetItemImgPath();
+	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+	m_ItemImg->SetBrushFromTexture(pTex2D);
 }

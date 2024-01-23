@@ -6,6 +6,9 @@
 #include "Components/TextBlock.h"
 #include "../Item/Item_InvenData.h"
 #include "UI_ItemTooltip.h"
+#include "UI_PlayerStat.h"
+#include "../System/PlayerState_Base.h"
+#include "Components/MenuAnchor.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -14,6 +17,7 @@ void UUI_Inventory::NativeConstruct()
 	m_TileView = Cast<UTileView>(GetWidgetFromName(L"ItemTileView"));
 	m_Tooltip = Cast<UUI_ItemTooltip>(GetWidgetFromName(L"ItemTooltipUI"));
 	m_ItemName = Cast<UTextBlock>(GetWidgetFromName(L"ItemName"));
+	m_Status = Cast<UUI_PlayerStat>(GetWidgetFromName(L"PlayerStatUI"));
 
 	if (!IsValid(m_TileView))
 	{
@@ -40,6 +44,11 @@ void UUI_Inventory::NativeConstruct()
 	else
 	{
 		m_ItemName->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (!IsValid(m_Status))
+	{
+		UE_LOG(LogTemp, Error, TEXT("캐릭터스탯 위젯 찾지 못함"));
 	}
 
 }
@@ -92,4 +101,9 @@ bool UUI_Inventory::IsInventoryOpened()
 	{
 		return false;
 	}
+}
+
+void UUI_Inventory::SetStatUI(APlayerState* _PlayerState)
+{
+	m_Status->SetPlayerStatUI(Cast<APlayerState_Base>(_PlayerState));
 }

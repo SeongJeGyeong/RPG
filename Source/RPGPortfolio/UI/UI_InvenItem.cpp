@@ -4,7 +4,10 @@
 #include "UI_InvenItem.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/Button.h"
 #include "../Item/Item_InvenData.h"
+#include "UI_Inventory.h"
+#include "Components/MenuAnchor.h"
 
 void UUI_InvenItem::NativeConstruct()
 {
@@ -12,11 +15,18 @@ void UUI_InvenItem::NativeConstruct()
 
 	m_ItemImg = Cast<UImage>(GetWidgetFromName(TEXT("ItemImg")));
 	m_ItemQnt = Cast<UTextBlock>(GetWidgetFromName(TEXT("Quantity")));
-
+	m_ItemBtn = Cast<UButton>(GetWidgetFromName(TEXT("ItemBtn")));
+	m_MenuAnchor = Cast<UMenuAnchor>(GetWidgetFromName(TEXT("ItemMenuAnchor")));
+	
 	if (!IsValid(m_ItemImg) || !IsValid(m_ItemQnt))
 	{
 		UE_LOG(LogTemp, Error, TEXT("InvenItem의 하위 위젯을 찾지 못함"));
 	}
+	if (!IsValid(m_ItemBtn))
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 버튼 위젯을 찾지 못함"));
+	}
+	m_ItemBtn->OnClicked.AddDynamic(this, &UUI_InvenItem::ItemBtnClicked);
 }
 
 void UUI_InvenItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -28,6 +38,12 @@ void UUI_InvenItem::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 	InitFromData(ListItemObject);
+}
+
+void UUI_InvenItem::ItemBtnClicked()
+{
+	UE_LOG(LogTemp, Display, TEXT("아이템 클릭"));
+	m_MenuAnchor->Open(true);
 }
 
 void UUI_InvenItem::InitFromData(UObject* _Data)

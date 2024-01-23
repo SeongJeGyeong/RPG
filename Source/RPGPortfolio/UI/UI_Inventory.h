@@ -18,10 +18,13 @@ private:
 	class UTileView* m_TileView;
 	class UUI_ItemTooltip* m_Tooltip;
 	class UTextBlock* m_ItemName;
+	class UUI_PlayerStat* m_Status;
+
 public:
 	void AddItem(UObject* _ItemData);
 	void Clear();
 	bool IsInventoryOpened();
+	void SetStatUI(APlayerState* _PlayerState);
 
 public:
 	virtual void NativeConstruct() override;

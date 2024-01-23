@@ -93,6 +93,7 @@ void UInventory_Mgr::ShowInventoryUI()
 	}
 
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
+	InventoryUI->SetStatUI(UGameplayStatics::GetPlayerState(m_World, 0));
 	RenewInventoryUI();
 	InventoryUI->SetVisibility(ESlateVisibility::Visible);
 }

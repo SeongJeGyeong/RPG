@@ -20,8 +20,9 @@ private:
 	class UTextBlock*	m_ItemDesc;
 	class UTextBlock*	m_ItemQnt;
 	class UImage*		m_ItemImg;
-
+	class UButton*		m_ItemBtn;
 	class UItem_InvenData* m_ItemData;
+	class UMenuAnchor*	m_MenuAnchor;
 
 public:
 	UFUNCTION()
@@ -32,4 +33,8 @@ public:
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
+	class UButton* GetItemBtn() { return m_ItemBtn; }
+
+	UFUNCTION()
+	void ItemBtnClicked();
 };

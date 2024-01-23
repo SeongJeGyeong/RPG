@@ -31,6 +31,8 @@ private:
 	class UTextBlock* m_Req_Dex;
 	class UTextBlock* m_Req_Int;
 
+	class UImage* m_ItemImg;
+
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
