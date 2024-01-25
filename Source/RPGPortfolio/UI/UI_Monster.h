@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -22,13 +22,20 @@ private:
 	FText m_MonsterName;
 	float m_Ratio;
 
+	float fDisplayTime = 0.f;
+
+	bool  bDMGDisplay;
+	float fTakedDMG = 0.f;
+
 public:
 	void SetHPRatio(float _Ratio);
 	void SetName(const FString& _Name);
-	void DisplayDMG(const int32 _DMG);
+	void DisplayDMG(const float _DMG);
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 };

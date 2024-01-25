@@ -44,10 +44,16 @@ struct FMonsterInfo : public FTableRowBase
 	float CurMP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Atk;
+	float PhysicAtk;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Def;
+	float PhysicDef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MagicAtk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MagicDef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DetectRange;

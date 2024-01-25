@@ -17,6 +17,8 @@
 #include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "../System/PlayerState_Base.h"
+#include "../Monsters/Monster_Base.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -555,14 +557,24 @@ void APlayer_Base_Knight::AttackHitCheck()
 		if (HitResult.GetActor()->IsValidLowLevel())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
-			int32 iDamage;
+			float iDamage;
+			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+
 			if (GetAttackMontage() == m_AttackMontage)
 			{
-				iDamage = 200;
+				iDamage = pState->GetPlayerBasePower().PhysicAtk;
+				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
 			}
 			else if(GetAttackMontage() == m_PrimaryAttackMontage)
 			{
-				iDamage = 400;
+				iDamage = pState->GetPlayerBasePower().PhysicAtk * 1.5f;
+				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
+			}
+			AMonster_Base* pMonster = Cast<AMonster_Base>(HitResult.GetActor());
+			if (IsValid(pMonster))
+			{
+				iDamage -= pMonster->GetMonsterInfo().PhysicDef;
+				UE_LOG(LogTemp, Display, TEXT("Target Deffense : %d"), (int)pMonster->GetMonsterInfo().PhysicDef);
 			}
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), iDamage, GetController(), this, UDamageType::StaticClass());
 

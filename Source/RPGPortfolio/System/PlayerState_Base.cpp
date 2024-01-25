@@ -31,10 +31,6 @@ APlayerState_Base::APlayerState_Base()
 	m_PlayerBasePower.MagicDef = ( m_PlayerStat.Attunement + m_PlayerStat.Intelligence ) * 5.f;
 }
 
-void APlayerState_Base::InitPlayerStat(FCharacterStatSheet _PlayerStat)
-{
-}
-
 void APlayerState_Base::SetPlayerStat(FCharacterStatSheet _PlayerStat)
 {
 }

@@ -32,7 +32,6 @@ public:
 	FCharacterStatSheet GetPlayerStatus() const { return m_PlayerStat; }
 	FCharacterBasePower GetPlayerBasePower() const { return m_PlayerBasePower; }
 
-	void InitPlayerStat(FCharacterStatSheet _PlayerStat);
 	void SetPlayerStat(FCharacterStatSheet _PlayerStat);
 	void InitPlayerData(FCharacterBasePower _PlayerBasePower);
 };

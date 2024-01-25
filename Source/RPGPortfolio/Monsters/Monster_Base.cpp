@@ -125,8 +125,6 @@ void AMonster_Base::Tick(float DeltaTime)
 	if (m_WidgetComponent->IsWidgetVisible() && !bLockedOn)
 	{
 		fWidgetVisTime += DeltaTime * 1.f;
-		UE_LOG(LogTemp, Warning, TEXT("%f"), fWidgetVisTime);
-
 		if (fWidgetVisTime > 3.f)
 		{
 			m_WidgetComponent->SetVisibility(false);
@@ -149,6 +147,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
 	m_WidgetComponent->SetVisibility(true);
+	m_MonsterWidget->DisplayDMG(FinalDamage);
 	fWidgetVisTime = 0.f;
 
 	if (m_Info.CurHP <= 0.f && GetController())
