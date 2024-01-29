@@ -29,6 +29,8 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* m_WidgetComponent;
 
+	TSubclassOf<UUserWidget> m_MarkerClass;
+	class UWidgetComponent* m_LockOnMarker;
 	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;
 

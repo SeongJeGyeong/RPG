@@ -37,6 +37,21 @@ AMonster_Base::AMonster_Base()
 	}
 	m_WidgetComponent->SetupAttachment(GetRootComponent());
 
+	m_LockOnMarker = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnMarker"));
+	if ( !IsValid(m_WidgetComponent) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
+	}
+	m_LockOnMarker->SetupAttachment(m_TargetComp);
+
+	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
+	if ( MarkerUI.Succeeded() )
+	{
+		m_LockOnMarker->SetWidgetClass(MarkerUI.Class);
+		m_MarkerClass = MarkerUI.Class;
+	}
+	m_LockOnMarker->SetWidgetSpace(EWidgetSpace::Screen);
+	m_LockOnMarker->SetDrawSize(FVector2D(50.f, 50.f));
 }
 
 void AMonster_Base::OnConstruction(const FTransform& _Transform)
@@ -86,6 +101,8 @@ void AMonster_Base::BeginPlay()
 		m_Info.CurHP = m_Info.MaxHP;
 	}
 	m_WidgetComponent->SetVisibility(false);
+	m_LockOnMarker->SetVisibility(false);
+
 }
 
 // Called every frame
@@ -156,6 +173,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		GetController()->UnPossess();
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 		m_TargetComp->DestroyComponent();
+		m_LockOnMarker->DestroyComponent();
 		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		//GetMesh()->SetSimulatePhysics(true);
 	}
@@ -166,5 +184,6 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 void AMonster_Base::SetbLockedOn(bool _LockedOn)
 {
 	m_WidgetComponent->SetVisibility(_LockedOn);
+	m_LockOnMarker->SetVisibility(_LockedOn);
 	bLockedOn = _LockedOn;
 }

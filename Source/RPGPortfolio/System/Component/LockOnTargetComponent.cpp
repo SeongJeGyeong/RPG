@@ -2,8 +2,11 @@
 
 
 #include "LockOnTargetComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/WidgetComponent.h"
 
 ULockOnTargetComponent::ULockOnTargetComponent()
 {
 	SetCollisionProfileName(FName("LOT"));
+
 }

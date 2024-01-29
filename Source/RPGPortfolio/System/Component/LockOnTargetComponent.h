@@ -13,7 +13,6 @@ UCLASS(meta = (BlueprintSpawnableComponent))
 class RPGPORTFOLIO_API ULockOnTargetComponent : public USphereComponent
 {
 	GENERATED_BODY()
-	
 
 public:
 	ULockOnTargetComponent();
