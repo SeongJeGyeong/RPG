@@ -5,6 +5,10 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "../RPGPortfolioGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "UI_StatusMain.h"
+#include "UI_EquipMain.h"
 
 void UUI_Menu_Main::NativeConstruct()
 {
@@ -57,6 +61,16 @@ void UUI_Menu_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_Menu_Main::EquipBtnClicked()
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+
+	UUI_EquipMain* EquipUI = GameMode->GetEquipUI();
+	EquipUI->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UUI_Menu_Main::EquipBtnHovered()
@@ -87,6 +101,16 @@ void UUI_Menu_Main::InventoryBtnUnHovered()
 
 void UUI_Menu_Main::StatusBtnClicked()
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+
+	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
+	StatusUI->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UUI_Menu_Main::StatusBtnHovered()

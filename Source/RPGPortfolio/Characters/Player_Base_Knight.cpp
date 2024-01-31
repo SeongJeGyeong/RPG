@@ -14,11 +14,14 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
 #include "../UI/UI_Message_Main.h"
+#include "../UI/UI_StatusMain.h"
+#include "../UI/UI_EquipMain.h"
 #include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../System/PlayerState_Base.h"
 #include "../Monsters/Monster_Base.h"
+
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -438,7 +441,13 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 {
 	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
 
-	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+	if (pGameMode->IsSubMenuUIOpened())
 	{
 		return;
 	}
@@ -447,13 +456,6 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 	if ( !IsValid(pController) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
-		return;
-	}
-
-	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(pGameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
 
@@ -488,9 +490,32 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 {
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+
 	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
 	{
 		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
+		return;
+	}
+
+	UUI_StatusMain* StatusUI = pGameMode->GetStatusUI();
+	pGameMode->GetStatusUI()->GetVisibility();
+	if (StatusUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		StatusUI->SetVisibility(ESlateVisibility::Hidden);
+		return;
+	}
+
+	UUI_EquipMain* EquipUI = pGameMode->GetEquipUI();
+	if (EquipUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		EquipUI->SetVisibility(ESlateVisibility::Hidden);
+		return;
 	}
 }
 

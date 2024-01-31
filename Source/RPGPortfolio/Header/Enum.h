@@ -86,10 +86,10 @@ enum class EITEM_TYPE : uint8
 UENUM(BlueprintType)
 enum class ECATEGORY_ARM : uint8
 {
-	HELMET,
+	HELM,
 	CHEST,
 	GAUNTLET,
-	LEG,
+	LEGGINGS,
 
 	END,
 };
