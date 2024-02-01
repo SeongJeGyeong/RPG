@@ -41,7 +41,7 @@ public:
 	void CloseInventoryUI();
 	bool CheckInventoryOpened();
 
-private:
-	void RenewInventoryUI();
+public:
+	void RenewInventoryUI(EITEM_TYPE _Type);
 
 };

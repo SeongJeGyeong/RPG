@@ -70,15 +70,16 @@ enum class EBOSS_STATE : uint8
 UENUM(BlueprintType)
 enum class EITEM_TYPE : uint8
 {
-	ACCESSORIE,
-	ARMOR,
-	ARROWS,
+	ALL,
+
 	CONSUMABLE,
+	WEAPON,
+	ARMOR,
+	ACCESSORIE,
+	ARROWS,
+	SPELL,
 	KEY,
 	MISC,
-	SPELL,
-	THROWABLE,
-	WEAPON,
 
 	END,
 };

@@ -15,19 +15,29 @@ class RPGPORTFOLIO_API UUI_Inventory : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UTileView* m_TileView;
-	class UUI_ItemTooltip* m_Tooltip;
-	class UTextBlock* m_ItemName;
-	class UUI_PlayerStat* m_Status;
+	class UTileView*		m_TileView;
+	class UUI_ItemTooltip*	m_Tooltip;
+	class UTextBlock*		m_Category;
+	class UTextBlock*		m_ItemName;
+	class UUI_PlayerStat*	m_Status;
+	class UButton*			m_LeftBtn;
+	class UButton*			m_RightBtn;
+	enum EITEM_TYPE			eCategory;
 
 public:
 	void AddItem(UObject* _ItemData);
 	void Clear();
 	bool IsInventoryOpened();
 	void SetStatUI(APlayerState* _PlayerState);
+	void SetCategoryText(EITEM_TYPE _Type);
 
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 	void OnTileHovered(UObject* _ItemData, bool _Hovered);
+
+	UFUNCTION()
+	void LeftBtnClicked();
+	UFUNCTION()
+	void RightBtnClicked();
 };

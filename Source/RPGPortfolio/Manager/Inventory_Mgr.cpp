@@ -65,10 +65,10 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
 	// 없으면 인벤토리에 새 아이템을 추가한다.
 	// 있으면 인벤토리에 존재 하는 아이템의 스택을 1 올린다. 
-	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->Type].Find(_ID);
+	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->ID].Find(_ID);
 	if ( nullptr == pItemRow )
 	{
-		m_InvenStorage[(int32)pItemInfo->Type].Add(_ID, FInvenItemRow{pItemInfo, 1});
+		m_InvenStorage[(int32)pItemInfo->ID].Add(_ID, FInvenItemRow{pItemInfo, 1});
 	}
 	else
 	{
@@ -76,10 +76,10 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	}
 
 	//인벤토리  UI가 열려있을 경우 갱신
-	if (CheckInventoryOpened())
+	/*if (CheckInventoryOpened())
 	{
-		RenewInventoryUI();
-	}
+		RenewInventoryUI(EITEM_TYPE::ALL);
+	}*/
 }
 
 void UInventory_Mgr::ShowInventoryUI()
@@ -94,7 +94,7 @@ void UInventory_Mgr::ShowInventoryUI()
 
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
 	InventoryUI->SetStatUI(UGameplayStatics::GetPlayerState(m_World, 0));
-	RenewInventoryUI();
+	RenewInventoryUI(EITEM_TYPE::ALL);
 	InventoryUI->SetVisibility(ESlateVisibility::Visible);
 }
 
@@ -112,7 +112,7 @@ void UInventory_Mgr::CloseInventoryUI()
 	InventoryUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UInventory_Mgr::RenewInventoryUI()
+void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 
@@ -127,27 +127,64 @@ void UInventory_Mgr::RenewInventoryUI()
 	InventoryUI->Clear();
 
 	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
-	for (int32 i = 0; i < (int32)EITEM_ID::END; ++i)
+	// 전체아이템 인벤토리일 경우
+	if (_Type == EITEM_TYPE::ALL)
 	{
-		for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
+		for (int32 i = 0; i < (int32)EITEM_ID::END; ++i)
 		{
-			UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+			for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
+			{
+				UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
 
-			pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
-			pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
-			pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
-			pItemData->SetItemQnt(Iter.Value().Stack);
-			pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-			pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
-			pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
-			pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
-			pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
-			pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
-			pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
-			pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
-			pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+				pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+				pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+				pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+				pItemData->SetItemQnt(Iter.Value().Stack);
+				pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+				pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+				pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+				pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+				pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+				pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+				pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+				pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+				pItemData->SetItemType(Iter.Value().ItemInfo->Type);
 
-			InventoryUI->AddItem(pItemData);
+				InventoryUI->AddItem(pItemData);
+			}
+		}
+	}
+	// 카테고리별 인벤토리일 경우
+	else
+	{
+		for (int32 i = 0; i < (int32)EITEM_ID::END; ++i)
+		{
+			for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
+			{
+				UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+				if(Iter.Value().ItemInfo->Type == _Type)
+				{
+					pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+					pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+					pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+					pItemData->SetItemQnt(Iter.Value().Stack);
+					pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+					pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+					pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+					pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+					pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+					pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+					pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+					pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+					pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+				}
+				else
+				{
+					continue;
+				}
+
+				InventoryUI->AddItem(pItemData);
+			}
 		}
 	}
 }

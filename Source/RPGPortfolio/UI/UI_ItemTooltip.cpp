@@ -56,7 +56,7 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 		m_Category->SetText(FText::FromString(L"화살"));
 		break;
 	case EITEM_TYPE::CONSUMABLE:
-		m_Category->SetText(FText::FromString(L"소비"));
+		m_Category->SetText(FText::FromString(L"소비아이템"));
 		break;
 	case EITEM_TYPE::KEY:
 		m_Category->SetText(FText::FromString(L"열쇠"));
@@ -66,9 +66,6 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 		break;
 	case EITEM_TYPE::SPELL:
 		m_Category->SetText(FText::FromString(L"주문"));
-		break;
-	case EITEM_TYPE::THROWABLE:
-		m_Category->SetText(FText::FromString(L"투척물"));
 		break;
 	case EITEM_TYPE::WEAPON:
 		m_Category->SetText(FText::FromString(L"무기"));
