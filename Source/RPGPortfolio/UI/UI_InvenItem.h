@@ -33,8 +33,6 @@ public:
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
-	class UButton* GetItemBtn() { return m_ItemBtn; }
-
 	UFUNCTION()
 	void ItemBtnClicked();
 };

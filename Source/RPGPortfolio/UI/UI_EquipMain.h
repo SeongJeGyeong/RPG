@@ -15,12 +15,23 @@ class RPGPORTFOLIO_API UUI_EquipMain : public UUserWidget
 	GENERATED_BODY()
 	
 private:
+	class UTextBlock*		m_SelItemName;
+	class UTextBlock*		m_SelItemSlot;
 	class UUI_ItemTooltip*	m_Tooltip;
 	class UUI_PlayerStat*	m_Stat;
+	class UUI_EquipItemList* m_ItemList;
+	class UUI_EquipItem*	m_Consumable_1;
 
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
+	void ListVisibilityChanged(ESlateVisibility _Visibility);
+	void RenewItemListUI(EITEM_TYPE _Type);
 
+	/*UFUNCTION()
+	void ItemBtnClicked();*/
+
+public:
+	UUI_EquipItemList* GetItemList() { return m_ItemList; }
 };

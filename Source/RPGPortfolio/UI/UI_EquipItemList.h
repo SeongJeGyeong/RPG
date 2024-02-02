@@ -1,0 +1,26 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "UI_EquipItemList.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class RPGPORTFOLIO_API UUI_EquipItemList : public UUserWidget
+{
+	GENERATED_BODY()
+	
+private:
+	class UTextBlock*	m_SlotName;
+	class UTextBlock*	m_ListItemName;
+	class UTileView*	m_TileView;
+
+public:
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+	void OnTileHovered(UObject* _ItemData, bool _Hovered);
+};

@@ -189,6 +189,10 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 	}
 }
 
+void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
+{
+}
+
 bool UInventory_Mgr::CheckInventoryOpened()
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));

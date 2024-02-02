@@ -16,19 +16,19 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 		m_MainHUDClass = mainHUD.Class;
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Inventory(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
+	ConstructorHelpers::FClassFinder<UUserWidget> Inventory(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
 	if (Inventory.Succeeded())
 	{
 		m_InventoryUIClass = Inventory.Class;
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Status(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/BPC_UI_Status.BPC_UI_Status_C'"));
+	ConstructorHelpers::FClassFinder<UUserWidget> Status(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Status/BPC_UI_Status.BPC_UI_Status_C'"));
 	if (Status.Succeeded())
 	{
 		m_StatusUIClass = Status.Class;
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Equip(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/BPC_UI_Equip.BPC_UI_Equip_C'"));
+	ConstructorHelpers::FClassFinder<UUserWidget> Equip(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Equip/BPC_UI_Equip.BPC_UI_Equip_C'"));
 	if (Equip.Succeeded())
 	{
 		m_EquipUIClass = Equip.Class;

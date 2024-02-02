@@ -16,6 +16,7 @@
 #include "../UI/UI_Message_Main.h"
 #include "../UI/UI_StatusMain.h"
 #include "../UI/UI_EquipMain.h"
+#include "../UI/UI_EquipItemList.h"
 #include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
@@ -514,6 +515,12 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 	UUI_EquipMain* EquipUI = pGameMode->GetEquipUI();
 	if (EquipUI->GetVisibility() == ESlateVisibility::Visible)
 	{
+		if ( EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
+		{
+			EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
+			return;
+		}
+
 		EquipUI->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}

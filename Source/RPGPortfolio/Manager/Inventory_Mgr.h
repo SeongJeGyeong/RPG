@@ -41,7 +41,9 @@ public:
 	void CloseInventoryUI();
 	bool CheckInventoryOpened();
 
+	TMap<EITEM_ID, FInvenItemRow> GetInvenStorage() { return m_InvenStorage[(int32)EITEM_ID::END]; }
+
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
-
+	void RenewItemListUI(EITEM_TYPE _Type);
 };
