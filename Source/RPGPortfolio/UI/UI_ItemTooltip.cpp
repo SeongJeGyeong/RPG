@@ -49,8 +49,17 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 	case EITEM_TYPE::ACCESSORIE:
 		m_Category->SetText(FText::FromString(L"악세사리"));
 		break;
-	case EITEM_TYPE::ARMOR:
-		m_Category->SetText(FText::FromString(L"방어구"));
+	case EITEM_TYPE::ARM_HELM:
+		m_Category->SetText(FText::FromString(L"투구"));
+		break;
+	case EITEM_TYPE::ARM_CHEST:
+		m_Category->SetText(FText::FromString(L"갑옷"));
+		break;
+	case EITEM_TYPE::ARM_GAUNTLET:
+		m_Category->SetText(FText::FromString(L"장갑"));
+		break;
+	case EITEM_TYPE::ARM_LEGGINGS:
+		m_Category->SetText(FText::FromString(L"각반"));
 		break;
 	case EITEM_TYPE::ARROWS:
 		m_Category->SetText(FText::FromString(L"화살"));
@@ -69,6 +78,9 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 		break;
 	case EITEM_TYPE::WEAPON:
 		m_Category->SetText(FText::FromString(L"무기"));
+		break;
+	case EITEM_TYPE::SHIELD:
+		m_Category->SetText(FText::FromString(L"방패"));
 		break;
 	default:
 		break;

@@ -5,24 +5,29 @@
 #include "Components/TileView.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
 #include "../System/PlayerState_Base.h"
 #include "UI_ItemTooltip.h"
 #include "UI_PlayerStat.h"
 #include "../Header/Enum.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "PaperSprite.h"
+#include "Styling/SlateBrush.h"
 
 void UUI_Inventory::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	m_ItemName = Cast<UTextBlock>(GetWidgetFromName(L"ItemName"));
-	m_Category = Cast<UTextBlock>(GetWidgetFromName(L"CategoryText"));
-	m_LeftBtn = Cast<UButton>(GetWidgetFromName(L"Btn_Cat_Left"));
-	m_RightBtn = Cast<UButton>(GetWidgetFromName(L"Btn_Cat_Right"));
-	m_TileView = Cast<UTileView>(GetWidgetFromName(L"ItemTileView"));
-	m_Tooltip = Cast<UUI_ItemTooltip>(GetWidgetFromName(L"ItemTooltipUI"));
-	m_Status = Cast<UUI_PlayerStat>(GetWidgetFromName(L"PlayerStatUI"));
+	m_ItemName = Cast<UTextBlock>(GetWidgetFromName(TEXT("ItemName")));
+	m_Category = Cast<UTextBlock>(GetWidgetFromName(TEXT("CategoryText")));
+	m_Category_Img = Cast<UImage>(GetWidgetFromName(TEXT("Category_Img")));
+	m_LeftBtn = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Cat_Left")));
+	m_RightBtn = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Cat_Right")));
+	m_TileView = Cast<UTileView>(GetWidgetFromName(TEXT("ItemTileView")));
+	m_Tooltip = Cast<UUI_ItemTooltip>(GetWidgetFromName(TEXT("ItemTooltipUI")));
+	m_Status = Cast<UUI_PlayerStat>(GetWidgetFromName(TEXT("PlayerStatUI")));
+
 
 	if ( !IsValid(m_ItemName) )
 	{
@@ -36,6 +41,19 @@ void UUI_Inventory::NativeConstruct()
 	if (!IsValid(m_Category))
 	{
 		UE_LOG(LogTemp, Error, TEXT("카테고리 텍스트 위젯 찾지 못함"));
+	}
+	else
+	{
+		m_Category->SetText(FText::FromString(L"전체아이템"));
+	}
+	if (!IsValid(m_Category_Img))
+	{
+		UE_LOG(LogTemp, Error, TEXT("카테고리 이미지 위젯 찾지 못함"));
+	}
+	else
+	{
+		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_All.Inven_Category_All'"));
+		m_Category_Img->SetBrushFromTexture(pTex2D);
 	}
 
 	if (!IsValid(m_LeftBtn) || !IsValid(m_RightBtn))
@@ -72,7 +90,7 @@ void UUI_Inventory::NativeConstruct()
 	}
 
 	eCategory = EITEM_TYPE::ALL;
-	SetCategoryText(eCategory);
+	SetCategoryUI(eCategory);
 }
 
 void UUI_Inventory::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -111,7 +129,7 @@ void UUI_Inventory::LeftBtnClicked()
 		int8 iCategory = static_cast<int8>(eCategory);
 		eCategory = static_cast<EITEM_TYPE>(--iCategory);
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
-		SetCategoryText(eCategory);
+		SetCategoryUI(eCategory);
 	}
 }
 
@@ -126,7 +144,7 @@ void UUI_Inventory::RightBtnClicked()
 		int8 iCategory = static_cast<int8>( eCategory );
 		eCategory = static_cast<EITEM_TYPE>(++iCategory);
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
-		SetCategoryText(eCategory);
+		SetCategoryUI(eCategory);
 	}
 }
 
@@ -160,38 +178,79 @@ void UUI_Inventory::SetStatUI(APlayerState* _PlayerState)
 	m_Status->SetPlayerStatUI(Cast<APlayerState_Base>(_PlayerState));
 }
 
-void UUI_Inventory::SetCategoryText(EITEM_TYPE _Type)
+void UUI_Inventory::SetCategoryUI(EITEM_TYPE _Type)
 {
+	UPaperSprite* pSprite = nullptr;
+	UTexture2D* Category_2DTex = nullptr;
+
 	switch (_Type)
 	{
 	case EITEM_TYPE::ALL:
 		m_Category->SetText(FText::FromString(L"전체아이템"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_All.Inven_Category_All'"));
 		break;
 	case EITEM_TYPE::CONSUMABLE:
 		m_Category->SetText(FText::FromString(L"소비아이템"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Consumable.Inven_Category_Consumable'"));
 		break;
 	case EITEM_TYPE::WEAPON:
 		m_Category->SetText(FText::FromString(L"무기"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Weapon.Inven_Category_Weapon'"));
 		break;
-	case EITEM_TYPE::ARMOR:
-		m_Category->SetText(FText::FromString(L"방어구"));
+	case EITEM_TYPE::SHIELD:
+		m_Category->SetText(FText::FromString(L"방패"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Shield.Inven_Category_Shield'"));
+		break;
+	case EITEM_TYPE::ARM_HELM:
+		m_Category->SetText(FText::FromString(L"투구"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Helm.Inven_Category_Helm'"));
+		break;
+	case EITEM_TYPE::ARM_CHEST:
+		m_Category->SetText(FText::FromString(L"갑옷"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Chest.Inven_Category_Chest'"));
+		break;
+	case EITEM_TYPE::ARM_GAUNTLET:
+		m_Category->SetText(FText::FromString(L"장갑"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Gauntlet.Inven_Category_Gauntlet'"));
+		break;
+	case EITEM_TYPE::ARM_LEGGINGS:
+		m_Category->SetText(FText::FromString(L"각반"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Leggings.Inven_Category_Leggings'"));
 		break;
 	case EITEM_TYPE::ACCESSORIE:
 		m_Category->SetText(FText::FromString(L"악세사리"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Accessorie.Inven_Category_Accessorie'"));
 		break;
 	case EITEM_TYPE::ARROWS:
 		m_Category->SetText(FText::FromString(L"화살"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Arrows.Inven_Category_Arrows'"));
 		break;
 	case EITEM_TYPE::SPELL:
 		m_Category->SetText(FText::FromString(L"마법"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Spell.Inven_Category_Spell'"));
 		break;
 	case EITEM_TYPE::KEY:
 		m_Category->SetText(FText::FromString(L"중요아이템"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Keys.Inven_Category_Keys'"));
 		break;
 	case EITEM_TYPE::MISC:
 		m_Category->SetText(FText::FromString(L"기타아이템"));
+		pSprite = LoadObject<UPaperSprite>(nullptr, TEXT("/Script/Paper2D.PaperSprite'/Game/DSResource/UI/Inven_Category_Img_Sprite_14.Inven_Category_Img_Sprite_14'"));
 		break;
 	default:
 		break;
 	}
+
+	// 스프라이트를 브러쉬로 바꾸기 위해 MakeBrushFromSprite가 필요함
+	// PaperSpriteBlueprintLibrary 는 Paper2D API에 포함되어 있지 않음
+	// MakeBrushFromSprite함수를 쓸 수 없기 때문에 해당 함수의 내용을 직접 가져와서 사용
+	const FSlateAtlasData SpriteAtlasData = pSprite->GetSlateAtlasData();
+	const FVector2D SpriteSize = SpriteAtlasData.GetSourceDimensions();
+	FSlateBrush Brush;
+	Brush.SetResourceObject(pSprite);
+	Brush.ImageSize = FVector2D(80, 100);
+
+	m_Category_Img->SetBrush(Brush);
+	
+	//m_Category_Img->SetBrushFromTexture(Category_2DTex);
 }

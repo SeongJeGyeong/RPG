@@ -45,22 +45,70 @@ void UUI_EquipItem::ItemBtnHovered()
 {
 	if (IsValid(ItemSlotText))
 	{
-		switch ( eCaterogy )
+		switch ( eSlotType )
 		{
-		case EITEM_TYPE::CONSUMABLE:
-			ItemSlotText->SetText(FText::FromString(L"소비아이템"));
+		case EEQUIP_SLOT::WEAPON_1:
+			ItemSlotText->SetText(FText::FromString(L"무기 1"));
 			break;
-		case EITEM_TYPE::WEAPON:
-			ItemSlotText->SetText(FText::FromString(L"무기"));
+		case EEQUIP_SLOT::WEAPON_2:
+			ItemSlotText->SetText(FText::FromString(L"무기 2"));
 			break;
-		case EITEM_TYPE::ARMOR:
-			ItemSlotText->SetText(FText::FromString(L"방어구"));
+		case EEQUIP_SLOT::WEAPON_3:
+			ItemSlotText->SetText(FText::FromString(L"무기 3"));
 			break;
-		case EITEM_TYPE::ACCESSORIE:
-			ItemSlotText->SetText(FText::FromString(L"악세사리"));
+		case EEQUIP_SLOT::SHIELD_1:
+			ItemSlotText->SetText(FText::FromString(L"방패 1"));
 			break;
-		case EITEM_TYPE::ARROWS:
+		case EEQUIP_SLOT::SHIELD_2:
+			ItemSlotText->SetText(FText::FromString(L"방패 2"));
+			break;
+		case EEQUIP_SLOT::SHIELD_3:
+			ItemSlotText->SetText(FText::FromString(L"방패 3"));
+			break;
+		case EEQUIP_SLOT::ARROW:
 			ItemSlotText->SetText(FText::FromString(L"화살"));
+			break;
+		case EEQUIP_SLOT::BOLT:
+			ItemSlotText->SetText(FText::FromString(L"볼트"));
+			break;
+		case EEQUIP_SLOT::HELM:
+			ItemSlotText->SetText(FText::FromString(L"투구"));
+			break;
+		case EEQUIP_SLOT::CHEST:
+			ItemSlotText->SetText(FText::FromString(L"갑옷"));
+			break;
+		case EEQUIP_SLOT::GAUNTLET:
+			ItemSlotText->SetText(FText::FromString(L"장갑"));
+			break;
+		case EEQUIP_SLOT::LEGGINGS:
+			ItemSlotText->SetText(FText::FromString(L"각반"));
+			break;
+		case EEQUIP_SLOT::ACCESSORIE_1:
+			ItemSlotText->SetText(FText::FromString(L"악세사리 1"));
+			break;
+		case EEQUIP_SLOT::ACCESSORIE_2:
+			ItemSlotText->SetText(FText::FromString(L"악세사리 2"));
+			break;
+		case EEQUIP_SLOT::ACCESSORIE_3:
+			ItemSlotText->SetText(FText::FromString(L"악세사리 3"));
+			break;
+		case EEQUIP_SLOT::ACCESSORIE_4:
+			ItemSlotText->SetText(FText::FromString(L"악세사리 4"));
+			break;
+		case EEQUIP_SLOT::CONSUMABLE_1:
+			ItemSlotText->SetText(FText::FromString(L"소비아이템 1"));
+			break;
+		case EEQUIP_SLOT::CONSUMABLE_2:
+			ItemSlotText->SetText(FText::FromString(L"소비아이템 2"));
+			break;
+		case EEQUIP_SLOT::CONSUMABLE_3:
+			ItemSlotText->SetText(FText::FromString(L"소비아이템 3"));
+			break;
+		case EEQUIP_SLOT::CONSUMABLE_4:
+			ItemSlotText->SetText(FText::FromString(L"소비아이템 4"));
+			break;
+		case EEQUIP_SLOT::CONSUMABLE_5:
+			ItemSlotText->SetText(FText::FromString(L"소비아이템 5"));
 			break;
 		default:
 			break;

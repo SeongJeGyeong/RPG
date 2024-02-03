@@ -22,6 +22,8 @@ private:
 	class UUI_PlayerStat*	m_Status;
 	class UButton*			m_LeftBtn;
 	class UButton*			m_RightBtn;
+	class UImage*			m_Category_Img;
+
 	enum EITEM_TYPE			eCategory;
 
 public:
@@ -29,7 +31,7 @@ public:
 	void Clear();
 	bool IsInventoryOpened();
 	void SetStatUI(APlayerState* _PlayerState);
-	void SetCategoryText(EITEM_TYPE _Type);
+	void SetCategoryUI(EITEM_TYPE _Type);
 
 public:
 	virtual void NativeConstruct() override;

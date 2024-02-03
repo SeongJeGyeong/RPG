@@ -20,7 +20,7 @@ private:
 	class UImage*	m_DishImg;
 
 	class UItem_InvenData* m_ItemData;
-	EITEM_TYPE	eCaterogy;
+	EEQUIP_SLOT	eSlotType;
 
 	class UTextBlock* ItemSlotText;
 	class UTextBlock* ItemNameText;
@@ -33,8 +33,8 @@ public:
 	void SetItemSlotUI(class UTextBlock* _SlotText) { ItemSlotText = _SlotText; }
 	void SetItemNameUI(class UTextBlock* _NameText) { ItemNameText = _NameText; }
 	void SetItemListUI(class UUI_EquipItemList* _ItemList) { ItemList = _ItemList; }
-	void SetItemType(EITEM_TYPE _Type) { eCaterogy = _Type; }
-	EITEM_TYPE GetItemType() { return eCaterogy; }
+	void SetSlotType(EEQUIP_SLOT _Type) { eSlotType = _Type; }
+	EEQUIP_SLOT GetSlotType() { return eSlotType; }
 	class UButton* GetItemBtn() { return m_ItemBtn; }
 
 	UFUNCTION()
