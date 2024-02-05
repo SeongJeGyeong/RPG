@@ -54,81 +54,6 @@ void UUI_EquipMain::NativeConstruct()
 		OnNativeVisibilityChanged.AddUObject(this, &UUI_EquipMain::ListVisibilityChanged);
 	}
 
-	m_Weapon_1 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Weapon_1")));
-	m_Weapon_2 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Weapon_2")));
-	m_Weapon_3 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Weapon_3")));
-	m_Shield_1 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Shield_1")));
-	m_Shield_2 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Shield_2")));
-	m_Shield_3 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Shield_3")));
-	m_Arrow = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Arrow")));
-	m_Bolt = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Bolt")));
-	m_Helm = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Helm")));
-	m_Chest = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Chest")));
-	m_Gauntlet = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Gauntlet")));
-	m_Leggings = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Leggings")));
-	m_Accessorie_1 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_1")));
-	m_Accessorie_2 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_2")));
-	m_Accessorie_3 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_3")));
-	m_Accessorie_4 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_4")));
-	m_Consumable_1 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_1")));
-	m_Consumable_2 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_2")));
-	m_Consumable_3 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_3")));
-	m_Consumable_4 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_4")));
-	m_Consumable_5 = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_5")));
-
-	if (!IsValid(m_Weapon_1) || !IsValid(m_Weapon_2) || !IsValid(m_Weapon_3) || !IsValid(m_Shield_1) || !IsValid(m_Shield_2) || !IsValid(m_Shield_3) ||
-		!IsValid(m_Arrow) || !IsValid(m_Bolt) || !IsValid(m_Helm) || !IsValid(m_Chest) || !IsValid(m_Gauntlet) || !IsValid(m_Leggings) ||
-		!IsValid(m_Accessorie_1) || !IsValid(m_Accessorie_2) || !IsValid(m_Accessorie_3) || !IsValid(m_Accessorie_4) || 
-		!IsValid(m_Consumable_1) || !IsValid(m_Consumable_2) || !IsValid(m_Consumable_3) || !IsValid(m_Consumable_4) || !IsValid(m_Consumable_5))
-	{
-		UE_LOG(LogTemp, Error, TEXT("아이템슬롯 캐스팅 실패"));
-	}
-	else
-	{
-		InitEquipSlot(m_Weapon_1);
-		m_Weapon_1->SetSlotType(EEQUIP_SLOT::WEAPON_1);
-		InitEquipSlot(m_Weapon_2);
-		m_Weapon_2->SetSlotType(EEQUIP_SLOT::WEAPON_2);
-		InitEquipSlot(m_Weapon_3);
-		m_Weapon_3->SetSlotType(EEQUIP_SLOT::WEAPON_3);
-		InitEquipSlot(m_Shield_1);
-		m_Shield_1->SetSlotType(EEQUIP_SLOT::SHIELD_1);
-		InitEquipSlot(m_Shield_2);
-		m_Shield_2->SetSlotType(EEQUIP_SLOT::SHIELD_2);
-		InitEquipSlot(m_Shield_3);
-		m_Shield_3->SetSlotType(EEQUIP_SLOT::SHIELD_3);
-		InitEquipSlot(m_Arrow);
-		m_Arrow->SetSlotType(EEQUIP_SLOT::ARROW);
-		InitEquipSlot(m_Bolt);
-		m_Bolt->SetSlotType(EEQUIP_SLOT::BOLT);
-		InitEquipSlot(m_Helm);
-		m_Helm->SetSlotType(EEQUIP_SLOT::HELM);
-		InitEquipSlot(m_Chest);
-		m_Chest->SetSlotType(EEQUIP_SLOT::CHEST);
-		InitEquipSlot(m_Gauntlet);
-		m_Gauntlet->SetSlotType(EEQUIP_SLOT::GAUNTLET);
-		InitEquipSlot(m_Leggings);
-		m_Leggings->SetSlotType(EEQUIP_SLOT::LEGGINGS);
-		InitEquipSlot(m_Accessorie_1);
-		m_Accessorie_1->SetSlotType(EEQUIP_SLOT::ACCESSORIE_1);
-		InitEquipSlot(m_Accessorie_2);
-		m_Accessorie_2->SetSlotType(EEQUIP_SLOT::ACCESSORIE_2);
-		InitEquipSlot(m_Accessorie_3);
-		m_Accessorie_3->SetSlotType(EEQUIP_SLOT::ACCESSORIE_3);
-		InitEquipSlot(m_Accessorie_4);
-		m_Accessorie_4->SetSlotType(EEQUIP_SLOT::ACCESSORIE_4);
-		InitEquipSlot(m_Consumable_1);
-		m_Consumable_1->SetSlotType(EEQUIP_SLOT::CONSUMABLE_1);
-		InitEquipSlot(m_Consumable_2);
-		m_Consumable_2->SetSlotType(EEQUIP_SLOT::CONSUMABLE_2);
-		InitEquipSlot(m_Consumable_3);
-		m_Consumable_3->SetSlotType(EEQUIP_SLOT::CONSUMABLE_3);
-		InitEquipSlot(m_Consumable_4);
-		m_Consumable_4->SetSlotType(EEQUIP_SLOT::CONSUMABLE_4);
-		InitEquipSlot(m_Consumable_5);
-		m_Consumable_5->SetSlotType(EEQUIP_SLOT::CONSUMABLE_5);
-	}
-
 }
 
 void UUI_EquipMain::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -142,22 +67,4 @@ void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 	{
 		m_ItemList->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-//void UUI_EquipMain::ItemBtnClicked()
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("장비창 버튼 클릭"));
-//	RenewItemListUI()
-//	m_ItemList->SetVisibility(ESlateVisibility::Visible);
-//}
-
-void UUI_EquipMain::RenewItemListUI(EITEM_TYPE _Type)
-{
-}
-
-void UUI_EquipMain::InitEquipSlot(UUI_EquipItem* _SlotUI)
-{
-	_SlotUI->SetItemListUI(m_ItemList);
-	_SlotUI->SetItemNameUI(m_SelItemName);
-	_SlotUI->SetItemSlotUI(m_SelItemSlot);
 }

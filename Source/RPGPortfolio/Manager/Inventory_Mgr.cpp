@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../UI/UI_Base.h"
 #include "../Item/Item_InvenData.h"
+#include "Misc/ScopeLock.h"
 
 UWorld* UInventory_Mgr::m_World = nullptr;
 
@@ -204,4 +205,10 @@ bool UInventory_Mgr::CheckInventoryOpened()
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
 
 	return InventoryUI->IsInventoryOpened();
+}
+
+bool UInventory_Mgr::GetInvenStorage(TMap<EITEM_ID, FInvenItemRow>& _OutInvenStorage, int32 _Idx)
+{
+	_OutInvenStorage = m_InvenStorage[_Idx];
+	return true;
 }

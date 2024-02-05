@@ -15,15 +15,20 @@ class RPGPORTFOLIO_API UUI_EquipItem : public UUserWidget
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
+	EEQUIP_SLOT	eSlotType;
+
 	class UButton*	m_ItemBtn;
 	class UImage*	m_ItemImg;
 	class UImage*	m_DishImg;
 
 	class UItem_InvenData* m_ItemData;
-	EEQUIP_SLOT	eSlotType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UTextBlock* ItemSlotText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UTextBlock* ItemNameText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UUI_EquipItemList*	ItemList;
 	
 public:

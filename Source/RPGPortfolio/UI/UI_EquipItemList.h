@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_EquipItemList.generated.h"
 
+
+struct FInvenItemRow;
 /**
  * 
  */
@@ -20,7 +22,11 @@ private:
 	class UTileView*	m_TileView;
 
 public:
+	void SetCategoryText(FText _Text);
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+
+
+	void RenewItemListUI(EITEM_TYPE _Type);
 	void OnTileHovered(UObject* _ItemData, bool _Hovered);
 };

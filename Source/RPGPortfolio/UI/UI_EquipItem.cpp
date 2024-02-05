@@ -38,6 +38,96 @@ void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_EquipItem::ItemBtnClicked()
 {
+	switch ( eSlotType )
+	{
+	case EEQUIP_SLOT::WEAPON_1:
+		ItemList->SetCategoryText(FText::FromString(L"무기 1"));
+		ItemList->RenewItemListUI(EITEM_TYPE::WEAPON);
+		break;
+	case EEQUIP_SLOT::WEAPON_2:
+		ItemList->SetCategoryText(FText::FromString(L"무기 2"));
+		ItemList->RenewItemListUI(EITEM_TYPE::WEAPON);
+		break;
+	case EEQUIP_SLOT::WEAPON_3:
+		ItemList->SetCategoryText(FText::FromString(L"무기 3"));
+		ItemList->RenewItemListUI(EITEM_TYPE::WEAPON);
+		break;
+	case EEQUIP_SLOT::SHIELD_1:
+		ItemList->SetCategoryText(FText::FromString(L"방패 1"));
+		ItemList->RenewItemListUI(EITEM_TYPE::SHIELD);
+		break;
+	case EEQUIP_SLOT::SHIELD_2:
+		ItemList->SetCategoryText(FText::FromString(L"방패 2"));
+		ItemList->RenewItemListUI(EITEM_TYPE::SHIELD);
+		break;
+	case EEQUIP_SLOT::SHIELD_3:
+		ItemList->SetCategoryText(FText::FromString(L"방패 3"));
+		ItemList->RenewItemListUI(EITEM_TYPE::SHIELD);
+		break;
+	case EEQUIP_SLOT::ARROW:
+		ItemList->SetCategoryText(FText::FromString(L"화살"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ARROWS);
+		break;
+	case EEQUIP_SLOT::BOLT:
+		ItemList->SetCategoryText(FText::FromString(L"볼트"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ARROWS);
+		break;
+	case EEQUIP_SLOT::HELM:
+		ItemList->SetCategoryText(FText::FromString(L"투구"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ARM_HELM);
+		break;
+	case EEQUIP_SLOT::CHEST:
+		ItemList->SetCategoryText(FText::FromString(L"갑옷"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ARM_CHEST);
+		break;
+	case EEQUIP_SLOT::GAUNTLET:
+		ItemList->SetCategoryText(FText::FromString(L"장갑"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ARM_GAUNTLET);
+		break;
+	case EEQUIP_SLOT::LEGGINGS:
+		ItemList->SetCategoryText(FText::FromString(L"각반"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ARM_LEGGINGS);
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_1:
+		ItemList->SetCategoryText(FText::FromString(L"악세사리 1"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_2:
+		ItemList->SetCategoryText(FText::FromString(L"악세사리 2"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_3:
+		ItemList->SetCategoryText(FText::FromString(L"악세사리 3"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_4:
+		ItemList->SetCategoryText(FText::FromString(L"악세사리 4"));
+		ItemList->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_1:
+		ItemList->SetCategoryText(FText::FromString(L"소비아이템 1"));
+		ItemList->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_2:
+		ItemList->SetCategoryText(FText::FromString(L"소비아이템 2"));
+		ItemList->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_3:
+		ItemList->SetCategoryText(FText::FromString(L"소비아이템 3"));
+		ItemList->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_4:
+		ItemList->SetCategoryText(FText::FromString(L"소비아이템 4"));
+		ItemList->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_5:
+		ItemList->SetCategoryText(FText::FromString(L"소비아이템 5"));
+		ItemList->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		break;
+	default:
+		break;
+	}
+
 	ItemList->SetVisibility(ESlateVisibility::Visible);
 }
 
