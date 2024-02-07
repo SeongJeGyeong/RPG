@@ -6,6 +6,7 @@
 #include "Components/TileView.h"
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "UI_ItemTooltip.h"
 
 void UUI_EquipItemList::NativeConstruct()
 {
@@ -91,9 +92,12 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 
 		m_ListItemName->SetText(FText::FromString(pData->GetItemName()));
 		m_ListItemName->SetVisibility(ESlateVisibility::Visible);
+		m_Tooltip->SetTooltipUI(pData);
+		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		m_ListItemName->SetVisibility(ESlateVisibility::Hidden);
+		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

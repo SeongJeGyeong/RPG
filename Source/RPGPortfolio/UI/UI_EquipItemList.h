@@ -17,6 +17,9 @@ class RPGPORTFOLIO_API UUI_EquipItemList : public UUserWidget
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG", meta = ( AllowPrivateAccess = true ))
+	class UUI_ItemTooltip* m_Tooltip;
+
 	class UTextBlock*	m_SlotName;
 	class UTextBlock*	m_ListItemName;
 	class UTileView*	m_TileView;

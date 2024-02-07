@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "../Item/Item_InvenData.h"
 #include "UI_EquipItemList.h"
+#include "UI_ItemTooltip.h"
 #include "../Header/Enum.h"
 
 void UUI_EquipItem::NativeConstruct()
@@ -208,6 +209,8 @@ void UUI_EquipItem::ItemBtnHovered()
 	if (IsValid(ItemNameText) && IsValid(m_ItemData))
 	{
 		ItemNameText->SetText(FText::FromString(m_ItemData->GetItemName()));
+		m_Tooltip->SetTooltipUI(m_ItemData);
+		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
@@ -220,5 +223,9 @@ void UUI_EquipItem::ItemBtnUnHovered()
 	if (IsValid(ItemNameText))
 	{
 		ItemNameText->SetText(FText::GetEmpty());
+	}
+	if (m_Tooltip->GetVisibility() == ESlateVisibility::Visible)
+	{
+		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
