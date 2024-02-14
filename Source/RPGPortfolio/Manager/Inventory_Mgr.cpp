@@ -66,10 +66,10 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
 	// 없으면 인벤토리에 새 아이템을 추가한다.
 	// 있으면 인벤토리에 존재 하는 아이템의 스택을 1 올린다. 
-	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->ID].Find(_ID);
+	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->Type].Find(_ID);
 	if ( nullptr == pItemRow )
 	{
-		m_InvenStorage[(int32)pItemInfo->ID].Add(_ID, FInvenItemRow{pItemInfo, 1});
+		m_InvenStorage[(int32)pItemInfo->Type].Add(_ID, FInvenItemRow{pItemInfo, 1, EEQUIP_SLOT::EMPTY});
 	}
 	else
 	{
@@ -131,7 +131,7 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 	// 전체아이템 인벤토리일 경우
 	if (_Type == EITEM_TYPE::ALL)
 	{
-		for (int32 i = 0; i < (int32)EITEM_ID::END; ++i)
+		for (int32 i = 1; i < (int32)EITEM_TYPE::END; ++i)
 		{
 			for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
 			{
@@ -150,6 +150,7 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 				pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
 				pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
 				pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+				pItemData->SetEquiped(Iter.Value().EquipedSlot);
 
 				InventoryUI->AddItem(pItemData);
 			}
@@ -158,34 +159,26 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 	// 카테고리별 인벤토리일 경우
 	else
 	{
-		for (int32 i = 0; i < (int32)EITEM_ID::END; ++i)
+		for (auto Iter = m_InvenStorage[(int32)_Type].CreateConstIterator(); Iter; ++Iter)
 		{
-			for (auto Iter = m_InvenStorage[i].CreateConstIterator(); Iter; ++Iter)
-			{
-				UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-				if(Iter.Value().ItemInfo->Type == _Type)
-				{
-					pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
-					pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
-					pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
-					pItemData->SetItemQnt(Iter.Value().Stack);
-					pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-					pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
-					pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
-					pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
-					pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
-					pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
-					pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
-					pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
-					pItemData->SetItemType(Iter.Value().ItemInfo->Type);
-				}
-				else
-				{
-					continue;
-				}
+			UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
 
-				InventoryUI->AddItem(pItemData);
-			}
+			pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+			pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+			pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+			pItemData->SetItemQnt(Iter.Value().Stack);
+			pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+			pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+			pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+			pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+			pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+			pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+			pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+			pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+			pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+			pItemData->SetEquiped(Iter.Value().EquipedSlot);
+
+			InventoryUI->AddItem(pItemData);
 		}
 	}
 }
@@ -211,4 +204,9 @@ bool UInventory_Mgr::GetInvenStorage(TMap<EITEM_ID, FInvenItemRow>& _OutInvenSto
 {
 	_OutInvenStorage = m_InvenStorage[_Idx];
 	return true;
+}
+
+void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
+{
+	m_InvenStorage[(int32)_ID].Find(_ID);
 }

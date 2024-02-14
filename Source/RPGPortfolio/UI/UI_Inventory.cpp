@@ -8,12 +8,13 @@
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
 #include "../System/PlayerState_Base.h"
-#include "UI_ItemTooltip.h"
-#include "UI_PlayerStat.h"
 #include "../Header/Enum.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "PaperSprite.h"
 #include "Styling/SlateBrush.h"
+#include "UI_ItemTooltip.h"
+#include "UI_PlayerStat.h"
+#include "UI_InvenItem.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -102,6 +103,10 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 {
 	if (_Hovered)
 	{
+		// 인벤토리에서는 메뉴앵커 표시 되도록
+		UUI_InvenItem* ItemUI = Cast<UUI_InvenItem>(m_TileView->GetEntryWidgetFromItem(_ItemData));
+		ItemUI->SetAnchorActive(true);
+
 		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 
 		m_ItemName->SetText(FText::FromString(pData->GetItemName()));

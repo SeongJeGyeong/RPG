@@ -7,6 +7,7 @@
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "UI_ItemTooltip.h"
+#include "UI_InvenItem.h"
 
 void UUI_EquipItemList::NativeConstruct()
 {
@@ -47,57 +48,56 @@ void UUI_EquipItemList::RenewItemListUI(EITEM_TYPE _Type)
 	else
 	{
 		m_TileView->ClearListItems();
-
 	}
 
-	TMap<EITEM_ID, FInvenItemRow> InvenStorageMap[(int32)EITEM_ID::END];
+	TMap<EITEM_ID, FInvenItemRow> InvenStorageMap;
 
-	for ( int32 i = 0; i < (int32)EITEM_ID::END; ++i )
+	UInventory_Mgr::GetInst(GetWorld())->GetInvenStorage(InvenStorageMap, (int32)_Type);
+
+	for (auto Iter = InvenStorageMap.CreateConstIterator(); Iter; ++Iter)
 	{
-		UInventory_Mgr::GetInst(GetWorld())->GetInvenStorage(InvenStorageMap[i], i);
+		UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
 
-		for (auto Iter = InvenStorageMap[i].CreateConstIterator(); Iter; ++Iter)
-		{
-			UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-			if (Iter.Value().ItemInfo->Type == _Type)
-			{
-				pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
-				pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
-				pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
-				pItemData->SetItemQnt(Iter.Value().Stack);
-				pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-				pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
-				pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
-				pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
-				pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
-				pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
-				pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
-				pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
-				pItemData->SetItemType(Iter.Value().ItemInfo->Type);
-			}
-			else
-			{
-				continue;
-			}
-			m_TileView->AddItem(pItemData);
-		}
+		pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+		pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+		pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+		pItemData->SetItemQnt(Iter.Value().Stack);
+		pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+		pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+		pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+		pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+		pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+		pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+		pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+		pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+		pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+		pItemData->SetEquiped(Iter.Value().EquipedSlot);
+
+		m_TileView->AddItem(pItemData);
 	}
 }
 
 void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 {
+	UUI_InvenItem* ItemUI = Cast<UUI_InvenItem>(m_TileView->GetEntryWidgetFromItem(_ItemData));
 	if (_Hovered)
 	{
+		// 장비할 아이템목록에서는 메뉴앵커 표시 안되도록
+		ItemUI->SetAnchorActive(false);
+		ItemUI->SetSelectedSlot(eEquipSlot);
+
 		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 
 		m_ListItemName->SetText(FText::FromString(pData->GetItemName()));
 		m_ListItemName->SetVisibility(ESlateVisibility::Visible);
 		m_Tooltip->SetTooltipUI(pData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
+		
 	}
 	else
 	{
 		m_ListItemName->SetVisibility(ESlateVisibility::Hidden);
 		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
+		ItemUI->SetSelectedSlot(EEQUIP_SLOT::EMPTY);
 	}
 }

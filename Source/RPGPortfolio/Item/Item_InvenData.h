@@ -21,7 +21,6 @@ private:
 	FString	m_ItemDesc;
 	uint16	m_ItemQnt;
 	EITEM_TYPE m_ItemType;
-	
 
 	float	m_ATK;
 	float	m_DEF;
@@ -32,6 +31,7 @@ private:
 	int32	m_Require_Dex;
 	int32	m_Require_Int;
 
+	EEQUIP_SLOT	bEquiped;
 
 public:
 	const FString& GetItemName() { return m_ItemName; }
@@ -72,4 +72,7 @@ public:
 
 	const int32& GetRequireInt() { return m_Require_Int; }
 	void SetRequireInt(const int32& _Require_Int) { m_Require_Int = _Require_Int; }
+
+	const EEQUIP_SLOT& GetEquiped() { return bEquiped; }
+	void SetEquiped(const EEQUIP_SLOT& _Equiped) { bEquiped = _Equiped; }
 };

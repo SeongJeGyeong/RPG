@@ -137,4 +137,5 @@ enum class EEQUIP_SLOT : uint8
 	CONSUMABLE_4,
 	CONSUMABLE_5,
 
+	EMPTY,
 };

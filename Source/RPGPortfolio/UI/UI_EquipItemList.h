@@ -23,8 +23,11 @@ private:
 	class UTextBlock*	m_SlotName;
 	class UTextBlock*	m_ListItemName;
 	class UTileView*	m_TileView;
+	EEQUIP_SLOT		eEquipSlot;
+
 
 public:
+	void SetSlotCategory(EEQUIP_SLOT _EquipSlot) { eEquipSlot = _EquipSlot; }
 	void SetCategoryText(FText _Text);
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;

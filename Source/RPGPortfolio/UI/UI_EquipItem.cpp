@@ -39,6 +39,7 @@ void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_EquipItem::ItemBtnClicked()
 {
+	ItemList->SetSlotCategory(eSlotType);
 	switch ( eSlotType )
 	{
 	case EEQUIP_SLOT::WEAPON_1:

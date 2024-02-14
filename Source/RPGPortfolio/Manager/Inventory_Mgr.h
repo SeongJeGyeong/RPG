@@ -15,6 +15,7 @@ struct FInvenItemRow
 
 	FGameItemInfo*	ItemInfo;
 	uint32		Stack;
+	EEQUIP_SLOT	EquipedSlot;
 };
 
 UCLASS()
@@ -28,7 +29,7 @@ private:
 private:
 	UDataTable* m_ItemDataTable;
 	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;
-	TMap<EITEM_ID, FInvenItemRow>	m_InvenStorage[(int32)EITEM_ID::END];
+	TMap<EITEM_ID, FInvenItemRow>	m_InvenStorage[(int32)EITEM_TYPE::END];
 
 public:
 	static UInventory_Mgr* GetInst(UWorld* _World);
@@ -42,6 +43,8 @@ public:
 	bool CheckInventoryOpened();
 
 	bool GetInvenStorage(TMap<EITEM_ID, FInvenItemRow>& _OutInvenStorage, int32 _Idx);
+
+	void ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);

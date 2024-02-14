@@ -20,13 +20,20 @@ private:
 	class UTextBlock*	m_ItemDesc;
 	class UTextBlock*	m_ItemQnt;
 	class UImage*		m_ItemImg;
+	class UImage*		m_EquipMark;
 	class UButton*		m_ItemBtn;
 	class UItem_InvenData* m_ItemData;
 	class UMenuAnchor*	m_MenuAnchor;
 
+	bool bAnchorActive;
+	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
+
 public:
 	UFUNCTION()
 	void InitFromData(UObject* _Data);
+
+	void SetAnchorActive(bool _AnchorActive) { bAnchorActive = _AnchorActive; }
+	void SetSelectedSlot(EEQUIP_SLOT _SelectedSlot) { eSelectedSlot = _SelectedSlot; }
 
 public:
 	virtual void NativeConstruct() override;
