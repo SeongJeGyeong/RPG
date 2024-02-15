@@ -5,9 +5,10 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
+#include "Components/MenuAnchor.h"
 #include "../Item/Item_InvenData.h"
 #include "UI_Inventory.h"
-#include "Components/MenuAnchor.h"
+#include "../Manager/Inventory_Mgr.h"
 
 void UUI_InvenItem::NativeConstruct()
 {
@@ -63,7 +64,11 @@ void UUI_InvenItem::InitFromData(UObject* _Data)
 	// 아이템 수량 세팅
 	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), m_ItemData->GetItemQnt())));
 
-	if (m_ItemData->GetEquiped() != EEQUIP_SLOT::EMPTY)
+	if (m_ItemData->GetEquiped() == EEQUIP_SLOT::EMPTY)
+	{
+		m_EquipMark->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
 	{
 		m_EquipMark->SetVisibility(ESlateVisibility::Visible);
 	}
@@ -77,6 +82,7 @@ void UUI_InvenItem::ItemBtnClicked()
 	}
 	else
 	{
+		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
 		m_EquipMark->SetVisibility(ESlateVisibility::Visible);
 	}
 }

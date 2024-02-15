@@ -20,7 +20,8 @@ private:
 	FString	m_ItemImgPath;
 	FString	m_ItemDesc;
 	uint16	m_ItemQnt;
-	EITEM_TYPE m_ItemType;
+	EITEM_TYPE	m_ItemType;
+	EITEM_ID	m_ItemID;
 
 	float	m_ATK;
 	float	m_DEF;
@@ -48,6 +49,9 @@ public:
 
 	const EITEM_TYPE& GetItemType() { return m_ItemType; }
 	void SetItemType(const EITEM_TYPE& _ItemType) { m_ItemType = _ItemType; }
+
+	const EITEM_ID& GetItemID() { return m_ItemID; }
+	void SetItemID(const EITEM_ID& _ItemID) { m_ItemID = _ItemID; }
 
 	const float& GetAtkVal() { return m_ATK; }
 	void SetAtkVal(const float& _ATK) { m_ATK  = _ATK;}

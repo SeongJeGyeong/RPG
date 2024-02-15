@@ -153,7 +153,7 @@ void UUI_Inventory::RightBtnClicked()
 	}
 }
 
-void UUI_Inventory::AddItem(UObject* _ItemData)
+void UUI_Inventory::AddInventoryItem(UObject* _ItemData)
 {
 	m_TileView->AddItem(_ItemData);
 }

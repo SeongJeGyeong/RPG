@@ -4,11 +4,12 @@
 #include "Inventory_Mgr.h"
 #include "../GameInstance_Base.h"
 #include "../UI/UI_Inventory.h"
+#include "../UI/UI_EquipMain.h"
+#include "../UI/UI_EquipItemList.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "../UI/UI_Base.h"
 #include "../Item/Item_InvenData.h"
-#include "Misc/ScopeLock.h"
 
 UWorld* UInventory_Mgr::m_World = nullptr;
 
@@ -151,8 +152,9 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 				pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
 				pItemData->SetItemType(Iter.Value().ItemInfo->Type);
 				pItemData->SetEquiped(Iter.Value().EquipedSlot);
+				pItemData->SetItemID(Iter.Key());
 
-				InventoryUI->AddItem(pItemData);
+				InventoryUI->AddInventoryItem(pItemData);
 			}
 		}
 	}
@@ -177,14 +179,49 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 			pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
 			pItemData->SetItemType(Iter.Value().ItemInfo->Type);
 			pItemData->SetEquiped(Iter.Value().EquipedSlot);
-
-			InventoryUI->AddItem(pItemData);
+			pItemData->SetItemID(Iter.Key());
+			
+			InventoryUI->AddInventoryItem(pItemData);
 		}
 	}
 }
 
 void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
+
+	UUI_EquipItemList* EquipItemListUI = EquipMainUI->GetItemList();
+	EquipItemListUI->ClearTileView();
+
+	for (auto Iter = m_InvenStorage[(int32)_Type].CreateConstIterator(); Iter; ++Iter)
+	{
+		UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+
+		pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+		pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+		pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+		pItemData->SetItemQnt(Iter.Value().Stack);
+		pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+		pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+		pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+		pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+		pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+		pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+		pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+		pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+		pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+		pItemData->SetEquiped(Iter.Value().EquipedSlot);
+		pItemData->SetItemID(Iter.Key());
+
+		EquipItemListUI->AddEquipItemList(pItemData);
+	}
 }
 
 bool UInventory_Mgr::CheckInventoryOpened()
@@ -208,5 +245,74 @@ bool UInventory_Mgr::GetInvenStorage(TMap<EITEM_ID, FInvenItemRow>& _OutInvenSto
 
 void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
-	m_InvenStorage[(int32)_ID].Find(_ID);
+	EITEM_TYPE _Type;
+	switch ( _Slot )
+	{
+	case EEQUIP_SLOT::WEAPON_1:
+	case EEQUIP_SLOT::WEAPON_2:
+	case EEQUIP_SLOT::WEAPON_3:
+		_Type = EITEM_TYPE::WEAPON;
+		break;
+	case EEQUIP_SLOT::SHIELD_1:
+	case EEQUIP_SLOT::SHIELD_2:
+	case EEQUIP_SLOT::SHIELD_3:
+		_Type = EITEM_TYPE::SHIELD;
+		break;
+	case EEQUIP_SLOT::ARROW:
+		_Type = EITEM_TYPE::ARROWS;
+		break;
+	case EEQUIP_SLOT::BOLT:
+		_Type = EITEM_TYPE::ARROWS;
+		break;
+	case EEQUIP_SLOT::HELM:
+		_Type = EITEM_TYPE::ARM_HELM;
+		break;
+	case EEQUIP_SLOT::CHEST:
+		_Type = EITEM_TYPE::ARM_CHEST;
+		break;
+	case EEQUIP_SLOT::GAUNTLET:
+		_Type = EITEM_TYPE::ARM_GAUNTLET;
+		break;
+	case EEQUIP_SLOT::LEGGINGS:
+		_Type = EITEM_TYPE::ARM_LEGGINGS;
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_1:
+	case EEQUIP_SLOT::ACCESSORIE_2:
+	case EEQUIP_SLOT::ACCESSORIE_3:
+	case EEQUIP_SLOT::ACCESSORIE_4:
+		_Type = EITEM_TYPE::ACCESSORIE;
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_1:
+	case EEQUIP_SLOT::CONSUMABLE_2:
+	case EEQUIP_SLOT::CONSUMABLE_3:
+	case EEQUIP_SLOT::CONSUMABLE_4:
+	case EEQUIP_SLOT::CONSUMABLE_5:
+		_Type = EITEM_TYPE::CONSUMABLE;
+		break;
+	default:
+		break;
+	}
+
+	if (m_InvenStorage[(int32)_Type].Find(_ID)->EquipedSlot == _Slot)
+	{
+		FInvenItemRow* pItemRow = m_InvenStorage[(int32)_Type].Find(_ID);
+		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
+		m_InvenStorage[(int32)_Type].Add(_ID, *pItemRow);
+		RenewItemListUI(_Type);
+		return;
+	}
+
+	for (auto Iter = m_InvenStorage[(int32)_Type].CreateIterator(); Iter; ++Iter)
+	{
+		if (Iter.Key() != _ID && Iter.Value().EquipedSlot == _Slot)
+		{
+			Iter.Value().EquipedSlot = EEQUIP_SLOT::EMPTY;
+		}
+		else if (Iter.Key() == _ID)
+		{
+			Iter.Value().EquipedSlot = _Slot;
+		}
+	}
+
+	RenewItemListUI(_Type);
 }

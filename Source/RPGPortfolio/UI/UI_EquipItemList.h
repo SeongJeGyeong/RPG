@@ -32,7 +32,8 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
-
-	void RenewItemListUI(EITEM_TYPE _Type);
+	void AddEquipItemList(UObject* _ItemData);
+	void ClearTileView();
+	//void RenewItemListUI(EITEM_TYPE _Type);
 	void OnTileHovered(UObject* _ItemData, bool _Hovered);
 };

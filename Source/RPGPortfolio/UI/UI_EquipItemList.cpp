@@ -38,44 +38,57 @@ void UUI_EquipItemList::SetCategoryText(FText _Text)
 	m_SlotName->SetText(_Text);
 }
 
-void UUI_EquipItemList::RenewItemListUI(EITEM_TYPE _Type)
+void UUI_EquipItemList::AddEquipItemList(UObject* _ItemData)
 {
-	if ( !IsValid(m_TileView) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("장착할 아이템 타일뷰 불러오지 못함"));
-		return;
-	}
-	else
+	m_TileView->AddItem(_ItemData);
+}
+
+void UUI_EquipItemList::ClearTileView()
+{
+	if (IsValid(m_TileView))
 	{
 		m_TileView->ClearListItems();
 	}
-
-	TMap<EITEM_ID, FInvenItemRow> InvenStorageMap;
-
-	UInventory_Mgr::GetInst(GetWorld())->GetInvenStorage(InvenStorageMap, (int32)_Type);
-
-	for (auto Iter = InvenStorageMap.CreateConstIterator(); Iter; ++Iter)
-	{
-		UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-
-		pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
-		pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
-		pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
-		pItemData->SetItemQnt(Iter.Value().Stack);
-		pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-		pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
-		pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
-		pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
-		pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
-		pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
-		pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
-		pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
-		pItemData->SetItemType(Iter.Value().ItemInfo->Type);
-		pItemData->SetEquiped(Iter.Value().EquipedSlot);
-
-		m_TileView->AddItem(pItemData);
-	}
 }
+
+//void UUI_EquipItemList::RenewItemListUI(EITEM_TYPE _Type)
+//{
+//	if ( !IsValid(m_TileView) )
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("장착할 아이템 타일뷰 불러오지 못함"));
+//		return;
+//	}
+//	else
+//	{
+//	}
+//
+//	TMap<EITEM_ID, FInvenItemRow> InvenStorageMap;
+//
+//	UInventory_Mgr::GetInst(GetWorld())->GetInvenStorage(InvenStorageMap, (int32)_Type);
+//
+//	for (auto Iter = InvenStorageMap.CreateConstIterator(); Iter; ++Iter)
+//	{
+//		UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+//
+//		pItemData->SetItemImgPath(Iter.Value().ItemInfo->IconImgPath);
+//		pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
+//		pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
+//		pItemData->SetItemQnt(Iter.Value().Stack);
+//		pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
+//		pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+//		pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
+//		pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
+//		pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
+//		pItemData->SetRequireDex(Iter.Value().ItemInfo->Require_Dex);
+//		pItemData->SetRequireInt(Iter.Value().ItemInfo->Require_Int);
+//		pItemData->SetMaximumStack(Iter.Value().ItemInfo->Maximum_Stack);
+//		pItemData->SetItemType(Iter.Value().ItemInfo->Type);
+//		pItemData->SetEquiped(Iter.Value().EquipedSlot);
+//		pItemData->SetItemID(Iter.Key());
+//
+//		m_TileView->AddItem(pItemData);
+//	}
+//}
 
 void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 {

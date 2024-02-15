@@ -27,7 +27,7 @@ private:
 	enum EITEM_TYPE			eCategory;
 
 public:
-	void AddItem(UObject* _ItemData);
+	void AddInventoryItem(UObject* _ItemData);
 	void Clear();
 	bool IsInventoryOpened();
 	void SetStatUI(APlayerState* _PlayerState);
