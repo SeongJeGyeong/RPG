@@ -38,6 +38,24 @@ void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 	Super::NativeTick(_Geo, _DeltaTime);
 }
 
+void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
+{
+	m_ItemData = _ItemData;
+	if (m_ItemData == nullptr)
+	{
+		m_ItemImg->SetVisibility(ESlateVisibility::Hidden);
+		m_DishImg->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		FString ItemImgPath = m_ItemData->GetItemImgPath();
+		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+		m_ItemImg->SetBrushFromTexture(pTex2D);
+		m_ItemImg->SetVisibility(ESlateVisibility::Visible);
+		m_DishImg->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
 void UUI_EquipItem::ItemBtnClicked()
 {
 	ItemList->SetSlotCategory(eSlotType);

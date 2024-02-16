@@ -10,6 +10,7 @@
 #include "UI_EquipItemList.h"
 #include "../System/PlayerState_Base.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Item/Item_InvenData.h"
 
 void UUI_EquipMain::NativeConstruct()
 {
@@ -67,4 +68,80 @@ void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 	{
 		m_ItemList->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, UItem_InvenData* _ItemData)
+{
+	UUI_EquipItem* pEquipItem = nullptr;
+
+	switch (_Slot)
+	{
+	case EEQUIP_SLOT::WEAPON_1:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Weapon_1")));
+		break;
+	case EEQUIP_SLOT::WEAPON_2:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Weapon_2")));
+		break;
+	case EEQUIP_SLOT::WEAPON_3:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Weapon_3")));
+		break;
+	case EEQUIP_SLOT::SHIELD_1:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Shield_1")));
+		break;
+	case EEQUIP_SLOT::SHIELD_2:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Shield_2")));
+		break;
+	case EEQUIP_SLOT::SHIELD_3:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Shield_3")));
+		break;
+	case EEQUIP_SLOT::ARROW:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Arrow")));
+		break;
+	case EEQUIP_SLOT::BOLT:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Bolt")));
+		break;
+	case EEQUIP_SLOT::HELM:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Helm")));
+		break;
+	case EEQUIP_SLOT::CHEST:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Chest")));
+		break;
+	case EEQUIP_SLOT::GAUNTLET:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Gauntlet")));
+		break;
+	case EEQUIP_SLOT::LEGGINGS:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Leggings")));
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_1:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_1")));
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_2:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_2")));
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_3:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_3")));
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_4:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Accessorie_4")));
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_1:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_1")));
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_2:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_2")));
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_3:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_3")));
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_4:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_4")));
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_5:
+		pEquipItem = Cast<UUI_EquipItem>(GetWidgetFromName(TEXT("Consumable_5")));
+		break;
+	default:
+		break;
+	}
+
+	pEquipItem->SetEquipItem(_ItemData);
 }

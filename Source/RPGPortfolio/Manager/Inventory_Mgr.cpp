@@ -237,12 +237,6 @@ bool UInventory_Mgr::CheckInventoryOpened()
 	return InventoryUI->IsInventoryOpened();
 }
 
-bool UInventory_Mgr::GetInvenStorage(TMap<EITEM_ID, FInvenItemRow>& _OutInvenStorage, int32 _Idx)
-{
-	_OutInvenStorage = m_InvenStorage[_Idx];
-	return true;
-}
-
 void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	EITEM_TYPE _Type;
@@ -299,6 +293,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
 		m_InvenStorage[(int32)_Type].Add(_ID, *pItemRow);
 		RenewItemListUI(_Type);
+		RenewEquipItemUI(_Slot);
 		return;
 	}
 
@@ -313,6 +308,45 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			Iter.Value().EquipedSlot = _Slot;
 		}
 	}
-
 	RenewItemListUI(_Type);
+
+	FInvenItemRow* pItemRow = m_InvenStorage[(int32)_Type].Find(_ID);
+	RenewEquipItemUI(_Slot, pItemRow);
+}
+
+void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
+
+	if (_ItemRow == nullptr)
+	{
+		EquipMainUI->RenewEquipItem(_Slot);
+		return;
+	}
+
+	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+	pItemData->SetItemImgPath(_ItemRow->ItemInfo->IconImgPath);
+	pItemData->SetItemName(_ItemRow->ItemInfo->ItemName);
+	pItemData->SetItemDesc(_ItemRow->ItemInfo->Description);
+	pItemData->SetItemQnt(_ItemRow->Stack);
+	pItemData->SetAtkVal(_ItemRow->ItemInfo->ATK);
+	pItemData->SetDefVal(_ItemRow->ItemInfo->DEF);
+	pItemData->SetRestoreHP(_ItemRow->ItemInfo->Restore_HP);
+	pItemData->SetRestoreMP(_ItemRow->ItemInfo->Restore_MP);
+	pItemData->SetRequireStr(_ItemRow->ItemInfo->Require_Str);
+	pItemData->SetRequireDex(_ItemRow->ItemInfo->Require_Dex);
+	pItemData->SetRequireInt(_ItemRow->ItemInfo->Require_Int);
+	pItemData->SetMaximumStack(_ItemRow->ItemInfo->Maximum_Stack);
+	pItemData->SetItemType(_ItemRow->ItemInfo->Type);
+	pItemData->SetEquiped(_ItemRow->EquipedSlot);
+	pItemData->SetItemID(_ItemRow->ItemInfo->ID);
+
+	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 }

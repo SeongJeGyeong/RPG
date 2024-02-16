@@ -42,11 +42,10 @@ public:
 	void CloseInventoryUI();
 	bool CheckInventoryOpened();
 
-	bool GetInvenStorage(TMap<EITEM_ID, FInvenItemRow>& _OutInvenStorage, int32 _Idx);
-
 	void ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
 	void RenewItemListUI(EITEM_TYPE _Type);
+	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow = {});
 };

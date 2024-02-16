@@ -83,6 +83,6 @@ void UUI_InvenItem::ItemBtnClicked()
 	else
 	{
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
-		m_EquipMark->SetVisibility(ESlateVisibility::Visible);
+		//m_EquipMark->SetVisibility(ESlateVisibility::Visible);
 	}
 }

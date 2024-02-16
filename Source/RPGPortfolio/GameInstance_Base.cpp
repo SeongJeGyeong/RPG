@@ -6,6 +6,7 @@
 
 UGameInstance_Base::UGameInstance_Base()
 	: m_InvenMgr(nullptr)
+	, m_EquipMgr(nullptr)
 {
 	ConstructorHelpers::FObjectFinder<UDataTable> ItemTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_ItemInfo.DT_ItemInfo'"));
 	if (ItemTable.Succeeded())

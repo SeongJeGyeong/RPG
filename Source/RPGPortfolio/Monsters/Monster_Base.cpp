@@ -58,7 +58,8 @@ void AMonster_Base::OnConstruction(const FTransform& _Transform)
 {
 	Super::OnConstruction(_Transform);
 
-	FMonsterInfo* pInfo = nullptr;
+	FMonsterInfo* pInfo
+		;
 
 	if (IsValid(m_TableRow.DataTable) && !m_TableRow.RowName.IsNone())
 	{

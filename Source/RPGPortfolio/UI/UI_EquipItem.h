@@ -44,6 +44,8 @@ public:
 	EEQUIP_SLOT GetSlotType() { return eSlotType; }
 	class UButton* GetItemBtn() { return m_ItemBtn; }
 
+	void SetEquipItem(UItem_InvenData* _ItemData);
+
 	UFUNCTION()
 	void ItemBtnClicked();
 	UFUNCTION()

@@ -7,6 +7,7 @@
 #include "GameInstance_Base.generated.h"
 
 class UInventory_Mgr;
+class UEquip_Mgr;
 
 UCLASS()
 class RPGPORTFOLIO_API UGameInstance_Base : public UGameInstance
@@ -15,6 +16,7 @@ class RPGPORTFOLIO_API UGameInstance_Base : public UGameInstance
 	
 private:
 	UInventory_Mgr*		m_InvenMgr;
+	UEquip_Mgr*			m_EquipMgr;
 
 public:
 	UGameInstance_Base();
@@ -22,4 +24,5 @@ public:
 
 	// Inventory_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음
 	friend class UInventory_Mgr;
+	friend class UEquip_Mgr;
 };
