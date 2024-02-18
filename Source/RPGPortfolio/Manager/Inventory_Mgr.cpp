@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../UI/UI_Base.h"
 #include "../Item/Item_InvenData.h"
+#include "../Manager/Equip_Mgr.h"
 
 UWorld* UInventory_Mgr::m_World = nullptr;
 
@@ -303,8 +304,14 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		{
 			Iter.Value().EquipedSlot = EEQUIP_SLOT::EMPTY;
 		}
-		else if (Iter.Key() == _ID)
+
+		if (Iter.Key() == _ID)
 		{
+			if (Iter.Value().EquipedSlot != EEQUIP_SLOT::EMPTY)
+			{
+				RenewEquipItemUI(Iter.Value().EquipedSlot);
+			}
+
 			Iter.Value().EquipedSlot = _Slot;
 		}
 	}
@@ -325,9 +332,14 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
 
+	int32 Index = UEquip_Mgr::GetInst(m_World)->ConvertSlotToIdx(_Slot);
 	if (_ItemRow == nullptr)
 	{
 		EquipMainUI->RenewEquipItem(_Slot);
+		if (Index == UEquip_Mgr::GetInst(m_World)->GetCurrentIndex())
+		{
+			UEquip_Mgr::GetInst(m_World)->SetEquickSlotArray(_ItemRow, Index);
+		}
 		return;
 	}
 
@@ -349,4 +361,9 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	pItemData->SetItemID(_ItemRow->ItemInfo->ID);
 
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
+
+	if ( Index == UEquip_Mgr::GetInst(m_World)->GetCurrentIndex() )
+	{
+		UEquip_Mgr::GetInst(m_World)->SetEquickSlotArray(_ItemRow, Index);
+	}
 }

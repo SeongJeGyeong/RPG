@@ -198,6 +198,16 @@ struct FGameItemInfo
 
 };
 
+USTRUCT()
+struct FInvenItemRow
+{
+	GENERATED_USTRUCT_BODY()
+
+	FGameItemInfo* ItemInfo;
+	uint32		Stack;
+	EEQUIP_SLOT	EquipedSlot;
+};
+
 USTRUCT(Atomic, BlueprintType)
 struct FDroppedItemData
 {

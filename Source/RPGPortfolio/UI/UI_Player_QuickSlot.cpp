@@ -3,6 +3,7 @@
 
 #include "UI_Player_QuickSlot.h"
 #include "UI_Player_QuickSlotItem.h"
+#include "../Manager/Equip_Mgr.h"
 
 void UUI_Player_QuickSlot::NativeConstruct()
 {
@@ -15,9 +16,26 @@ void UUI_Player_QuickSlot::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("퀵슬롯 UI 캐스팅 실패"));
 	}
+	else
+	{
+		RenewLowerQuickSlot(0);
+	}
 }
 
 void UUI_Player_QuickSlot::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 {
 	Super::NativeTick(_Geo, _DeltaTime);
+}
+
+void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
+{
+	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetSlotForIndex(_Idx);
+	if (ItemData == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("하단 퀵슬롯의 지정된 인덱스에 아이템 설정되지 않음"));
+		m_LowerSlotItem->RenewQuickSlotItem(ItemData);
+		return;
+	}
+	m_LowerSlotItem->RenewQuickSlotItem(ItemData);
+	UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(_Idx);
 }

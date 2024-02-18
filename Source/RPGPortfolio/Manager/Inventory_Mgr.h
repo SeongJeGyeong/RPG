@@ -8,16 +8,6 @@
 #include "UObject/NoExportTypes.h"
 #include "Inventory_Mgr.generated.h"
 
-USTRUCT()
-struct FInvenItemRow
-{
-	GENERATED_USTRUCT_BODY()
-
-	FGameItemInfo*	ItemInfo;
-	uint32		Stack;
-	EEQUIP_SLOT	EquipedSlot;
-};
-
 UCLASS()
 class RPGPORTFOLIO_API UInventory_Mgr : public UObject
 {
