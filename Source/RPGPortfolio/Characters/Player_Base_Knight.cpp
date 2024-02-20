@@ -17,12 +17,13 @@
 #include "../UI/UI_StatusMain.h"
 #include "../UI/UI_EquipMain.h"
 #include "../UI/UI_EquipItemList.h"
+#include "../UI/UI_Player_QuickSlot.h"
 #include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../System/PlayerState_Base.h"
 #include "../Monsters/Monster_Base.h"
-
+#include "../Manager/Equip_Mgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -119,7 +120,7 @@ void APlayer_Base_Knight::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
-	MainUI = pGameMode->GetMainHUD();
+	m_MainUI = pGameMode->GetMainHUD();
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
@@ -232,6 +233,8 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::BACKTOPREV:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::BackToPrevMenu);
 				break;
+			case EInputActionType::QUICKSLOTCHANGE:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::QuickSlotChange);
 			default:
 				break;
 			}
@@ -476,7 +479,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 	pController->bShowMouseCursor = bShowMenu;
 	pController->SetPause(bShowMenu);
 
-	MainUI->ShowMenu(bShowMenu);
+	m_MainUI->ShowMenu(bShowMenu);
 }
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
@@ -524,6 +527,13 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 		EquipUI->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
+}
+
+void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
+{
+	int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
+	m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
+	UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()
@@ -620,9 +630,9 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
 	if(TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
 	{
-		UUI_Message_Main* Message = MainUI->GetMainMessageUI();
+		UUI_Message_Main* Message = m_MainUI->GetMainMessageUI();
 		Message->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
-		MainUI->ShowMessage(true);
+		m_MainUI->ShowMessage(true);
 		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
 	}
 }
@@ -653,7 +663,7 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 
 		if (OverlapItemArr.IsEmpty())
 		{
-			MainUI->ShowMessage(false);
+			m_MainUI->ShowMessage(false);
 		}
 	}
 }

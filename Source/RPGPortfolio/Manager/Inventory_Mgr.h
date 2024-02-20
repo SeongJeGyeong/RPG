@@ -37,5 +37,6 @@ public:
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
 	void RenewItemListUI(EITEM_TYPE _Type);
-	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow = {});
+	void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
+	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
 };

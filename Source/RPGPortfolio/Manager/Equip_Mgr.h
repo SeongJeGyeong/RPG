@@ -21,7 +21,7 @@ private:
 
 	// TFixedAllocator : 지정한 숫자만큼의 배열 메모리를 정적으로 할당
 	// 할당된 인덱스를 넘어서 엘리먼트를 추가하려고 하면 코드 오류 발생
-	TArray<FInvenItemRow*, TFixedAllocator<5>> QuickSlotArr = {nullptr, };
+	TArray<FInvenItemRow*, TFixedAllocator<5>> QuickSlotArr;
 
 	int32 CurQuickSlotIdx = 0;
 
@@ -29,13 +29,14 @@ public:
 	static UEquip_Mgr* GetInst(UWorld* _World);
 	static UEquip_Mgr* GetInst(UGameInstance* _GameInst);
 
-	FInvenItemRow* GetSlotForIndex(int32 _Idx) { return QuickSlotArr[_Idx]; }
+	FInvenItemRow* GetSlotForIndex(int32 _Idx);
 
-	void SetEquickItemData(FInvenItemRow _InvenItem, EEQUIP_SLOT _Slot);
-	void SetEquickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx);
+	void SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx);
+	void RenewQuickSlotUI(int32 _Idx);
 
-	int32 ConvertSlotToIdx(EEQUIP_SLOT _Slot);
+	int32 ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot);
 
 	int32 GetCurrentIndex() { return CurQuickSlotIdx; }
+	int32 GetNextArrayIndex();
 	void SetCurrentIndex(int32 _CurrentIdx) { CurQuickSlotIdx = _CurrentIdx; }
 };

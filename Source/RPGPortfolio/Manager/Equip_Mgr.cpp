@@ -30,29 +30,43 @@ UEquip_Mgr* UEquip_Mgr::GetInst(UGameInstance* _GameInst)
 	return pGameInst->m_EquipMgr;
 }
 
-void UEquip_Mgr::SetEquickItemData(FInvenItemRow _InvenItem, EEQUIP_SLOT _Slot)
+FInvenItemRow* UEquip_Mgr::GetSlotForIndex(int32 _Idx)
 {
+	if (QuickSlotArr.IsEmpty())
+	{
+		return nullptr;
+	}
 
+	return QuickSlotArr[_Idx];
 }
 
-void UEquip_Mgr::SetEquickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
+int32 UEquip_Mgr::GetNextArrayIndex()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-	if ( !IsValid(GameMode) )
+	if (CurQuickSlotIdx >= QuickSlotArr.Num() - 1)
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
-		return;
+		CurQuickSlotIdx = 0;
 	}
-	UUI_Base* MainUI = GameMode->GetMainHUD();
+	else
+	{
+		++CurQuickSlotIdx;
+	}
 
+	return CurQuickSlotIdx;
+}
+
+void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
+{
 	if (_InvenItem == nullptr)
 	{
-		QuickSlotArr[_Idx] = _InvenItem;
-
-		if (_Idx == CurQuickSlotIdx)
+		QuickSlotArr.RemoveAt(_Idx);
+		/*for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
 		{
-			MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
-		}
+			if ( QuickSlotArr[i] == nullptr)
+			{
+				continue;
+			}
+			UE_LOG(LogTemp, Display, TEXT("QuickSlotArr[%d] 채워짐"), i);
+		}*/
 		return;
 	}
 
@@ -64,20 +78,37 @@ void UEquip_Mgr::SetEquickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
 		}
 		if (QuickSlotArr[i]->ItemInfo->ID == _InvenItem->ItemInfo->ID && QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
 		{
-			QuickSlotArr[i] = nullptr;
+			QuickSlotArr.RemoveAt(i);
 			break;
 		}
 	}
 
-	QuickSlotArr[_Idx] = _InvenItem;
+	QuickSlotArr.Insert(_InvenItem, _Idx);
 
-	if (_Idx == CurQuickSlotIdx)
+	/*for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
 	{
-		MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
-	}
+		if (QuickSlotArr[i] == nullptr)
+		{
+			continue;
+		}
+		UE_LOG(LogTemp, Display, TEXT("QuickSlotArr[%d] 채워짐"), i);
+	}*/
 }
 
-int32 UEquip_Mgr::ConvertSlotToIdx(EEQUIP_SLOT _Slot)
+void UEquip_Mgr::RenewQuickSlotUI(int32 _Idx)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_Base* MainUI = GameMode->GetMainHUD();
+
+	MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
+}
+
+int32 UEquip_Mgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)
 {
 	int32 Index = -1;
 	switch ( _Slot )
@@ -135,7 +166,6 @@ int32 UEquip_Mgr::ConvertSlotToIdx(EEQUIP_SLOT _Slot)
 	default:
 		break;
 	}
-
 
 	return Index;
 }

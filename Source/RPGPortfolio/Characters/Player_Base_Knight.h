@@ -65,7 +65,7 @@ private:
 	int32 iBaseDamage;
 	bool bShowMenu;
 
-	class UUI_Base* MainUI;
+	class UUI_Base* m_MainUI;
 
 	TArray<class AItem_Dropped_Base*> OverlapItemArr;
 
@@ -116,6 +116,7 @@ private:
 	void OpenMenu(const FInputActionInstance& _Instance);
 	void ActionCommand(const FInputActionInstance& _Instance);
 	void BackToPrevMenu(const FInputActionInstance& _Instance);
+	void QuickSlotChange(const FInputActionInstance& _Instance);
 
 	bool CheckMontagePlaying();
 

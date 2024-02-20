@@ -288,18 +288,29 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		break;
 	}
 
+	// 이미 해당슬롯에 장비중인 아이템을 다시 클릭할 경우 장비슬롯을 EMPTY로 바꾼 후 스토리지에 다시 넣는다.
 	if (m_InvenStorage[(int32)_Type].Find(_ID)->EquipedSlot == _Slot)
 	{
 		FInvenItemRow* pItemRow = m_InvenStorage[(int32)_Type].Find(_ID);
 		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
 		m_InvenStorage[(int32)_Type].Add(_ID, *pItemRow);
 		RenewItemListUI(_Type);
-		RenewEquipItemUI(_Slot);
+		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다. 
+		if (_Type == EITEM_TYPE::CONSUMABLE)
+		{
+			RenewEquipConsumeUI(_Slot, nullptr);
+		}
+		else
+		{
+			RenewEquipItemUI(_Slot, nullptr);
+		}
+
 		return;
 	}
 
 	for (auto Iter = m_InvenStorage[(int32)_Type].CreateIterator(); Iter; ++Iter)
 	{
+		// 해당 장비슬롯에 다른 아이템이 장비되어있을 경우 기존에 장비되어있던 아이템의 장비슬롯을 EMPTY로 바꾼다.
 		if (Iter.Key() != _ID && Iter.Value().EquipedSlot == _Slot)
 		{
 			Iter.Value().EquipedSlot = EEQUIP_SLOT::EMPTY;
@@ -307,9 +318,10 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 		if (Iter.Key() == _ID)
 		{
+			// 장착할 아이템이 다른 장비슬롯에 장비되어있을 경우 해당 장비슬롯에서 장착해제 처리한다.
 			if (Iter.Value().EquipedSlot != EEQUIP_SLOT::EMPTY)
 			{
-				RenewEquipItemUI(Iter.Value().EquipedSlot);
+				RenewEquipItemUI(Iter.Value().EquipedSlot, nullptr);
 			}
 
 			Iter.Value().EquipedSlot = _Slot;
@@ -317,11 +329,20 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	}
 	RenewItemListUI(_Type);
 
-	FInvenItemRow* pItemRow = m_InvenStorage[(int32)_Type].Find(_ID);
-	RenewEquipItemUI(_Slot, pItemRow);
+	FInvenItemRow* pItemRow = m_InvenStorage[ (int32)_Type ].Find(_ID);
+
+	if (_Type == EITEM_TYPE::CONSUMABLE)
+	{
+		RenewEquipConsumeUI(_Slot, pItemRow);
+	}
+	else
+	{
+		RenewEquipItemUI(_Slot, pItemRow);
+	}
+
 }
 
-void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
+void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 
@@ -332,13 +353,19 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
 
-	int32 Index = UEquip_Mgr::GetInst(m_World)->ConvertSlotToIdx(_Slot);
-	if (_ItemRow == nullptr)
+	// 장비슬롯 열거형을 인덱스로 변환
+	int32 Index = UEquip_Mgr::GetInst(m_World)->ConvertQuickSlotToIdx(_Slot);
+	UE_LOG(LogTemp, Display, TEXT("지정된 슬롯 인덱스 : %d"), Index);
+	if ( _ItemRow == nullptr )
 	{
 		EquipMainUI->RenewEquipItem(_Slot);
-		if (Index == UEquip_Mgr::GetInst(m_World)->GetCurrentIndex())
+		UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index);
+
+		int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
+		UE_LOG(LogTemp, Display, TEXT("현재 슬롯 인덱스 : %d"), curIdx);
+		if ( Index == curIdx )
 		{
-			UEquip_Mgr::GetInst(m_World)->SetEquickSlotArray(_ItemRow, Index);
+			UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(Index);
 		}
 		return;
 	}
@@ -362,8 +389,49 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 
-	if ( Index == UEquip_Mgr::GetInst(m_World)->GetCurrentIndex() )
+	UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index);
+
+	int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
+	UE_LOG(LogTemp, Display, TEXT("현재 슬롯 인덱스 : %d"), curIdx);
+	if ( Index == curIdx )
 	{
-		UEquip_Mgr::GetInst(m_World)->SetEquickSlotArray(_ItemRow, Index);
+		UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(Index);
 	}
+}
+
+void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	if (!IsValid(GameMode))
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
+
+	if (_ItemRow == nullptr)
+	{
+		EquipMainUI->RenewEquipItem(_Slot);
+		return;
+	}
+
+	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+	pItemData->SetItemImgPath(_ItemRow->ItemInfo->IconImgPath);
+	pItemData->SetItemName(_ItemRow->ItemInfo->ItemName);
+	pItemData->SetItemDesc(_ItemRow->ItemInfo->Description);
+	pItemData->SetItemQnt(_ItemRow->Stack);
+	pItemData->SetAtkVal(_ItemRow->ItemInfo->ATK);
+	pItemData->SetDefVal(_ItemRow->ItemInfo->DEF);
+	pItemData->SetRestoreHP(_ItemRow->ItemInfo->Restore_HP);
+	pItemData->SetRestoreMP(_ItemRow->ItemInfo->Restore_MP);
+	pItemData->SetRequireStr(_ItemRow->ItemInfo->Require_Str);
+	pItemData->SetRequireDex(_ItemRow->ItemInfo->Require_Dex);
+	pItemData->SetRequireInt(_ItemRow->ItemInfo->Require_Int);
+	pItemData->SetMaximumStack(_ItemRow->ItemInfo->Maximum_Stack);
+	pItemData->SetItemType(_ItemRow->ItemInfo->Type);
+	pItemData->SetEquiped(_ItemRow->EquipedSlot);
+	pItemData->SetItemID(_ItemRow->ItemInfo->ID);
+
+	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 }

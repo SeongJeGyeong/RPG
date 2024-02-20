@@ -17,6 +17,7 @@ enum class EInputActionType : uint8
 	OPENMENU,
 	ACTION,
 	BACKTOPREV,
+	QUICKSLOTCHANGE,
 };
 
 UENUM(BlueprintType)
@@ -91,6 +92,7 @@ enum class EITEM_TYPE : uint8
 UENUM(BlueprintType)
 enum class EITEM_ID : uint8
 {
+	ARM_HELM_KNIGHT,
 	ARM_CHEST_KNIGHT,
 	ARM_GAUNTLET_KNIGHT,
 	ARM_LEG_KNIGHT,
