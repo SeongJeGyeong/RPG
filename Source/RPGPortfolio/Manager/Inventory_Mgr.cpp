@@ -303,6 +303,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		else
 		{
 			RenewEquipItemUI(_Slot, nullptr);
+			UEquip_Mgr::GetInst(m_World)->SetEquipSlotMap(nullptr, _Slot);
 		}
 
 		return;
@@ -338,6 +339,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	else
 	{
 		RenewEquipItemUI(_Slot, pItemRow);
+		UEquip_Mgr::GetInst(m_World)->SetEquipSlotMap(pItemRow, _Slot);
 	}
 
 }

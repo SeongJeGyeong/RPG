@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_StatusMain.generated.h"
@@ -39,5 +40,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+
+	void RenewStatusUI();
 
 };

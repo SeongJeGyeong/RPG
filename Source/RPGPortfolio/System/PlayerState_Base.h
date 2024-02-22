@@ -33,5 +33,6 @@ public:
 	FCharacterBasePower GetPlayerBasePower() const { return m_PlayerBasePower; }
 
 	void SetPlayerStat(FCharacterStatSheet _PlayerStat);
+	void SetPlayerBasePower(EEQUIP_SLOT _Slot);
 	void InitPlayerData(FCharacterBasePower _PlayerBasePower);
 };

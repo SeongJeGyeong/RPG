@@ -3,10 +3,12 @@
 
 #include "Equip_Mgr.h"
 #include "../RPGPortfolioGameModeBase.h"
+#include "../System/PlayerState_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "../GameInstance_Base.h"
 #include "../UI/UI_Player_QuickSlot.h"
 #include "../UI/UI_Base.h"
+#include "../UI/UI_StatusMain.h"
 
 UWorld* UEquip_Mgr::m_World = nullptr;
 
@@ -32,17 +34,17 @@ UEquip_Mgr* UEquip_Mgr::GetInst(UGameInstance* _GameInst)
 
 FInvenItemRow* UEquip_Mgr::GetSlotForIndex(int32 _Idx)
 {
-	if (QuickSlotArr.IsEmpty())
+	if (m_QuickSlotArr.IsEmpty())
 	{
 		return nullptr;
 	}
 
-	return QuickSlotArr[_Idx];
+	return m_QuickSlotArr[_Idx];
 }
 
 int32 UEquip_Mgr::GetNextArrayIndex()
 {
-	if (CurQuickSlotIdx >= QuickSlotArr.Num() - 1)
+	if (CurQuickSlotIdx >= m_QuickSlotArr.Num() - 1)
 	{
 		CurQuickSlotIdx = 0;
 	}
@@ -54,11 +56,52 @@ int32 UEquip_Mgr::GetNextArrayIndex()
 	return CurQuickSlotIdx;
 }
 
+void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+
+	FGameItemInfo* pItemInfo = _InvenItem->ItemInfo;
+
+	if (pItemInfo == nullptr)
+	{
+		m_EquipItemMap.Emplace(_Slot);
+	}
+	else
+	{
+		m_EquipItemMap.Emplace(_Slot, *pItemInfo);
+	}
+
+	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
+	pPlayerState->SetPlayerBasePower(_Slot);
+
+	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
+	StatusUI->RenewStatusUI();
+
+	//FGameItemInfo* pItemInfo = m_EquipItemMap.Find(_Slot);
+
+	//if (pItemInfo == nullptr)
+	//{
+	//	m_EquipItemMap.Emplace(_Slot, _InvenItem);
+	//}
+	//else
+	//{
+	//	if (_InvenItem == nullptr)
+	//	{
+	//		m_EquipItemMap.Emplace(_Slot, _InvenItem);
+	//	}
+	//}
+}
+
 void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
 {
 	if (_InvenItem == nullptr)
 	{
-		QuickSlotArr.RemoveAt(_Idx);
+		m_QuickSlotArr.RemoveAt(_Idx);
 		/*for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
 		{
 			if ( QuickSlotArr[i] == nullptr)
@@ -70,20 +113,20 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
 		return;
 	}
 
-	for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
+	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 	{
-		if (QuickSlotArr[i] == nullptr)
+		if ( m_QuickSlotArr[i] == nullptr)
 		{
 			continue;
 		}
-		if (QuickSlotArr[i]->ItemInfo->ID == _InvenItem->ItemInfo->ID && QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
+		if ( m_QuickSlotArr[i]->ItemInfo->ID == _InvenItem->ItemInfo->ID && m_QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
 		{
-			QuickSlotArr.RemoveAt(i);
+			m_QuickSlotArr.RemoveAt(i);
 			break;
 		}
 	}
 
-	QuickSlotArr.Insert(_InvenItem, _Idx);
+	m_QuickSlotArr.Insert(_InvenItem, _Idx);
 
 	/*for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
 	{

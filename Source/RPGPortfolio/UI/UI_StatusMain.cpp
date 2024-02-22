@@ -31,8 +31,19 @@ void UUI_StatusMain::NativeConstruct()
 	m_PhysicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("PhysicDef")));
 	m_MagicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("MagicDef")));
 
+	RenewStatusUI();
+}
+
+void UUI_StatusMain::NativeTick(const FGeometry& _Geo, float _DeltaTime)
+{
+	Super::NativeTick(_Geo, _DeltaTime);
+
+}
+
+void UUI_StatusMain::RenewStatusUI()
+{
 	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-	
+
 	m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Level)));
 	m_Souls->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerBasePower().AmountOfSoul)));
 	//m_Required_Souls;
@@ -49,14 +60,8 @@ void UUI_StatusMain::NativeConstruct()
 	m_CurrentST->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().CurStamina)));
 	m_MaximumST->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MaxStamina)));
 	m_PhysicAtk_Weak->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().PhysicAtk)));
-	m_PhysicAtk_Strong->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(pPlayerState->GetPlayerBasePower().PhysicAtk * 1.5f))));
+	m_PhysicAtk_Strong->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( pPlayerState->GetPlayerBasePower().PhysicAtk * 1.5f ))));
 	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MagicAtk)));
 	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().PhysicDef)));
 	m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MagicDef)));
-}
-
-void UUI_StatusMain::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-
 }
