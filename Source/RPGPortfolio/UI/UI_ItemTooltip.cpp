@@ -17,8 +17,10 @@ void UUI_ItemTooltip::NativeConstruct()
 	m_MaxQnt_Inven = Cast<UTextBlock>(GetWidgetFromName(L"Sel_MaxQnt_Inven"));
 	m_CurQnt_Storage = Cast<UTextBlock>(GetWidgetFromName(L"Sel_CurQnt_Storage"));
 	m_MaxQnt_Storage = Cast<UTextBlock>(GetWidgetFromName(L"Sel_MaxQnt_Storage"));
-	m_Atk = Cast<UTextBlock>(GetWidgetFromName(L"ATK"));
-	m_Def = Cast<UTextBlock>(GetWidgetFromName(L"DEF"));
+	m_PhysicAtk = Cast<UTextBlock>(GetWidgetFromName(L"PhysicAtk"));
+	m_PhysicDef = Cast<UTextBlock>(GetWidgetFromName(L"PhysicDef"));
+	m_MagicAtk = Cast<UTextBlock>(GetWidgetFromName(L"MagicAtk"));
+	m_MagicDef = Cast<UTextBlock>(GetWidgetFromName(L"MagicDef"));
 	m_Restore_HP = Cast<UTextBlock>(GetWidgetFromName(L"Restore_HP"));
 	m_Restore_MP = Cast<UTextBlock>(GetWidgetFromName(L"Restore_MP"));
 	m_Desc = Cast<UTextBlock>(GetWidgetFromName(L"Item_Desc"));
@@ -28,9 +30,10 @@ void UUI_ItemTooltip::NativeConstruct()
 	m_ItemImg = Cast<UImage>(GetWidgetFromName(L"Sel_ItemImg"));
 
 	if (!IsValid(m_ItemName) || !IsValid(m_Category) || !IsValid(m_SubCategory) || !IsValid(m_CurQnt_Inven) ||
-		!IsValid(m_MaxQnt_Inven) || !IsValid(m_CurQnt_Storage) || !IsValid(m_MaxQnt_Storage) || !IsValid(m_Atk) ||
-		!IsValid(m_Def) || !IsValid(m_Restore_HP) || !IsValid(m_Restore_MP) || !IsValid(m_Desc) || 
-		!IsValid(m_Req_Str) || !IsValid(m_Req_Dex) || !IsValid(m_Req_Int) || !IsValid(m_ItemImg))
+		!IsValid(m_MaxQnt_Inven) || !IsValid(m_CurQnt_Storage) || !IsValid(m_MaxQnt_Storage) || !IsValid(m_PhysicAtk) ||
+		!IsValid(m_PhysicDef) || !IsValid(m_MagicAtk) || !IsValid(m_MagicDef) || !IsValid(m_Restore_HP) || !IsValid(m_Restore_MP) || 
+		!IsValid(m_Desc) || !IsValid(m_Req_Str) || !IsValid(m_Req_Dex) || !IsValid(m_Req_Int) || !IsValid(m_ItemImg)
+		)
 	{
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 툴팁 UI 캐스팅 실패"));
 	}
@@ -94,24 +97,42 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 	m_CurQnt_Storage->SetText(FText::FromString(L"0"));
 	m_MaxQnt_Storage->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetMaximumStack())));
 	
-	if (0 > _InvenData->GetAtkVal())
+	if (0 > _InvenData->GetPhysicAtkVal())
 	{
-		m_Atk->SetText(FText::FromString(L"-"));
+		m_PhysicAtk->SetText(FText::FromString(L"-"));
 	}
 	else
 	{
-		m_Atk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetAtkVal())));
+		m_PhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetPhysicAtkVal())));
 	}
 	
-	if (0 > _InvenData->GetDefVal() )
+	if (0 > _InvenData->GetPhysicDefVal() )
 	{
-		m_Def->SetText(FText::FromString(L"-"));
+		m_PhysicDef->SetText(FText::FromString(L"-"));
 	}
 	else
 	{
-		m_Def->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetDefVal())));
+		m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetPhysicDefVal())));
 	}
 	
+	if ( 0 > _InvenData->GetMagicAtkVal() )
+	{
+		m_MagicAtk->SetText(FText::FromString(L"-"));
+	}
+	else
+	{
+		m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetMagicAtkVal())));
+	}
+
+	if ( 0 > _InvenData->GetMagicDefVal() )
+	{
+		m_MagicDef->SetText(FText::FromString(L"-"));
+	}
+	else
+	{
+		m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetMagicDefVal())));
+	}
+
 	if (0 > _InvenData->GetRestoreHP() )
 	{
 		m_Restore_HP->SetText(FText::FromString(L"-"));

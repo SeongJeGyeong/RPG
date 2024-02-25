@@ -170,10 +170,16 @@ struct FGameItemInfo
 	FString			IconImgPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float			ATK;
+	float			PhysicAtk;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float			DEF;
+	float			MagicAtk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			PhysicDef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			MagicDef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float			Restore_HP;

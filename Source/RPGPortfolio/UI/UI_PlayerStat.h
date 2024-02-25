@@ -30,9 +30,23 @@ private:
 	class UTextBlock* m_CurMP;
 	class UTextBlock* m_CurStamina;
 
+	class UTextBlock* m_PhysicAtk;
+	class UTextBlock* m_PhysicDef;
+	class UTextBlock* m_MagicAtk;
+	class UTextBlock* m_MagicDef;
+	class UTextBlock* m_AltPhysicAtk;
+	class UTextBlock* m_AltPhysicDef;
+	class UTextBlock* m_AltMagicAtk;
+	class UTextBlock* m_AltMagicDef;
+	class UTextBlock* m_PhyAtk_Arrow;
+	class UTextBlock* m_PhyDef_Arrow;
+	class UTextBlock* m_MagAtk_Arrow;
+	class UTextBlock* m_MagDef_Arrow;
+
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void SetPlayerStatUI(class APlayerState_Base* _PlayerState);
+	void RenewBasePower();
 };

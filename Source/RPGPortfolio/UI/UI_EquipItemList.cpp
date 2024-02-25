@@ -8,6 +8,7 @@
 #include "../Manager/Inventory_Mgr.h"
 #include "UI_ItemTooltip.h"
 #include "UI_InvenItem.h"
+#include "UI_PlayerStat.h"
 
 void UUI_EquipItemList::NativeConstruct()
 {
@@ -59,6 +60,14 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		// 장비할 아이템목록에서는 메뉴앵커 표시 안되도록
 		ItemUI->SetAnchorActive(false);
 		ItemUI->SetSelectedSlot(eEquipSlot);
+
+		if (eEquipSlot != EEQUIP_SLOT::ARROW && eEquipSlot != EEQUIP_SLOT::BOLT && eEquipSlot != EEQUIP_SLOT::CONSUMABLE_1 &&
+			eEquipSlot != EEQUIP_SLOT::CONSUMABLE_2 && eEquipSlot != EEQUIP_SLOT::CONSUMABLE_3 &&
+			eEquipSlot != EEQUIP_SLOT::CONSUMABLE_4 && eEquipSlot != EEQUIP_SLOT::CONSUMABLE_5
+			)
+		{
+			ItemUI->SetStatUI(m_Stat);
+		}
 
 		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 

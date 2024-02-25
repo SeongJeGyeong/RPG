@@ -9,6 +9,7 @@
 #include "../Item/Item_InvenData.h"
 #include "UI_Inventory.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "UI_PlayerStat.h"
 
 void UUI_InvenItem::NativeConstruct()
 {
@@ -83,5 +84,6 @@ void UUI_InvenItem::ItemBtnClicked()
 	else
 	{
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
+		m_StatUI->RenewBasePower();
 	}
 }

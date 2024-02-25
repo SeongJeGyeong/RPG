@@ -22,8 +22,10 @@ private:
 	class UTextBlock* m_MaxQnt_Inven;
 	class UTextBlock* m_CurQnt_Storage;
 	class UTextBlock* m_MaxQnt_Storage;
-	class UTextBlock* m_Atk;
-	class UTextBlock* m_Def;
+	class UTextBlock* m_PhysicAtk;
+	class UTextBlock* m_PhysicDef;
+	class UTextBlock* m_MagicAtk;
+	class UTextBlock* m_MagicDef;
 	class UTextBlock* m_Restore_HP;
 	class UTextBlock* m_Restore_MP;
 	class UTextBlock* m_Desc;

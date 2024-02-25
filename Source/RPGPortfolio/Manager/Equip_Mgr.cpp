@@ -65,19 +65,15 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 		return;
 	}
 
-	FGameItemInfo* pItemInfo = _InvenItem->ItemInfo;
-
-	if (pItemInfo == nullptr)
+	if ( _InvenItem == nullptr)
 	{
 		m_EquipItemMap.Emplace(_Slot);
 	}
 	else
 	{
+		FGameItemInfo* pItemInfo = _InvenItem->ItemInfo;
 		m_EquipItemMap.Emplace(_Slot, *pItemInfo);
 	}
-
-	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
-	pPlayerState->SetPlayerBasePower(_Slot);
 
 	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
 	StatusUI->RenewStatusUI();

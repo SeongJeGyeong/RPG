@@ -23,8 +23,10 @@ private:
 	EITEM_TYPE	m_ItemType;
 	EITEM_ID	m_ItemID;
 
-	float	m_ATK;
-	float	m_DEF;
+	float	m_PhysicAtk;
+	float	m_PhysicDef;
+	float	m_MagicAtk;
+	float	m_MagicDef;
 	float	m_Restore_HP;
 	float	m_Restore_MP;
 	int32	m_Maximum_Stack;
@@ -53,11 +55,17 @@ public:
 	const EITEM_ID& GetItemID() { return m_ItemID; }
 	void SetItemID(const EITEM_ID& _ItemID) { m_ItemID = _ItemID; }
 
-	const float& GetAtkVal() { return m_ATK; }
-	void SetAtkVal(const float& _ATK) { m_ATK  = _ATK;}
+	const float& GetPhysicAtkVal() { return m_PhysicAtk; }
+	void SetPhysicAtkVal(const float& _PhysicAtk) { m_PhysicAtk = _PhysicAtk; }
 
-	const float& GetDefVal() { return m_DEF; }
-	void SetDefVal(const float& _DEF) { m_DEF = _DEF; }
+	const float& GetMagicAtkVal() { return m_MagicAtk; }
+	void SetMagicAtkVal(const float& _MagicAtk) { m_MagicAtk = _MagicAtk; }
+
+	const float& GetPhysicDefVal() { return m_PhysicDef; }
+	void SetPhysicDefVal(const float& _PhysicDef) { m_PhysicDef = _PhysicDef; }
+
+	const float& GetMagicDefVal() { return m_MagicDef; }
+	void SetMagicDefVal(const float& _MagicDef) { m_MagicDef = _MagicDef; }
 
 	const float& GetRestoreHP() { return m_Restore_HP; }
 	void SetRestoreHP(const float& _Restore_HP) { m_Restore_HP = _Restore_HP; }

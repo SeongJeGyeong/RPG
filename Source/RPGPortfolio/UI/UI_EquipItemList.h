@@ -20,6 +20,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG", meta = ( AllowPrivateAccess = true ))
 	class UUI_ItemTooltip* m_Tooltip;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG", meta = ( AllowPrivateAccess = true ))
+	class UUI_PlayerStat* m_Stat;
+
+
 	class UTextBlock*	m_SlotName;
 	class UTextBlock*	m_ListItemName;
 	class UTileView*	m_TileView;

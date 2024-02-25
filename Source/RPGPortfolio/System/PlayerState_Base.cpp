@@ -3,6 +3,7 @@
 
 #include "PlayerState_Base.h"
 #include "../Manager/Equip_Mgr.h"
+#include "../UI/UI_PlayerStat.h"
 
 APlayerState_Base::APlayerState_Base()
 {
@@ -36,65 +37,12 @@ void APlayerState_Base::SetPlayerStat(FCharacterStatSheet _PlayerStat)
 {
 }
 
-void APlayerState_Base::SetPlayerBasePower(EEQUIP_SLOT _Slot)
+void APlayerState_Base::SetPlayerBasePower()
 {
-	FGameItemInfo* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(_Slot);
-
-	if (pItemInfo == nullptr)
-	{
-		switch ( _Slot )
-		{
-		case EEQUIP_SLOT::WEAPON_1:
-		case EEQUIP_SLOT::WEAPON_2:
-		case EEQUIP_SLOT::WEAPON_3:
-			m_PlayerBasePower.PhysicAtk = ( m_PlayerStat.Strength + m_PlayerStat.Dexterity ) * 10.f;
-			m_PlayerBasePower.MagicAtk = m_PlayerStat.Intelligence * 20.f;
-			break;
-		case EEQUIP_SLOT::SHIELD_1:
-		case EEQUIP_SLOT::SHIELD_2:
-		case EEQUIP_SLOT::SHIELD_3:
-			break;
-		case EEQUIP_SLOT::ARROW:
-			break;
-		case EEQUIP_SLOT::BOLT:
-			break;
-		case EEQUIP_SLOT::HELM:
-		case EEQUIP_SLOT::CHEST:
-		case EEQUIP_SLOT::GAUNTLET:
-		case EEQUIP_SLOT::LEGGINGS:
-			m_PlayerBasePower.PhysicDef = ( m_PlayerStat.Strength + m_PlayerStat.Dexterity ) * 5.f;
-			m_PlayerBasePower.MagicDef = ( m_PlayerStat.Attunement + m_PlayerStat.Intelligence ) * 5.f;
-			break;
-		case EEQUIP_SLOT::ACCESSORIE_1:
-		case EEQUIP_SLOT::ACCESSORIE_2:
-		case EEQUIP_SLOT::ACCESSORIE_3:
-		case EEQUIP_SLOT::ACCESSORIE_4:
-			break;
-		default:
-			break;
-		}
-	}
-	else
-	{
-		switch ( pItemInfo->Type )
-		{
-		case EITEM_TYPE::WEAPON:
-			m_PlayerBasePower.PhysicAtk += pItemInfo->ATK;
-			//m_PlayerBasePower.MagicAtk = m_PlayerStat.Intelligence * 20.f;
-			break;
-		case EITEM_TYPE::ARM_HELM:
-		case EITEM_TYPE::ARM_CHEST:
-		case EITEM_TYPE::ARM_GAUNTLET:
-		case EITEM_TYPE::ARM_LEGGINGS:
-			m_PlayerBasePower.PhysicDef += pItemInfo->DEF;
-			break;
-		case EITEM_TYPE::ACCESSORIE:
-			break;
-		default:
-			break;
-		}
-	}
-
+	m_PlayerBasePower.PhysicAtk = ((m_PlayerStat.Strength + m_PlayerStat.Dexterity) * 10.f) + Wea_PhyAtk;
+	m_PlayerBasePower.MagicAtk = ( m_PlayerStat.Intelligence * 20.f ) + Wea_MagAtk;
+	m_PlayerBasePower.PhysicDef = ((m_PlayerStat.Strength + m_PlayerStat.Dexterity) * 5.f) + (Helm_PhyDef + Chest_PhyDef + Gaunt_PhyDef + Leg_PhyDef);
+	m_PlayerBasePower.MagicDef = ((m_PlayerStat.Attunement + m_PlayerStat.Intelligence) * 5.f) + (Helm_MagDef + Chest_MagDef + Gaunt_MagDef + Leg_MagDef);
 }
 
 void APlayerState_Base::InitPlayerData(FCharacterBasePower _PlayerBasePower)
@@ -109,4 +57,75 @@ void APlayerState_Base::InitPlayerData(FCharacterBasePower _PlayerBasePower)
 	m_PlayerBasePower.PhysicDef = (m_PlayerStat.Strength + m_PlayerStat.Dexterity) * 5.f;
 	m_PlayerBasePower.MagicAtk = m_PlayerStat.Intelligence * 20.f;
 	m_PlayerBasePower.MagicDef = (m_PlayerStat.Attunement + m_PlayerStat.Intelligence) * 5.f;
+}
+
+void APlayerState_Base::SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped)
+{
+	switch ( _ItemInfo->Type )
+	{
+	case EITEM_TYPE::WEAPON:
+		if (bEquiped == false)
+		{
+			Wea_PhyAtk = 0.f;
+			Wea_MagAtk = 0.f;
+		}
+		else
+		{
+			Wea_PhyAtk = _ItemInfo->PhysicAtk;
+			Wea_MagAtk = _ItemInfo->MagicAtk;
+		}
+		break;
+	case EITEM_TYPE::ARM_HELM:
+		if (bEquiped == false)
+		{
+			Helm_PhyDef = 0.f;
+			Helm_MagDef = 0.f;
+		}
+		else
+		{
+			Helm_PhyDef = _ItemInfo->PhysicDef;
+			Helm_MagDef = _ItemInfo->MagicDef;
+		}
+		break;
+	case EITEM_TYPE::ARM_CHEST:
+		if (bEquiped == false)
+		{
+			Chest_PhyDef = 0.f;
+			Chest_MagDef = 0.f;
+		}
+		else
+		{
+			Chest_PhyDef = _ItemInfo->PhysicDef;
+			Chest_MagDef = _ItemInfo->MagicDef;
+		}
+		break;
+	case EITEM_TYPE::ARM_GAUNTLET:
+		if (bEquiped == false)
+		{
+			Gaunt_PhyDef = 0.f;
+			Gaunt_MagDef = 0.f;
+		}
+		else
+		{
+			Gaunt_PhyDef = _ItemInfo->PhysicDef;
+			Gaunt_MagDef = _ItemInfo->MagicDef;
+		}
+		break;
+	case EITEM_TYPE::ARM_LEGGINGS:
+		if (bEquiped == false)
+		{
+			Leg_PhyDef = 0.f;
+			Leg_MagDef = 0.f;
+		}
+		else
+		{
+			Leg_PhyDef = _ItemInfo->PhysicDef;
+			Leg_MagDef = _ItemInfo->MagicDef;
+		}
+		break;
+	case EITEM_TYPE::ACCESSORIE:
+		break;
+	default:
+		break;
+	}
 }

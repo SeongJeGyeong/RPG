@@ -11,6 +11,7 @@
 #include "../UI/UI_Base.h"
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Equip_Mgr.h"
+#include "../System/PlayerState_Base.h"
 
 UWorld* UInventory_Mgr::m_World = nullptr;
 
@@ -143,8 +144,10 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 				pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
 				pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
 				pItemData->SetItemQnt(Iter.Value().Stack);
-				pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-				pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+				pItemData->SetPhysicAtkVal(Iter.Value().ItemInfo->PhysicAtk);
+				pItemData->SetPhysicDefVal(Iter.Value().ItemInfo->PhysicDef);
+				pItemData->SetMagicAtkVal(Iter.Value().ItemInfo->MagicAtk);
+				pItemData->SetMagicDefVal(Iter.Value().ItemInfo->MagicDef);
 				pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
 				pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
 				pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
@@ -170,8 +173,10 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 			pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
 			pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
 			pItemData->SetItemQnt(Iter.Value().Stack);
-			pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-			pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+			pItemData->SetPhysicAtkVal(Iter.Value().ItemInfo->PhysicAtk);
+			pItemData->SetPhysicDefVal(Iter.Value().ItemInfo->PhysicDef);
+			pItemData->SetMagicAtkVal(Iter.Value().ItemInfo->MagicAtk);
+			pItemData->SetMagicDefVal(Iter.Value().ItemInfo->MagicDef);
 			pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
 			pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
 			pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
@@ -209,8 +214,10 @@ void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
 		pItemData->SetItemName(Iter.Value().ItemInfo->ItemName);
 		pItemData->SetItemDesc(Iter.Value().ItemInfo->Description);
 		pItemData->SetItemQnt(Iter.Value().Stack);
-		pItemData->SetAtkVal(Iter.Value().ItemInfo->ATK);
-		pItemData->SetDefVal(Iter.Value().ItemInfo->DEF);
+		pItemData->SetPhysicAtkVal(Iter.Value().ItemInfo->PhysicAtk);
+		pItemData->SetPhysicDefVal(Iter.Value().ItemInfo->PhysicDef);
+		pItemData->SetMagicAtkVal(Iter.Value().ItemInfo->MagicAtk);
+		pItemData->SetMagicDefVal(Iter.Value().ItemInfo->MagicDef);
 		pItemData->SetRestoreHP(Iter.Value().ItemInfo->Restore_HP);
 		pItemData->SetRestoreMP(Iter.Value().ItemInfo->Restore_MP);
 		pItemData->SetRequireStr(Iter.Value().ItemInfo->Require_Str);
@@ -304,6 +311,11 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		{
 			RenewEquipItemUI(_Slot, nullptr);
 			UEquip_Mgr::GetInst(m_World)->SetEquipSlotMap(nullptr, _Slot);
+			
+			APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
+			
+			pPlayerState->SetEquipFigure(pItemRow->ItemInfo, false);
+			pPlayerState->SetPlayerBasePower();
 		}
 
 		return;
@@ -340,6 +352,10 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	{
 		RenewEquipItemUI(_Slot, pItemRow);
 		UEquip_Mgr::GetInst(m_World)->SetEquipSlotMap(pItemRow, _Slot);
+
+		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
+		pPlayerState->SetEquipFigure(pItemRow->ItemInfo, true);
+		pPlayerState->SetPlayerBasePower();
 	}
 
 }
@@ -377,8 +393,10 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 	pItemData->SetItemName(_ItemRow->ItemInfo->ItemName);
 	pItemData->SetItemDesc(_ItemRow->ItemInfo->Description);
 	pItemData->SetItemQnt(_ItemRow->Stack);
-	pItemData->SetAtkVal(_ItemRow->ItemInfo->ATK);
-	pItemData->SetDefVal(_ItemRow->ItemInfo->DEF);
+	pItemData->SetPhysicAtkVal(_ItemRow->ItemInfo->PhysicAtk);
+	pItemData->SetPhysicDefVal(_ItemRow->ItemInfo->PhysicDef);
+	pItemData->SetMagicAtkVal(_ItemRow->ItemInfo->MagicAtk);
+	pItemData->SetMagicDefVal(_ItemRow->ItemInfo->MagicDef);
 	pItemData->SetRestoreHP(_ItemRow->ItemInfo->Restore_HP);
 	pItemData->SetRestoreMP(_ItemRow->ItemInfo->Restore_MP);
 	pItemData->SetRequireStr(_ItemRow->ItemInfo->Require_Str);
@@ -423,8 +441,10 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	pItemData->SetItemName(_ItemRow->ItemInfo->ItemName);
 	pItemData->SetItemDesc(_ItemRow->ItemInfo->Description);
 	pItemData->SetItemQnt(_ItemRow->Stack);
-	pItemData->SetAtkVal(_ItemRow->ItemInfo->ATK);
-	pItemData->SetDefVal(_ItemRow->ItemInfo->DEF);
+	pItemData->SetPhysicAtkVal(_ItemRow->ItemInfo->PhysicAtk);
+	pItemData->SetPhysicDefVal(_ItemRow->ItemInfo->PhysicDef);
+	pItemData->SetMagicAtkVal(_ItemRow->ItemInfo->MagicAtk);
+	pItemData->SetMagicDefVal(_ItemRow->ItemInfo->MagicDef);
 	pItemData->SetRestoreHP(_ItemRow->ItemInfo->Restore_HP);
 	pItemData->SetRestoreMP(_ItemRow->ItemInfo->Restore_MP);
 	pItemData->SetRequireStr(_ItemRow->ItemInfo->Require_Str);

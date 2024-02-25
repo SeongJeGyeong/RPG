@@ -5,6 +5,8 @@
 #include "Components/TextBlock.h"
 #include "../System/PlayerState_Base.h"
 #include "../Header/Struct.h"
+#include "../Item/Item_InvenData.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUI_PlayerStat::NativeConstruct()
 {
@@ -25,11 +27,40 @@ void UUI_PlayerStat::NativeConstruct()
 	m_CurMP = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentMP")));
 	m_CurStamina = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentST")));
 
+	m_PhysicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("PhysicAtk")));
+	m_PhysicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("PhysicDef")));
+	m_MagicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("MagicAtk")));
+	m_MagicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("MagicDef")));
+	m_AltPhysicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_PhysicAtk")));
+	m_AltPhysicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_PhysicDef")));
+	m_AltMagicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_MagicAtk")));
+	m_AltMagicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_MagicDef")));
+	m_PhyAtk_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow1")));
+	m_PhyDef_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow3")));
+	m_MagAtk_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow2")));
+	m_MagDef_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow4")));
+
+
 	if (!IsValid(m_Level) || !IsValid(m_Vigor) || !IsValid(m_Attunement) || !IsValid(m_Endurance) ||
 		!IsValid(m_Strength) || !IsValid(m_Dexterity) || !IsValid(m_Intelligence) || !IsValid(m_MaxHP) ||
-		!IsValid(m_MaxMP) || !IsValid(m_MaxStamina) || !IsValid(m_CurHP) || !IsValid(m_CurMP) || !IsValid(m_CurStamina))
+		!IsValid(m_MaxMP) || !IsValid(m_MaxStamina) || !IsValid(m_CurHP) || !IsValid(m_CurMP) || !IsValid(m_CurStamina) ||
+		!IsValid(m_PhysicAtk) || !IsValid(m_PhysicDef) || !IsValid(m_MagicAtk) || !IsValid(m_MagicDef) ||
+		!IsValid(m_AltPhysicAtk) || !IsValid(m_AltPhysicDef) || !IsValid(m_AltMagicAtk) || !IsValid(m_AltMagicDef) ||
+		!IsValid(m_PhyAtk_Arrow) || !IsValid(m_PhyDef_Arrow) || !IsValid(m_MagAtk_Arrow) || !IsValid(m_MagDef_Arrow) 
+		)
 	{
 		UE_LOG(LogTemp, Error, TEXT("캐릭터 스탯창 캐스팅 실패"));
+	}
+	else
+	{
+		m_AltPhysicAtk->SetVisibility(ESlateVisibility::Hidden);
+		m_AltPhysicDef->SetVisibility(ESlateVisibility::Hidden);
+		m_AltMagicAtk->SetVisibility(ESlateVisibility::Hidden);
+		m_AltMagicDef->SetVisibility(ESlateVisibility::Hidden);
+		m_PhyAtk_Arrow->SetVisibility(ESlateVisibility::Hidden);
+		m_PhyDef_Arrow->SetVisibility(ESlateVisibility::Hidden);
+		m_MagAtk_Arrow->SetVisibility(ESlateVisibility::Hidden);
+		m_MagDef_Arrow->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 }
@@ -59,5 +90,20 @@ void UUI_PlayerStat::SetPlayerStatUI(APlayerState_Base* _PlayerState)
 	m_CurHP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.CurHP)));
 	m_CurMP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.CurMP)));
 	m_CurStamina->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.CurStamina)));
+	m_PhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicAtk)));
+	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));
+	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicAtk)));
+	m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicDef)));
 
+}
+
+void UUI_PlayerStat::RenewBasePower()
+{
+	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
+
+	m_PhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicAtk)));
+	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicAtk)));
+	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));
+	m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicDef)));
 }
