@@ -107,3 +107,142 @@ void UUI_PlayerStat::RenewBasePower()
 	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));
 	m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicDef)));
 }
+
+void UUI_PlayerStat::SetVisibilityAlterBasePower(bool _bVisibility)
+{
+	if(_bVisibility == true)
+	{
+		m_AltPhysicAtk->SetVisibility(ESlateVisibility::Visible);
+		m_AltPhysicDef->SetVisibility(ESlateVisibility::Visible);
+		m_AltMagicAtk->SetVisibility(ESlateVisibility::Visible);
+		m_AltMagicDef->SetVisibility(ESlateVisibility::Visible);
+		m_PhyAtk_Arrow->SetVisibility(ESlateVisibility::Visible);
+		m_PhyDef_Arrow->SetVisibility(ESlateVisibility::Visible);
+		m_MagAtk_Arrow->SetVisibility(ESlateVisibility::Visible);
+		m_MagDef_Arrow->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		m_AltPhysicAtk->SetVisibility(ESlateVisibility::Hidden);
+		m_AltPhysicDef->SetVisibility(ESlateVisibility::Hidden);
+		m_AltMagicAtk->SetVisibility(ESlateVisibility::Hidden);
+		m_AltMagicDef->SetVisibility(ESlateVisibility::Hidden);
+		m_PhyAtk_Arrow->SetVisibility(ESlateVisibility::Hidden);
+		m_PhyDef_Arrow->SetVisibility(ESlateVisibility::Hidden);
+		m_MagAtk_Arrow->SetVisibility(ESlateVisibility::Hidden);
+		m_MagDef_Arrow->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEquiped)
+{
+	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
+
+	// 이미 장착되어 있는 아이템일 경우
+	if(_bEquiped)
+	{
+		if ( _InvenData->GetPhysicAtkVal() > 0 )
+		{
+			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.PhysicAtk - _InvenData->GetPhysicAtkVal() ))));
+		}
+		else
+		{
+			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicAtk)));
+		}
+
+		if ( _InvenData->GetMagicAtkVal() > 0 )
+		{
+			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.MagicAtk - _InvenData->GetMagicAtkVal() ))));
+		}
+		else
+		{
+			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicAtk)));
+		}
+
+		if ( _InvenData->GetPhysicDefVal() > 0 )
+		{
+			m_AltPhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.PhysicDef - _InvenData->GetPhysicDefVal() ))));
+		}
+		else
+		{
+			m_AltPhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));
+		}
+
+		if ( _InvenData->GetMagicDefVal() > 0 )
+		{
+			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.MagicDef - _InvenData->GetMagicDefVal() ))));
+		}
+		else
+		{
+			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicDef)));
+		}
+	}
+	// 장착중인 아이템이 없거나 다른 아이템을 장착중인 경우
+	else
+	{
+		// 현재 장착중인 무기의 공격을 빼고 장착할 무기의 공격력을 더한 값을 표시한다.
+		if ( _InvenData->GetPhysicAtkVal() > 0 )
+		{
+			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.PhysicAtk - pPlayerState->GetWeaPhyAtk() + _InvenData->GetPhysicAtkVal() ))));
+		}
+		else
+		{
+			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicAtk)));
+		}
+
+		if ( _InvenData->GetMagicAtkVal() > 0 )
+		{
+			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.MagicAtk - pPlayerState->GetWeaMagAtk() + _InvenData->GetMagicAtkVal() ))));
+		}
+		else
+		{
+			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicAtk)));
+		}
+
+		// 현재 장착되어있는 아이템의 방어력을 빼고 장착할 아이템의 방어력을 더한 값을 표시한다.
+		float fEquipItemPhyDef = 0.f;
+		float fEquipItemMagDef = 0.f;
+
+		switch (_InvenData->GetItemType())
+		{
+		case EITEM_TYPE::ARM_HELM:
+			fEquipItemPhyDef = pPlayerState->GetHelmPhyDef();
+			fEquipItemMagDef = pPlayerState->GetHelmMagDef();
+			break;
+		case EITEM_TYPE::ARM_CHEST:
+			fEquipItemPhyDef = pPlayerState->GetChestPhyDef();
+			fEquipItemMagDef = pPlayerState->GetChestMagDef();
+			break;
+		case EITEM_TYPE::ARM_GAUNTLET:
+			fEquipItemPhyDef = pPlayerState->GetGauntPhyDef();
+			fEquipItemMagDef = pPlayerState->GetGauntMagDef();
+			break;
+		case EITEM_TYPE::ARM_LEGGINGS:
+			fEquipItemPhyDef = pPlayerState->GetLegPhyDef();
+			fEquipItemMagDef = pPlayerState->GetLegMagDef();
+			break;
+		default:
+			break;
+		}
+
+		if ( _InvenData->GetPhysicDefVal() > 0 )
+		{
+			
+			m_AltPhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.PhysicDef - fEquipItemPhyDef + _InvenData->GetPhysicDefVal() ))));
+		}
+		else
+		{
+			m_AltPhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));
+		}
+
+		if ( _InvenData->GetMagicDefVal() > 0 )
+		{
+			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.MagicDef - fEquipItemMagDef + _InvenData->GetMagicDefVal() ))));
+		}
+		else
+		{
+			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicDef)));
+		}
+	}
+}

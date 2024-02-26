@@ -531,9 +531,12 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 {
-	int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
-	m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
-	UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
+	if (UEquip_Mgr::GetInst(GetWorld())->GetQuickSlotValid())
+	{
+		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
+		m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
+		UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
+	}
 }
 
 bool APlayer_Base_Knight::CheckMontagePlaying()

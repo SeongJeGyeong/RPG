@@ -25,17 +25,17 @@ private:
 	UPROPERTY()
 	FCharacterBasePower m_PlayerBasePower;
 
-	float Helm_PhyDef;
-	float Helm_MagDef;
-	float Chest_PhyDef;
-	float Chest_MagDef;
-	float Gaunt_PhyDef;
-	float Gaunt_MagDef;
-	float Leg_PhyDef;
-	float Leg_MagDef;
+	float Helm_PhyDef = 0.f;
+	float Helm_MagDef = 0.f;
+	float Chest_PhyDef = 0.f;
+	float Chest_MagDef = 0.f;
+	float Gaunt_PhyDef = 0.f;
+	float Gaunt_MagDef = 0.f;
+	float Leg_PhyDef = 0.f;
+	float Leg_MagDef = 0.f;
 
-	float Wea_PhyAtk;
-	float Wea_MagAtk;
+	float Wea_PhyAtk = 0.f;
+	float Wea_MagAtk = 0.f;
 
 public:
 	int32 GetPlayerLevel() const { return m_PlayerStat.Level; }
@@ -68,4 +68,9 @@ public:
 	void SetLegPhyDef(const float& _LegPhyDef) { Leg_PhyDef = _LegPhyDef; }
 	const float& GetLegMagDef() { return Leg_MagDef; }
 	void SetLegMagDef(const float& _LegMagDef) { Leg_MagDef = _LegMagDef; }
+
+	const float& GetWeaPhyAtk() { return Wea_PhyAtk; }
+	void SetWeaPhyAtk(const float& _WeaPhyAtk) { Wea_PhyAtk = _WeaPhyAtk; }
+	const float& GetWeaMagAtk() { return Wea_MagAtk; }
+	void SetWeaMagAtk(const float& _WeaMagAtk) { Wea_MagAtk = _WeaMagAtk; }
 };

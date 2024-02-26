@@ -61,26 +61,38 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		ItemUI->SetAnchorActive(false);
 		ItemUI->SetSelectedSlot(eEquipSlot);
 
+		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
+
 		if (eEquipSlot != EEQUIP_SLOT::ARROW && eEquipSlot != EEQUIP_SLOT::BOLT && eEquipSlot != EEQUIP_SLOT::CONSUMABLE_1 &&
 			eEquipSlot != EEQUIP_SLOT::CONSUMABLE_2 && eEquipSlot != EEQUIP_SLOT::CONSUMABLE_3 &&
 			eEquipSlot != EEQUIP_SLOT::CONSUMABLE_4 && eEquipSlot != EEQUIP_SLOT::CONSUMABLE_5
 			)
 		{
 			ItemUI->SetStatUI(m_Stat);
+			// 이미 장착된 아이템에 호버될 경우 장착 해제시 변경될 능력치 수치를 표시하도록 한다.
+			if (pData->GetEquiped() == eEquipSlot)
+			{
+				m_Stat->AlterRenewBasePower(pData, true);
+			}
+			else
+			{
+				m_Stat->AlterRenewBasePower(pData, false);
+			}
+			
+			m_Stat->SetVisibilityAlterBasePower(true);
 		}
-
-		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 
 		m_ListItemName->SetText(FText::FromString(pData->GetItemName()));
 		m_ListItemName->SetVisibility(ESlateVisibility::Visible);
 		m_Tooltip->SetTooltipUI(pData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
-		
 	}
 	else
 	{
 		m_ListItemName->SetVisibility(ESlateVisibility::Hidden);
 		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
 		ItemUI->SetSelectedSlot(EEQUIP_SLOT::EMPTY);
+
+		m_Stat->SetVisibilityAlterBasePower(false);
 	}
 }

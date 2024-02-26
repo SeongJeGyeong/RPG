@@ -305,7 +305,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다. 
 		if (_Type == EITEM_TYPE::CONSUMABLE)
 		{
-			RenewEquipConsumeUI(_Slot, nullptr);
+			RenewEquipConsumeUI(_Slot, pItemRow, true);
 		}
 		else
 		{
@@ -326,6 +326,16 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		// 해당 장비슬롯에 다른 아이템이 장비되어있을 경우 기존에 장비되어있던 아이템의 장비슬롯을 EMPTY로 바꾼다.
 		if (Iter.Key() != _ID && Iter.Value().EquipedSlot == _Slot)
 		{
+			if ( Iter.Value().ItemInfo->Type == EITEM_TYPE::CONSUMABLE )
+			{
+				// 기존에 장비되어있던 아이템 퀵슬롯에서 해제
+				RenewEquipConsumeUI(Iter.Value().EquipedSlot, m_InvenStorage[ (int32)_Type ].Find(Iter.Key()), true);
+			}
+			else
+			{
+				RenewEquipItemUI(Iter.Value().EquipedSlot, nullptr);
+			}
+
 			Iter.Value().EquipedSlot = EEQUIP_SLOT::EMPTY;
 		}
 
@@ -334,7 +344,14 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			// 장착할 아이템이 다른 장비슬롯에 장비되어있을 경우 해당 장비슬롯에서 장착해제 처리한다.
 			if (Iter.Value().EquipedSlot != EEQUIP_SLOT::EMPTY)
 			{
-				RenewEquipItemUI(Iter.Value().EquipedSlot, nullptr);
+				if ( Iter.Value().ItemInfo->Type == EITEM_TYPE::CONSUMABLE )
+				{
+					RenewEquipConsumeUI(Iter.Value().EquipedSlot, m_InvenStorage[(int32)_Type].Find(_ID), true);
+				}
+				else
+				{
+					RenewEquipItemUI(Iter.Value().EquipedSlot, nullptr);
+				}
 			}
 
 			Iter.Value().EquipedSlot = _Slot;
@@ -346,7 +363,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 	if (_Type == EITEM_TYPE::CONSUMABLE)
 	{
-		RenewEquipConsumeUI(_Slot, pItemRow);
+		RenewEquipConsumeUI(_Slot, pItemRow, false);
 	}
 	else
 	{
@@ -360,7 +377,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 }
 
-void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
+void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip)
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 
@@ -374,13 +391,14 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 	// 장비슬롯 열거형을 인덱스로 변환
 	int32 Index = UEquip_Mgr::GetInst(m_World)->ConvertQuickSlotToIdx(_Slot);
 	UE_LOG(LogTemp, Display, TEXT("지정된 슬롯 인덱스 : %d"), Index);
-	if ( _ItemRow == nullptr )
+
+	//장비해제인 경우
+	if (_Unequip)
 	{
 		EquipMainUI->RenewEquipItem(_Slot);
-		UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index);
+		UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index, true);
 
 		int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
-		UE_LOG(LogTemp, Display, TEXT("현재 슬롯 인덱스 : %d"), curIdx);
 		if ( Index == curIdx )
 		{
 			UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(Index);
@@ -409,7 +427,7 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 
-	UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index);
+	UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index, false);
 
 	int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
 	UE_LOG(LogTemp, Display, TEXT("현재 슬롯 인덱스 : %d"), curIdx);

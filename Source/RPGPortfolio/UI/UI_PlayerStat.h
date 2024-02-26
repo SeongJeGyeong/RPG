@@ -49,4 +49,6 @@ public:
 
 	void SetPlayerStatUI(class APlayerState_Base* _PlayerState);
 	void RenewBasePower();
+	void SetVisibilityAlterBasePower(bool _bVisibility);
+	void AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEquiped);
 };

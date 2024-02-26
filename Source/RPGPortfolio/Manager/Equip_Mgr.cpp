@@ -44,16 +44,31 @@ FInvenItemRow* UEquip_Mgr::GetSlotForIndex(int32 _Idx)
 
 int32 UEquip_Mgr::GetNextArrayIndex()
 {
-	if (CurQuickSlotIdx >= m_QuickSlotArr.Num() - 1)
+	while (++CurQuickSlotIdx)
 	{
-		CurQuickSlotIdx = 0;
-	}
-	else
-	{
-		++CurQuickSlotIdx;
+		if ( CurQuickSlotIdx >= m_QuickSlotArr.Num() )
+		{
+			CurQuickSlotIdx = 0;
+		}
+		if (m_QuickSlotArr[CurQuickSlotIdx] != nullptr)
+		{
+			break;
+		}
 	}
 
 	return CurQuickSlotIdx;
+}
+
+bool UEquip_Mgr::GetQuickSlotValid()
+{
+	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
+	{
+		if (m_QuickSlotArr[i] != nullptr)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
@@ -93,19 +108,21 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 	//}
 }
 
-void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
+void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _Unequip)
 {
-	if (_InvenItem == nullptr)
+	if (_Unequip)
 	{
-		m_QuickSlotArr.RemoveAt(_Idx);
-		/*for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
+		//m_QuickSlotArr.Remove(_InvenItem);
+		m_QuickSlotArr[_Idx] = nullptr;
+
+		for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 		{
-			if ( QuickSlotArr[i] == nullptr)
+			if (m_QuickSlotArr[i] == nullptr)
 			{
 				continue;
 			}
 			UE_LOG(LogTemp, Display, TEXT("QuickSlotArr[%d] 채워짐"), i);
-		}*/
+		}
 		return;
 	}
 
@@ -117,21 +134,36 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx)
 		}
 		if ( m_QuickSlotArr[i]->ItemInfo->ID == _InvenItem->ItemInfo->ID && m_QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
 		{
-			m_QuickSlotArr.RemoveAt(i);
+			m_QuickSlotArr[i] = nullptr;
+			//m_QuickSlotArr.RemoveAt(i);
 			break;
 		}
 	}
 
-	m_QuickSlotArr.Insert(_InvenItem, _Idx);
+	UE_LOG(LogTemp, Display, TEXT("QuickSlotArr 최대 인덱스 : %d"), m_QuickSlotArr.Num());
 
-	/*for (int32 i = 0; i < QuickSlotArr.Num(); ++i)
+	m_QuickSlotArr[_Idx] = _InvenItem;
+
+	//// 인덱스가 배열의 Num()값 이상이면 add
+	//// 인덱스가 배열의 범위 내면 Insert
+	//if ( m_QuickSlotArr.IsValidIndex(_Idx) )
+	//{
+	//	m_QuickSlotArr[ _Idx ] = _InvenItem;
+	//	//m_QuickSlotArr.Insert(_InvenItem, _Idx);
+	//}
+	//else
+	//{
+	//	m_QuickSlotArr.Add(_InvenItem);
+	//}
+
+	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 	{
-		if (QuickSlotArr[i] == nullptr)
+		if ( m_QuickSlotArr[i] == nullptr)
 		{
 			continue;
 		}
 		UE_LOG(LogTemp, Display, TEXT("QuickSlotArr[%d] 채워짐"), i);
-	}*/
+	}
 }
 
 void UEquip_Mgr::RenewQuickSlotUI(int32 _Idx)
@@ -152,38 +184,6 @@ int32 UEquip_Mgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)
 	int32 Index = -1;
 	switch ( _Slot )
 	{
-	case EEQUIP_SLOT::WEAPON_1:
-		break;
-	case EEQUIP_SLOT::WEAPON_2:
-		break;
-	case EEQUIP_SLOT::WEAPON_3:
-		break;
-	case EEQUIP_SLOT::SHIELD_1:
-		break;
-	case EEQUIP_SLOT::SHIELD_2:
-		break;
-	case EEQUIP_SLOT::SHIELD_3:
-		break;
-	case EEQUIP_SLOT::ARROW:
-		break;
-	case EEQUIP_SLOT::BOLT:
-		break;
-	case EEQUIP_SLOT::HELM:
-		break;
-	case EEQUIP_SLOT::CHEST:
-		break;
-	case EEQUIP_SLOT::GAUNTLET:
-		break;
-	case EEQUIP_SLOT::LEGGINGS:
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_1:
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_2:
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_3:
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_4:
-		break;
 	case EEQUIP_SLOT::CONSUMABLE_1:
 		Index = 0;
 		break;

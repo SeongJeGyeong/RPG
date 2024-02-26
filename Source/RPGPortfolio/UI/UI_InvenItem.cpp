@@ -84,6 +84,13 @@ void UUI_InvenItem::ItemBtnClicked()
 	else
 	{
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
-		m_StatUI->RenewBasePower();
+		if (m_ItemData->GetItemType() == EITEM_TYPE::WEAPON || m_ItemData->GetItemType() == EITEM_TYPE::ARM_HELM ||
+			m_ItemData->GetItemType() == EITEM_TYPE::ARM_CHEST || m_ItemData->GetItemType() == EITEM_TYPE::ARM_GAUNTLET ||
+			m_ItemData->GetItemType() == EITEM_TYPE::ARM_LEGGINGS)
+		{
+			m_StatUI->RenewBasePower();
+		}
+		
+
 	}
 }
