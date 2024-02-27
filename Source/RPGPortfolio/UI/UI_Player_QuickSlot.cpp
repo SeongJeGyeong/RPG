@@ -32,10 +32,30 @@ void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetSlotForIndex(_Idx);
 	if (ItemData == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("하단 퀵슬롯의 지정된 인덱스에 아이템 설정되지 않음"));
+		if(UEquip_Mgr::GetInst(GetWorld())->GetQuickSlotValid())
+		{
+			int32 NextIdx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
+			ItemData = UEquip_Mgr::GetInst(GetWorld())->GetSlotForIndex(NextIdx);
+			UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(NextIdx);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("하단 퀵슬롯의 지정된 인덱스에 아이템 설정되지 않음"));
+		}
+
 		m_LowerSlotItem->RenewQuickSlotItem(ItemData);
 		return;
 	}
 	m_LowerSlotItem->RenewQuickSlotItem(ItemData);
 	UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(_Idx);
+
+	UWidgetBlueprintGeneratedClass* pWidgetClass = GetWidgetTreeOwningClass();
+	for (int32 i = 0; i < pWidgetClass->Animations.Num(); ++i)
+	{
+		if (pWidgetClass->Animations[i].GetName() == TEXT("LowerSlotChangeAnim_INST"))
+		{
+			PlayAnimation(pWidgetClass->Animations[i]);
+			break;
+		}
+	}
 }

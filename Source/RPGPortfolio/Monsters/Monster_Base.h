@@ -38,6 +38,7 @@ private:
 	float fDeadEffectRatio;
 	float fWidgetVisTime;
 	bool bLockedOn;
+	bool bAtkTrace;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
@@ -58,7 +59,11 @@ public:
 	bool GetbLockedOn() { return bLockedOn; }
 	void SetbLockedOn(bool _LockedOn);
 
+	bool GetbAtkTrace() { return bAtkTrace; }
+	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
+
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
+	void AttackHitCheck();
 
 public:
 	// Sets default values for this character's properties

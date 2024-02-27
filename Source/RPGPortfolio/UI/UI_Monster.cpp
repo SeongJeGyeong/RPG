@@ -11,7 +11,6 @@ void UUI_Monster::NativeConstruct()
 
 	// NativeOnInitialized 함수는 몬스터 이름과 체력을 가져오기 전에 호출되기 때문에 이름과 체력이 ui에 표시되지 않는다.
 	// 또한 몬스터는 여러 마리 존재하므로 캐릭터가 존재하는 레벨에 몬스터가 많을수록 몬스터 ui가 동시에 초기화 될 때 부하가 걸릴 수 있다.
-
 	m_Name = Cast<UTextBlock>(GetWidgetFromName(TEXT("MonsterName")));
 	m_DMGFigure = Cast<UTextBlock>(GetWidgetFromName(TEXT("DMGFigure")));
 	m_HPBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("MonsterHP")));

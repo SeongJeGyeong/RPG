@@ -23,4 +23,6 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
+	void SetPlayerHPRatio(float _HPRatio);
+	void SetPlayerMPRatio(float _MPRatio);
 };

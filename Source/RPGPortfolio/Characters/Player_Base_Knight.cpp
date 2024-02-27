@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
+#include "../UI/UI_Player_Main.h"
 #include "../UI/UI_Message_Main.h"
 #include "../UI/UI_StatusMain.h"
 #include "../UI/UI_EquipMain.h"
@@ -121,7 +122,7 @@ void APlayer_Base_Knight::BeginPlay()
 		return;
 	}
 	m_MainUI = pGameMode->GetMainHUD();
-
+	m_PlayerUI = m_MainUI->GetMainUIWidget();
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
 }
@@ -247,6 +248,8 @@ void APlayer_Base_Knight::SetOrientRotation(bool _Val)
 	GetCharacterMovement()->bOrientRotationToMovement = _Val;
 }
 
+////////////////////////////// 인풋액션 함수 //////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
@@ -534,10 +537,13 @@ void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 	if (UEquip_Mgr::GetInst(GetWorld())->GetQuickSlotValid())
 	{
 		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
+		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯 인덱스 : %d"), Idx);
 		m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
 		UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
 	}
 }
+//////////////////////////////////////////////////////////////////////////
+////////////////////////////// 인풋액션 함수 //////////////////////////////
 
 bool APlayer_Base_Knight::CheckMontagePlaying()
 {
@@ -626,6 +632,26 @@ void APlayer_Base_Knight::AttackHitCheck()
 			bAtkTrace = false;
 		}
 	}
+}
+
+float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+
+	int32 iCurHP = pState->GetPlayerBasePower().CurHP;
+
+	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, pState->GetPlayerBasePower().MaxHP);
+
+	m_PlayerUI->SetPlayerHPRatio(iCurHP / pState->GetPlayerBasePower().MaxHP);
+
+	if ( iCurHP <= 0.f && GetController() )
+	{
+		// 사망처리
+	}
+
+	return 0.0f;
 }
 
 void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)

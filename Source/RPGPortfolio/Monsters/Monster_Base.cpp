@@ -149,6 +149,11 @@ void AMonster_Base::Tick(float DeltaTime)
 			fWidgetVisTime = 0.f;
 		}
 	}
+
+	if (bAtkTrace)
+	{
+		AttackHitCheck();
+	}
 }
 
 // Called to bind functionality to input
@@ -187,4 +192,36 @@ void AMonster_Base::SetbLockedOn(bool _LockedOn)
 	m_WidgetComponent->SetVisibility(_LockedOn);
 	m_LockOnMarker->SetVisibility(_LockedOn);
 	bLockedOn = _LockedOn;
+}
+
+void AMonster_Base::AttackHitCheck()
+{
+	float AtkRadius = 10.f;
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	FVector HitSphere = GetMesh()->GetSocketLocation("BARGHEST_Head");
+	bool bResult = GetWorld()->SweepSingleByChannel
+	(
+		HitResult,
+		HitSphere,
+		HitSphere,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel5,
+		FCollisionShape::MakeSphere(AtkRadius),
+		Params
+	);
+
+	FColor color;
+	bResult ? color = FColor::Red : color = FColor::Green;
+	DrawDebugSphere(GetWorld(), HitSphere, AtkRadius, 12, color);
+
+	if (bResult)
+	{
+
+		if ( HitResult.GetActor()->IsValidLowLevel() )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+			bAtkTrace = false;
+		}
+	}
 }

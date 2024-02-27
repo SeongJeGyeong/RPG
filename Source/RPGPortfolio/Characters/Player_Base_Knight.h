@@ -66,7 +66,7 @@ private:
 	bool bShowMenu;
 
 	class UUI_Base* m_MainUI;
-
+	class UUI_Player_Main* m_PlayerUI;
 	TArray<class AItem_Dropped_Base*> OverlapItemArr;
 
 public:
@@ -98,6 +98,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 public:
 	void NextAttackCheck();
 	void AttackHitCheck();

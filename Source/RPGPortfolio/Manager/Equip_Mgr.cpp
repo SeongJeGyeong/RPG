@@ -112,8 +112,12 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _
 {
 	if (_Unequip)
 	{
-		//m_QuickSlotArr.Remove(_InvenItem);
 		m_QuickSlotArr[_Idx] = nullptr;
+
+		if (_Idx == CurQuickSlotIdx)
+		{
+
+		}
 
 		for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 		{
@@ -135,7 +139,6 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _
 		if ( m_QuickSlotArr[i]->ItemInfo->ID == _InvenItem->ItemInfo->ID && m_QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
 		{
 			m_QuickSlotArr[i] = nullptr;
-			//m_QuickSlotArr.RemoveAt(i);
 			break;
 		}
 	}
@@ -143,18 +146,6 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _
 	UE_LOG(LogTemp, Display, TEXT("QuickSlotArr 최대 인덱스 : %d"), m_QuickSlotArr.Num());
 
 	m_QuickSlotArr[_Idx] = _InvenItem;
-
-	//// 인덱스가 배열의 Num()값 이상이면 add
-	//// 인덱스가 배열의 범위 내면 Insert
-	//if ( m_QuickSlotArr.IsValidIndex(_Idx) )
-	//{
-	//	m_QuickSlotArr[ _Idx ] = _InvenItem;
-	//	//m_QuickSlotArr.Insert(_InvenItem, _Idx);
-	//}
-	//else
-	//{
-	//	m_QuickSlotArr.Add(_InvenItem);
-	//}
 
 	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 	{
