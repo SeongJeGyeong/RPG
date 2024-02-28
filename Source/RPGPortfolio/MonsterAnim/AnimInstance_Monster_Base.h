@@ -32,4 +32,10 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
 
+	UFUNCTION()
+	void AnimNotify_HitCheckStart();
+
+	UFUNCTION()
+	void AnimNotify_HitCheckEnd();
+
 };

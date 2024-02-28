@@ -129,3 +129,8 @@ void APlayerState_Base::SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped)
 		break;
 	}
 }
+
+void APlayerState_Base::SetPlayerCurrentHP(float _CurHP)
+{
+	m_PlayerBasePower.CurHP = _CurHP;
+}

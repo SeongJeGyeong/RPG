@@ -23,3 +23,15 @@ void UAnimInstance_Monster_Base::NativeUpdateAnimation(float _fDeltaTime)
 	m_State = m_Monster->GetState();
 	
 }
+
+void UAnimInstance_Monster_Base::AnimNotify_HitCheckStart()
+{
+	UE_LOG(LogTemp, Warning, TEXT("monster HitCheckStart Notify"));
+	m_Monster->SetbAtkTrace(true);
+}
+
+void UAnimInstance_Monster_Base::AnimNotify_HitCheckEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("monster HitCheckEnd Notify"));
+	m_Monster->SetbAtkTrace(false);
+}

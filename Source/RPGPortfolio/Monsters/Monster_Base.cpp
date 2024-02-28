@@ -10,6 +10,7 @@
 #include "Components/WidgetComponent.h"
 #include "../UI/UI_Monster.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -166,6 +167,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	FinalDamage = FMath::Clamp(FinalDamage - m_Info.PhysicDef, 0.f, FinalDamage);
 	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
 
 	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
@@ -196,7 +198,7 @@ void AMonster_Base::SetbLockedOn(bool _LockedOn)
 
 void AMonster_Base::AttackHitCheck()
 {
-	float AtkRadius = 10.f;
+	float AtkRadius = 50.f;
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	FVector HitSphere = GetMesh()->GetSocketLocation("BARGHEST_Head");
@@ -206,7 +208,7 @@ void AMonster_Base::AttackHitCheck()
 		HitSphere,
 		HitSphere,
 		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel5,
+		ECollisionChannel::ECC_GameTraceChannel6,
 		FCollisionShape::MakeSphere(AtkRadius),
 		Params
 	);
@@ -217,10 +219,10 @@ void AMonster_Base::AttackHitCheck()
 
 	if (bResult)
 	{
-
 		if ( HitResult.GetActor()->IsValidLowLevel() )
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+			UGameplayStatics::ApplyDamage(HitResult.GetActor(), m_Info.PhysicAtk, GetController(), this, UDamageType::StaticClass());
 			bAtkTrace = false;
 		}
 	}

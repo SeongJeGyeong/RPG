@@ -640,10 +640,12 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 
-	int32 iCurHP = pState->GetPlayerBasePower().CurHP;
+	FinalDamage = FMath::Clamp(FinalDamage - pState->GetPlayerBasePower().PhysicDef, 0.f, FinalDamage);
 
+	int32 iCurHP = pState->GetPlayerBasePower().CurHP;
 	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, pState->GetPlayerBasePower().MaxHP);
 
+	pState->SetPlayerCurrentHP(iCurHP);
 	m_PlayerUI->SetPlayerHPRatio(iCurHP / pState->GetPlayerBasePower().MaxHP);
 
 	if ( iCurHP <= 0.f && GetController() )
