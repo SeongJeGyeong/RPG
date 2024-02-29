@@ -86,6 +86,31 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	}*/
 }
 
+void UInventory_Mgr::SubGameItem(EITEM_ID _ID)
+{
+	//삭제할 아이템과 동일한 ID의 아이템 정보를 가져온다
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+
+	if (nullptr == pItemInfo)
+	{
+		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		return;
+	}
+
+	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
+	// 없으면 아무것도 수행하지 않고, 있으면 인벤토리에서 삭제한다. 
+	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->Type].Find(_ID);
+	if (nullptr == pItemRow)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("삭제할 아이템이 존재하지 않음"));
+		return;
+	}
+	else
+	{
+		m_InvenStorage[(int32)pItemInfo->Type].Remove(_ID);
+	}
+}
+
 void UInventory_Mgr::ShowInventoryUI()
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));

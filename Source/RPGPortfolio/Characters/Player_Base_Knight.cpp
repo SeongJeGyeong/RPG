@@ -34,6 +34,8 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, CurrentCombo(1)
 	, MaxCombo(4)
 	, bShowMenu(false)
+	, bItemDelay(false)
+	, fItemDelayTime(0.f)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -170,6 +172,17 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	{
 		AttackHitCheck();
 	}
+
+	if (bItemDelay)
+	{
+		fItemDelayTime += 1.f * DeltaTime;
+		if (fItemDelayTime > 3.f)
+		{
+			bItemDelay = false;
+			fItemDelayTime = 0.f;
+		}
+	}
+
 }
 
 // Called to bind functionality to input
@@ -236,6 +249,10 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				break;
 			case EInputActionType::QUICKSLOTCHANGE:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::QuickSlotChange);
+				break;
+			case EInputActionType::USELOWERQUICKSLOT:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::UseLowerQuickSlot);
+				break;
 			default:
 				break;
 			}
@@ -534,12 +551,49 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 {
-	if (UEquip_Mgr::GetInst(GetWorld())->GetQuickSlotValid())
+	if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr())
 	{
 		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
 		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯 인덱스 : %d"), Idx);
 		m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
 		UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
+	}
+}
+
+void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instance)
+{
+	if (!bItemDelay)
+	{
+		int32 iCurIdx = UEquip_Mgr::GetInst(GetWorld())->GetCurrentIndex();
+		if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx))
+		{
+			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
+			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+			if ( pItem->ItemInfo->Restore_HP >= 0 )
+			{
+				pState->SetPlayerCurrentHP(FMath::Clamp(pState->GetPlayerBasePower().CurHP + pItem->ItemInfo->Restore_HP, 0.f, pState->GetPlayerBasePower().MaxHP));
+				m_PlayerUI->SetPlayerHPRatio(pState->GetPlayerBasePower().CurHP / pState->GetPlayerBasePower().MaxHP);
+			}
+			if ( pItem->ItemInfo->Restore_MP >= 0 )
+			{
+				pState->SetPlayerCurrentMP(FMath::Clamp(pState->GetPlayerBasePower().CurMP + pItem->ItemInfo->Restore_MP, 0.f, pState->GetPlayerBasePower().MaxMP));
+				m_PlayerUI->SetPlayerMPRatio(pState->GetPlayerBasePower().CurMP / pState->GetPlayerBasePower().MaxMP);
+			}
+
+			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
+
+			bItemDelay = true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
+			return;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 딜레이 대기중"));
+		return;
 	}
 }
 //////////////////////////////////////////////////////////////////////////

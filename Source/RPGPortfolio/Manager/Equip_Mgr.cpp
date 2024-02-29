@@ -9,6 +9,7 @@
 #include "../UI/UI_Player_QuickSlot.h"
 #include "../UI/UI_Base.h"
 #include "../UI/UI_StatusMain.h"
+#include "Inventory_Mgr.h"
 
 UWorld* UEquip_Mgr::m_World = nullptr;
 
@@ -32,7 +33,7 @@ UEquip_Mgr* UEquip_Mgr::GetInst(UGameInstance* _GameInst)
 	return pGameInst->m_EquipMgr;
 }
 
-FInvenItemRow* UEquip_Mgr::GetSlotForIndex(int32 _Idx)
+FInvenItemRow* UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
 {
 	if (m_QuickSlotArr.IsEmpty())
 	{
@@ -59,7 +60,7 @@ int32 UEquip_Mgr::GetNextArrayIndex()
 	return CurQuickSlotIdx;
 }
 
-bool UEquip_Mgr::GetQuickSlotValid()
+bool UEquip_Mgr::QuickSlotValidForArr()
 {
 	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 	{
@@ -68,7 +69,43 @@ bool UEquip_Mgr::GetQuickSlotValid()
 			return true;
 		}
 	}
+
 	return false;
+}
+
+bool UEquip_Mgr::QuickSlotValidForIdx(int32 _Idx)
+{
+	if (m_QuickSlotArr[_Idx] != nullptr)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
+{
+	FInvenItemRow* pItem = GetQSItemForIndex(_Idx);
+
+	if (pItem->Stack > 0)
+	{
+		--pItem->Stack;
+
+		// 개수가 0이 되면 퀵슬롯에서 해당 아이템을 없앤다.
+		if (pItem->Stack <= 0)
+		{
+			UInventory_Mgr::GetInst(m_World)->SubGameItem(pItem->ItemInfo->ID);
+			SetQuickSlotArray(pItem, _Idx, true);
+			RenewQuickSlotUI(_Idx);
+		}
+		// 개수가 0이 아니면 퀵슬롯에서 해당 아이템의 갯수만 줄인다.
+		else
+		{
+			RenewQuickSlotUI(_Idx);
+		}
+	}
+
+
 }
 
 void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)

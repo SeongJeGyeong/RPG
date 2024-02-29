@@ -49,6 +49,7 @@ public:
 	void InitPlayerData(FCharacterBasePower _PlayerBasePower);
 	void SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped);
 	void SetPlayerCurrentHP(float _CurHP);
+	void SetPlayerCurrentMP(float _CurMP);
 
 	const float& GetHelmPhyDef() { return Helm_PhyDef; }
 	void SetHelmPhyDef(const float& _HelmPhyDef) { Helm_PhyDef = _HelmPhyDef; }

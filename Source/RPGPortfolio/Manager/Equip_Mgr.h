@@ -31,7 +31,7 @@ public:
 	static UEquip_Mgr* GetInst(UWorld* _World);
 	static UEquip_Mgr* GetInst(UGameInstance* _GameInst);
 
-	FInvenItemRow* GetSlotForIndex(int32 _Idx);
+	FInvenItemRow* GetQSItemForIndex(int32 _Idx);
 
 	void SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot);
 	FGameItemInfo* GetEquipItemFromSlot(EEQUIP_SLOT _Slot) { return m_EquipItemMap.Find(_Slot); }
@@ -44,5 +44,8 @@ public:
 	int32 GetCurrentIndex() { return CurQuickSlotIdx; }
 	int32 GetNextArrayIndex();
 	void SetCurrentIndex(int32 _CurrentIdx) { CurQuickSlotIdx = _CurrentIdx; }
-	bool GetQuickSlotValid();
+	bool QuickSlotValidForArr();
+	bool QuickSlotValidForIdx(int32 _Idx);
+
+	void DecreaseLowerSlotItem(int32 _Idx);
 };

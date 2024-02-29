@@ -18,6 +18,7 @@ enum class EInputActionType : uint8
 	ACTION,
 	BACKTOPREV,
 	QUICKSLOTCHANGE,
+	USELOWERQUICKSLOT,
 };
 
 UENUM(BlueprintType)

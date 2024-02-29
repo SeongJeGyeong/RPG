@@ -29,13 +29,13 @@ void UUI_Player_QuickSlot::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 {
-	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetSlotForIndex(_Idx);
+	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
 	if (ItemData == nullptr)
 	{
-		if(UEquip_Mgr::GetInst(GetWorld())->GetQuickSlotValid())
+		if(UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr())
 		{
 			int32 NextIdx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
-			ItemData = UEquip_Mgr::GetInst(GetWorld())->GetSlotForIndex(NextIdx);
+			ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(NextIdx);
 			UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(NextIdx);
 		}
 		else

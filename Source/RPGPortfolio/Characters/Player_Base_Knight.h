@@ -56,7 +56,10 @@ private:
 	bool bEnableMove;
 	bool bAttackToggle;
 	bool bAtkTrace;
-	
+	bool bItemDelay;
+
+	float fItemDelayTime;
+
 	FVector vDodgeVector;
 	FRotator rDodgeRotation;
 
@@ -118,6 +121,8 @@ private:
 	void ActionCommand(const FInputActionInstance& _Instance);
 	void BackToPrevMenu(const FInputActionInstance& _Instance);
 	void QuickSlotChange(const FInputActionInstance& _Instance);
+	
+	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 
 	bool CheckMontagePlaying();
 

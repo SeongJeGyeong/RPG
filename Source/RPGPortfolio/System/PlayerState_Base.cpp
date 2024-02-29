@@ -134,3 +134,8 @@ void APlayerState_Base::SetPlayerCurrentHP(float _CurHP)
 {
 	m_PlayerBasePower.CurHP = _CurHP;
 }
+
+void APlayerState_Base::SetPlayerCurrentMP(float _CurMP)
+{
+	m_PlayerBasePower.CurMP = _CurMP;
+}
