@@ -17,11 +17,13 @@ class RPGPORTFOLIO_API UUI_Player_QuickSlot : public UUserWidget
 private:
 	class UUI_Player_QuickSlotItem* m_UpperSlotItem;
 	class UUI_Player_QuickSlotItem* m_LowerSlotItem;
+	class UUI_Player_QuickSlotItem* m_NextQuickSlotItem;
 
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void RenewLowerQuickSlot(int32 _Idx);
-
+	void RenewNextQuickSlot(int32 _Idx);
+	void SetQuickSlotColor(float R, float G, float B, float A, bool UroL);
 };

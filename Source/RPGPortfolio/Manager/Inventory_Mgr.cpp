@@ -86,7 +86,7 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	}*/
 }
 
-void UInventory_Mgr::SubGameItem(EITEM_ID _ID)
+void UInventory_Mgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
 {
 	//삭제할 아이템과 동일한 ID의 아이템 정보를 가져온다
 	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
@@ -107,6 +107,7 @@ void UInventory_Mgr::SubGameItem(EITEM_ID _ID)
 	}
 	else
 	{
+		RenewEquipConsumeUI(_Slot, pItemRow, true);
 		m_InvenStorage[(int32)pItemInfo->Type].Remove(_ID);
 	}
 }
@@ -424,10 +425,8 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 		UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index, true);
 
 		int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
-		if ( Index == curIdx )
-		{
-			UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(Index);
-		}
+		UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(curIdx);
+
 		return;
 	}
 
@@ -456,9 +455,17 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 
 	int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
 	UE_LOG(LogTemp, Display, TEXT("현재 슬롯 인덱스 : %d"), curIdx);
-	if ( Index == curIdx )
+	if (Index == curIdx)
 	{
 		UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(Index);
+	}
+	else
+	{
+		int32 nextIdx = UEquip_Mgr::GetInst(m_World)->GetNextArrayIndex();
+		if (curIdx != nextIdx)
+		{
+			UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(curIdx);
+		}
 	}
 }
 

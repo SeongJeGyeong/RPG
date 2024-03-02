@@ -27,5 +27,6 @@ public:
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void RenewQuickSlotItem(struct FInvenItemRow* _InvenItem);
+	void RenewNextQuickSlotItem(FInvenItemRow* _InvenItem);
 
 };

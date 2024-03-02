@@ -45,19 +45,31 @@ FInvenItemRow* UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
 
 int32 UEquip_Mgr::GetNextArrayIndex()
 {
-	while (++CurQuickSlotIdx)
+	int32 idx = CurQuickSlotIdx;
+	int32 iCount = 0;
+	while (++idx)
 	{
-		if ( CurQuickSlotIdx >= m_QuickSlotArr.Num() )
+		if (iCount >= 5)
 		{
-			CurQuickSlotIdx = 0;
+			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 등록된 아이템 없음"));
+			return CurQuickSlotIdx;
 		}
-		if (m_QuickSlotArr[CurQuickSlotIdx] != nullptr)
+
+		if (idx >= m_QuickSlotArr.Num())
+		{
+			idx = 0;
+		}
+
+		if (m_QuickSlotArr[idx] == nullptr)
+		{
+			++iCount;
+		}
+		else
 		{
 			break;
 		}
 	}
-
-	return CurQuickSlotIdx;
+	return idx;
 }
 
 bool UEquip_Mgr::QuickSlotValidForArr()
@@ -94,9 +106,8 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 		// 개수가 0이 되면 퀵슬롯에서 해당 아이템을 없앤다.
 		if (pItem->Stack <= 0)
 		{
-			UInventory_Mgr::GetInst(m_World)->SubGameItem(pItem->ItemInfo->ID);
-			SetQuickSlotArray(pItem, _Idx, true);
-			RenewQuickSlotUI(_Idx);
+			EEQUIP_SLOT Slot = ConvertIdxToQuickSlot(_Idx);
+			UInventory_Mgr::GetInst(m_World)->SubGameItem(Slot, pItem->ItemInfo->ID);
 		}
 		// 개수가 0이 아니면 퀵슬롯에서 해당 아이템의 갯수만 줄인다.
 		else
@@ -153,7 +164,8 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _
 
 		if (_Idx == CurQuickSlotIdx)
 		{
-
+			// 현재 퀵슬롯의 아이템을 장비해제 했을경우 다음 퀵슬롯으로 자리를 옮긴다.
+			CurQuickSlotIdx = GetNextArrayIndex();
 		}
 
 		for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
@@ -207,6 +219,19 @@ void UEquip_Mgr::RenewQuickSlotUI(int32 _Idx)
 	MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
 }
 
+void UEquip_Mgr::RenewNextQuickSlotUI(int32 _Idx)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_Base* MainUI = GameMode->GetMainHUD();
+
+	MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
+}
+
 int32 UEquip_Mgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)
 {
 	int32 Index = -1;
@@ -235,4 +260,31 @@ int32 UEquip_Mgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)
 	}
 
 	return Index;
+}
+
+EEQUIP_SLOT UEquip_Mgr::ConvertIdxToQuickSlot(int32 _Idx)
+{
+	EEQUIP_SLOT Slot = EEQUIP_SLOT::EMPTY;
+	switch ( _Idx )
+	{
+	case 0:
+		Slot = EEQUIP_SLOT::CONSUMABLE_1;
+		break;
+	case 1:
+		Slot = EEQUIP_SLOT::CONSUMABLE_2;
+		break;
+	case 2:
+		Slot = EEQUIP_SLOT::CONSUMABLE_3;
+		break;
+	case 3:
+		Slot = EEQUIP_SLOT::CONSUMABLE_4;
+		break;
+	case 4:
+		Slot = EEQUIP_SLOT::CONSUMABLE_5;
+		break;
+	default:
+		break;
+	}
+
+	return Slot;
 }

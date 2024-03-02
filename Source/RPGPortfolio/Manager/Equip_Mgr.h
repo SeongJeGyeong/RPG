@@ -38,8 +38,10 @@ public:
 
 	void SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _Unequip);
 	void RenewQuickSlotUI(int32 _Idx);
+	void RenewNextQuickSlotUI(int32 _Idx);
 
 	int32 ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot);
+	EEQUIP_SLOT ConvertIdxToQuickSlot(int32 _Idx);
 
 	int32 GetCurrentIndex() { return CurQuickSlotIdx; }
 	int32 GetNextArrayIndex();

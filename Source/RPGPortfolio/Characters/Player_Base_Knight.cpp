@@ -31,11 +31,11 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	: bEnableJump(true)
 	, bEnableMove(true)
 	, bAttackToggle(false)
+	, bItemDelay(false)
+	, fItemDelayTime(0.f)
 	, CurrentCombo(1)
 	, MaxCombo(4)
 	, bShowMenu(false)
-	, bItemDelay(false)
-	, fItemDelayTime(0.f)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -178,6 +178,8 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		fItemDelayTime += 1.f * DeltaTime;
 		if (fItemDelayTime > 3.f)
 		{
+			UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
+			pQuickSlotUI->SetQuickSlotColor(1.f, 1.f, 1.f, 1.f, false);
 			bItemDelay = false;
 			fItemDelayTime = 0.f;
 		}
@@ -556,7 +558,6 @@ void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
 		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯 인덱스 : %d"), Idx);
 		m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
-		UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
 	}
 }
 
@@ -582,6 +583,8 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 
 			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
 
+			UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
+			pQuickSlotUI->SetQuickSlotColor(0.5f, 0.5f, 0.5f, 0.5f, false);
 			bItemDelay = true;
 		}
 		else

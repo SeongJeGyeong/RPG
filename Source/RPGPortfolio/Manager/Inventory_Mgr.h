@@ -27,7 +27,7 @@ public:
 
 	void SetItemDataTable(UDataTable* _ItemDataTable);
 	void AddGameItem(EITEM_ID _ID);
-	void SubGameItem(EITEM_ID _ID);
+	void SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID);
 
 	void ShowInventoryUI();
 	void CloseInventoryUI();

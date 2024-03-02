@@ -165,11 +165,14 @@ void AMonster_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (m_State == EMONSTER_STATE::DEAD)
+	{
+		return 0.0f;
+	}
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	FinalDamage = FMath::Clamp(FinalDamage - m_Info.PhysicDef, 0.f, FinalDamage);
 	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
-
 	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
 	m_WidgetComponent->SetVisibility(true);
 	m_MonsterWidget->DisplayDMG(FinalDamage);
