@@ -55,6 +55,13 @@ void UInventory_Mgr::SetItemDataTable(UDataTable* _ItemDataTable)
 	}
 }
 
+FGameItemInfo* UInventory_Mgr::GetItemInfo(EITEM_ID _ID)
+{
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+
+	return pItemInfo;
+}
+
 void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 {
 	//습득한 아이템과 동일한 ID의 아이템 정보를 가져온다

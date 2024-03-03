@@ -35,6 +35,7 @@ public:
 
 	void ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 
+	FGameItemInfo* GetItemInfo(EITEM_ID _ID);
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
 	void RenewItemListUI(EITEM_TYPE _Type);

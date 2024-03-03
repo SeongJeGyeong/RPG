@@ -86,14 +86,32 @@ void UUI_Base::ShowMenu(bool _bShow)
 	}
 }
 
-void UUI_Base::ShowMessage(bool _bShow)
+void UUI_Base::ShowActionMessage(bool _bShow, FText _Command, FText _Message)
 {
-	if ( _bShow )
+	if (_bShow)
 	{
+		m_MainMessageUI->SetMessageText(_Command, _Message);
 		m_MainMessageUI->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
-		m_MainMessageUI->SetVisibility(ESlateVisibility::Hidden);
+		if (!bDisplayRootMessage)
+		{
+			m_MainMessageUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void UUI_Base::ShowRootingMessage(bool _bShow, FString _ItemName, FString _ItemImgPath, int32 _Stack)
+{
+	bDisplayRootMessage = _bShow;
+	if ( _bShow )
+	{
+		m_ItemMessageUI->SetItemMessage(_ItemName, _ItemImgPath, _Stack);
+		m_ItemMessageUI->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		m_ItemMessageUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

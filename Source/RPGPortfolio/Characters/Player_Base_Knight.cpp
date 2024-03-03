@@ -15,6 +15,7 @@
 #include "../UI/UI_Base.h"
 #include "../UI/UI_Player_Main.h"
 #include "../UI/UI_Message_Main.h"
+#include "../UI/UI_Message_Item.h"
 #include "../UI/UI_StatusMain.h"
 #include "../UI/UI_EquipMain.h"
 #include "../UI/UI_EquipItemList.h"
@@ -510,7 +511,17 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 획득"));
 		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID);
+		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->m_IID);
+		
+		m_MainUI->ShowRootingMessage(true, pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
+		m_MainUI->ShowActionMessage(true, FText::FromString(L"E"), FText::FromString(L"확인"));
+
 		OverlapItemArr[OverlapItemArr.Num() - 1]->Destroy();
+	}
+	else if (m_MainUI->GetRootMessageDisplayed())
+	{
+		m_MainUI->ShowRootingMessage(false);
+		m_MainUI->ShowActionMessage(false);
 	}
 }
 
@@ -649,7 +660,7 @@ void APlayer_Base_Knight::AttackHitCheck()
 		vSwordBottom,
 		vSwordTop,
 		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel5,
+		ECollisionChannel::ECC_GameTraceChannel5,	// 트레이스 채널 설정은 Block으로 해놔야 HitResult에 걸림(Block으로 해도 밀려나진 않음)
 		FCollisionShape::MakeCapsule(AtkRadius, (vSwordTop - vSwordBottom).Size() * 0.5f),
 		Params
 	);
@@ -718,9 +729,7 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
 	if(TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
 	{
-		UUI_Message_Main* Message = m_MainUI->GetMainMessageUI();
-		Message->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
-		m_MainUI->ShowMessage(true);
+		m_MainUI->ShowActionMessage(true, FText::FromString(L"E"), FText::FromString(L"획득한다"));
 		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
 	}
 }
@@ -751,7 +760,14 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 
 		if (OverlapItemArr.IsEmpty())
 		{
-			m_MainUI->ShowMessage(false);
+			if (m_MainUI->GetRootMessageDisplayed())
+			{
+				m_MainUI->ShowActionMessage(true, FText::FromString(L"E"), FText::FromString(L"확인"));
+			}
+			else
+			{
+				m_MainUI->ShowActionMessage(false);
+			}
 		}
 	}
 }

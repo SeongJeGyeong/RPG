@@ -23,14 +23,19 @@ private:
 	class UUI_Message_Main*		m_MainMessageUI;
 	class UUI_Message_Item*		m_ItemMessageUI;
 
+	bool bDisplayRootMessage = false;
+
 public:
 	class UUI_Player_Main* GetMainUIWidget() { return m_MainUI; }
 	class UUI_Message_Main* GetMainMessageUI() { return m_MainMessageUI; }
 	class UUI_Message_Item* GetItemMessageUI() { return m_ItemMessageUI; }
 	class UUI_Player_QuickSlot* GetQuickSlotUI() { return m_QuickSlotUI; }
+	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
 
 	void ShowMenu(bool _bShow);
-	void ShowMessage(bool _bShow);
+
+	void ShowActionMessage(bool _bShow, FText _Command = FText::GetEmpty(), FText _Message = FText::GetEmpty());
+	void ShowRootingMessage(bool _bShow,  FString _ItemName = TEXT(""), FString _ItemImgPath = TEXT(""), int32 _Stack = 0);
 
 public:
 	virtual void NativeConstruct() override;

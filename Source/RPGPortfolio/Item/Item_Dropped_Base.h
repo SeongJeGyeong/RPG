@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
 	EITEM_ID	m_IID;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
+	int32		m_Stack = 1;
+
 	// 간접 프로퍼티 참조. 에셋을 수동으로 로드해야 함
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
 	TSoftObjectPtr<UDA_ItemData> m_ItemData;

@@ -23,4 +23,5 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
+	void SetItemMessage(FString _ItemName, FString _ItemImgPath, int32 _Stack);
 };
