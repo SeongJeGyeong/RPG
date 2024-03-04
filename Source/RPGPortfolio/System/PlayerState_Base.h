@@ -50,6 +50,7 @@ public:
 	void SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped);
 	void SetPlayerCurrentHP(float _CurHP);
 	void SetPlayerCurrentMP(float _CurMP);
+	void PlayerGainSoul(int32 _Soul);
 
 	const float& GetHelmPhyDef() { return Helm_PhyDef; }
 	void SetHelmPhyDef(const float& _HelmPhyDef) { Helm_PhyDef = _HelmPhyDef; }

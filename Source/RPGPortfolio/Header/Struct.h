@@ -63,6 +63,9 @@ struct FMonsterInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BOSS_PerceiveRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Dropped_Soul;
 };
 
 USTRUCT(Atomic, BlueprintType)

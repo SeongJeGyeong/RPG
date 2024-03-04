@@ -14,4 +14,21 @@ class RPGPORTFOLIO_API UUI_Player_Soul : public UUserWidget
 {
 	GENERATED_BODY()
 	
+private:
+	class UTextBlock* m_AmountOfSoul;
+	class UTextBlock* m_GainedSoul;
+	int32 iDisplayedSoul;
+	int32 iGainedSoul;
+	bool bSoulGained = false;
+	bool bDisplayGainedSoul = false;
+
+	float fDisplayTime = 0.f;
+	float fOpacity = 1.f;
+
+public:
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+
+	void RenewAmountOfSoul(int32 _GainedSoul);
+
 };

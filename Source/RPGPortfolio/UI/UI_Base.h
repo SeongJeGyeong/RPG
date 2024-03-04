@@ -30,12 +30,14 @@ public:
 	class UUI_Message_Main* GetMainMessageUI() { return m_MainMessageUI; }
 	class UUI_Message_Item* GetItemMessageUI() { return m_ItemMessageUI; }
 	class UUI_Player_QuickSlot* GetQuickSlotUI() { return m_QuickSlotUI; }
+	class UUI_Player_Soul* GetSoulUI() { return m_SoulUI; }
+
 	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
 
 	void ShowMenu(bool _bShow);
 
-	void ShowActionMessage(bool _bShow, FText _Command = FText::GetEmpty(), FText _Message = FText::GetEmpty());
-	void ShowRootingMessage(bool _bShow,  FString _ItemName = TEXT(""), FString _ItemImgPath = TEXT(""), int32 _Stack = 0);
+	void ShowActionMessage(bool _bShow);
+	void ShowRootingMessage(bool _bShow);
 
 public:
 	virtual void NativeConstruct() override;

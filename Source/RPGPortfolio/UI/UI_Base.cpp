@@ -86,11 +86,10 @@ void UUI_Base::ShowMenu(bool _bShow)
 	}
 }
 
-void UUI_Base::ShowActionMessage(bool _bShow, FText _Command, FText _Message)
+void UUI_Base::ShowActionMessage(bool _bShow)
 {
 	if (_bShow)
 	{
-		m_MainMessageUI->SetMessageText(_Command, _Message);
 		m_MainMessageUI->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
@@ -102,12 +101,11 @@ void UUI_Base::ShowActionMessage(bool _bShow, FText _Command, FText _Message)
 	}
 }
 
-void UUI_Base::ShowRootingMessage(bool _bShow, FString _ItemName, FString _ItemImgPath, int32 _Stack)
+void UUI_Base::ShowRootingMessage(bool _bShow)
 {
 	bDisplayRootMessage = _bShow;
 	if ( _bShow )
 	{
-		m_ItemMessageUI->SetItemMessage(_ItemName, _ItemImgPath, _Stack);
 		m_ItemMessageUI->SetVisibility(ESlateVisibility::Visible);
 	}
 	else

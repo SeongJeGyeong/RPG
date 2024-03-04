@@ -20,6 +20,7 @@
 #include "../UI/UI_EquipMain.h"
 #include "../UI/UI_EquipItemList.h"
 #include "../UI/UI_Player_QuickSlot.h"
+#include "../UI/UI_Player_Soul.h"
 #include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
@@ -157,7 +158,8 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		m_AnimInst->bIsAttack = false;
 	}
 	bAttackToggle = false;
-
+	
+	// 회피 애니메이션 재생중일 때
 	if (m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()))
 	{
 		GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * DeltaTime);
@@ -165,7 +167,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	}
 	else if (m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()))
 	{
-		AddMovementInput(vDodgeVector, 120.f * DeltaTime);
+		AddMovementInput(vDodgeVector, 200.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
 	}
 
@@ -513,9 +515,10 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID);
 		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->m_IID);
 		
-		m_MainUI->ShowRootingMessage(true, pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
-		m_MainUI->ShowActionMessage(true, FText::FromString(L"E"), FText::FromString(L"확인"));
-
+		m_MainUI->ShowRootingMessage(true);
+		m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
+		m_MainUI->ShowActionMessage(true);
+		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"확인"));
 		OverlapItemArr[OverlapItemArr.Num() - 1]->Destroy();
 	}
 	else if (m_MainUI->GetRootMessageDisplayed())
@@ -590,6 +593,11 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 			{
 				pState->SetPlayerCurrentMP(FMath::Clamp(pState->GetPlayerBasePower().CurMP + pItem->ItemInfo->Restore_MP, 0.f, pState->GetPlayerBasePower().MaxMP));
 				m_PlayerUI->SetPlayerMPRatio(pState->GetPlayerBasePower().CurMP / pState->GetPlayerBasePower().MaxMP);
+			}
+			if (pItem->ItemInfo->Gained_Soul >= 0)
+			{
+				pState->PlayerGainSoul(pItem->ItemInfo->Gained_Soul);
+				m_MainUI->GetSoulUI()->RenewAmountOfSoul(pItem->ItemInfo->Gained_Soul);
 			}
 
 			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
@@ -729,7 +737,8 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
 	if(TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
 	{
-		m_MainUI->ShowActionMessage(true, FText::FromString(L"E"), FText::FromString(L"획득한다"));
+		m_MainUI->ShowActionMessage(true);
+		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
 		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
 	}
 }
@@ -762,7 +771,8 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 		{
 			if (m_MainUI->GetRootMessageDisplayed())
 			{
-				m_MainUI->ShowActionMessage(true, FText::FromString(L"E"), FText::FromString(L"확인"));
+				m_MainUI->ShowActionMessage(true);
+				m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"확인"));
 			}
 			else
 			{

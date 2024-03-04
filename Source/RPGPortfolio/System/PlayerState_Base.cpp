@@ -3,7 +3,6 @@
 
 #include "PlayerState_Base.h"
 #include "../Manager/Equip_Mgr.h"
-#include "../UI/UI_PlayerStat.h"
 
 APlayerState_Base::APlayerState_Base()
 {
@@ -138,4 +137,9 @@ void APlayerState_Base::SetPlayerCurrentHP(float _CurHP)
 void APlayerState_Base::SetPlayerCurrentMP(float _CurMP)
 {
 	m_PlayerBasePower.CurMP = _CurMP;
+}
+
+void APlayerState_Base::PlayerGainSoul(int32 _Soul)
+{
+	m_PlayerBasePower.AmountOfSoul += _Soul;
 }
