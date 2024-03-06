@@ -38,7 +38,7 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 		if (iDisplayedSoul < PlayerBasePower.AmountOfSoul)
 		{
-			iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 5.f * _DeltaTime, iDisplayedSoul, PlayerBasePower.AmountOfSoul);
+			iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 3.f * _DeltaTime, iDisplayedSoul, PlayerBasePower.AmountOfSoul);
 			UE_LOG(LogTemp, Display, TEXT("soul : %d"), iDisplayedSoul);
 			m_AmountOfSoul->SetText(FText::FromString(FString::Printf(TEXT("%d"), iDisplayedSoul)));
 		}

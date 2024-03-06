@@ -89,6 +89,7 @@ public:
 	TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
 	void SetAttackMontage(TSoftObjectPtr<UAnimMontage> _SettingAttackMontage) { m_SettingAttackMontage = _SettingAttackMontage; }
 
+	void GainMonsterSoul(int32 _GainedSoul);
 
 protected:
 	// Called when the game starts or when spawned

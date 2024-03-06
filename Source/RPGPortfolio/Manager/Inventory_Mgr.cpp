@@ -62,7 +62,7 @@ FGameItemInfo* UInventory_Mgr::GetItemInfo(EITEM_ID _ID)
 	return pItemInfo;
 }
 
-void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
+void UInventory_Mgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 {
 	//습득한 아이템과 동일한 ID의 아이템 정보를 가져온다
 	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
@@ -79,11 +79,11 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID)
 	FInvenItemRow* pItemRow = m_InvenStorage[(int32)pItemInfo->Type].Find(_ID);
 	if ( nullptr == pItemRow )
 	{
-		m_InvenStorage[(int32)pItemInfo->Type].Add(_ID, FInvenItemRow{pItemInfo, 1, EEQUIP_SLOT::EMPTY});
+		m_InvenStorage[(int32)pItemInfo->Type].Add(_ID, FInvenItemRow{pItemInfo, _Stack, EEQUIP_SLOT::EMPTY});
 	}
 	else
 	{
-		++pItemRow->Stack;
+		pItemRow->Stack += _Stack;
 	}
 
 	//인벤토리  UI가 열려있을 경우 갱신

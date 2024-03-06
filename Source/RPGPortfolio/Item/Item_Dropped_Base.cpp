@@ -23,6 +23,12 @@ AItem_Dropped_Base::AItem_Dropped_Base()
 	m_Mesh->SetupAttachment(m_Trigger);
 	m_Niagara->SetupAttachment(m_Trigger);
 
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/RPGEffects/ParticlesNiagara/StatusEffects/MagicGlow/NS_Status_Magic_Glow.NS_Status_Magic_Glow'"));
+	if (niagara.Succeeded())
+	{
+		m_Niagara->SetAsset(niagara.Object);
+		m_Niagara->Activate(true);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -32,7 +38,6 @@ void AItem_Dropped_Base::BeginPlay()
 
 	//m_Trigger->OnComponentBeginOverlap.AddDynamic(this, &AItem_Dropped_Base::BeginOverlap);
 	//m_Trigger->OnComponentEndOverlap.AddDynamic(this, &AItem_Dropped_Base::EndOverlap);
-	
 }
 
 // Called every frame

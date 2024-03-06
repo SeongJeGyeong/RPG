@@ -27,6 +27,9 @@
 #include "../System/PlayerState_Base.h"
 #include "../Monsters/Monster_Base.h"
 #include "../Manager/Equip_Mgr.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -512,7 +515,7 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	if (!OverlapItemArr.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 획득"));
-		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID);
+		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID, (uint32)OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
 		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->m_IID);
 		
 		m_MainUI->ShowRootingMessage(true);
@@ -599,6 +602,14 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 				pState->PlayerGainSoul(pItem->ItemInfo->Gained_Soul);
 				m_MainUI->GetSoulUI()->RenewAmountOfSoul(pItem->ItemInfo->Gained_Soul);
 			}
+
+			UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItem->ItemInfo->NiagaraPath);
+			FVector vLoc = GetActorLocation();
+			vLoc.Z -= 40.f;
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), pSystem, vLoc);
+			//UNiagaraComponent* pNiagara = nullptr;
+			//pNiagara->SetAsset(pSystem);
+			//pNiagara->Activate(true);
 
 			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
 
@@ -780,4 +791,11 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 			}
 		}
 	}
+}
+
+void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
+{
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	pState->PlayerGainSoul(_GainedSoul);
+	m_MainUI->GetSoulUI()->RenewAmountOfSoul(_GainedSoul);
 }

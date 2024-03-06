@@ -11,6 +11,7 @@
 #include "../UI/UI_Monster.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Characters/Player_Base_Knight.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -185,6 +186,9 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 		m_TargetComp->DestroyComponent();
 		m_LockOnMarker->DestroyComponent();
+		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
+		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
+
 		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		//GetMesh()->SetSimulatePhysics(true);
 	}

@@ -26,7 +26,7 @@ public:
 	static UInventory_Mgr* GetInst(UGameInstance* _GameInst);
 
 	void SetItemDataTable(UDataTable* _ItemDataTable);
-	void AddGameItem(EITEM_ID _ID);
+	void AddGameItem(EITEM_ID _ID, uint32 _Stack);
 	void SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID);
 
 	void ShowInventoryUI();

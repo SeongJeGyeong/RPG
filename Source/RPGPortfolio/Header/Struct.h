@@ -205,6 +205,8 @@ struct FGameItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32			Require_Int;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString			NiagaraPath;
 };
 
 USTRUCT()
