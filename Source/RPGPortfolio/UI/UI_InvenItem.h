@@ -22,8 +22,10 @@ private:
 	class UImage*		m_ItemImg;
 	class UImage*		m_EquipMark;
 	class UButton*		m_ItemBtn;
-	class UItem_InvenData* m_ItemData;
 	class UMenuAnchor*	m_MenuAnchor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
+	class UItem_InvenData* m_ItemData;
 
 	bool bAnchorActive;
 	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
@@ -45,4 +47,8 @@ public:
 
 	UFUNCTION()
 	void ItemBtnClicked();
+
+	UFUNCTION()
+	UItem_InvenData* GetSelItemData() { return m_ItemData; }
+
 };

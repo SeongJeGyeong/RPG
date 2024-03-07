@@ -10,6 +10,7 @@
 #include "UI_Inventory.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "UI_PlayerStat.h"
+#include "UI_ItemSelectMenu.h"
 
 void UUI_InvenItem::NativeConstruct()
 {
@@ -90,7 +91,5 @@ void UUI_InvenItem::ItemBtnClicked()
 		{
 			m_StatUI->RenewBasePower();
 		}
-		
-
 	}
 }
