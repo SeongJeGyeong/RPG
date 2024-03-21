@@ -9,9 +9,14 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "../UI/UI_Base.h"
+#include "../UI/UI_Player_Main.h"
+#include "../UI/UI_Player_Soul.h"
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Equip_Mgr.h"
 #include "../System/PlayerState_Base.h"
+#include "../Characters/Player_Base_Knight.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 UWorld* UInventory_Mgr::m_World = nullptr;
 
@@ -513,4 +518,38 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	pItemData->SetItemID(_ItemRow->ItemInfo->ID);
 
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
+}
+
+void UInventory_Mgr::UseInventoryItem(EITEM_ID _ID)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+
+	UUI_Base* pMainUI = GameMode->GetMainHUD();
+	UUI_Player_Main* pPlayerUI = pMainUI->GetMainUIWidget();
+	
+	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
+
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+	if ( pItemInfo->Restore_HP >= 0 )
+	{
+		pPlayerState->SetPlayerCurrentHP(FMath::Clamp(pPlayerState->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, pPlayerState->GetPlayerBasePower().MaxHP));
+		pPlayerUI->SetPlayerHPRatio(pPlayerState->GetPlayerBasePower().CurHP / pPlayerState->GetPlayerBasePower().MaxHP);
+	}
+	if ( pItemInfo->Restore_MP >= 0 )
+	{
+		pPlayerState->SetPlayerCurrentMP(FMath::Clamp(pPlayerState->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, pPlayerState->GetPlayerBasePower().MaxMP));
+		pPlayerUI->SetPlayerMPRatio(pPlayerState->GetPlayerBasePower().CurMP / pPlayerState->GetPlayerBasePower().MaxMP);
+	}
+	if ( pItemInfo->Gained_Soul >= 0 )
+	{
+		pPlayerState->PlayerGainSoul(pItemInfo->Gained_Soul);
+		pMainUI->GetSoulUI()->RenewAmountOfSoul(pItemInfo->Gained_Soul);
+	}
+
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(m_World, 0));
+
+	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItemInfo->NiagaraPath);
+	FVector vLoc = pPlayer->GetActorLocation();
+	vLoc.Z -= 40.f;
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(m_World, pSystem, vLoc);
 }

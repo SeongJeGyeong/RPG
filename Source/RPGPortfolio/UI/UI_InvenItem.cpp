@@ -11,6 +11,8 @@
 #include "../Manager/Inventory_Mgr.h"
 #include "UI_PlayerStat.h"
 #include "UI_ItemSelectMenu.h"
+#include "../Characters/Player_Base_Knight.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUI_InvenItem::NativeConstruct()
 {
@@ -78,10 +80,14 @@ void UUI_InvenItem::InitFromData(UObject* _Data)
 
 void UUI_InvenItem::ItemBtnClicked()
 {
+	// 인벤토리에서 아이템 클릭 시
 	if (bAnchorActive)
 	{
+		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		bItemUseDelay = pPlayer->GetbItemDelay();
 		m_MenuAnchor->Open(true);
 	}
+	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
@@ -92,4 +98,8 @@ void UUI_InvenItem::ItemBtnClicked()
 			m_StatUI->RenewBasePower();
 		}
 	}
+}
+
+void UUI_InvenItem::MenuAnchorOpened()
+{
 }

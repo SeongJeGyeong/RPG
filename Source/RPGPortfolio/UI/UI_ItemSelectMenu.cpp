@@ -5,6 +5,10 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "../Item/Item_InvenData.h"
+#include "../Manager/Inventory_Mgr.h"
+#include "../Manager/Equip_Mgr.h"
+#include "Kismet/GameplayStatics.h"
+#include "../Characters/Player_Base_Knight.h"
 
 void UUI_ItemSelectMenu::NativeConstruct()
 {
@@ -26,6 +30,13 @@ void UUI_ItemSelectMenu::NativeConstruct()
 	{
 		m_Btn_Use->OnClicked.AddDynamic(this, &UUI_ItemSelectMenu::UseBtnClicked);
 	}
+
+	if (bItemUseDelay)
+	{
+		m_Txt_Use->SetColorAndOpacity(FLinearColor::FLinearColor(0.5f, 0.5f, 0.5f, 0.5f));
+		m_Btn_Use->SetIsEnabled(false);
+	}
+
 }
 
 void UUI_ItemSelectMenu::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -37,6 +48,21 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 {
 	if (IsValid(m_SelectedItemData))
 	{
+		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		
+		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
+		pPlayer->CloseMenuUI();
+
+		UInventory_Mgr::GetInst(GetWorld())->UseInventoryItem(m_SelectedItemData->GetItemID());
+		if (m_SelectedItemData->GetEquiped() != EEQUIP_SLOT::EMPTY)
+		{
+			int32 idx = UEquip_Mgr::GetInst(GetWorld())->ConvertQuickSlotToIdx(m_SelectedItemData->GetEquiped());
+			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(idx);
+		}
+
+		// 아이템 사용후 대기시간 on
+		pPlayer->ItemUseDelayOn();
+
 		UE_LOG(LogTemp, Warning, TEXT("데이터 전달 성공"));
 		UE_LOG(LogTemp, Warning, L"%s", *m_SelectedItemData->GetItemName());
 		UE_LOG(LogTemp, Warning, TEXT("%d"), m_SelectedItemData->GetItemQnt());

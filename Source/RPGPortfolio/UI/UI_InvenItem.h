@@ -27,6 +27,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UItem_InvenData* m_ItemData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
+	bool bItemUseDelay;
+
 	bool bAnchorActive;
 	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
 
@@ -49,6 +52,5 @@ public:
 	void ItemBtnClicked();
 
 	UFUNCTION()
-	UItem_InvenData* GetSelItemData() { return m_ItemData; }
-
+	void MenuAnchorOpened();
 };

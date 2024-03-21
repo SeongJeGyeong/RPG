@@ -80,6 +80,8 @@ public:
 	bool GetbEnableMove() { return bEnableMove; }
 	void SetbEnableMove(bool _EnableMove) { bEnableMove = _EnableMove; }
 
+	bool GetbItemDelay() { return bItemDelay; }
+
 	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
 	void SetOrientRotation(bool _Val);
 
@@ -106,6 +108,8 @@ public:
 public:
 	void NextAttackCheck();
 	void AttackHitCheck();
+	void CloseMenuUI();
+	void ItemUseDelayOn();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
@@ -122,7 +126,6 @@ private:
 	void ActionCommand(const FInputActionInstance& _Instance);
 	void BackToPrevMenu(const FInputActionInstance& _Instance);
 	void QuickSlotChange(const FInputActionInstance& _Instance);
-	
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 
 	bool CheckMontagePlaying();

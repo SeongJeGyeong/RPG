@@ -586,35 +586,14 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx))
 		{
 			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
-			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-			if ( pItem->ItemInfo->Restore_HP >= 0 )
-			{
-				pState->SetPlayerCurrentHP(FMath::Clamp(pState->GetPlayerBasePower().CurHP + pItem->ItemInfo->Restore_HP, 0.f, pState->GetPlayerBasePower().MaxHP));
-				m_PlayerUI->SetPlayerHPRatio(pState->GetPlayerBasePower().CurHP / pState->GetPlayerBasePower().MaxHP);
-			}
-			if ( pItem->ItemInfo->Restore_MP >= 0 )
-			{
-				pState->SetPlayerCurrentMP(FMath::Clamp(pState->GetPlayerBasePower().CurMP + pItem->ItemInfo->Restore_MP, 0.f, pState->GetPlayerBasePower().MaxMP));
-				m_PlayerUI->SetPlayerMPRatio(pState->GetPlayerBasePower().CurMP / pState->GetPlayerBasePower().MaxMP);
-			}
-			if (pItem->ItemInfo->Gained_Soul >= 0)
-			{
-				pState->PlayerGainSoul(pItem->ItemInfo->Gained_Soul);
-				m_MainUI->GetSoulUI()->RenewAmountOfSoul(pItem->ItemInfo->Gained_Soul);
-			}
-
-			UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItem->ItemInfo->NiagaraPath);
-			FVector vLoc = GetActorLocation();
-			vLoc.Z -= 40.f;
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), pSystem, vLoc);
-			//UNiagaraComponent* pNiagara = nullptr;
-			//pNiagara->SetAsset(pSystem);
-			//pNiagara->Activate(true);
+			UInventory_Mgr::GetInst(GetWorld())->UseInventoryItem(pItem->ItemInfo->ID);
 
 			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
 
+			// 아이템 사용후 대기시간 on
 			UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
 			pQuickSlotUI->SetQuickSlotColor(0.5f, 0.5f, 0.5f, 0.5f, false);
+			fItemDelayTime = 0.f;
 			bItemDelay = true;
 		}
 		else
@@ -798,4 +777,30 @@ void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 	pState->PlayerGainSoul(_GainedSoul);
 	m_MainUI->GetSoulUI()->RenewAmountOfSoul(_GainedSoul);
+}
+
+void APlayer_Base_Knight::CloseMenuUI()
+{
+	APlayerController* pController = Cast<APlayerController>(GetController());
+	if ( !IsValid(pController) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
+		return;
+	}
+
+	FInputModeGameOnly GameOnly;
+	pController->SetInputMode(GameOnly);
+	pController->bShowMouseCursor = false;
+	pController->SetPause(false);
+
+	m_MainUI->ShowMenu(false);
+	bShowMenu = false;
+}
+
+void APlayer_Base_Knight::ItemUseDelayOn()
+{
+	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
+	pQuickSlotUI->SetQuickSlotColor(0.5f, 0.5f, 0.5f, 0.5f, false);
+	fItemDelayTime = 0.f;
+	bItemDelay = true;
 }

@@ -25,15 +25,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UItem_InvenData* m_SelectedItemData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
+	bool bItemUseDelay;
 
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 public:
-	UFUNCTION()
-	void SetItemData(UItem_InvenData* _SelectedItemData) { m_SelectedItemData = _SelectedItemData; }
-
 	UFUNCTION()
 	void UseBtnClicked();
 

@@ -41,4 +41,6 @@ public:
 	void RenewItemListUI(EITEM_TYPE _Type);
 	void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
+
+	void UseInventoryItem(EITEM_ID _ID);
 };
