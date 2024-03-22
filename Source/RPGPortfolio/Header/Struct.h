@@ -166,7 +166,8 @@ struct FGameItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString			ItemName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// MultiLine = "true" : 데이터테이블 블루프린트에서 텍스트 입력 시 줄바꿈 가능하도록 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (MultiLine = "true"))
 	FString			Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -12,6 +12,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
+#include "../MonsterAnim/AnimInstance_Monster_Base.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -54,14 +55,22 @@ AMonster_Base::AMonster_Base()
 	}
 	m_LockOnMarker->SetWidgetSpace(EWidgetSpace::Screen);
 	m_LockOnMarker->SetDrawSize(FVector2D(50.f, 50.f));
+
+	if (m_Type == EMONSTER_TYPE::Barghest)
+	{
+		ConstructorHelpers::FObjectFinder<UAnimSequence> HitAnim(TEXT("/Script/Engine.AnimSequence'/Game/QuadrapedCreatures/Barghest/Animations/BARGHEST_getHitNormal.BARGHEST_getHitNormal'"));
+		if ( HitAnim.Succeeded() )
+		{
+			m_HitSequence = HitAnim.Object;
+		}
+	}
 }
 
 void AMonster_Base::OnConstruction(const FTransform& _Transform)
 {
 	Super::OnConstruction(_Transform);
 
-	FMonsterInfo* pInfo
-		;
+	FMonsterInfo* pInfo;
 
 	if (IsValid(m_TableRow.DataTable) && !m_TableRow.RowName.IsNone())
 	{
@@ -142,6 +151,11 @@ void AMonster_Base::Tick(float DeltaTime)
 		}
 	}
 
+	if (m_State == EMONSTER_STATE::HIT)
+	{
+		GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	}
+
 	if (m_WidgetComponent->IsWidgetVisible() && !bLockedOn)
 	{
 		fWidgetVisTime += DeltaTime * 1.f;
@@ -191,6 +205,11 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		//GetMesh()->SetSimulatePhysics(true);
+	}
+	else
+	{
+		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+		pAnimInst->PlayHitAnimation();
 	}
 
 	return 0.0f;

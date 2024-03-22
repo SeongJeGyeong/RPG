@@ -16,15 +16,17 @@ class RPGPORTFOLIO_API UAnimInstance_Monster_Base : public UAnimInstance
 {
 	GENERATED_BODY()
 	
-public:
+private:
 	class AMonster_Base* m_Monster;
+	TSoftObjectPtr<UAnimMontage> m_HitMontage;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	EMONSTER_STATE m_State;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	bool bIsDead;
 
+public:
 	void SetDeadAnim() { bIsDead = true; }
 
 public:
@@ -37,5 +39,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_HitCheckEnd();
+
+	void PlayHitAnimation();
 
 };

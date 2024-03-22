@@ -11,6 +11,11 @@ void UAnimInstance_Monster_Base::NativeInitializeAnimation()
 
 void UAnimInstance_Monster_Base::NativeBeginPlay()
 {
+	FMonsterInfo MonInfo = m_Monster->GetMonsterInfo();
+	if ( MonInfo.Type == EMONSTER_TYPE::Barghest )
+	{
+		m_HitMontage = LoadObject<UAnimMontage>(nullptr, TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Monster/Animation/AM_Barghest_Hit.AM_Barghest_Hit'"));
+	}
 }
 
 void UAnimInstance_Monster_Base::NativeUpdateAnimation(float _fDeltaTime)
@@ -34,4 +39,10 @@ void UAnimInstance_Monster_Base::AnimNotify_HitCheckEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("monster HitCheckEnd Notify"));
 	m_Monster->SetbAtkTrace(false);
+}
+
+void UAnimInstance_Monster_Base::PlayHitAnimation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("HitAnim Play"));
+	Montage_Play(m_HitMontage.LoadSynchronous());
 }
