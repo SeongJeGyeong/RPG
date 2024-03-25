@@ -43,6 +43,5 @@ void UAnimInstance_Monster_Base::AnimNotify_HitCheckEnd()
 
 void UAnimInstance_Monster_Base::PlayHitAnimation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("HitAnim Play"));
 	Montage_Play(m_HitMontage.LoadSynchronous());
 }

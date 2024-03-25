@@ -45,6 +45,7 @@ private:
 	TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
 	TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
 	TSoftObjectPtr<UAnimMontage> m_ParryMontage;
+	TSoftObjectPtr<UAnimMontage> m_HitMontage;
 
 private:
 	////////// Lock On ///////////////

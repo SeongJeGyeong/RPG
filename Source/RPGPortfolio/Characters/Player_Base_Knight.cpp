@@ -96,6 +96,13 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	{
 		m_ParryMontage = ParryMontage.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HitMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Hit.AM_Knight_Hit'"));
+	if(HitMontage.Succeeded())
+	{
+		m_HitMontage = HitMontage.Object;
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -613,10 +620,12 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 
 bool APlayer_Base_Knight::CheckMontagePlaying()
 {
-	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous()) ||
+	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
+	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous())		||
 		m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) ||
-		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()) ||
-		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()) ||
+		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous())		||
+		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous())			||
+		m_AnimInst->Montage_IsPlaying(m_HitMontage.LoadSynchronous())			||
 		GetCharacterMovement()->IsFalling()
 		)
 	{
@@ -717,6 +726,11 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	if ( iCurHP <= 0.f && GetController() )
 	{
 		// 사망처리
+	}
+	else
+	{
+		// 피격 애니메이션 재생
+		m_AnimInst->Montage_Play(m_HitMontage.LoadSynchronous());
 	}
 
 	return 0.0f;
