@@ -26,6 +26,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	UCharacterMovementComponent* m_Movement;
 
+	USoundBase* m_AttackSound;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fMoveSpeed;

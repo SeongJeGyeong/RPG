@@ -59,10 +59,16 @@ AMonster_Base::AMonster_Base()
 	if (m_Type == EMONSTER_TYPE::Barghest)
 	{
 		ConstructorHelpers::FObjectFinder<UAnimSequence> HitAnim(TEXT("/Script/Engine.AnimSequence'/Game/QuadrapedCreatures/Barghest/Animations/BARGHEST_getHitNormal.BARGHEST_getHitNormal'"));
-		if ( HitAnim.Succeeded() )
+		if (HitAnim.Succeeded())
 		{
 			m_HitSequence = HitAnim.Object;
 		}
+		ConstructorHelpers::FObjectFinder<USoundBase> HitSound(TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/Barghest/SC_Barghest_Hit.SC_Barghest_Hit'"));
+		if(HitSound.Succeeded())
+		{
+			m_HitSound = HitSound.Object;
+		}
+		
 	}
 }
 
@@ -202,6 +208,11 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		m_LockOnMarker->DestroyComponent();
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
+		USoundBase* DeadSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/Blueprint/Monster/Sound/Barghest/kill2.kill2'"));
+		if (IsValid(DeadSound))
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound, GetActorLocation());
+		}
 
 		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		//GetMesh()->SetSimulatePhysics(true);
@@ -210,6 +221,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 		pAnimInst->PlayHitAnimation();
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_HitSound, GetActorLocation());
 	}
 
 	return 0.0f;

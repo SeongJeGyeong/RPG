@@ -3,6 +3,7 @@
 
 #include "AnimInstance_Knight.h"
 #include "Animation/AnimNode_StateMachine.h"
+#include "Kismet/GameplayStatics.h"
 
 void UAnimInstance_Knight::NativeInitializeAnimation()
 {
@@ -15,6 +16,7 @@ void UAnimInstance_Knight::NativeBeginPlay()
 	if (IsValid(m_Player))
 	{
 		m_Movement = m_Player->GetCharacterMovement();
+		m_AttackSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Attack_Normal.SC_Attack_Normal'"));
 	}
 }
 
@@ -82,6 +84,7 @@ void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
 	m_Player->SetbAtkTrace(true);
+	UGameplayStatics::PlaySound2D(this, m_AttackSound);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()

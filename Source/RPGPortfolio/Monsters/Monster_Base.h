@@ -35,6 +35,7 @@ private:
 	class UWidgetComponent* m_LockOnMarker;
 	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;
+	USoundBase* m_HitSound;
 
 	float fDestroyRate;
 	float fDeadEffectRatio;
