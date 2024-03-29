@@ -3,6 +3,7 @@
 
 #include "AnimInstance_Monster_Base.h"
 #include "../Monsters/Monster_Base.h"
+#include "Kismet/GameplayStatics.h"
 
 void UAnimInstance_Monster_Base::NativeInitializeAnimation()
 {
@@ -32,6 +33,18 @@ void UAnimInstance_Monster_Base::NativeUpdateAnimation(float _fDeltaTime)
 void UAnimInstance_Monster_Base::AnimNotify_HitCheckStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("monster HitCheckStart Notify"));
+
+	TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_Monster->GetMonSoundDA().LoadSynchronous();
+	TSoftObjectPtr<USoundBase> AtkSound = SoundDA->GetSoundMap().Find(m_Monster->GetMonsterInfo().Type)->AtkSound_Normal;
+	if ( IsValid(AtkSound.LoadSynchronous()) )
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AtkSound.LoadSynchronous(), m_Monster->GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격사운드 로드 실패"));
+	}
+
 	m_Monster->SetbAtkTrace(true);
 }
 

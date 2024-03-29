@@ -8,7 +8,6 @@
 #include "../Item/Item_InvenData.h"
 #include "UI_EquipItemList.h"
 #include "UI_ItemTooltip.h"
-#include "../Header/Enum.h"
 #include "../Manager/Inventory_Mgr.h"
 
 void UUI_EquipItem::NativeConstruct()

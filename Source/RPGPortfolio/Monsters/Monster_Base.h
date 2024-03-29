@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Header/Struct.h"
-
+#include "../System/DataAsset/DA_MonsterSound.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Monster_Base.generated.h"
@@ -29,13 +29,15 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* m_WidgetComponent;
 
+	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	TSoftObjectPtr<UDA_MonsterSound>	m_SoundSetting;
+
 	TSoftObjectPtr<UAnimSequence> m_HitSequence;
 
 	TSubclassOf<UUserWidget> m_MarkerClass;
 	class UWidgetComponent* m_LockOnMarker;
 	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;
-	USoundBase* m_HitSound;
 
 	float fDestroyRate;
 	float fDeadEffectRatio;
@@ -67,6 +69,8 @@ public:
 
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
 	void AttackHitCheck();
+
+	TSoftObjectPtr<UDA_MonsterSound> GetMonSoundDA() { return m_SoundSetting; }
 
 public:
 	// Sets default values for this character's properties

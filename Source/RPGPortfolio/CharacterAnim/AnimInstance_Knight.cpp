@@ -16,7 +16,7 @@ void UAnimInstance_Knight::NativeBeginPlay()
 	if (IsValid(m_Player))
 	{
 		m_Movement = m_Player->GetCharacterMovement();
-		m_AttackSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Attack_Normal.SC_Attack_Normal'"));
+		m_AttackSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_Attack_Normal.SC_Player_Attack_Normal'"));
 	}
 }
 

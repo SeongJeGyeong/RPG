@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "../Header/Struct.h"
 #include "UI_Player_QuickSlotItem.h"
+#include "../Header/Struct.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"

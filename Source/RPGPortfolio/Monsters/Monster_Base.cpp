@@ -41,7 +41,7 @@ AMonster_Base::AMonster_Base()
 	m_WidgetComponent->SetupAttachment(GetRootComponent());
 
 	m_LockOnMarker = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnMarker"));
-	if ( !IsValid(m_WidgetComponent) )
+	if ( !IsValid(m_LockOnMarker) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
 	}
@@ -63,12 +63,6 @@ AMonster_Base::AMonster_Base()
 		{
 			m_HitSequence = HitAnim.Object;
 		}
-		ConstructorHelpers::FObjectFinder<USoundBase> HitSound(TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/Barghest/SC_Barghest_Hit.SC_Barghest_Hit'"));
-		if(HitSound.Succeeded())
-		{
-			m_HitSound = HitSound.Object;
-		}
-		
 	}
 }
 
@@ -120,7 +114,6 @@ void AMonster_Base::BeginPlay()
 	}
 	m_WidgetComponent->SetVisibility(false);
 	m_LockOnMarker->SetVisibility(false);
-
 }
 
 // Called every frame
@@ -208,12 +201,19 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		m_LockOnMarker->DestroyComponent();
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
-		USoundBase* DeadSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/Blueprint/Monster/Sound/Barghest/kill2.kill2'"));
-		if (IsValid(DeadSound))
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound, GetActorLocation());
-		}
+		bAtkTrace = false;
+		TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_SoundSetting.LoadSynchronous();
+		TSoftObjectPtr<USoundBase> DeadSound = SoundDA->GetSoundMap().Find(m_Type)->DeadSound;
 
+		if (IsValid(DeadSound.LoadSynchronous()))
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound.LoadSynchronous(), GetActorLocation());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
+		}
+		
 		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		//GetMesh()->SetSimulatePhysics(true);
 	}
@@ -221,7 +221,18 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 		pAnimInst->PlayHitAnimation();
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_HitSound, GetActorLocation());
+		
+		TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_SoundSetting.LoadSynchronous();
+		TSoftObjectPtr<USoundBase> HitSound = SoundDA->GetSoundMap().Find(m_Type)->HitSound_Normal;
+		if (IsValid(HitSound.LoadSynchronous()))
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
+		}
+
 	}
 
 	return 0.0f;
@@ -261,6 +272,19 @@ void AMonster_Base::AttackHitCheck()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), m_Info.PhysicAtk, GetController(), this, UDamageType::StaticClass());
+
+			TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_SoundSetting.LoadSynchronous();
+			TSoftObjectPtr<USoundBase> DmgSound = SoundDA->GetSoundMap().Find(m_Type)->DmgSound_Normal;
+
+			if ( IsValid(DmgSound.LoadSynchronous()) )
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
+			}
+			
 			bAtkTrace = false;
 		}
 	}
