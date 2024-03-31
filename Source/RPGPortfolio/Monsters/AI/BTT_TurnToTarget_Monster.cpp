@@ -22,7 +22,7 @@ EBTNodeResult::Type UBTT_TurnToTarget_Monster::ExecuteTask(UBehaviorTreeComponen
 	{
 		return EBTNodeResult::Failed;
 	}
-
+	pMonster->ChangeState(EMONSTER_STATE::IDLE);
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (nullptr == pPlayer)
 	{
@@ -32,7 +32,7 @@ EBTNodeResult::Type UBTT_TurnToTarget_Monster::ExecuteTask(UBehaviorTreeComponen
 	FVector LookVector = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
 	LookVector.Z = 0.f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
-	pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 5.f));
+	pMonster->SetActorRotation(FMath::RInterpTo(pMonster->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 10.f));
 
 	return EBTNodeResult::Succeeded;
 }

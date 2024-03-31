@@ -19,38 +19,39 @@ EBTNodeResult::Type UBTT_Attack_Monster::ExecuteTask(UBehaviorTreeComponent& Own
 
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 
-	pMonster->ChangeState(EMONSTER_STATE::BITE);
+	pMonster->MonsterAttackNormal();
 
-	return EBTNodeResult::InProgress;
+	return EBTNodeResult::Succeeded;
 }
 
 void UBTT_Attack_Monster::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
-	ACharacter* pTarget = Cast<ACharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
-	if (!IsValid(pTarget))
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-		return;
-	}
+	//// 타겟(플레이어) 가져옴
+	//ACharacter* pTarget = Cast<ACharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
+	//if (!IsValid(pTarget))
+	//{
+	//	FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+	//	return;
+	//}
 
-	float fAtkRange = OwnerComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
+	//float fAtkRange = OwnerComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
 
-	AAIController* pController = OwnerComp.GetAIOwner();
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
-	if (!IsValid(pMonster))
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-		return;
-	}
+	//AAIController* pController = OwnerComp.GetAIOwner();
+	//AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+	//if (!IsValid(pMonster))
+	//{
+	//	FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+	//	return;
+	//}
 
-	float Distance = FVector::Distance(pTarget->GetActorLocation(), pMonster->GetActorLocation());
+	//float Distance = FVector::Distance(pTarget->GetActorLocation(), pMonster->GetActorLocation());
 
-	// 몬스터와 타겟 사이의 거리가 공격범위 밖이면
-	if (Distance > fAtkRange)
-	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		return;
-	}
+	//// 몬스터와 타겟 사이의 거리가 공격범위 밖이면
+	//if (Distance > fAtkRange)
+	//{
+	//	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	//	return;
+	//}
 }

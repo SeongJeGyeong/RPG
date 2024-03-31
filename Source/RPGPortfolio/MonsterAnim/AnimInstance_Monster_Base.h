@@ -40,6 +40,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_HitCheckEnd();
 
-	void PlayHitAnimation();
+	UFUNCTION()
+	void AnimNotify_Hit_Start();
 
+	UFUNCTION()
+	void AnimNotify_Hit_End();
 };

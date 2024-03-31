@@ -278,3 +278,36 @@ struct FMonsterSoundData
 	TSoftObjectPtr<USoundBase> DeadSound;
 
 };
+
+USTRUCT(Atomic, BlueprintType)
+struct FMonsterAnimData
+{
+	GENERATED_USTRUCT_BODY()
+
+	// 근접공격 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Nor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Alt1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Alt2;
+
+	// 원거리공격 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Nor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Alt1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Alt2;
+
+	// 피격 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> HitAnim_Nor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimMontage> HitAnim_Alt;
+};

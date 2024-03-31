@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Header/Struct.h"
-#include "../System/DataAsset/DA_MonsterSound.h"
+#include "../System/DataAsset/DA_MonsterInfo.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Monster_Base.generated.h"
@@ -30,20 +30,22 @@ private:
 	class UWidgetComponent* m_WidgetComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_MonsterSound>	m_SoundSetting;
+	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
 
-	TSoftObjectPtr<UAnimSequence> m_HitSequence;
+	UAnimInstance* m_AnimInst;
 
 	TSubclassOf<UUserWidget> m_MarkerClass;
 	class UWidgetComponent* m_LockOnMarker;
 	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;
 
-	float fDestroyRate;
+	float fDestroyRate = 0.f;
 	float fDeadEffectRatio;
 	float fWidgetVisTime;
 	bool bLockedOn;
 	bool bAtkTrace;
+	bool bHitWait;
+	float fHitWaitTime = 0.f;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
@@ -70,8 +72,6 @@ public:
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
 	void AttackHitCheck();
 
-	TSoftObjectPtr<UDA_MonsterSound> GetMonSoundDA() { return m_SoundSetting; }
-
 public:
 	// Sets default values for this character's properties
 	AMonster_Base();
@@ -91,4 +91,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	void MonsterAttackNormal();
+
+	UFUNCTION()
+	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };

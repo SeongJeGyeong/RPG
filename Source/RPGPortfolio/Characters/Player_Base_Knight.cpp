@@ -385,15 +385,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	}
 
 	bAttackToggle = _Instance.GetValue().Get<bool>();
-
-	if (bAttackToggle)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AttackTrue"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AttackFalse"));
-	}
 	
 	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
@@ -450,7 +441,6 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 			vDodgeVector = GetCharacterMovement()->GetLastInputVector();
 			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 		}
-		
 	}
 }
 

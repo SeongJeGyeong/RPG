@@ -55,15 +55,6 @@ AMonster_Base::AMonster_Base()
 	}
 	m_LockOnMarker->SetWidgetSpace(EWidgetSpace::Screen);
 	m_LockOnMarker->SetDrawSize(FVector2D(50.f, 50.f));
-
-	if (m_Type == EMONSTER_TYPE::Barghest)
-	{
-		ConstructorHelpers::FObjectFinder<UAnimSequence> HitAnim(TEXT("/Script/Engine.AnimSequence'/Game/QuadrapedCreatures/Barghest/Animations/BARGHEST_getHitNormal.BARGHEST_getHitNormal'"));
-		if (HitAnim.Succeeded())
-		{
-			m_HitSequence = HitAnim.Object;
-		}
-	}
 }
 
 void AMonster_Base::OnConstruction(const FTransform& _Transform)
@@ -92,6 +83,7 @@ void AMonster_Base::BeginPlay()
 
 	if (IsValid(pAIController))
 	{
+		// 블랙보드에 몬스터정보 전달
 		if (pAIController->GetBlackboardComponent())
 		{
 			pAIController->GetBlackboardComponent()->SetValueAsVector(FName("SpawnPosition"), GetActorLocation());
@@ -99,8 +91,10 @@ void AMonster_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_Info.DetectRange);
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("PerceiveRange"), m_Info.BOSS_PerceiveRange);
 		}
+		m_AnimInst = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
+		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
-
+	
 	m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
 	if (!IsValid(m_MonsterWidget))
 	{
@@ -150,9 +144,24 @@ void AMonster_Base::Tick(float DeltaTime)
 		}
 	}
 
-	if (m_State == EMONSTER_STATE::HIT)
+	if (bHitWait)
 	{
-		GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		fHitWaitTime += DeltaTime * 1.f;
+
+		if (fHitWaitTime > 2.f)
+		{
+			AAIController* pAIController = Cast<AAIController>(GetController());
+			if ( IsValid(pAIController) )
+			{
+				if ( pAIController->GetBlackboardComponent() )
+				{					
+					pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
+					pAIController->GetBrainComponent()->RestartLogic();
+					bHitWait = false;
+					fHitWaitTime = 0.f;
+				}
+			}
+		}
 	}
 
 	if (m_WidgetComponent->IsWidgetVisible() && !bLockedOn)
@@ -202,9 +211,8 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 		bAtkTrace = false;
-		TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_SoundSetting.LoadSynchronous();
-		TSoftObjectPtr<USoundBase> DeadSound = SoundDA->GetSoundMap().Find(m_Type)->DeadSound;
 
+		TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DeadSound;
 		if (IsValid(DeadSound.LoadSynchronous()))
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound.LoadSynchronous(), GetActorLocation());
@@ -219,11 +227,33 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	else
 	{
+		// 블랙보드에 WasHit true로 전달
+		AAIController* pAIController = Cast<AAIController>(GetController());
+		if (IsValid(pAIController))
+		{
+			if (pAIController->GetBlackboardComponent())
+			{
+				pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), true);
+				m_State = EMONSTER_STATE::IDLE;
+				pAIController->GetBrainComponent()->StopLogic("Hit");
+				//const FAIRequestID RequestID;
+				//pAIController->PauseMove(RequestID);
+
+			}
+		}
+
 		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-		pAnimInst->PlayHitAnimation();
-		
-		TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_SoundSetting.LoadSynchronous();
-		TSoftObjectPtr<USoundBase> HitSound = SoundDA->GetSoundMap().Find(m_Type)->HitSound_Normal;
+		TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
+		if (IsValid(HitMontage.LoadSynchronous()))
+		{
+			pAnimInst->Montage_Play(HitMontage.LoadSynchronous());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
+		}
+
+		TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->HitSound_Normal;
 		if (IsValid(HitSound.LoadSynchronous()))
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
@@ -236,6 +266,50 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 
 	return 0.0f;
+}
+
+void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
+	if (IsValid(HitMontage.LoadSynchronous()))
+	{
+		if (HitMontage == Montage)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("피격 몽타주 종료"));
+
+			bHitWait = true;
+			fHitWaitTime = 0.f;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("피격이외의 몽타주 종료"));
+		}
+	}
+}
+
+void AMonster_Base::MonsterAttackNormal()
+{
+	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+	TSoftObjectPtr<UAnimMontage> AtkMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->AtkAnim_Melee_Nor;
+	if (IsValid(AtkMontage.LoadSynchronous()))
+	{
+		pAnimInst->Montage_Play(AtkMontage.LoadSynchronous());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격애니메이션 로드 실패"));
+	}
+
+	TSoftObjectPtr<USoundBase> AtkSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->AtkSound_Normal;
+	if (IsValid(AtkSound.LoadSynchronous()))
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AtkSound.LoadSynchronous(), GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격사운드 로드 실패"));
+	}
+	ChangeState(EMONSTER_STATE::IDLE);
 }
 
 void AMonster_Base::SetbLockedOn(bool _LockedOn)
@@ -273,9 +347,7 @@ void AMonster_Base::AttackHitCheck()
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
 			UGameplayStatics::ApplyDamage(HitResult.GetActor(), m_Info.PhysicAtk, GetController(), this, UDamageType::StaticClass());
 
-			TSoftObjectPtr<UDA_MonsterSound> SoundDA = m_SoundSetting.LoadSynchronous();
-			TSoftObjectPtr<USoundBase> DmgSound = SoundDA->GetSoundMap().Find(m_Type)->DmgSound_Normal;
-
+			TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
 			if ( IsValid(DmgSound.LoadSynchronous()) )
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());

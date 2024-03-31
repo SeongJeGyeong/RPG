@@ -15,6 +15,8 @@ UBTD_WithinRange_Monster::UBTD_WithinRange_Monster()
 
 bool UBTD_WithinRange_Monster::CalculateRawConditionValue(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory) const
 {
+	Super::CalculateRawConditionValue(_OwnComp, _NodeMemory);
+
 	if (m_TargetKey.IsNone())
 	{
 		return false;
@@ -28,7 +30,8 @@ bool UBTD_WithinRange_Monster::CalculateRawConditionValue(UBehaviorTreeComponent
 
 	AActor* pTarget = Cast<AActor>(pObject);
 
-	float fRange = m_Range;
+	//float fRange = m_Range;
+	float fRange;
 	if (!m_RangeKey.IsNone())
 	{
 		fRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(m_RangeKey.SelectedKeyName);
