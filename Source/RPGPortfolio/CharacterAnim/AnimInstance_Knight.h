@@ -10,6 +10,7 @@
 
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnInvincibleTimeCheckDelegate); // 무적시간 체크 델리게이트
 
 /**
  * 
@@ -57,6 +58,7 @@ public:
 	bool bIsAttack;
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
+	FOnInvincibleTimeCheckDelegate OnInvincibleTimeCheck;
 
 	// 다음콤보 체크
 	UFUNCTION()
@@ -67,6 +69,9 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_HitCheckEnd();
+
+	UFUNCTION()
+	void AnimNotify_DodgeStart();
 
 	UFUNCTION()
 	void AnimNotify_DodgeEnd();

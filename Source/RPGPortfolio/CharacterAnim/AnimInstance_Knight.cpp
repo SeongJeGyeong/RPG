@@ -92,6 +92,14 @@ void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 	m_Player->SetbAtkTrace(false);
 }
 
+void UAnimInstance_Knight::AnimNotify_DodgeStart()
+{
+	m_Player->SetbInvincible(true);
+	OnInvincibleTimeCheck.Broadcast();
+}
+
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
+	m_Player->SetbInvincible(false);
+	OnInvincibleTimeCheck.Broadcast();
 }

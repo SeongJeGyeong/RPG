@@ -148,14 +148,14 @@ void AMonster_Base::Tick(float DeltaTime)
 	{
 		fHitWaitTime += DeltaTime * 1.f;
 
-		if (fHitWaitTime > 2.f)
+		if (fHitWaitTime > 1.f)
 		{
 			AAIController* pAIController = Cast<AAIController>(GetController());
 			if ( IsValid(pAIController) )
 			{
 				if ( pAIController->GetBlackboardComponent() )
 				{					
-					pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
+					//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
 					pAIController->GetBrainComponent()->RestartLogic();
 					bHitWait = false;
 					fHitWaitTime = 0.f;
@@ -201,6 +201,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	m_MonsterWidget->DisplayDMG(FinalDamage);
 	fWidgetVisTime = 0.f;
 
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 	if (m_Info.CurHP <= 0.f && GetController())
 	{
 		m_State = EMONSTER_STATE::DEAD;
@@ -208,7 +209,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 		m_TargetComp->DestroyComponent();
 		m_LockOnMarker->DestroyComponent();
-		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
+
 		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 		bAtkTrace = false;
 
@@ -233,14 +234,21 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		{
 			if (pAIController->GetBlackboardComponent())
 			{
-				pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), true);
+				//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), true);
 				m_State = EMONSTER_STATE::IDLE;
 				pAIController->GetBrainComponent()->StopLogic("Hit");
-				//const FAIRequestID RequestID;
-				//pAIController->PauseMove(RequestID);
-
 			}
 		}
+
+		// 공격한 플레이어의 반대방향으로 밀려남
+		FVector LaunchVec = GetActorLocation() - pPlayer->GetActorLocation();
+		FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
+		LaunchForce.Z = 0.f;
+
+		UE_LOG(LogTemp, Warning, TEXT("MonsterLocation X: %f, Y: %f, Z: %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+		UE_LOG(LogTemp, Warning, TEXT("PlayerLocation X: %f, Y: %f, Z: %f"), pPlayer->GetActorLocation().X, pPlayer->GetActorLocation().Y, pPlayer->GetActorLocation().Z);
+		UE_LOG(LogTemp, Warning, TEXT("LaunchVec X: %f, Y: %f, Z: %f"), LaunchForce.X, LaunchForce.Y, LaunchForce.Z);
+		LaunchCharacter(LaunchForce, false, false);
 
 		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 		TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
@@ -344,20 +352,32 @@ void AMonster_Base::AttackHitCheck()
 	{
 		if ( HitResult.GetActor()->IsValidLowLevel() )
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
-			UGameplayStatics::ApplyDamage(HitResult.GetActor(), m_Info.PhysicAtk, GetController(), this, UDamageType::StaticClass());
+			APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
 
-			TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
-			if ( IsValid(DmgSound.LoadSynchronous()) )
+			if (!IsValid(pPlayer))
 			{
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());
+				UE_LOG(LogTemp, Display, TEXT("타격 상대가 플레이어가 아님"));
+				return;
 			}
-			else
+
+			// 플레이어가 무적상태가 아닐 때만
+			if (!pPlayer->GetbInvincible())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
+				UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
+				UGameplayStatics::ApplyDamage(HitResult.GetActor(), m_Info.PhysicAtk, GetController(), this, UDamageType::StaticClass());
+
+				TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
+				if ( IsValid(DmgSound.LoadSynchronous()) )
+				{
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
+				}
+				bAtkTrace = false;
 			}
-			
-			bAtkTrace = false;
 		}
 	}
+
 }

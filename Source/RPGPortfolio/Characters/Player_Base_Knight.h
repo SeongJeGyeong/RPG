@@ -61,12 +61,18 @@ private:
 
 	float fItemDelayTime;
 
+	// 구르기 관련
 	FVector vDodgeVector;
 	FRotator rDodgeRotation;
+	// 무적시간
+	bool bToggleInvinc;
+	float fInvincTime;
 
+	// 공격 관련
 	int32 CurrentCombo;
 	int32 MaxCombo;
 	int32 iBaseDamage;
+
 	bool bShowMenu;
 
 	class UUI_Base* m_MainUI;
@@ -80,8 +86,9 @@ public:
 	void SetbEnableJump(bool _EnableJump) { bEnableJump = _EnableJump; }
 	bool GetbEnableMove() { return bEnableMove; }
 	void SetbEnableMove(bool _EnableMove) { bEnableMove = _EnableMove; }
-
 	bool GetbItemDelay() { return bItemDelay; }
+	bool GetbInvincible() { return bToggleInvinc; }
+	void SetbInvincible(bool _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
 
 	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
 	void SetOrientRotation(bool _Val);
@@ -111,6 +118,7 @@ public:
 	void AttackHitCheck();
 	void CloseMenuUI();
 	void ItemUseDelayOn();
+	void InvincibleTimeCheck();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

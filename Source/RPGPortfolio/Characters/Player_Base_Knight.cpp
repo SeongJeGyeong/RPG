@@ -38,6 +38,8 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bAttackToggle(false)
 	, bItemDelay(false)
 	, fItemDelayTime(0.f)
+	, bToggleInvinc(false)
+	, fInvincTime(0.f)
 	, CurrentCombo(1)
 	, MaxCombo(4)
 	, bShowMenu(false)
@@ -127,6 +129,7 @@ void APlayer_Base_Knight::BeginPlay()
 	if (IsValid(m_AnimInst))
 	{
 		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
+		m_AnimInst->OnInvincibleTimeCheck.AddUObject(this, &APlayer_Base_Knight::InvincibleTimeCheck);
 	}
 
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -149,13 +152,13 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
 	if (m_Arm->IsCameraLockedToTarget())
 	{
-		// Vector from player to target
+		// 플레이어에서 타겟으로의 벡터
 		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - (m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 100.f));
 		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
 		FRotator CurrentRot = GetControlRotation();
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
 
-		// Update control rotation to face target
+		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
 	}
 
@@ -197,7 +200,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 			fItemDelayTime = 0.f;
 		}
 	}
-
 }
 
 // Called to bind functionality to input
@@ -608,6 +610,7 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
 
+// 재생중일 때 이동입력안되는 몽타주 목록
 bool APlayer_Base_Knight::CheckMontagePlaying()
 {
 	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
@@ -625,6 +628,7 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 	return false;
 }
 
+// 연속공격 다음 모션 체크함수
 void APlayer_Base_Knight::NextAttackCheck()
 {
 	if (bAttackToggle)
@@ -719,6 +723,13 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	}
 	else
 	{
+		AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
+		
+		// 피격 시 피격지점 반대방향으로 밀려나도록
+		FVector LaunchVec = GetActorLocation() - pMonster->GetActorLocation();
+		FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
+		LaunchCharacter(LaunchForce, false, false);
+
 		// 피격 애니메이션 재생
 		m_AnimInst->Montage_Play(m_HitMontage.LoadSynchronous());
 	}
@@ -740,18 +751,10 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
 {
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
+
+	// 아이템에 오버랩된 상태일 경우
 	if (TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
 	{
-		/*for ( auto iter = OverlapItemArr.CreateIterator(); iter; ++iter )
-		{
-			AItem_Dropped_Base* item = *iter;
-			if (item->GetName().Equals(_OtherActor->GetName()))
-			{
-				OverlapItemArr[ iter.GetIndex() ];
-				break;
-			}
-		}*/
-
 		for (int32 i = 0; i < OverlapItemArr.Num(); ++i)
 		{
 			if (OverlapItemArr[i]->GetName().Equals(_OtherActor->GetName()))
@@ -801,10 +804,24 @@ void APlayer_Base_Knight::CloseMenuUI()
 	bShowMenu = false;
 }
 
+// 아이템 사용 후 대기시간 계산 시작
 void APlayer_Base_Knight::ItemUseDelayOn()
 {
 	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
 	pQuickSlotUI->SetQuickSlotColor(0.5f, 0.5f, 0.5f, 0.5f, false);
 	fItemDelayTime = 0.f;
 	bItemDelay = true;
+}
+
+// 무적시간 동안 데미지 안받도록 설정
+void APlayer_Base_Knight::InvincibleTimeCheck()
+{
+	if (bToggleInvinc)
+	{
+		SetCanBeDamaged(false);
+	}
+	else
+	{
+		SetCanBeDamaged(true);
+	}
 }
