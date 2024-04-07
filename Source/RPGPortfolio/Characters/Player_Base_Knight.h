@@ -53,13 +53,21 @@ private:
 	float BrokeLockAimingCooldown;
 	//////////////////////////////////
 
+	// 점프, 이동 가능한 상태인지 체크용
 	bool bEnableJump;
 	bool bEnableMove;
+
 	bool bAttackToggle;
 	bool bAtkTrace;
-	bool bItemDelay;
 
+	// 아이템 사용 딜레이 체크용
+	bool bItemDelay;
 	float fItemDelayTime;
+
+	// 공격 중 이동 체크용
+	bool bAtkMove;
+	FVector vAtkMoveVec;
+	FRotator rAtkMoveRot;
 
 	// 구르기 관련
 	FVector vDodgeVector;
@@ -82,6 +90,8 @@ private:
 public:
 	bool GetbAtkTrace() { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace;}
+	bool GetbAtkMove() { return bAtkMove; }
+	void SetbAtkMove(bool _AtkMove) { bAtkMove = _AtkMove; }
 	bool GetbEnableJump() { return bEnableJump; }
 	void SetbEnableJump(bool _EnableJump) { bEnableJump = _EnableJump; }
 	bool GetbEnableMove() { return bEnableMove; }
@@ -119,6 +129,7 @@ public:
 	void CloseMenuUI();
 	void ItemUseDelayOn();
 	void InvincibleTimeCheck();
+	void AttackMoveStart();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

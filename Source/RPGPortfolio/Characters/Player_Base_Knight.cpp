@@ -41,7 +41,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bToggleInvinc(false)
 	, fInvincTime(0.f)
 	, CurrentCombo(1)
-	, MaxCombo(4)
+	, MaxCombo(3)
 	, bShowMenu(false)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -69,7 +69,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	LockonControlRotationRate = 10.f;
 	BrokeLockAimingCooldown = 0.5f;
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack.AM_Knight_Attack'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack_Nor.AM_Knight_Attack_Nor'"));
 	if (AtkMontage.Succeeded())
 	{
 		m_AttackMontage = AtkMontage.Object;
@@ -130,6 +130,7 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
 		m_AnimInst->OnInvincibleTimeCheck.AddUObject(this, &APlayer_Base_Knight::InvincibleTimeCheck);
+		m_AnimInst->OnAttackMove.AddUObject(this, &APlayer_Base_Knight::AttackMoveStart);
 	}
 
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -182,6 +183,11 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	{
 		AddMovementInput(vDodgeVector, 200.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
+	}
+
+	if (bAtkMove)
+	{
+		AddMovementInput(vAtkMoveVec, 50.f * DeltaTime);
 	}
 
 	if (bAtkTrace)
@@ -391,7 +397,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
-		AddMovementInput(GetActorForwardVector(), 10000.f);
 		SetAttackMontage(m_AttackMontage);
 		m_AnimInst->bIsAttack = true;
 		CurrentCombo = 1;
@@ -635,7 +640,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 	{
 		if (CurrentCombo == MaxCombo)
 		{
-			CurrentCombo = 1;
+			CurrentCombo = 2;
 		}
 		else
 		{
@@ -644,7 +649,6 @@ void APlayer_Base_Knight::NextAttackCheck()
 
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
-		AddMovementInput(GetActorForwardVector(), 10000.f);
 	}
 }
 
@@ -746,6 +750,13 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
 		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
 	}
+}
+
+void APlayer_Base_Knight::AttackMoveStart()
+{
+	bAtkMove = true;
+	vAtkMoveVec = GetActorForwardVector();
+
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
