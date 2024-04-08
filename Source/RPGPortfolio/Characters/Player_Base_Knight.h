@@ -39,7 +39,7 @@ private:
 	UAnimInstance_Knight* m_AnimInst;
 
 	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
-	TSoftObjectPtr<UAnimMontage> m_PrimaryAttackMontage;
+	TSoftObjectPtr<UAnimMontage> m_HeavyAttackMontage;
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
 
 	TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
@@ -138,7 +138,7 @@ private:
 	void SprintToggleAction(const FInputActionInstance& _Instance);
 	void GuardAction(const FInputActionInstance& _Instance);
 	void AttackAction(const FInputActionInstance& _Instance);
-	void PrimaryAttackAction(const FInputActionInstance& _Instance);
+	void HeavyAttackAction(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);

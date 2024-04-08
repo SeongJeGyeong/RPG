@@ -4,6 +4,7 @@
 #include "AnimInstance_Knight.h"
 #include "Animation/AnimNode_StateMachine.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UAnimInstance_Knight::NativeInitializeAnimation()
 {
@@ -26,6 +27,8 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	{
 		return;
 	}
+
+	FootIK(_DT);
 
 	// bIsMove = Idle->Move Trigger
 	fMoveSpeed = m_Movement->Velocity.Size2D();
@@ -74,6 +77,126 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		}
 		m_Player->SetbEnableJump(true);
 	}
+}
+
+void UAnimInstance_Knight::FootIK(float _DeltaTime)
+{
+	// 공중에 있지 않을 때
+	if ( !m_Player->GetCharacterMovement()->IsFalling() )
+	{
+		IgnoreActorArr.Emplace(m_Player);
+
+		TTuple<bool, float> Foot_R = CapsuleDistance(TEXT("Foot_R"), m_Player);
+		TTuple<bool, float> Foot_L = CapsuleDistance(TEXT("Foot_L"), m_Player);
+ 
+		// <>에 숫자를 넣으면 숫자에 해당하는 순서의 튜플 인자를 가져옴
+		if ( Foot_R.Get<0>() || Foot_L.Get<0>() )
+		{
+			const float fSelectFloat = UKismetMathLibrary::SelectFloat(Foot_L.Get<1>(), Foot_R.Get<1>(), Foot_L.Get<1>() >= Foot_R.Get<1>());
+			fDisplacement = FMath::FInterpTo(fDisplacement, ( fSelectFloat - 98.f ) * -1.f, _DeltaTime, fIKInterpSpeed);
+
+			TTuple<bool, float, FVector> FootTrace_R = FootLineTrace(TEXT("Foot_R"), m_Player);
+			TTuple<bool, float, FVector> FootTrace_L = FootLineTrace(TEXT("Foot_L"), m_Player);
+
+			if ( FootTrace_R.Get<0>() )
+			{
+				const float fDistance_R = FootTrace_R.Get<1>();
+				const FVector vFootRVec = FootTrace_R.Get<2>();
+				// DegAtan2 : A/B 의 역탄젠트(ArcTangent)를 반환함
+				// Atan과 Atan2의 차이
+				// Atan : 두 점 사이의 탄젠트값을 받아서 -90 ~ 90 사이의 디그리 각도를 반환한다.
+				// Atan2 : 두 점 사이의 상대좌표를 받아 -180 ~ 180 사이의 디그리 각도를 반환한다.
+				const double rRRotPitch = UKismetMathLibrary::DegAtan2(vFootRVec.X, vFootRVec.Z) * -1.f;
+				const double rRRotRoll = UKismetMathLibrary::DegAtan2(vFootRVec.Y, vFootRVec.Z);
+				const FRotator MakeRRot = FRotator(rRRotPitch, 0.f, rRRotRoll);
+
+				rRRot = FMath::RInterpTo(rRRot, MakeRRot, _DeltaTime, fIKInterpSpeed);
+				fRIK = FMath::FInterpTo(fRIK, (fDistance_R - 110.f) / -45.f, _DeltaTime, fIKInterpSpeed);
+			}
+
+			if ( FootTrace_L.Get<0>() )
+			{
+				const float fDistance_L = FootTrace_L.Get<1>();
+				const FVector vFootLVec = FootTrace_L.Get<2>();
+
+				const double rLRotPitch = UKismetMathLibrary::DegAtan2(vFootLVec.X, vFootLVec.Z) * -1.f;
+				const double rLRotRoll = UKismetMathLibrary::DegAtan2(vFootLVec.Y, vFootLVec.Z);
+				const FRotator MakeLRot = FRotator(rLRotPitch, 0.f, rLRotRoll);
+
+				rLRot = FMath::RInterpTo(rLRot, MakeLRot, _DeltaTime, fIKInterpSpeed);
+				fLIK = FMath::FInterpTo(fLIK, ( fDistance_L - 110.f ) / -45.f, _DeltaTime, fIKInterpSpeed);
+			}
+
+		}
+	}
+	else
+	{
+		rRRot = FMath::RInterpTo(rRRot, FRotator::ZeroRotator, _DeltaTime, fIKInterpSpeed);
+		fRIK = FMath::FInterpTo(fRIK, 0.f, _DeltaTime, fIKInterpSpeed);
+
+		rLRot = FMath::RInterpTo(rLRot, FRotator::ZeroRotator, _DeltaTime, fIKInterpSpeed);
+		fLIK = FMath::FInterpTo(fLIK, 0.f, _DeltaTime, fIKInterpSpeed);
+	}
+}
+
+TTuple<bool, float> UAnimInstance_Knight::CapsuleDistance(FName _SocketName, ACharacter* _Char)
+{
+	const FVector vWorldLocation = _Char->GetMesh()->GetComponentLocation();
+	const FVector vBreakVector = vWorldLocation + FVector(0.f, 0.f, 98.f);
+	const FVector vSocketLocation = _Char->GetMesh()->GetSocketLocation(_SocketName);
+
+	const FVector vLineTraceStart = FVector(vSocketLocation.X, vSocketLocation.Y, vBreakVector.Z);
+	const FVector vLineTraceEnd = vLineTraceStart - FVector(0.f, 0.f, 151.f);
+
+	FHitResult HitResult;
+
+	UKismetSystemLibrary::LineTraceSingle(
+		this,
+		vLineTraceStart,
+		vLineTraceEnd,
+		ETraceTypeQuery::TraceTypeQuery1,	//TraceTypeQuery : 숫자에 해당하는 ECollisionChannel을 반환
+		false,
+		IgnoreActorArr,
+		EDrawDebugTrace::ForOneFrame,
+		HitResult,
+		false
+	);
+
+	// 블록되는 충돌체와 Hit되었는지 반환. false인 경우 hit되지 않았거나 overlap되었음
+	const bool bResult = HitResult.bBlockingHit;
+
+	return MakeTuple(bResult, HitResult.Distance);
+}
+
+TTuple<bool, float, FVector> UAnimInstance_Knight::FootLineTrace(FName _SocketName, ACharacter* _Char)
+{
+	const FVector vSocketLocation = _Char->GetMesh()->GetSocketLocation(_SocketName);
+	const FVector vRootLocation = _Char->GetMesh()->GetSocketLocation(TEXT("Root"));
+
+	const FVector vLineTraceStart = FVector(vSocketLocation.X, vSocketLocation.Y, vRootLocation.Z);
+
+	FHitResult HitResult;
+
+	UKismetSystemLibrary::LineTraceSingle(
+		this,
+		vLineTraceStart + FVector(0.f, 0.f, 105.f),
+		vLineTraceStart + FVector(0.f, 0.f, -105.f),
+		ETraceTypeQuery::TraceTypeQuery1,	//TraceTypeQuery : 숫자에 해당하는 ECollisionChannel을 반환
+		false,
+		IgnoreActorArr,
+		EDrawDebugTrace::None,
+		HitResult,
+		false
+	);
+
+	const bool bResult = HitResult.bBlockingHit;
+
+	if ( bResult )
+	{
+		return MakeTuple(bResult, HitResult.Distance, HitResult.Normal);
+	}
+
+	return MakeTuple(bResult, 999.f, FVector::ZeroVector);
 }
 
 void UAnimInstance_Knight::AnimNotify_NextAttackCheck()

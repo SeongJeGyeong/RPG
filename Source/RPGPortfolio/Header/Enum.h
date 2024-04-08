@@ -10,7 +10,7 @@ enum class EInputActionType : uint8
 	GUARD,
 	DODGE,
 	ATTACK,
-	PRIMARYATTACK,
+	HEAVYATTACK,
 	PARRY,
 	LOCKON,
 	SWITCHLOCKON,
@@ -35,6 +35,9 @@ enum class EMONSTER_TYPE : uint8
 	Centaur,
 	Griffon,
 	MountainDragon,
+	UndeadAssassin,
+	HeavyKnight,
+	TaurusDemon,
 };
 
 UENUM(BlueprintType)
@@ -45,6 +48,8 @@ enum class EMONSTER_STATE : uint8
 	WALK,
 	RUN,
 	BITE,
+	ATTACK_NORMAL,
+	ATTACK_HEAVY,
 	DIVE,
 	HIT,
 	DEAD,

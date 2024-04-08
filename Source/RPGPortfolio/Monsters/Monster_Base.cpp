@@ -39,19 +39,27 @@ AMonster_Base::AMonster_Base()
 		UE_LOG(LogTemp, Error, TEXT("WidgetComponent Create Failed"));
 	}
 	m_WidgetComponent->SetupAttachment(GetRootComponent());
+	m_WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	m_WidgetComponent->SetDrawSize(FVector2D(200.f, 200.f));
 
+	ConstructorHelpers::FClassFinder<UUserWidget> MonsterUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_MonsterMain.BPC_UI_MonsterMain_C'"));
+	if ( MonsterUI.Succeeded() )
+	{
+		m_WidgetComponent->SetWidgetClass(MonsterUI.Class);
+	}
+
+	// Lock On Mark
 	m_LockOnMarker = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnMarker"));
 	if ( !IsValid(m_LockOnMarker) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
 	}
 	m_LockOnMarker->SetupAttachment(m_TargetComp);
-
 	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
 	if ( MarkerUI.Succeeded() )
 	{
 		m_LockOnMarker->SetWidgetClass(MarkerUI.Class);
-		m_MarkerClass = MarkerUI.Class;
+		//m_MarkerClass = MarkerUI.Class;
 	}
 	m_LockOnMarker->SetWidgetSpace(EWidgetSpace::Screen);
 	m_LockOnMarker->SetDrawSize(FVector2D(50.f, 50.f));

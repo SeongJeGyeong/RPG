@@ -34,7 +34,7 @@ private:
 
 	UAnimInstance* m_AnimInst;
 
-	TSubclassOf<UUserWidget> m_MarkerClass;
+	//TSubclassOf<UUserWidget> m_MarkerClass;
 	class UWidgetComponent* m_LockOnMarker;
 	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;

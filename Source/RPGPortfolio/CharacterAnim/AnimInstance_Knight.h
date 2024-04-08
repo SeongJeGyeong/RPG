@@ -52,6 +52,28 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fAttackBlendWeight;
 
+	// IK용 변수
+	UPROPERTY()
+	TArray<AActor*> IgnoreActorArr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
+	float fDisplacement;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
+	float fIKInterpSpeed = 10.f;	// IK가 적용되는 속도
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
+	FRotator rRRot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
+	FRotator rLRot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
+	float fRIK;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
+	float fLIK;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
@@ -88,4 +110,10 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _DT) override;
+	
+	// Foot IK용 함수들
+	void FootIK(float _DeltaTime);
+	TTuple<bool, float> CapsuleDistance(FName _SocketName, ACharacter* _Char);
+	TTuple<bool, float, FVector> FootLineTrace(FName _SocketName, ACharacter* _Char);
+
 };

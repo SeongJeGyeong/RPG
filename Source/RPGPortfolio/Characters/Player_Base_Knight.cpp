@@ -75,10 +75,10 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 		m_AttackMontage = AtkMontage.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> PrimaryAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_PrimaryAttack.AM_Knight_PrimaryAttack'"));
-	if (PrimaryAtkMontage.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HeavyAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_PrimaryAttack.AM_Knight_PrimaryAttack'"));
+	if ( HeavyAtkMontage.Succeeded())
 	{
-		m_PrimaryAttackMontage = PrimaryAtkMontage.Object;
+		m_HeavyAttackMontage = HeavyAtkMontage.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Dodge.AM_Knight_Dodge'"));
@@ -249,8 +249,8 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::ATTACK:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::AttackAction);
 				break;
-			case EInputActionType::PRIMARYATTACK:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::PrimaryAttackAction);
+			case EInputActionType::HEAVYATTACK:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttackAction);
 				break;
 			case EInputActionType::PARRY:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ParryAction);
@@ -403,7 +403,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	}
 }
 
-void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Instance)
+void APlayer_Base_Knight::HeavyAttackAction(const FInputActionInstance& _Instance)
 {
 	if (!IsValid(m_AnimInst))
 	{
@@ -415,16 +415,16 @@ void APlayer_Base_Knight::PrimaryAttackAction(const FInputActionInstance& _Insta
 
 	if (bAttackToggle)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("primaryTrue"));
+		UE_LOG(LogTemp, Warning, TEXT("HeavyTrue"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("primaryFalse"));
+		UE_LOG(LogTemp, Warning, TEXT("HeavyFalse"));
 	}
 	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
-		m_AnimInst->Montage_Play(m_PrimaryAttackMontage.LoadSynchronous());
-		SetAttackMontage(m_PrimaryAttackMontage);
+		m_AnimInst->Montage_Play(m_HeavyAttackMontage.LoadSynchronous());
+		SetAttackMontage(m_HeavyAttackMontage);
 		m_AnimInst->bIsAttack = true;
 		CurrentCombo = 1;
 	}
@@ -620,7 +620,7 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 {
 	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
 	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous())		||
-		m_AnimInst->Montage_IsPlaying(m_PrimaryAttackMontage.LoadSynchronous()) ||
+		m_AnimInst->Montage_IsPlaying(m_HeavyAttackMontage.LoadSynchronous()) ||
 		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous())		||
 		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous())			||
 		m_AnimInst->Montage_IsPlaying(m_HitMontage.LoadSynchronous())			||
@@ -689,7 +689,7 @@ void APlayer_Base_Knight::AttackHitCheck()
 				iDamage = pState->GetPlayerBasePower().PhysicAtk;
 				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
 			}
-			else if(GetAttackMontage() == m_PrimaryAttackMontage)
+			else if(GetAttackMontage() == m_HeavyAttackMontage)
 			{
 				iDamage = pState->GetPlayerBasePower().PhysicAtk * 1.5f;
 				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
