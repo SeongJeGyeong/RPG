@@ -31,26 +31,26 @@ private:
 	USoundBase* m_AttackSound;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fMoveSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsMove;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	FVector	vLocalVelocity;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	FVector	vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	FVector	vCameraLookAt;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	float fAttackBlendWeight;
+	/*UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	float fAttackBlendWeight;*/
 
 	// IK용 변수
 	UPROPERTY()
@@ -80,8 +80,6 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	bool bIsGuard;
-
-	bool bIsAttack;
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnInvincibleTimeCheckDelegate OnInvincibleTimeCheck;

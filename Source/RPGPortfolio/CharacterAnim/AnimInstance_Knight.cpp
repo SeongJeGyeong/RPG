@@ -55,15 +55,6 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 9.f, 0.f, 1.f);
 	}
 
-	if (bIsAttack)
-	{
-		fAttackBlendWeight = 1.f;
-	}
-	else
-	{
-		fAttackBlendWeight = 0.f;
-	}
-
 	const FAnimNode_StateMachine* state = GetStateMachineInstanceFromName(FName("Main"));
 	if (FName("Idle/Move").IsEqual(state->GetCurrentStateName()))
 	{
@@ -98,8 +89,6 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 			const float fSelectFloat = UKismetMathLibrary::SelectFloat(Foot_L.Get<1>(), Foot_R.Get<1>(), Foot_L.Get<1>() >= Foot_R.Get<1>());
 			// 루트 본의 높이를 보간함
 			fRootDisplacement = FMath::FInterpTo(fRootDisplacement, ( fSelectFloat - 100.f ) * -1.f, _DeltaTime, fIKInterpSpeed);
-			UE_LOG(LogTemp, Warning, TEXT("Foot displ : %f"), fSelectFloat);
-			UE_LOG(LogTemp, Warning, TEXT("Root displ : %f"), fRootDisplacement);
 
 			TTuple<bool, float, FVector> FootTrace_R = FootLineTrace(TEXT("Foot_R"), m_Player);
 			TTuple<bool, float, FVector> FootTrace_L = FootLineTrace(TEXT("Foot_L"), m_Player);
@@ -111,8 +100,8 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 				fDistance_R += ( Foot_L.Get<1>() > Foot_R.Get<1>() ) ? -5.f : 0.f;
 				// Leg IK의 알파값을 보간 (0 ~ 1)
 				fRIK = FMath::FInterpTo(fRIK, ( fDistance_R - 105.f ) / -50.f, _DeltaTime, fIKInterpSpeed);
-				UE_LOG(LogTemp, Warning, TEXT("Right Distance : %f"), fDistance_R);
-				UE_LOG(LogTemp, Warning, TEXT("Right IK : %f"), fRIK);
+				// UE_LOG(LogTemp, Warning, TEXT("Right Distance : %f"), fDistance_R);
+				// UE_LOG(LogTemp, Warning, TEXT("Right IK : %f"), fRIK);
 
 				const FVector vFootRVec = FootTrace_R.Get<2>();
 				// DegAtan2 : A/B 의 역탄젠트(ArcTangent)를 디그리 각도로 반환함
@@ -131,8 +120,8 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 				float fDistance_L = FootTrace_L.Get<1>();
 				fDistance_L += ( Foot_L.Get<1>() < Foot_R.Get<1>() ) ? -5.f : 0.f;
 				fLIK = FMath::FInterpTo(fLIK, ( fDistance_L - 105.f ) / -50.f, _DeltaTime, fIKInterpSpeed);
-				UE_LOG(LogTemp, Warning, TEXT("Left Distance : %f"), fDistance_L);
-				UE_LOG(LogTemp, Warning, TEXT("Left IK : %f"), fLIK);
+				// UE_LOG(LogTemp, Warning, TEXT("Left Distance : %f"), fDistance_L);
+				// UE_LOG(LogTemp, Warning, TEXT("Left IK : %f"), fLIK);
 
 				const FVector vFootLVec = FootTrace_L.Get<2>();
 				const double rLRotPitch = UKismetMathLibrary::DegAtan2(vFootLVec.X, vFootLVec.Z) * -1.f;
@@ -141,7 +130,6 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 
 				rLRot = FMath::RInterpTo(rLRot, MakeLRot, _DeltaTime, fIKInterpSpeed);
 			}
-
 		}
 	}
 	else

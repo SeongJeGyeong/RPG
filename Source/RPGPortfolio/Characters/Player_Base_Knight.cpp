@@ -75,7 +75,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 		m_AttackMontage = AtkMontage.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> HeavyAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_PrimaryAttack.AM_Knight_PrimaryAttack'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> HeavyAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack_Hea.AM_Knight_Attack_Hea'"));
 	if ( HeavyAtkMontage.Succeeded())
 	{
 		m_HeavyAttackMontage = HeavyAtkMontage.Object;
@@ -163,14 +163,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		GetController()->SetControlRotation(NewRot);
 	}
 
-	if (m_AnimInst->Montage_IsPlaying(GetAttackMontage().LoadSynchronous()))
-	{
-
-	}
-	else
-	{
-		m_AnimInst->bIsAttack = false;
-	}
 	bAttackToggle = false;
 	
 	// 회피 애니메이션 재생중일 때
@@ -187,7 +179,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 
 	if (bAtkMove)
 	{
-		AddMovementInput(vAtkMoveVec, 50.f * DeltaTime);
+		AddMovementInput(vAtkMoveVec, 40.f * DeltaTime);
 	}
 
 	if (bAtkTrace)
@@ -398,7 +390,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	{
 		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
 		SetAttackMontage(m_AttackMontage);
-		m_AnimInst->bIsAttack = true;
 		CurrentCombo = 1;
 	}
 }
@@ -425,8 +416,7 @@ void APlayer_Base_Knight::HeavyAttackAction(const FInputActionInstance& _Instanc
 	{
 		m_AnimInst->Montage_Play(m_HeavyAttackMontage.LoadSynchronous());
 		SetAttackMontage(m_HeavyAttackMontage);
-		m_AnimInst->bIsAttack = true;
-		CurrentCombo = 1;
+		CurrentCombo = 2;
 	}
 }
 
@@ -646,7 +636,6 @@ void APlayer_Base_Knight::NextAttackCheck()
 		{
 			CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
 		}
-
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
 	}

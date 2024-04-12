@@ -22,10 +22,10 @@ private:
 	bool bIsMove;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	FVector	vLocalVelocity;
+	FVector	vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	FVector	vPlayerLoc;
+	FVector	vPlayerLoc;		// 플레이어 바라보기 위해 사용
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsFly;

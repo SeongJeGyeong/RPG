@@ -23,8 +23,17 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	EMONSTER_STATE m_State;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	bool bIsDead;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	bool bIsMove;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	FVector	vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = ( AllowPrivateAccess = "true" ))
+	class UCharacterMovementComponent* m_Movement;
 
 public:
 	void SetDeadAnim() { bIsDead = true; }
@@ -41,8 +50,5 @@ public:
 	void AnimNotify_HitCheckEnd();
 
 	UFUNCTION()
-	void AnimNotify_Hit_Start();
-
-	UFUNCTION()
-	void AnimNotify_Hit_End();
+	void AnimNotify_NextAtkCheck();
 };

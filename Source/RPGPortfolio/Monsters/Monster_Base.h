@@ -54,7 +54,7 @@ protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBlackboardData* m_Blackboard;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
+	UPROPERTY()
 	class AAIC_Monster_Base* m_AIController;
 
 public:
