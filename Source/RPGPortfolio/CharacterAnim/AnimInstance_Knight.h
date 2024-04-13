@@ -28,8 +28,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	UCharacterMovementComponent* m_Movement;
 
-	USoundBase* m_AttackSound;
-
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fMoveSpeed;
@@ -48,9 +46,6 @@ private:
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;
-
-	/*UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	float fAttackBlendWeight;*/
 
 	// IK용 변수
 	UPROPERTY()

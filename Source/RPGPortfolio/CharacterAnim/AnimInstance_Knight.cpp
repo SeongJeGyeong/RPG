@@ -18,7 +18,6 @@ void UAnimInstance_Knight::NativeBeginPlay()
 	if (IsValid(m_Player))
 	{
 		m_Movement = m_Player->GetCharacterMovement();
-		m_AttackSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_Attack_Normal.SC_Player_Attack_Normal'"));
 	}
 }
 
@@ -100,18 +99,23 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 				fDistance_R += ( Foot_L.Get<1>() > Foot_R.Get<1>() ) ? -5.f : 0.f;
 				// Leg IK의 알파값을 보간 (0 ~ 1)
 				fRIK = FMath::FInterpTo(fRIK, ( fDistance_R - 105.f ) / -50.f, _DeltaTime, fIKInterpSpeed);
-				// UE_LOG(LogTemp, Warning, TEXT("Right Distance : %f"), fDistance_R);
-				// UE_LOG(LogTemp, Warning, TEXT("Right IK : %f"), fRIK);
 
+				// 발과 닿은 바닥의 법선벡터
 				const FVector vFootRVec = FootTrace_R.Get<2>();
+				/*UE_LOG(LogTemp, Warning, TEXT("FootRVec X : %f"), vFootRVec.X);
+				UE_LOG(LogTemp, Warning, TEXT("FootRVec Y : %f"), vFootRVec.Y);
+				UE_LOG(LogTemp, Warning, TEXT("FootRVec Z : %f"), vFootRVec.Z);*/
 				// DegAtan2 : A/B 의 역탄젠트(ArcTangent)를 디그리 각도로 반환함
 				// Atan과 Atan2의 차이
-				// Atan : 두 점 사이의 탄젠트값을 받아서 -90 ~ 90 사이의 디그리 각도를 반환한다.
+				// Atan : 두 점 사이의 탄젠트값을 받아서 -90 ~ 90 사이의 디그리 각도를 반환한다.(방향의 개념이 없는 단순한 두 점 사이의 각도)
 				// Atan2 : 두 점 사이의 상대좌표를 받아 -180 ~ 180 사이의 디그리 각도를 반환한다.
 				const double rRRotPitch = UKismetMathLibrary::DegAtan2(vFootRVec.X, vFootRVec.Z) * -1.f;
+				
+				// 바닥이 경사지지 않은 평면일 경우 Z축을 따라 위로 향하는 벡터(0, 0, 1)가 수평선 (Y축)과 이루는 각도
 				const double rRRotRoll = UKismetMathLibrary::DegAtan2(vFootRVec.Y, vFootRVec.Z);
 				const FRotator MakeRRot = FRotator(rRRotPitch, 0.f, rRRotRoll);
-				// 발의 각도를 보간함
+				
+				// 발의 본 각도를 바닥의 법선벡터의 역방향과 일치하도록 보간함
 				rRRot = FMath::RInterpTo(rRRot, MakeRRot, _DeltaTime, fIKInterpSpeed);
 			}
 
@@ -201,6 +205,8 @@ TTuple<bool, float, FVector> UAnimInstance_Knight::FootLineTrace(FName _SocketNa
 
 	if ( bResult )
 	{
+		// FHitResult.Normal : 충돌한 지점의 노말벡터
+		// 법선벡터(Normal Vector) : 물체의 표면이 향하고 있는 방향을 구한 벡터. 물체가 평면일 경우 물체와 수직인 방향의 벡터가 된다.
 		return MakeTuple(bResult, HitResult.Distance, HitResult.Normal);
 	}
 
@@ -215,7 +221,6 @@ void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
 	m_Player->SetbAtkTrace(true);
-	UGameplayStatics::PlaySound2D(this, m_AttackSound);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()

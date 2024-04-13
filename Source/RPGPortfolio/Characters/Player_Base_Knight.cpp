@@ -36,6 +36,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	: bEnableJump(true)
 	, bEnableMove(true)
 	, bAttackToggle(false)
+	, bHeavyToggle(false)
 	, bItemDelay(false)
 	, fItemDelayTime(0.f)
 	, bToggleInvinc(false)
@@ -173,7 +174,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	}
 	else if (m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()))
 	{
-		AddMovementInput(vDodgeVector, 200.f * DeltaTime);
+		AddMovementInput(vDodgeVector, 2000.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
 	}
 
@@ -241,9 +242,12 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::ATTACK:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::AttackAction);
 				break;
-			case EInputActionType::HEAVYATTACK:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttackAction);
+			case EInputActionType::HEAVYTOGGLE:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttackToggle);
 				break;
+			//case EInputActionType::HEAVYATTACK:
+			//	InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttackAction);
+			//	break;
 			case EInputActionType::PARRY:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ParryAction);
 				break;
@@ -388,9 +392,34 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	
 	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
-		m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
-		SetAttackMontage(m_AttackMontage);
-		CurrentCombo = 1;
+		if (bHeavyToggle)
+		{
+			// 강공격
+			m_AnimInst->Montage_Play(m_HeavyAttackMontage.LoadSynchronous());
+			SetAttackMontage(m_HeavyAttackMontage);
+			CurrentCombo = 2;
+		}
+		else
+		{
+			// 약공격
+			m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
+			SetAttackMontage(m_AttackMontage);
+			CurrentCombo = 1;
+		}
+	}
+}
+
+void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instance)
+{
+	bHeavyToggle = _Instance.GetValue().Get<bool>();
+		//(bHeavyToggle != _Instance.GetValue().Get<bool>());
+	if ( bHeavyToggle )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HeavyTrue"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HeavyFalse"));
 	}
 }
 
@@ -422,8 +451,6 @@ void APlayer_Base_Knight::HeavyAttackAction(const FInputActionInstance& _Instanc
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Dodge"));
-
 	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
 	{
 		if(GetCharacterMovement()->GetLastInputVector().IsZero())

@@ -58,6 +58,7 @@ private:
 	bool bEnableMove;
 
 	bool bAttackToggle;
+	bool bHeavyToggle;
 	bool bAtkTrace;
 
 	// 아이템 사용 딜레이 체크용
@@ -138,6 +139,7 @@ private:
 	void SprintToggleAction(const FInputActionInstance& _Instance);
 	void GuardAction(const FInputActionInstance& _Instance);
 	void AttackAction(const FInputActionInstance& _Instance);
+	void HeavyAttackToggle(const FInputActionInstance& _Instance);
 	void HeavyAttackAction(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
