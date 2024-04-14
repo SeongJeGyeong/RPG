@@ -91,6 +91,7 @@ private:
 public:
 	bool GetbAtkTrace() { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace;}
+	void SetbAtkToggle(bool _AtkToggle) { bAttackToggle = _AtkToggle; }
 	bool GetbAtkMove() { return bAtkMove; }
 	void SetbAtkMove(bool _AtkMove) { bAtkMove = _AtkMove; }
 	bool GetbEnableJump() { return bEnableJump; }

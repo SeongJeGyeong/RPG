@@ -163,8 +163,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
 	}
-
-	bAttackToggle = false;
 	
 	// 회피 애니메이션 재생중일 때
 	if (m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()))
@@ -406,6 +404,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 			SetAttackMontage(m_AttackMontage);
 			CurrentCombo = 1;
 		}
+		bAttackToggle = false;
 	}
 }
 
@@ -420,32 +419,6 @@ void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instanc
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("HeavyFalse"));
-	}
-}
-
-void APlayer_Base_Knight::HeavyAttackAction(const FInputActionInstance& _Instance)
-{
-	if (!IsValid(m_AnimInst))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
-		return;
-	}
-
-	bAttackToggle = _Instance.GetValue().Get<bool>();
-
-	if (bAttackToggle)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HeavyTrue"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HeavyFalse"));
-	}
-	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
-	{
-		m_AnimInst->Montage_Play(m_HeavyAttackMontage.LoadSynchronous());
-		SetAttackMontage(m_HeavyAttackMontage);
-		CurrentCombo = 2;
 	}
 }
 
@@ -665,6 +638,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 		}
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
+		bAttackToggle = false;
 	}
 }
 

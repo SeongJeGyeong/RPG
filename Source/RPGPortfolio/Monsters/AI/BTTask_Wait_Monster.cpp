@@ -8,6 +8,7 @@
 
 EBTNodeResult::Type UBTTask_Wait_Monster::ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory)
 {
+
 	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 
 	if (IsValid(pMonster))

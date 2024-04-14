@@ -38,10 +38,6 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 		return EBTNodeResult::Succeeded;
 		//return EBTNodeResult::Failed;
 	}
-	else
-	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsObject(FName("TraceTarget"), pCharacter);
-	}
 
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(pController, pCharacter->GetActorLocation());
 
@@ -67,7 +63,7 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 		return;
 	}
 
-	ACharacter* pTarget = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("TraceTarget")));
+	ACharacter* pTarget = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
 	if (!IsValid(pTarget))
 	{
 		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);

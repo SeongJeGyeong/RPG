@@ -132,11 +132,11 @@ void AMonster_Base::Tick(float DeltaTime)
 			fDeadEffectRatio += DeltaTime * 0.3f;
 			TArray<USceneComponent*> ChildMeshArr;
 			GetMesh()->GetChildrenComponents(true, ChildMeshArr);
-			if (ChildMeshArr[0] != nullptr)
+			if (!ChildMeshArr.IsEmpty())
 			{
-				for (USceneComponent* ChildMesh : ChildMeshArr)
+				for ( USceneComponent* ChildMesh : ChildMeshArr )
 				{
-					if ("TargetComponent" == ChildMesh->GetName())
+					if ( "TargetComponent" == ChildMesh->GetName() )
 					{
 						continue;
 					}

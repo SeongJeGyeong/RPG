@@ -18,12 +18,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = ( AllowPrivateAccess = true ))
 	FBlackboardKeySelector m_TargetKey;
 
-	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = ( AllowPrivateAccess = true ))
-	FBlackboardKeySelector m_RecentTargetPos;
-
-	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = ( AllowPrivateAccess = true ))
-	float				   m_RevaluateRange;
-
 	float				   fAroundDir;
 
 public:

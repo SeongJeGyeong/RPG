@@ -13,7 +13,7 @@ EBTNodeResult::Type UBTT_LoseTarget_Monster::ExecuteTask(UBehaviorTreeComponent&
 	if (IsValid(pMonster))
 	{
 		pMonster->ChangeState(EMONSTER_STATE::LOOKAROUND);
-		//_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("RecentPosSet"), false);
+		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("RecentPosSet"), false);
 	}
 
 	return Super::ExecuteTask(_OwnComp, _NodeMemory);
