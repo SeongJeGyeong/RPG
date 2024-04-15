@@ -200,6 +200,8 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		return 0.0f;
 	}
+	bAtkTrace = false;
+
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	FinalDamage = FMath::Clamp(FinalDamage - m_Info.PhysicDef, 0.f, FinalDamage);
@@ -316,15 +318,6 @@ void AMonster_Base::MonsterAttackNormal()
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격애니메이션 로드 실패"));
 	}
 
-	TSoftObjectPtr<USoundBase> AtkSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->AtkSound_Normal;
-	if (IsValid(AtkSound.LoadSynchronous()))
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AtkSound.LoadSynchronous(), GetActorLocation());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격사운드 로드 실패"));
-	}
 	ChangeState(EMONSTER_STATE::IDLE);
 }
 
@@ -337,24 +330,38 @@ void AMonster_Base::SetbLockedOn(bool _LockedOn)
 
 void AMonster_Base::AttackHitCheck()
 {
-	float AtkRadius = 50.f;
+	float AtkRadius = 20.f;
+	if ( m_Type == EMONSTER_TYPE::UndeadAssassin )
+	{
+		AtkRadius = 10.f;
+	}
+	else if ( m_Type == EMONSTER_TYPE::Barghest )
+	{
+		AtkRadius = 50.f;
+	}
+
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
-	FVector HitSphere = GetMesh()->GetSocketLocation("BARGHEST_Head");
+	FVector vHitStart = GetMesh()->GetSocketLocation("Socket_HitStart");
+	FVector vHitEnd = GetMesh()->GetSocketLocation("Socket_HitEnd");
+	float fTraceHalfHeight = (vHitEnd - vHitStart).Size() * 0.5;
+
 	bool bResult = GetWorld()->SweepSingleByChannel
 	(
 		HitResult,
-		HitSphere,
-		HitSphere,
+		vHitStart,
+		vHitEnd,
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel6,
-		FCollisionShape::MakeSphere(AtkRadius),
+		FCollisionShape::MakeCapsule(AtkRadius, fTraceHalfHeight),
 		Params
 	);
 
 	FColor color;
 	bResult ? color = FColor::Red : color = FColor::Green;
-	DrawDebugSphere(GetWorld(), HitSphere, AtkRadius, 12, color);
+
+	FVector vMidpoint = FMath::Lerp(vHitEnd, vHitStart, 0.5f);
+	DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat(), color, false, 0.5f);
 
 	if (bResult)
 	{
@@ -365,6 +372,17 @@ void AMonster_Base::AttackHitCheck()
 			if (!IsValid(pPlayer))
 			{
 				UE_LOG(LogTemp, Display, TEXT("타격 상대가 플레이어가 아님"));
+				return;
+			}
+
+			if (pPlayer->GetbToggleGuard())
+			{
+				TSoftObjectPtr<USoundBase> BlockSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_ShieldBlock.SC_Player_ShieldBlock'"));
+				if ( IsValid(BlockSound.LoadSynchronous()) )
+				{
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());
+				}
+				bAtkTrace = false;
 				return;
 			}
 

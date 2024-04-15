@@ -73,9 +73,13 @@ private:
 	// 구르기 관련
 	FVector vDodgeVector;
 	FRotator rDodgeRotation;
+
 	// 무적시간
 	bool bToggleInvinc;
 	float fInvincTime;
+
+	// 방패 방어 상태
+	bool bToggleGuard;
 
 	// 공격 관련
 	int32 CurrentCombo;
@@ -101,6 +105,8 @@ public:
 	bool GetbItemDelay() { return bItemDelay; }
 	bool GetbInvincible() { return bToggleInvinc; }
 	void SetbInvincible(bool _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
+	bool GetbToggleGuard() { return bToggleGuard; }
+	void SetbToggleGuard(bool _ToggleGuard) { bToggleGuard = _ToggleGuard; }
 
 	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
 	void SetOrientRotation(bool _Val);
@@ -130,7 +136,7 @@ public:
 	void AttackHitCheck();
 	void CloseMenuUI();
 	void ItemUseDelayOn();
-	void InvincibleTimeCheck();
+	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart();
 
 private:
@@ -141,7 +147,6 @@ private:
 	void GuardAction(const FInputActionInstance& _Instance);
 	void AttackAction(const FInputActionInstance& _Instance);
 	void HeavyAttackToggle(const FInputActionInstance& _Instance);
-	void HeavyAttackAction(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);

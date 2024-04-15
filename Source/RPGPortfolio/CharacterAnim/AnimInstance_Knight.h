@@ -10,7 +10,7 @@
 
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnInvincibleTimeCheckDelegate); // 무적시간 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam (FOnInvincibleTimeCheckDelegate, bool); // 무적시간 체크 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnAttackMoveDelegate);	// 공격 중 이동 델리게이트
 
 /**
@@ -44,8 +44,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	bool bIsGuard;			// 가드액션 여부
+
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	float fGuardBlendWeight;
+	float fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
 
 	// IK용 변수
 	UPROPERTY()
@@ -73,9 +76,10 @@ private:
 	float fLIK;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	bool bIsGuard;
+	bool GetbIsGuard() { return bIsGuard; }
+	void SetbIsGaurd(bool _IsGuard) { bIsGuard = _IsGuard; }
 
+public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnInvincibleTimeCheckDelegate OnInvincibleTimeCheck;
 	FOnAttackMoveDelegate	OnAttackMove;

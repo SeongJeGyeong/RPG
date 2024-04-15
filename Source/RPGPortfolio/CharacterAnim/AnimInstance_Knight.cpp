@@ -28,6 +28,7 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		return;
 	}
 
+	// Foot IK
 	FootIK(_DT);
 
 	// bIsMove = Idle->Move Trigger
@@ -42,19 +43,25 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	}
 
 	vLocalVelocity = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
-
 	bIsInAir = m_Movement->IsFalling();
 
+	// 가드 모션
 	if (bIsGuard && !bIsInAir)
 	{
-		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight + _DT * 9.f, 0.f, 1.f);
+		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight + _DT * 15.f, 0.f, 1.f);
+
+		if ( fGuardBlendWeight >= 1.f )
+		{
+			m_Player->SetbToggleGuard(true);
+		}
 	}
 	else
 	{
-		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 9.f, 0.f, 1.f);
+		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 15.f, 0.f, 1.f);
 	}
 
 	const FAnimNode_StateMachine* state = GetStateMachineInstanceFromName(FName("Main"));
+	// Idle/Move 스테이트일 때 이동가능
 	if (FName("Idle/Move").IsEqual(state->GetCurrentStateName()))
 	{
 		m_Player->SetbEnableJump(false);
@@ -62,6 +69,7 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	}
 	else
 	{
+		// 착지 애니매이션 재생중일 때 이동 불가능
 		if (FName("Land").IsEqual(state->GetCurrentStateName()))
 		{
 			m_Player->SetbEnableMove(false);
@@ -242,12 +250,12 @@ void UAnimInstance_Knight::AnimNotify_MoveEnd()
 
 void UAnimInstance_Knight::AnimNotify_DodgeStart()
 {
-	m_Player->SetbInvincible(true);
-	OnInvincibleTimeCheck.Broadcast();
+	//m_Player->SetbInvincible(true);
+	OnInvincibleTimeCheck.Broadcast(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
-	m_Player->SetbInvincible(false);
-	OnInvincibleTimeCheck.Broadcast();
+	//m_Player->SetbInvincible(false);
+	OnInvincibleTimeCheck.Broadcast(false);
 }

@@ -243,9 +243,6 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 			case EInputActionType::HEAVYTOGGLE:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttackToggle);
 				break;
-			//case EInputActionType::HEAVYATTACK:
-			//	InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttackAction);
-			//	break;
 			case EInputActionType::PARRY:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ParryAction);
 				break;
@@ -341,7 +338,7 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
 	{
 		ACharacter::Jump();
 	}
@@ -366,13 +363,15 @@ void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
 	if (!CheckMontagePlaying())
 	{
-		m_AnimInst->bIsGuard = _Instance.GetValue().Get<bool>();
-		if (m_AnimInst->bIsGuard)
+		bool bGuard = _Instance.GetValue().Get<bool>();
+		m_AnimInst->SetbIsGaurd(bGuard);
+		if (bGuard)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("GuardTrue"));
 		}
 		else
 		{
+			bToggleGuard = false;
 			UE_LOG(LogTemp, Warning, TEXT("GuardFalse"));
 		}
 	}
@@ -388,7 +387,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
-	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
 	{
 		if (bHeavyToggle)
 		{
@@ -424,7 +423,7 @@ void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instanc
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
-	if (!CheckMontagePlaying() && !m_AnimInst->bIsGuard)
+	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
 	{
 		if(GetCharacterMovement()->GetLastInputVector().IsZero())
 		{
@@ -665,7 +664,6 @@ void APlayer_Base_Knight::AttackHitCheck()
 	FVector vMidpoint = FMath::Lerp(vSwordTop, vSwordBottom, 0.5f);
 	// FVector vMidpoint2 = (vSwordBottom + vSwordTop) / 2;
 	DrawDebugCapsule(GetWorld(), vMidpoint, (vSwordTop - vSwordBottom).Size() * 0.5f, AtkRadius, FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(), color, false, 0.5f);
-
 	if (bResult)
 	{
 		if (HitResult.GetActor()->IsValidLowLevel())
@@ -815,9 +813,11 @@ void APlayer_Base_Knight::ItemUseDelayOn()
 }
 
 // 무적시간 동안 데미지 안받도록 설정
-void APlayer_Base_Knight::InvincibleTimeCheck()
+void APlayer_Base_Knight::InvincibleTimeCheck(bool _Invincible)
 {
-	if (bToggleInvinc)
+	bToggleInvinc = _Invincible;
+
+	if (_Invincible)
 	{
 		SetCanBeDamaged(false);
 	}
