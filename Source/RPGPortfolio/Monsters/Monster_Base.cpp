@@ -100,7 +100,7 @@ void AMonster_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("PerceiveRange"), m_Info.BOSS_PerceiveRange);
 		}
 		m_AnimInst = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
-		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
+		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnStaggerMontageEnded);
 	}
 	
 	m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
@@ -152,7 +152,7 @@ void AMonster_Base::Tick(float DeltaTime)
 		}
 	}
 
-	if (bHitWait)
+	if (bStaggerWait)
 	{
 		fHitWaitTime += DeltaTime * 1.f;
 
@@ -165,7 +165,7 @@ void AMonster_Base::Tick(float DeltaTime)
 				{					
 					//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
 					pAIController->GetBrainComponent()->RestartLogic();
-					bHitWait = false;
+					bStaggerWait = false;
 					fHitWaitTime = 0.f;
 				}
 			}
@@ -212,6 +212,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	fWidgetVisTime = 0.f;
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
+	// 사망 시
 	if (m_Info.CurHP <= 0.f && GetController())
 	{
 		m_State = EMONSTER_STATE::DEAD;
@@ -221,7 +222,6 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		m_LockOnMarker->DestroyComponent();
 
 		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
-		bAtkTrace = false;
 
 		TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DeadSound;
 		if (IsValid(DeadSound.LoadSynchronous()))
@@ -238,7 +238,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	else
 	{
-		// 블랙보드에 WasHit true로 전달
+		// 행동트리 일시적으로 중지
 		AAIController* pAIController = Cast<AAIController>(GetController());
 		if (IsValid(pAIController))
 		{
@@ -255,9 +255,9 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
 		LaunchForce.Z = 0.f;
 
-		UE_LOG(LogTemp, Warning, TEXT("MonsterLocation X: %f, Y: %f, Z: %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
+		/*UE_LOG(LogTemp, Warning, TEXT("MonsterLocation X: %f, Y: %f, Z: %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
 		UE_LOG(LogTemp, Warning, TEXT("PlayerLocation X: %f, Y: %f, Z: %f"), pPlayer->GetActorLocation().X, pPlayer->GetActorLocation().Y, pPlayer->GetActorLocation().Z);
-		UE_LOG(LogTemp, Warning, TEXT("LaunchVec X: %f, Y: %f, Z: %f"), LaunchForce.X, LaunchForce.Y, LaunchForce.Z);
+		UE_LOG(LogTemp, Warning, TEXT("LaunchVec X: %f, Y: %f, Z: %f"), LaunchForce.X, LaunchForce.Y, LaunchForce.Z);*/
 		LaunchCharacter(LaunchForce, false, false);
 
 		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
@@ -280,13 +280,13 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		{
 			UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
 		}
-
 	}
 
 	return 0.0f;
 }
 
-void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+// 경직상태가 되는 몽타주들 재생 종료시
+void AMonster_Base::OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
 	if (IsValid(HitMontage.LoadSynchronous()))
@@ -295,14 +295,28 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("피격 몽타주 종료"));
 
-			bHitWait = true;
+			bStaggerWait = true;
 			fHitWaitTime = 0.f;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("피격이외의 몽타주 종료"));
+			return;
 		}
 	}
+	TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
+	if (IsValid(BlockMontage.LoadSynchronous()))
+	{
+		if (BlockMontage == Montage)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("블록 몽타주 종료"));
+
+			bStaggerWait = true;
+			fHitWaitTime = 0.f;
+			return;
+		}
+	}
+
+}
+
+void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
 }
 
 void AMonster_Base::MonsterAttackNormal()
@@ -375,15 +389,46 @@ void AMonster_Base::AttackHitCheck()
 				return;
 			}
 
+			// 플레이어 가드에 공격이 막힐 경우
 			if (pPlayer->GetbToggleGuard())
 			{
-				TSoftObjectPtr<USoundBase> BlockSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_ShieldBlock.SC_Player_ShieldBlock'"));
-				if ( IsValid(BlockSound.LoadSynchronous()) )
+				// 플레이어와 몬스터가 바라보는 방향 사이의 각도 구하기
+				FVector vTarget = pPlayer->GetActorForwardVector().GetSafeNormal();
+				FVector vMonster = GetActorForwardVector().GetSafeNormal();
+				float fDot = FVector::DotProduct(vTarget, vMonster);
+				float fAcosAngle = FMath::Acos(fDot);
+				float fDegree = FMath::RadiansToDegrees(fAcosAngle);
+
+				// fDegree가 180도에 가까울수록 서로 마주보고 있음
+				// fDegree가 0도에 가까울수록 서로 같은 방향을 보고 있음
+				// 플레이어 정면 기준으로 160도 각도 안에서 공격했을 경우 막히도록
+				if (fDegree > 100.f)
 				{
-					UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());
+					UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+					TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
+					if ( IsValid(BlockMontage.LoadSynchronous()) )
+					{
+						pAnimInst->Montage_Play(BlockMontage.LoadSynchronous());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("몬스터 블록애니메이션 로드 실패"));
+					}
+
+					TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->BlockSound;
+					if ( IsValid(BlockSound.LoadSynchronous()) )
+					{
+						UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), GetActorLocation());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("몬스터 블록사운드 로드 실패"));
+					}
+
+					bAtkTrace = false;
+					pPlayer->BlockEnemyAttack(m_Info.PhysicAtk);
+					return;
 				}
-				bAtkTrace = false;
-				return;
 			}
 
 			// 플레이어가 무적상태가 아닐 때만

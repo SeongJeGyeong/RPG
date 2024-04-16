@@ -24,6 +24,8 @@ private:
 	FCharacterStatSheet m_PlayerStat;
 	UPROPERTY()
 	FCharacterBasePower m_PlayerBasePower;
+	UPROPERTY()
+	class UUI_Player_Main* m_UI;
 
 	float Helm_PhyDef = 0.f;
 	float Helm_MagDef = 0.f;
@@ -37,7 +39,15 @@ private:
 	float Wea_PhyAtk = 0.f;
 	float Wea_MagAtk = 0.f;
 
+	float fSTRecoveryWait = 0.f;
+	bool bSTRecovery = false;
+	bool bSTRecovSlowly = false;
+
 public:
+	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
+
 	int32 GetPlayerLevel() const { return m_PlayerStat.Level; }
 	int32 GetPlayerSoul() const { return m_PlayerBasePower.AmountOfSoul; }
 
@@ -50,6 +60,7 @@ public:
 	void SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped);
 	void SetPlayerCurrentHP(float _CurHP);
 	void SetPlayerCurrentMP(float _CurMP);
+	void SetPlayerCurrentStamina(float _CurStamina);
 	void PlayerGainSoul(int32 _Soul);
 
 	const float& GetHelmPhyDef() { return Helm_PhyDef; }
@@ -76,4 +87,10 @@ public:
 	void SetWeaPhyAtk(const float& _WeaPhyAtk) { Wea_PhyAtk = _WeaPhyAtk; }
 	const float& GetWeaMagAtk() { return Wea_MagAtk; }
 	void SetWeaMagAtk(const float& _WeaMagAtk) { Wea_MagAtk = _WeaMagAtk; }
+
+	bool GetbSTRecovery() const { return bSTRecovery; }
+	void SetbSTRecovery(const bool& _STRecovery) { bSTRecovery = _STRecovery; }
+	bool GetbSTRecovSlowly() const { return bSTRecovSlowly; }
+	void SetbSTRecovSlowly(const bool& _STRecovSlowly) { bSTRecovSlowly = _STRecovSlowly; }
+
 };

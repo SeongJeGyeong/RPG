@@ -18,6 +18,7 @@ private:
 	class UProgressBar* m_HP;
 	class UProgressBar* m_MP;
 	class UProgressBar* m_Stamina;
+	class APlayerState_Base* m_PlayerState;
 
 public:
 	virtual void NativeConstruct() override;
@@ -25,4 +26,5 @@ public:
 
 	void SetPlayerHPRatio(float _HPRatio);
 	void SetPlayerMPRatio(float _MPRatio);
+	void SetPlayerSTRatio(float _STRatio);
 };

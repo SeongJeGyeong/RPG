@@ -44,7 +44,7 @@ private:
 	float fWidgetVisTime;
 	bool bLockedOn;
 	bool bAtkTrace;
-	bool bHitWait;
+	bool bStaggerWait;
 	float fHitWaitTime = 0.f;
 
 protected:
@@ -95,5 +95,8 @@ public:
 	void MonsterAttackNormal();
 
 	UFUNCTION()
-	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };

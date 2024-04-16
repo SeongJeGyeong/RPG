@@ -533,12 +533,10 @@ void UInventory_Mgr::UseInventoryItem(EITEM_ID _ID)
 	if ( pItemInfo->Restore_HP >= 0 )
 	{
 		pPlayerState->SetPlayerCurrentHP(FMath::Clamp(pPlayerState->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, pPlayerState->GetPlayerBasePower().MaxHP));
-		pPlayerUI->SetPlayerHPRatio(pPlayerState->GetPlayerBasePower().CurHP / pPlayerState->GetPlayerBasePower().MaxHP);
 	}
 	if ( pItemInfo->Restore_MP >= 0 )
 	{
 		pPlayerState->SetPlayerCurrentMP(FMath::Clamp(pPlayerState->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, pPlayerState->GetPlayerBasePower().MaxMP));
-		pPlayerUI->SetPlayerMPRatio(pPlayerState->GetPlayerBasePower().CurMP / pPlayerState->GetPlayerBasePower().MaxMP);
 	}
 	if ( pItemInfo->Gained_Soul >= 0 )
 	{

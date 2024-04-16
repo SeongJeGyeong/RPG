@@ -20,8 +20,7 @@ void UUI_Player_Main::NativeConstruct()
 	}
 	else
 	{
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		FCharacterBasePower BasePower = pPlayerState->GetPlayerBasePower();
+		m_PlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	}
 }
 
@@ -38,4 +37,9 @@ void UUI_Player_Main::SetPlayerHPRatio(float _HPRatio)
 void UUI_Player_Main::SetPlayerMPRatio(float _MPRatio)
 {
 	m_MP->SetPercent(_MPRatio);
+}
+
+void UUI_Player_Main::SetPlayerSTRatio(float _STRatio)
+{
+	m_Stamina->SetPercent(_STRatio);
 }

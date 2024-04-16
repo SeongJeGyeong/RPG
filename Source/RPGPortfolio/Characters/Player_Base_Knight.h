@@ -61,6 +61,8 @@ private:
 	bool bHeavyToggle;
 	bool bAtkTrace;
 
+	bool bSprintToggle;
+
 	// 아이템 사용 딜레이 체크용
 	bool bItemDelay;
 	float fItemDelayTime;
@@ -93,28 +95,27 @@ private:
 	TArray<class AItem_Dropped_Base*> OverlapItemArr;
 
 public:
-	bool GetbAtkTrace() { return bAtkTrace; }
-	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace;}
-	void SetbAtkToggle(bool _AtkToggle) { bAttackToggle = _AtkToggle; }
-	bool GetbAtkMove() { return bAtkMove; }
-	void SetbAtkMove(bool _AtkMove) { bAtkMove = _AtkMove; }
-	bool GetbEnableJump() { return bEnableJump; }
-	void SetbEnableJump(bool _EnableJump) { bEnableJump = _EnableJump; }
-	bool GetbEnableMove() { return bEnableMove; }
-	void SetbEnableMove(bool _EnableMove) { bEnableMove = _EnableMove; }
-	bool GetbItemDelay() { return bItemDelay; }
-	bool GetbInvincible() { return bToggleInvinc; }
-	void SetbInvincible(bool _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
-	bool GetbToggleGuard() { return bToggleGuard; }
-	void SetbToggleGuard(bool _ToggleGuard) { bToggleGuard = _ToggleGuard; }
+	bool GetbAtkTrace() const { return bAtkTrace; }
+	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
+	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
+	bool GetbAtkMove() const { return bAtkMove; }
+	void SetbAtkMove(const bool& _AtkMove) { bAtkMove = _AtkMove; }
+	bool GetbEnableJump() const { return bEnableJump; }
+	void SetbEnableJump(const bool& _EnableJump) { bEnableJump = _EnableJump; }
+	bool GetbEnableMove() const { return bEnableMove; }
+	void SetbEnableMove(const bool& _EnableMove) { bEnableMove = _EnableMove; }
+	bool GetbItemDelay() const { return bItemDelay; }
+	bool GetbInvincible() const { return bToggleInvinc; }
+	void SetbInvincible(const bool& _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
+	bool GetbToggleGuard() const { return bToggleGuard; }
+	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
 
-	FVector GetPlayerForwardVector() { return GetActorForwardVector(); }
-	void SetOrientRotation(bool _Val);
+	void SetOrientRotation(const bool& _Val);
 
-	UCameraComponent* GetCamera() { return m_Camera; }
-	UPlayer_CameraArm* GetArm() { return m_Arm; }
+	const UCameraComponent* GetCamera() { return m_Camera; }
+	const UPlayer_CameraArm* GetArm() { return m_Arm; }
 
-	TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
+	const TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
 	void SetAttackMontage(TSoftObjectPtr<UAnimMontage> _SettingAttackMontage) { m_SettingAttackMontage = _SettingAttackMontage; }
 
 	void GainMonsterSoul(int32 _GainedSoul);
@@ -138,6 +139,7 @@ public:
 	void ItemUseDelayOn();
 	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart();
+	void BlockEnemyAttack(float _Damage);
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

@@ -3,9 +3,15 @@
 
 #include "PlayerState_Base.h"
 #include "../Manager/Equip_Mgr.h"
+#include "../UI/UI_Base.h"
+#include "../UI/UI_Player_Main.h"
+#include "RPGPortfolio/RPGPortfolioGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerState_Base::APlayerState_Base()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	ConstructorHelpers::FObjectFinder<UDataTable> CharacterSheet(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_CharacterSheet.DT_CharacterSheet'"));
 	if (CharacterSheet.Succeeded() || CharacterSheet.Object->GetRowStruct()->IsChildOf(FCharacterStatSheet::StaticStruct()))
 	{
@@ -30,6 +36,58 @@ APlayerState_Base::APlayerState_Base()
 	m_PlayerBasePower.PhysicDef = ( m_PlayerStat.Strength + m_PlayerStat.Dexterity ) * 5.f;
 	m_PlayerBasePower.MagicAtk = m_PlayerStat.Intelligence * 20.f;
 	m_PlayerBasePower.MagicDef = ( m_PlayerStat.Attunement + m_PlayerStat.Intelligence ) * 5.f;
+}
+
+void APlayerState_Base::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( IsValid(GameMode) )
+	{
+		UUI_Base* pMainUI = GameMode->GetMainHUD();
+
+		m_UI = pMainUI->GetMainUIWidget();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("플레이어 스테이트 게임모드 캐스팅 실패"));
+	}
+}
+
+void APlayerState_Base::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!bSTRecovery && m_PlayerBasePower.CurStamina != m_PlayerBasePower.MaxStamina)
+	{
+		fSTRecoveryWait += DeltaTime;
+		if (fSTRecoveryWait > 2.f)
+		{
+			bSTRecovery = true;
+			fSTRecoveryWait = 0.f;
+		}
+	}
+
+	if (bSTRecovery)
+	{
+		if (bSTRecovSlowly)
+		{
+			m_PlayerBasePower.CurStamina = FMath::Clamp(m_PlayerBasePower.CurStamina + 10.f * DeltaTime, 0.f, m_PlayerBasePower.MaxStamina);
+		}
+		else
+		{
+			m_PlayerBasePower.CurStamina = FMath::Clamp(m_PlayerBasePower.CurStamina + 20.f * DeltaTime, 0.f, m_PlayerBasePower.MaxStamina);
+		}
+
+		m_UI->SetPlayerSTRatio(m_PlayerBasePower.CurStamina / m_PlayerBasePower.MaxStamina);
+		if (m_PlayerBasePower.CurStamina == m_PlayerBasePower.MaxStamina)
+		{
+			bSTRecovery = false;
+			fSTRecoveryWait = 0.f;
+		}
+	}
+
 }
 
 void APlayerState_Base::SetPlayerStat(FCharacterStatSheet _PlayerStat)
@@ -132,11 +190,21 @@ void APlayerState_Base::SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped)
 void APlayerState_Base::SetPlayerCurrentHP(float _CurHP)
 {
 	m_PlayerBasePower.CurHP = _CurHP;
+	m_UI->SetPlayerHPRatio(m_PlayerBasePower.CurHP / m_PlayerBasePower.MaxHP);
 }
 
 void APlayerState_Base::SetPlayerCurrentMP(float _CurMP)
 {
 	m_PlayerBasePower.CurMP = _CurMP;
+	m_UI->SetPlayerMPRatio(m_PlayerBasePower.CurMP / m_PlayerBasePower.MaxMP);
+}
+
+void APlayerState_Base::SetPlayerCurrentStamina(float _CurStamina)
+{
+	bSTRecovery = false;
+	m_PlayerBasePower.CurStamina = _CurStamina;
+	m_UI->SetPlayerSTRatio(m_PlayerBasePower.CurStamina / m_PlayerBasePower.MaxStamina);
+	fSTRecoveryWait = 0.f;
 }
 
 void APlayerState_Base::PlayerGainSoul(int32 _Soul)

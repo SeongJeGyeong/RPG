@@ -197,6 +197,26 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 			fItemDelayTime = 0.f;
 		}
 	}
+
+
+	if (bSprintToggle)
+	{
+		// 스테미너가 0일 경우 달리기 불가
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+		if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
+			bSprintToggle = false;
+		}
+		else
+		{
+			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * DeltaTime);
+		}
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
 }
 
 // Called to bind functionality to input
@@ -274,7 +294,7 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
-void APlayer_Base_Knight::SetOrientRotation(bool _Val)
+void APlayer_Base_Knight::SetOrientRotation(const bool& _Val)
 {
 	GetCharacterMovement()->bOrientRotationToMovement = _Val;
 }
@@ -346,17 +366,26 @@ void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instance)
 {
-	bool bToggle = _Instance.GetValue().Get<bool>();
+	bSprintToggle = _Instance.GetValue().Get<bool>();
 
-	if (bToggle)
+	if (m_AnimInst->GetbIsGuard() || !bEnableMove)
+	{
+		bSprintToggle = false;
+		return;
+	}
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	// 스테미너가 0일 경우 달리기 불가
+	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
+	{
+		bSprintToggle = false;
+		return;
+	}
+
+	if (bSprintToggle)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	}
-	else
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	}
-
 }
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
@@ -367,11 +396,15 @@ void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 		m_AnimInst->SetbIsGaurd(bGuard);
 		if (bGuard)
 		{
+			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+			pState->SetbSTRecovSlowly(true);
 			UE_LOG(LogTemp, Warning, TEXT("GuardTrue"));
 		}
 		else
 		{
 			bToggleGuard = false;
+			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+			pState->SetbSTRecovSlowly(false);
 			UE_LOG(LogTemp, Warning, TEXT("GuardFalse"));
 		}
 	}
@@ -385,6 +418,14 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+
+	// 스테미너가 0일 경우 공격 불가
+	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
+	{
+		return;
+	}
+	
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
 	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
@@ -395,6 +436,8 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 			m_AnimInst->Montage_Play(m_HeavyAttackMontage.LoadSynchronous());
 			SetAttackMontage(m_HeavyAttackMontage);
 			CurrentCombo = 2;
+
+			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
 		}
 		else
 		{
@@ -402,6 +445,8 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 			m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
 			SetAttackMontage(m_AttackMontage);
 			CurrentCombo = 1;
+
+			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
 		}
 		bAttackToggle = false;
 	}
@@ -410,7 +455,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instance)
 {
 	bHeavyToggle = _Instance.GetValue().Get<bool>();
-		//(bHeavyToggle != _Instance.GetValue().Get<bool>());
 	if ( bHeavyToggle )
 	{
 		UE_LOG(LogTemp, Warning, TEXT("HeavyTrue"));
@@ -425,6 +469,14 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
 	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
 	{
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+
+		// 스테미너가 0일 경우 회피 불가
+		if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+		{
+			return;
+		}
+
 		if(GetCharacterMovement()->GetLastInputVector().IsZero())
 		{
 			m_AnimInst->Montage_Play(m_DodgeBWMontage.LoadSynchronous());
@@ -437,6 +489,8 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 			vDodgeVector = GetCharacterMovement()->GetLastInputVector();
 			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 		}
+
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
 	}
 }
 
@@ -635,9 +689,20 @@ void APlayer_Base_Knight::NextAttackCheck()
 		{
 			CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
 		}
+
 		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
 		bAttackToggle = false;
+
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+		if (m_AttackMontage.LoadSynchronous() == GetAttackMontage().LoadSynchronous())
+		{
+			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
+		}
+		else
+		{
+			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
+		}
 	}
 }
 
@@ -700,14 +765,11 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-
 	FinalDamage = FMath::Clamp(FinalDamage - pState->GetPlayerBasePower().PhysicDef, 0.f, FinalDamage);
-
 	int32 iCurHP = pState->GetPlayerBasePower().CurHP;
 	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, pState->GetPlayerBasePower().MaxHP);
 
 	pState->SetPlayerCurrentHP(iCurHP);
-	m_PlayerUI->SetPlayerHPRatio(iCurHP / pState->GetPlayerBasePower().MaxHP);
 
 	if ( iCurHP <= 0.f && GetController() )
 	{
@@ -715,6 +777,11 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	}
 	else
 	{
+		// 방어 상태 해제
+		m_AnimInst->SetbIsGaurd(false);
+		bToggleGuard = false;
+		pState->SetbSTRecovSlowly(false);
+
 		AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
 		
 		// 피격 시 피격지점 반대방향으로 밀려나도록
@@ -744,7 +811,20 @@ void APlayer_Base_Knight::AttackMoveStart()
 {
 	bAtkMove = true;
 	vAtkMoveVec = GetActorForwardVector();
+}
 
+void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)
+{
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - _Damage * 0.1f);
+
+	if (pState->GetPlayerBasePower().CurStamina < 0.f)
+	{
+		// 방어 풀리고 경직상태 되도록
+		m_AnimInst->SetbIsGaurd(false);
+		bToggleGuard = false;
+		pState->SetbSTRecovSlowly(false);
+	}
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
