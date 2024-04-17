@@ -50,6 +50,9 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	float fItemBlendWeight;// 아이템 사용 애니메이션 블렌드용 수치
+
 	// IK용 변수
 	UPROPERTY()
 	TArray<AActor*> IgnoreActorArr;
@@ -78,6 +81,8 @@ private:
 public:
 	bool GetbIsGuard() { return bIsGuard; }
 	void SetbIsGaurd(bool _IsGuard) { bIsGuard = _IsGuard; }
+
+	void TurnOnItemUseBlend(float _BlentWeight) { fItemBlendWeight = _BlentWeight; }
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;

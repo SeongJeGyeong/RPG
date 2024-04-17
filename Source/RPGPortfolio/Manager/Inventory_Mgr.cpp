@@ -545,9 +545,5 @@ void UInventory_Mgr::UseInventoryItem(EITEM_ID _ID)
 	}
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(m_World, 0));
-
-	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItemInfo->NiagaraPath);
-	FVector vLoc = pPlayer->GetActorLocation();
-	vLoc.Z -= 40.f;
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(m_World, pSystem, vLoc);
+	pPlayer->UseItem(pItemInfo->NiagaraPath);
 }

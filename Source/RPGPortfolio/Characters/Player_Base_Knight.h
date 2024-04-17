@@ -46,6 +46,8 @@ private:
 	TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
 	TSoftObjectPtr<UAnimMontage> m_ParryMontage;
 	TSoftObjectPtr<UAnimMontage> m_HitMontage;
+	TSoftObjectPtr<UAnimMontage> m_GuardBreakMontage;
+	TSoftObjectPtr<UAnimMontage> m_UseItemMontage;
 
 private:
 	////////// Lock On ///////////////
@@ -66,6 +68,9 @@ private:
 	// 아이템 사용 딜레이 체크용
 	bool bItemDelay;
 	float fItemDelayTime;
+
+	// 아이템 사용 애니메이션 재생 중
+	bool bItemInUse;
 
 	// 공격 중 이동 체크용
 	bool bAtkMove;
@@ -140,6 +145,7 @@ public:
 	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart();
 	void BlockEnemyAttack(float _Damage);
+	void UseItem(FString _NiagaraPath);
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

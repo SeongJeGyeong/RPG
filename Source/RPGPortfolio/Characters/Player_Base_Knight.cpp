@@ -106,6 +106,17 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 		m_HitMontage = HitMontage.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> BreakMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_GuardBreak.AM_Knight_GuardBreak'"));
+	if (BreakMontage.Succeeded())
+	{
+		m_GuardBreakMontage = BreakMontage.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> UseMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_UseItem.AM_Knight_UseItem'"));
+	if ( UseMontage.Succeeded() )
+	{
+		m_UseItemMontage = UseMontage.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -198,24 +209,36 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		}
 	}
 
-
-	if (bSprintToggle)
+	// 아이템 사용 중
+	if (bItemInUse)
 	{
-		// 스테미너가 0일 경우 달리기 불가
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+		GetCharacterMovement()->MaxWalkSpeed = 100.f;
+		if (!m_AnimInst->Montage_IsPlaying(m_UseItemMontage.LoadSynchronous()))
 		{
-			GetCharacterMovement()->MaxWalkSpeed = 300.f;
-			bSprintToggle = false;
-		}
-		else
-		{
-			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * DeltaTime);
+			m_AnimInst->TurnOnItemUseBlend(0.f);
+			bItemInUse = false;
 		}
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		if (bSprintToggle)
+		{
+			// 스테미너가 0일 경우 달리기 불가
+			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+			if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+			{
+				GetCharacterMovement()->MaxWalkSpeed = 300.f;
+				bSprintToggle = false;
+			}
+			else
+			{
+				pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * DeltaTime);
+			}
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		}
 	}
 }
 
@@ -663,10 +686,11 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 {
 	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
 	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous())		||
-		m_AnimInst->Montage_IsPlaying(m_HeavyAttackMontage.LoadSynchronous()) ||
+		m_AnimInst->Montage_IsPlaying(m_HeavyAttackMontage.LoadSynchronous())	||
 		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous())		||
 		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous())			||
 		m_AnimInst->Montage_IsPlaying(m_HitMontage.LoadSynchronous())			||
+		m_AnimInst->Montage_IsPlaying(m_GuardBreakMontage.LoadSynchronous())	||
 		GetCharacterMovement()->IsFalling()
 		)
 	{
@@ -824,7 +848,21 @@ void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)
 		m_AnimInst->SetbIsGaurd(false);
 		bToggleGuard = false;
 		pState->SetbSTRecovSlowly(false);
+		m_AnimInst->Montage_Play(m_GuardBreakMontage.LoadSynchronous());
 	}
+}
+
+void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
+{
+	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *_NiagaraPath);
+	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/EST-drink.EST-drink'"));
+	FVector vLoc = GetActorLocation();
+	vLoc.Z -= 40.f;
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), pSystem, vLoc);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
+	m_AnimInst->Montage_Play(m_UseItemMontage.LoadSynchronous());
+	bItemInUse = true;
+	m_AnimInst->TurnOnItemUseBlend(1.f);
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
