@@ -9,6 +9,7 @@
 #include "UI_EquipItemList.h"
 #include "UI_ItemTooltip.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
@@ -149,6 +150,9 @@ void UUI_EquipItem::ItemBtnClicked()
 	}
 
 	ItemList->SetVisibility(ESlateVisibility::Visible);
+
+	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 }
 
 void UUI_EquipItem::ItemBtnHovered()
@@ -231,6 +235,9 @@ void UUI_EquipItem::ItemBtnHovered()
 		m_Tooltip->SetTooltipUI(m_ItemData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 	}
+
+	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 }
 
 void UUI_EquipItem::ItemBtnUnHovered()

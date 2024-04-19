@@ -15,6 +15,7 @@
 #include "UI_ItemTooltip.h"
 #include "UI_PlayerStat.h"
 #include "UI_InvenItem.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -114,6 +115,9 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 
 		m_Tooltip->SetTooltipUI(pData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
+
+		USoundBase* pClickSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pClickSound);
 	}
 	else
 	{
@@ -135,6 +139,9 @@ void UUI_Inventory::LeftBtnClicked()
 		eCategory = static_cast<EITEM_TYPE>(--iCategory);
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
+
+		USoundBase* pMoveSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_MOVE.CURSOL_MOVE'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pMoveSound);
 	}
 }
 
@@ -150,6 +157,9 @@ void UUI_Inventory::RightBtnClicked()
 		eCategory = static_cast<EITEM_TYPE>(++iCategory);
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
+
+		USoundBase* pMoveSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_MOVE.CURSOL_MOVE'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pMoveSound);
 	}
 }
 

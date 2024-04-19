@@ -40,6 +40,7 @@ private:
 
 	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
 	TSoftObjectPtr<UAnimMontage> m_HeavyAttackMontage;
+	TSoftObjectPtr<UAnimMontage> m_JumpAttackMontage;
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
 
 	TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
@@ -50,17 +51,20 @@ private:
 	TSoftObjectPtr<UAnimMontage> m_UseItemMontage;
 
 private:
-	////////// Lock On ///////////////
+	// Lock On
 	float LockonControlRotationRate;
-	float BrokeLockAimingCooldown;
-	//////////////////////////////////
 
 	// 점프, 이동 가능한 상태인지 체크용
 	bool bEnableJump;
 	bool bEnableMove;
 
+	// 다음 공격 체크용 토글
 	bool bAttackToggle;
+	// 강공격 체크용 토글
 	bool bHeavyToggle;
+
+	bool bJumpAtk;
+
 	bool bAtkTrace;
 
 	bool bSprintToggle;
@@ -103,8 +107,6 @@ public:
 	bool GetbAtkTrace() const { return bAtkTrace; }
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
-	bool GetbAtkMove() const { return bAtkMove; }
-	void SetbAtkMove(const bool& _AtkMove) { bAtkMove = _AtkMove; }
 	bool GetbEnableJump() const { return bEnableJump; }
 	void SetbEnableJump(const bool& _EnableJump) { bEnableJump = _EnableJump; }
 	bool GetbEnableMove() const { return bEnableMove; }
@@ -143,7 +145,7 @@ public:
 	void CloseMenuUI();
 	void ItemUseDelayOn();
 	void InvincibleTimeCheck(bool _Invincible);
-	void AttackMoveStart();
+	void AttackMoveStart(bool _AtkMove);
 	void BlockEnemyAttack(float _Damage);
 	void UseItem(FString _NiagaraPath);
 

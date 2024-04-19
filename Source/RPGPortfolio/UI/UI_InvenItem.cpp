@@ -86,11 +86,16 @@ void UUI_InvenItem::ItemBtnClicked()
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		bItemUseDelay = pPlayer->GetbItemDelay();
 		m_MenuAnchor->Open(true);
+
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 	}
 	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
+
+		// 무기 및 방어구 교체 시
 		if (m_ItemData->GetItemType() == EITEM_TYPE::WEAPON || m_ItemData->GetItemType() == EITEM_TYPE::ARM_HELM ||
 			m_ItemData->GetItemType() == EITEM_TYPE::ARM_CHEST || m_ItemData->GetItemType() == EITEM_TYPE::ARM_GAUNTLET ||
 			m_ItemData->GetItemType() == EITEM_TYPE::ARM_LEGGINGS)

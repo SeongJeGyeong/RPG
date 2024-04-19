@@ -71,12 +71,18 @@ void UUI_Menu_Main::EquipBtnClicked()
 
 	UUI_EquipMain* EquipUI = GameMode->GetEquipUI();
 	EquipUI->SetVisibility(ESlateVisibility::Visible);
+
+	USoundBase* pClickSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pClickSound);
 }
 
 void UUI_Menu_Main::EquipBtnHovered()
 {
 	// 문자열 앞에 L을 붙여야 유니코드로 인식함
 	m_MenuName->SetText(FText::FromString(L"장비"));
+
+	USoundBase* pHoverSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pHoverSound);
 }
 
 void UUI_Menu_Main::EquipBtnUnHovered()
@@ -87,11 +93,15 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 void UUI_Menu_Main::InventoryBtnClicked()
 {
 	UInventory_Mgr::GetInst(GetWorld())->ShowInventoryUI();
+	USoundBase* pClickSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pClickSound);
 }
 
 void UUI_Menu_Main::InventoryBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"인벤토리"));
+	USoundBase* pHoverSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pHoverSound);
 }
 
 void UUI_Menu_Main::InventoryBtnUnHovered()
@@ -111,11 +121,16 @@ void UUI_Menu_Main::StatusBtnClicked()
 
 	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
 	StatusUI->SetVisibility(ESlateVisibility::Visible);
+
+	USoundBase* pClickSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pClickSound);
 }
 
 void UUI_Menu_Main::StatusBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"스테이터스"));
+	USoundBase* pHoverSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pHoverSound);
 }
 
 void UUI_Menu_Main::StatusBtnUnHovered()
@@ -130,6 +145,8 @@ void UUI_Menu_Main::TutorialBtnClicked()
 void UUI_Menu_Main::TutorialBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"튜토리얼"));
+	USoundBase* pHoverSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pHoverSound);
 }
 
 void UUI_Menu_Main::TutorialBtnUnHovered()
@@ -144,6 +161,8 @@ void UUI_Menu_Main::SettingsBtnClicked()
 void UUI_Menu_Main::SettingsBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"설정"));
+	USoundBase* pHoverSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pHoverSound);
 }
 
 void UUI_Menu_Main::SettingsBtnUnHovered()

@@ -68,7 +68,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	LockonControlRotationRate = 10.f;
-	BrokeLockAimingCooldown = 0.5f;
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack_Nor.AM_Knight_Attack_Nor'"));
 	if (AtkMontage.Succeeded())
@@ -80,6 +79,12 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	if ( HeavyAtkMontage.Succeeded())
 	{
 		m_HeavyAttackMontage = HeavyAtkMontage.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> JumpAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_JumpAttack.AM_Knight_JumpAttack'"));
+	if ( JumpAtkMontage.Succeeded() )
+	{
+		m_JumpAttackMontage = JumpAtkMontage.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Dodge.AM_Knight_Dodge'"));
@@ -186,6 +191,25 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		AddMovementInput(vDodgeVector, 2000.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
 	}
+
+	if (bJumpAtk)
+	{
+		float CurTime = m_AnimInst->Montage_GetPosition(m_JumpAttackMontage.LoadSynchronous());
+
+		UE_LOG(LogTemp, Warning, TEXT("JumpAtk Time : %f"), CurTime);
+		if (CurTime > 0.3f)
+		{
+			m_AnimInst->Montage_Pause(m_JumpAttackMontage.LoadSynchronous());
+		}
+
+		if (!GetCharacterMovement()->IsFalling())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Land"));
+			m_AnimInst->Montage_Resume(m_JumpAttackMontage.LoadSynchronous());
+			bJumpAtk = false;
+		}
+	}
+		
 
 	if (bAtkMove)
 	{
@@ -338,8 +362,6 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 			// get forward vector
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, vInput.X);
-
-			//GetCharacterMovement()->AddInputVector(GetActorForwardVector() * vInput.X);
 		}
 
 		if ((Controller != NULL) && (vInput.Y != 0.0f))
@@ -350,8 +372,6 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 			// get right vector 
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			AddMovementInput(Direction, vInput.Y);
-
-			// GetCharacterMovement()->AddInputVector(GetActorRightVector() * vInput.Y);
 		}
 	}
 }
@@ -360,22 +380,10 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (m_Arm->IsCameraLockedToTarget())
+	if (!m_Arm->bToggleLockOn)
 	{
-		// do not rotate
-	}
-	else
-	{
-		if (!m_Arm->bToggleLockOn)
-		{
-			// If camera lock was recently broken by a large mouse delta, allow a cooldown time to prevent erratic camera movement
-			bool bRecentlyBrokeLock = GetWorld()->GetRealTimeSeconds() < BrokeLockAimingCooldown;
-			if (!bRecentlyBrokeLock)
-			{
-				AddControllerYawInput(vInput.X);
-			}
-			AddControllerPitchInput(-vInput.Y);
-		}
+		AddControllerYawInput(vInput.X);
+		AddControllerPitchInput(-vInput.Y);
 	}
 }
 
@@ -451,6 +459,15 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
+	if (GetCharacterMovement()->IsFalling())
+	{
+		m_AnimInst->Montage_Play(m_JumpAttackMontage.LoadSynchronous());
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
+		bAttackToggle = false;
+		bJumpAtk = true;
+		return;
+	}
+
 	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
 	{
 		if (bHeavyToggle)
@@ -567,11 +584,17 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
 		GAU.SetHideCursorDuringCapture(false);
 		pController->SetInputMode(GAU);
+
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 	}
 	else
 	{
 		FInputModeGameOnly GameOnly;
 		pController->SetInputMode(GameOnly);
+
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 	}
 		
 	pController->bShowMouseCursor = bShowMenu;
@@ -587,7 +610,8 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 		UE_LOG(LogTemp, Warning, TEXT("아이템 획득"));
 		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID, (uint32)OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
 		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->m_IID);
-		
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/ITEMGET.ITEMGET'"));
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
 		m_MainUI->ShowRootingMessage(true);
 		m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
 		m_MainUI->ShowActionMessage(true);
@@ -613,6 +637,9 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
 	{
 		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
+
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 		return;
 	}
 
@@ -621,6 +648,8 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 	if (StatusUI->GetVisibility() == ESlateVisibility::Visible)
 	{
 		StatusUI->SetVisibility(ESlateVisibility::Hidden);
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 		return;
 	}
 
@@ -630,10 +659,16 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 		if ( EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
 		{
 			EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
+
+			USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
+			UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 			return;
 		}
 
 		EquipUI->SetVisibility(ESlateVisibility::Hidden);
+
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 		return;
 	}
 }
@@ -687,6 +722,7 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
 	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous())		||
 		m_AnimInst->Montage_IsPlaying(m_HeavyAttackMontage.LoadSynchronous())	||
+		m_AnimInst->Montage_IsPlaying(m_JumpAttackMontage.LoadSynchronous())	||
 		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous())		||
 		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous())			||
 		m_AnimInst->Montage_IsPlaying(m_HitMontage.LoadSynchronous())			||
@@ -814,6 +850,11 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		LaunchCharacter(LaunchForce, false, false);
 
 		// 피격 애니메이션 재생
+		if (CheckMontagePlaying())
+		{
+			m_AnimInst->Montage_Stop(1.f);
+			bAtkMove = false;
+		}
 		m_AnimInst->Montage_Play(m_HitMontage.LoadSynchronous());
 	}
 
@@ -831,10 +872,13 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 	}
 }
 
-void APlayer_Base_Knight::AttackMoveStart()
+void APlayer_Base_Knight::AttackMoveStart(bool _AtkMove)
 {
-	bAtkMove = true;
-	vAtkMoveVec = GetActorForwardVector();
+	bAtkMove = _AtkMove;
+	if (bAtkMove)
+	{
+		vAtkMoveVec = GetActorForwardVector();
+	}
 }
 
 void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)

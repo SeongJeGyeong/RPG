@@ -9,6 +9,7 @@
 #include "UI_ItemTooltip.h"
 #include "UI_InvenItem.h"
 #include "UI_PlayerStat.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUI_EquipItemList::NativeConstruct()
 {
@@ -86,6 +87,9 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		m_ListItemName->SetVisibility(ESlateVisibility::Visible);
 		m_Tooltip->SetTooltipUI(pData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
+
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
+		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 	}
 	else
 	{

@@ -244,22 +244,20 @@ void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 
 void UAnimInstance_Knight::AnimNotify_MoveStart()
 {
-	OnAttackMove.Broadcast();
+	OnAttackMove.Broadcast(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_MoveEnd()
 {
-	m_Player->SetbAtkMove(false);
+	OnAttackMove.Broadcast(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeStart()
 {
-	//m_Player->SetbInvincible(true);
 	OnInvincibleTimeCheck.Broadcast(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
-	//m_Player->SetbInvincible(false);
 	OnInvincibleTimeCheck.Broadcast(false);
 }
