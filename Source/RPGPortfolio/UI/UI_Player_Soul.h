@@ -21,6 +21,8 @@ private:
 	int32 iGainedSoul;
 	bool bSoulGained = false;
 	bool bDisplayGainedSoul = false;
+	bool bDoPlaySound = false;
+	bool bDoOnce = false;
 
 	float fDisplayTime = 0.f;
 	float fOpacity = 1.f;

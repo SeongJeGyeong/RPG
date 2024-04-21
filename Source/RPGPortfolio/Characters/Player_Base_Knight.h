@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../System/DataAsset/DA_PlayerMontage.h"
 #include "../System/DataAsset/DA_InputAction.h"
 #include "InputMappingContext.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,20 +36,22 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Animation", meta = ( AllowPrivateAccess = "true" ))
+	TSoftObjectPtr<UDA_PlayerMontage> m_PlayerMontage;
+
+	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 
-	TSoftObjectPtr<UAnimMontage> m_AttackMontage;
-	TSoftObjectPtr<UAnimMontage> m_HeavyAttackMontage;
-	TSoftObjectPtr<UAnimMontage> m_JumpAttackMontage;
+	//TSoftObjectPtr<UAnimMontage> m_AttackMontage;
+	//TSoftObjectPtr<UAnimMontage> m_HeavyAttackMontage;
+	//TSoftObjectPtr<UAnimMontage> m_JumpAttackMontage;
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
 
-	TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
-	TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
-	TSoftObjectPtr<UAnimMontage> m_ParryMontage;
-	TSoftObjectPtr<UAnimMontage> m_HitMontage;
-	TSoftObjectPtr<UAnimMontage> m_GuardBreakMontage;
-	TSoftObjectPtr<UAnimMontage> m_UseItemMontage;
+	//TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
+	//TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
+	//TSoftObjectPtr<UAnimMontage> m_HitMontage;
+	//TSoftObjectPtr<UAnimMontage> m_GuardBreakMontage;
+	//TSoftObjectPtr<UAnimMontage> m_UseItemMontage;
 
 private:
 	// Lock On

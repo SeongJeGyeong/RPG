@@ -23,6 +23,20 @@ enum class EInputActionType : uint8
 };
 
 UENUM(BlueprintType)
+enum class EPlayerMontage : uint8
+{
+	DODGE_FW,
+	DODGE_BW,
+	ATTACK,
+	HEAVYATTACK,
+	JUMPATTACK,
+	PARRY,
+	HIT,
+	GUARDBREAK,
+	USEITEM,
+};
+
+UENUM(BlueprintType)
 enum class ELockOnDirection : uint8
 {
 	Left	UMETA(DisplayName = "Left"),

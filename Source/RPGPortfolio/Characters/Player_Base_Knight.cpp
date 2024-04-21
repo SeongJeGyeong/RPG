@@ -69,58 +69,9 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 
 	LockonControlRotationRate = 10.f;
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack_Nor.AM_Knight_Attack_Nor'"));
-	if (AtkMontage.Succeeded())
+	if (!IsValid(m_PlayerMontage.Get()))
 	{
-		m_AttackMontage = AtkMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> HeavyAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Attack_Hea.AM_Knight_Attack_Hea'"));
-	if ( HeavyAtkMontage.Succeeded())
-	{
-		m_HeavyAttackMontage = HeavyAtkMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> JumpAtkMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_JumpAttack.AM_Knight_JumpAttack'"));
-	if ( JumpAtkMontage.Succeeded() )
-	{
-		m_JumpAttackMontage = JumpAtkMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Dodge.AM_Knight_Dodge'"));
-	if (DodgeMontage.Succeeded())
-	{
-		m_DodgeMontage = DodgeMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DodgeBWMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Dodge_Backward.AM_Knight_Dodge_Backward'"));
-	if (DodgeMontage.Succeeded())
-	{
-		m_DodgeBWMontage = DodgeBWMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> ParryMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Parry.AM_Knight_Parry'"));
-	if (DodgeMontage.Succeeded())
-	{
-		m_ParryMontage = ParryMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> HitMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_Hit.AM_Knight_Hit'"));
-	if(HitMontage.Succeeded())
-	{
-		m_HitMontage = HitMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> BreakMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_GuardBreak.AM_Knight_GuardBreak'"));
-	if (BreakMontage.Succeeded())
-	{
-		m_GuardBreakMontage = BreakMontage.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> UseMontage(TEXT("/Script/Engine.AnimMontage'/Game/Blueprint/Player/Animation/AM_Knight_UseItem.AM_Knight_UseItem'"));
-	if ( UseMontage.Succeeded() )
-	{
-		m_UseItemMontage = UseMontage.Object;
+		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
 	}
 }
 
@@ -181,31 +132,32 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	}
 	
 	// 회피 애니메이션 재생중일 때
-	if (m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous()))
+	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
 	{
 		GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
 	}
-	else if (m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous()))
+	else if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW)))
 	{
 		AddMovementInput(vDodgeVector, 2000.f * DeltaTime);
 		SetActorRotation(rDodgeRotation);
 	}
 
+	// 점프공격
 	if (bJumpAtk)
 	{
-		float CurTime = m_AnimInst->Montage_GetPosition(m_JumpAttackMontage.LoadSynchronous());
+		float CurTime = m_AnimInst->Montage_GetPosition(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 
-		UE_LOG(LogTemp, Warning, TEXT("JumpAtk Time : %f"), CurTime);
+		// 바닥에 착지하기 전까지는 공격 준비 자세에서 정지한다.
 		if (CurTime > 0.3f)
 		{
-			m_AnimInst->Montage_Pause(m_JumpAttackMontage.LoadSynchronous());
+			m_AnimInst->Montage_Pause(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 		}
 
+		// 바닥에 착지하면 애니메이션을 다시 재생
 		if (!GetCharacterMovement()->IsFalling())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Land"));
-			m_AnimInst->Montage_Resume(m_JumpAttackMontage.LoadSynchronous());
+			m_AnimInst->Montage_Resume(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 			bJumpAtk = false;
 		}
 	}
@@ -237,7 +189,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	if (bItemInUse)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 100.f;
-		if (!m_AnimInst->Montage_IsPlaying(m_UseItemMontage.LoadSynchronous()))
+		if (!m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM)))
 		{
 			m_AnimInst->TurnOnItemUseBlend(0.f);
 			bItemInUse = false;
@@ -461,7 +413,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	
 	if (GetCharacterMovement()->IsFalling())
 	{
-		m_AnimInst->Montage_Play(m_JumpAttackMontage.LoadSynchronous());
+		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
 		bAttackToggle = false;
 		bJumpAtk = true;
@@ -473,8 +425,9 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		if (bHeavyToggle)
 		{
 			// 강공격
-			m_AnimInst->Montage_Play(m_HeavyAttackMontage.LoadSynchronous());
-			SetAttackMontage(m_HeavyAttackMontage);
+
+			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
+			SetAttackMontage(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
 			CurrentCombo = 2;
 
 			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
@@ -482,8 +435,8 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		else
 		{
 			// 약공격
-			m_AnimInst->Montage_Play(m_AttackMontage.LoadSynchronous());
-			SetAttackMontage(m_AttackMontage);
+			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
+			SetAttackMontage(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
 			CurrentCombo = 1;
 
 			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
@@ -519,13 +472,13 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 
 		if(GetCharacterMovement()->GetLastInputVector().IsZero())
 		{
-			m_AnimInst->Montage_Play(m_DodgeBWMontage.LoadSynchronous());
+			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
 			vDodgeVector = GetActorForwardVector();
 			rDodgeRotation = GetActorRotation();
 		}
 		else
 		{
-			m_AnimInst->Montage_Play(m_DodgeMontage.LoadSynchronous());
+			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW));
 			vDodgeVector = GetCharacterMovement()->GetLastInputVector();
 			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 		}
@@ -536,7 +489,7 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 {
-	m_AnimInst->Montage_Play(m_ParryMontage.LoadSynchronous());
+	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::PARRY));
 }
 
 void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)
@@ -720,13 +673,13 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 bool APlayer_Base_Knight::CheckMontagePlaying()
 {
 	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
-	if (m_AnimInst->Montage_IsPlaying(m_AttackMontage.LoadSynchronous())		||
-		m_AnimInst->Montage_IsPlaying(m_HeavyAttackMontage.LoadSynchronous())	||
-		m_AnimInst->Montage_IsPlaying(m_JumpAttackMontage.LoadSynchronous())	||
-		m_AnimInst->Montage_IsPlaying(m_DodgeBWMontage.LoadSynchronous())		||
-		m_AnimInst->Montage_IsPlaying(m_DodgeMontage.LoadSynchronous())			||
-		m_AnimInst->Montage_IsPlaying(m_HitMontage.LoadSynchronous())			||
-		m_AnimInst->Montage_IsPlaying(m_GuardBreakMontage.LoadSynchronous())	||
+	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK))		||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT))			||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
 		GetCharacterMovement()->IsFalling()
 		)
 	{
@@ -755,7 +708,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 		bAttackToggle = false;
 
 		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		if (m_AttackMontage.LoadSynchronous() == GetAttackMontage().LoadSynchronous())
+		if (m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK) == GetAttackMontage().LoadSynchronous())
 		{
 			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
 		}
@@ -797,12 +750,12 @@ void APlayer_Base_Knight::AttackHitCheck()
 			float iDamage;
 			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 
-			if (GetAttackMontage() == m_AttackMontage)
+			if (GetAttackMontage() == m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK))
 			{
 				iDamage = pState->GetPlayerBasePower().PhysicAtk;
 				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
 			}
-			else if(GetAttackMontage() == m_HeavyAttackMontage)
+			else if(GetAttackMontage() == m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))
 			{
 				iDamage = pState->GetPlayerBasePower().PhysicAtk * 1.5f;
 				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
@@ -842,6 +795,12 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		bToggleGuard = false;
 		pState->SetbSTRecovSlowly(false);
 
+		// 현재 행동상태 해제
+		bJumpAtk = false;
+		bAtkTrace = false;
+		bAtkMove = false;
+		bItemInUse = false;
+
 		AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
 		
 		// 피격 시 피격지점 반대방향으로 밀려나도록
@@ -855,7 +814,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 			m_AnimInst->Montage_Stop(1.f);
 			bAtkMove = false;
 		}
-		m_AnimInst->Montage_Play(m_HitMontage.LoadSynchronous());
+		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT));
 	}
 
 	return 0.0f;
@@ -892,7 +851,9 @@ void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)
 		m_AnimInst->SetbIsGaurd(false);
 		bToggleGuard = false;
 		pState->SetbSTRecovSlowly(false);
-		m_AnimInst->Montage_Play(m_GuardBreakMontage.LoadSynchronous());
+		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
+		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/guardbreak.guardbreak'"));
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
 	}
 }
 
@@ -904,7 +865,7 @@ void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
 	vLoc.Z -= 40.f;
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), pSystem, vLoc);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
-	m_AnimInst->Montage_Play(m_UseItemMontage.LoadSynchronous());
+	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
 	bItemInUse = true;
 	m_AnimInst->TurnOnItemUseBlend(1.f);
 }

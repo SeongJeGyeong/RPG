@@ -59,6 +59,7 @@ void APlayerState_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 스태미너 회복 대기시간
 	if (!bSTRecovery && m_PlayerBasePower.CurStamina != m_PlayerBasePower.MaxStamina)
 	{
 		fSTRecoveryWait += DeltaTime;
@@ -69,6 +70,7 @@ void APlayerState_Base::Tick(float DeltaTime)
 		}
 	}
 
+	// 스태미너 회복
 	if (bSTRecovery)
 	{
 		if (bSTRecovSlowly)

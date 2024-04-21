@@ -36,6 +36,13 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
 
+		if (bDoPlaySound)
+		{
+			USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/soul-suck.soul-suck'"));
+			UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+			bDoPlaySound = false;
+		}
+
 		if (iDisplayedSoul < PlayerBasePower.AmountOfSoul)
 		{
 			iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 3.f * _DeltaTime, iDisplayedSoul, PlayerBasePower.AmountOfSoul);
@@ -49,12 +56,21 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 		}
 	}
 
+	// 적 사망 시 획득할 소울 보여줌
 	if (bDisplayGainedSoul)
 	{
 		fDisplayTime += _DeltaTime;
 
-		if (fDisplayTime >= 3.f)
+		if (fDisplayTime >= 2.f)
 		{
+			// 2초뒤 실제로 들어옴
+			if (bDoOnce)
+			{
+				bSoulGained = true;
+				bDoPlaySound = true;
+				bDoOnce = false;
+			}
+
 			fOpacity = FMath::Clamp(fOpacity - _DeltaTime, 0.f, 1.f);
 			m_GainedSoul->SetOpacity(fOpacity);
 			if (fOpacity <= 0.f)
@@ -78,6 +94,6 @@ void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)
 	fDisplayTime = 0.f;
 	fOpacity = 1.f;
 	m_GainedSoul->SetVisibility(ESlateVisibility::Visible);
-	bSoulGained = true;
 	bDisplayGainedSoul = true;
+	bDoOnce = true;
 }

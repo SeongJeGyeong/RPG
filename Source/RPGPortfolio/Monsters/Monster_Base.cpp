@@ -211,6 +211,10 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	m_MonsterWidget->DisplayDMG(FinalDamage);
 	fWidgetVisTime = 0.f;
 
+	// 피격 시 모든 애니메이션 중지
+	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+	pAnimInst->Montage_Stop(1.f);
+
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 	// 사망 시
 	if (m_Info.CurHP <= 0.f && GetController())
@@ -260,7 +264,6 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		UE_LOG(LogTemp, Warning, TEXT("LaunchVec X: %f, Y: %f, Z: %f"), LaunchForce.X, LaunchForce.Y, LaunchForce.Z);*/
 		LaunchCharacter(LaunchForce, false, false);
 
-		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 		TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
 		if (IsValid(HitMontage.LoadSynchronous()))
 		{
