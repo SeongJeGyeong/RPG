@@ -68,11 +68,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	LockonControlRotationRate = 10.f;
-
-	if (!IsValid(m_PlayerMontage.Get()))
-	{
-		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
-	}
 }
 
 // Called when the game starts or when spawned
@@ -111,6 +106,21 @@ void APlayer_Base_Knight::BeginPlay()
 	m_PlayerUI = m_MainUI->GetMainUIWidget();
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
+
+	if ( !IsValid(m_PlayerMontage.Get()) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
+	}
+
+	if ( !IsValid(m_PlayerSound.Get()) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
+	}
+	
+	if ( !IsValid(m_MenuSound.Get()) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
+	}
 }
 
 // Called every frame
@@ -538,16 +548,14 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		GAU.SetHideCursorDuringCapture(false);
 		pController->SetInputMode(GAU);
 
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_OPEN));
 	}
 	else
 	{
 		FInputModeGameOnly GameOnly;
 		pController->SetInputMode(GameOnly);
 
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 	}
 		
 	pController->bShowMouseCursor = bShowMenu;
@@ -563,8 +571,8 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 		UE_LOG(LogTemp, Warning, TEXT("아이템 획득"));
 		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID, (uint32)OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
 		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->m_IID);
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/ITEMGET.ITEMGET'"));
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::GETITEM), GetActorLocation());
+
 		m_MainUI->ShowRootingMessage(true);
 		m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
 		m_MainUI->ShowActionMessage(true);
@@ -590,9 +598,7 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
 	{
 		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
-
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 		return;
 	}
 
@@ -601,8 +607,7 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 	if (StatusUI->GetVisibility() == ESlateVisibility::Visible)
 	{
 		StatusUI->SetVisibility(ESlateVisibility::Hidden);
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 		return;
 	}
 
@@ -612,16 +617,12 @@ void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
 		if ( EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
 		{
 			EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
-
-			USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
-			UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 			return;
 		}
 
 		EquipUI->SetVisibility(ESlateVisibility::Hidden);
-
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_CANCEL.CURSOL_CANCEL'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 		return;
 	}
 }
@@ -852,8 +853,6 @@ void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)
 		bToggleGuard = false;
 		pState->SetbSTRecovSlowly(false);
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
-		USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/guardbreak.guardbreak'"));
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
 	}
 }
 

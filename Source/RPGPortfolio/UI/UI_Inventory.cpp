@@ -15,7 +15,7 @@
 #include "UI_ItemTooltip.h"
 #include "UI_PlayerStat.h"
 #include "UI_InvenItem.h"
-#include "Kismet/GameplayStatics.h"
+#include "../System/DataAsset/DA_MenuSound.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -93,6 +93,12 @@ void UUI_Inventory::NativeConstruct()
 
 	eCategory = EITEM_TYPE::ALL;
 	SetCategoryUI(eCategory);
+
+	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
+	if ( !IsValid(m_Sound) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
+	}
 }
 
 void UUI_Inventory::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -116,8 +122,7 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		m_Tooltip->SetTooltipUI(pData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 
-		USoundBase* pClickSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pClickSound);
+		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
 	}
 	else
 	{
@@ -140,8 +145,7 @@ void UUI_Inventory::LeftBtnClicked()
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
 
-		USoundBase* pMoveSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_MOVE.CURSOL_MOVE'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pMoveSound);
+		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
 	}
 }
 
@@ -158,8 +162,7 @@ void UUI_Inventory::RightBtnClicked()
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
 
-		USoundBase* pMoveSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_MOVE.CURSOL_MOVE'"));
-		UGameplayStatics::PlaySound2D(GetWorld(), pMoveSound);
+		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
 	}
 }
 

@@ -34,6 +34,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	class UUI_ItemTooltip* m_Tooltip;
 
+	class UDA_MenuSound* m_Sound;
+
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;

@@ -9,7 +9,8 @@
 #include "UI_EquipItemList.h"
 #include "UI_ItemTooltip.h"
 #include "../Manager/Inventory_Mgr.h"
-#include "Kismet/GameplayStatics.h"
+#include "../System/DataAsset/DA_MenuSound.h"
+//#include "Kismet/GameplayStatics.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
@@ -30,6 +31,12 @@ void UUI_EquipItem::NativeConstruct()
 		m_ItemBtn->OnClicked.AddDynamic(this, &UUI_EquipItem::ItemBtnClicked);
 		m_ItemBtn->OnHovered.AddDynamic(this, &UUI_EquipItem::ItemBtnHovered);
 		m_ItemBtn->OnUnhovered.AddDynamic(this, &UUI_EquipItem::ItemBtnUnHovered);
+	}
+
+	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
+	if ( !IsValid(m_Sound) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
 	}
 }
 
@@ -150,9 +157,7 @@ void UUI_EquipItem::ItemBtnClicked()
 	}
 
 	ItemList->SetVisibility(ESlateVisibility::Visible);
-
-	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_OK.CURSOL_OK'"));
-	UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
 }
 
 void UUI_EquipItem::ItemBtnHovered()
@@ -236,8 +241,7 @@ void UUI_EquipItem::ItemBtnHovered()
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 	}
 
-	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Menu/CURSOL_SELECT.CURSOL_SELECT'"));
-	UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
 }
 
 void UUI_EquipItem::ItemBtnUnHovered()

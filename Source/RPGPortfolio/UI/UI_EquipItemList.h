@@ -23,12 +23,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG", meta = ( AllowPrivateAccess = true ))
 	class UUI_PlayerStat* m_Stat;
 
-
 	class UTextBlock*	m_SlotName;
 	class UTextBlock*	m_ListItemName;
 	class UTileView*	m_TileView;
 	EEQUIP_SLOT		eEquipSlot;
 
+	class UDA_MenuSound* m_Sound;
 
 public:
 	void SetSlotCategory(EEQUIP_SLOT _EquipSlot) { eEquipSlot = _EquipSlot; }

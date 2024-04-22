@@ -23,8 +23,8 @@ private:
 	class UButton*			m_LeftBtn;
 	class UButton*			m_RightBtn;
 	class UImage*			m_Category_Img;
-
 	enum EITEM_TYPE			eCategory;
+	class UDA_MenuSound* m_Sound;
 
 public:
 	void AddInventoryItem(UObject* _ItemData);

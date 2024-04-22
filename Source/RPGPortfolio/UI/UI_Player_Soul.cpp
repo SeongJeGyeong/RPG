@@ -39,7 +39,7 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 		if (bDoPlaySound)
 		{
 			USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/soul-suck.soul-suck'"));
-			UGameplayStatics::PlaySound2D(GetWorld(), pSound);
+			PlaySound(pSound);
 			bDoPlaySound = false;
 		}
 

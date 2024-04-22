@@ -20,6 +20,6 @@ private:
 	TMap<EPlayerMontage, UAnimMontage*> m_MontageMap;
 
 public:
-	UAnimMontage* GetPlayerMontage(EPlayerMontage _Montage) { return *m_MontageMap.Find(_Montage); }
+	UAnimMontage* GetPlayerMontage(EPlayerMontage _MontageType) const { return *m_MontageMap.Find(_MontageType); }
 
 };

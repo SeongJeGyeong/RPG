@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../System/DataAsset/DA_MenuSound.h"
+#include "../System/DataAsset/DA_PlayerSound.h"
 #include "../System/DataAsset/DA_PlayerMontage.h"
 #include "../System/DataAsset/DA_InputAction.h"
 #include "InputMappingContext.h"
@@ -38,6 +40,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Animation", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_PlayerMontage> m_PlayerMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
+	TSoftObjectPtr<UDA_PlayerSound> m_PlayerSound;
+
+	UPROPERTY(EditAnywhere, Category = "MenuSound", meta = ( AllowPrivateAccess = "true" ))
+	TSoftObjectPtr<UDA_MenuSound> m_MenuSound;
 
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;

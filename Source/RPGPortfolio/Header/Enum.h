@@ -37,6 +37,25 @@ enum class EPlayerMontage : uint8
 };
 
 UENUM(BlueprintType)
+enum class EPlayerSound : uint8
+{
+	PARRY,
+	HIT,
+	GUARDBREAK,
+	GETITEM,
+	USEITEM,
+};
+
+UENUM(BlueprintType)
+enum class EMenuSound : uint8
+{
+	MENU_OPEN,
+	MENU_CLOSE,
+	MENU_SELECT,
+	MENU_CHANGE,
+};
+
+UENUM(BlueprintType)
 enum class ELockOnDirection : uint8
 {
 	Left	UMETA(DisplayName = "Left"),

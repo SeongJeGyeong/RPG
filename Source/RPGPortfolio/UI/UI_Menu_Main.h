@@ -22,6 +22,8 @@ private:
 	class UButton*	m_Settings;
 	class UTextBlock* m_MenuName;
 
+	class UDA_MenuSound* m_Sound;
+
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
