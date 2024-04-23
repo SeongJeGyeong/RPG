@@ -25,34 +25,25 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* m_Trigger;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UStaticMeshComponent* m_Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UNiagaraComponent* m_Niagara;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	EITEM_ID	m_IID;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	int32		m_Stack = 1;
 
-	// 간접 프로퍼티 참조. 에셋을 수동으로 로드해야 함
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
-	TSoftObjectPtr<UDA_ItemData> m_ItemData;
-
-private:
-	/*UFUNCTION()
-	void BeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
-
-	UFUNCTION()
-	void EndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);*/
-
-	UFUNCTION()
-	void OnNiagaraFinished(UNiagaraComponent* _Niagara);
-
+public:
+	const EITEM_ID GetDropItemID() { return m_IID; }
+	void SetDropItemID(const EITEM_ID& _ItemID) { m_IID = _ItemID; }
+	const int32 GetDropItemStack() { return m_Stack; }
+	void SetDropItemStack(const int32& _Stack) { m_Stack = _Stack; }
 };

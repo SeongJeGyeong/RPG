@@ -23,6 +23,9 @@ AItem_Dropped_Base::AItem_Dropped_Base()
 	m_Mesh->SetupAttachment(m_Trigger);
 	m_Niagara->SetupAttachment(m_Trigger);
 
+	m_Trigger->SetCollisionProfileName(TEXT("ItemTrigger"));
+	m_Mesh->SetCollisionProfileName(TEXT("IgnoreAll"));
+
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/RPGEffects/ParticlesNiagara/StatusEffects/MagicGlow/NS_Status_Magic_Glow.NS_Status_Magic_Glow'"));
 	if (niagara.Succeeded())
 	{
@@ -46,9 +49,3 @@ void AItem_Dropped_Base::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
-void AItem_Dropped_Base::OnNiagaraFinished(UNiagaraComponent* _Niagara)
-{
-	Destroy();
-}
-

@@ -7,7 +7,7 @@
 #include "UI_PlayerStat.generated.h"
 
 /**
- * 
+ * 인벤토리, 장비 창의 스테이터스
  */
 UCLASS()
 class RPGPORTFOLIO_API UUI_PlayerStat : public UUserWidget

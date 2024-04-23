@@ -106,6 +106,7 @@ void UUI_InvenItem::ItemBtnClicked()
 			m_ItemData->GetItemType() == EITEM_TYPE::ARM_CHEST || m_ItemData->GetItemType() == EITEM_TYPE::ARM_GAUNTLET ||
 			m_ItemData->GetItemType() == EITEM_TYPE::ARM_LEGGINGS)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("스테이터스 갱신"));
 			m_StatUI->RenewBasePower();
 		}
 	}

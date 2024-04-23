@@ -14,7 +14,7 @@ class RPGPORTFOLIO_API AMonster_Base : public ACharacter
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	FMonsterInfo	m_Info;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
@@ -23,7 +23,7 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_TableRow;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	class ULockOnTargetComponent* m_TargetComp;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
@@ -32,9 +32,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
 
+	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	EITEM_ID m_DropItemID;
+	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	int32 m_DropItemStack = 1;
+
 	UAnimInstance* m_AnimInst;
 
-	//TSubclassOf<UUserWidget> m_MarkerClass;
 	class UWidgetComponent* m_LockOnMarker;
 	class UUI_Monster* m_MonsterWidget;
 	EMONSTER_STATE	m_State;

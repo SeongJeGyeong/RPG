@@ -236,7 +236,9 @@ void UUI_EquipItem::ItemBtnHovered()
 
 	if (IsValid(ItemNameText) && IsValid(m_ItemData))
 	{
-		ItemNameText->SetText(FText::FromString(m_ItemData->GetItemName()));
+		FString sItemName = m_ItemData->GetItemName();
+		UE_LOG(LogTemp, Warning, TEXT("아이템이름 : %s"), *sItemName);
+		ItemNameText->SetText(FText::FromString(sItemName));
 		m_Tooltip->SetTooltipUI(m_ItemData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 	}

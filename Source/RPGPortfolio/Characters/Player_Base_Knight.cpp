@@ -568,17 +568,17 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 {
 	if (!OverlapItemArr.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 획득"));
-		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->m_IID, (uint32)OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
-		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->m_IID);
+		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->GetDropItemID(), (uint32)OverlapItemArr[OverlapItemArr.Num() - 1]->GetDropItemStack());
+		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->GetDropItemID());
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::GETITEM), GetActorLocation());
 
 		m_MainUI->ShowRootingMessage(true);
-		m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->m_Stack);
+		m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->GetDropItemStack());
 		m_MainUI->ShowActionMessage(true);
 		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"확인"));
 		OverlapItemArr[OverlapItemArr.Num() - 1]->Destroy();
 	}
+	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때
 	else if (m_MainUI->GetRootMessageDisplayed())
 	{
 		m_MainUI->ShowRootingMessage(false);

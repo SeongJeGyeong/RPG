@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "../MonsterAnim/AnimInstance_Monster_Base.h"
+#include "../Item/Item_Dropped_Base.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -226,6 +227,17 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		m_LockOnMarker->DestroyComponent();
 
 		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
+
+		FActorSpawnParameters SpawnParams;
+		// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
+		// 스폰할 위치를 찾지 못하면 충돌 상관없이 원래 위치에 스폰
+		TSubclassOf<AItem_Dropped_Base> Item = AItem_Dropped_Base::StaticClass();
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		FRotator Rotator;
+
+		AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, GetActorLocation(), Rotator, SpawnParams);
+		pDropItem->SetDropItemID(m_DropItemID);
+		pDropItem->SetDropItemStack(m_DropItemStack);
 
 		TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DeadSound;
 		if (IsValid(DeadSound.LoadSynchronous()))

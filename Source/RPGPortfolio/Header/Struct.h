@@ -241,24 +241,6 @@ struct FMonsterSoundData
 {
 	GENERATED_USTRUCT_BODY()
 
-	// 이동 사운드
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TSoftObjectPtr<USoundBase> WalkSound;
-
-	// 비행 몬스터일 경우 비행 시 사운드
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TSoftObjectPtr<USoundBase> FlySound;
-
-	// 공격 사운드
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TSoftObjectPtr<USoundBase> AtkSound_Normal;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TSoftObjectPtr<USoundBase> AtkSound_Alt1;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TSoftObjectPtr<USoundBase> AtkSound_Alt2;
-
 	// 공격 타격 성공시 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<USoundBase> DmgSound_Normal;

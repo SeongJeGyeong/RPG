@@ -122,6 +122,7 @@ void UUI_Menu_Main::StatusBtnClicked()
 
 	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
 	StatusUI->SetVisibility(ESlateVisibility::Visible);
+	StatusUI->RenewStatusUI();
 	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
 }
 

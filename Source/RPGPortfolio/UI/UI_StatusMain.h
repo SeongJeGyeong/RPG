@@ -8,7 +8,7 @@
 #include "UI_StatusMain.generated.h"
 
 /**
- * 
+ * 메뉴 -> 스테이터스
  */
 UCLASS()
 class RPGPORTFOLIO_API UUI_StatusMain : public UUserWidget
