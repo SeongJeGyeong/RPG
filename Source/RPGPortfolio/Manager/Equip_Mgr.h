@@ -19,6 +19,7 @@ class RPGPORTFOLIO_API UEquip_Mgr : public UObject
 private:
 	static UWorld* m_World;
 
+	UPROPERTY()
 	TMap<EEQUIP_SLOT, FGameItemInfo> m_EquipItemMap;
 
 	// TFixedAllocator : 지정한 숫자만큼의 배열 메모리를 정적으로 할당

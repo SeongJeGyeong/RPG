@@ -9,6 +9,7 @@
 #include "../UI/UI_Player_QuickSlot.h"
 #include "../UI/UI_Base.h"
 #include "../UI/UI_StatusMain.h"
+#include "../UI/UI_EquipMain.h"
 #include "Inventory_Mgr.h"
 
 UWorld* UEquip_Mgr::m_World = nullptr;
@@ -105,7 +106,7 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 
 		// 개수가 0이 되면 퀵슬롯에서 해당 아이템을 없앤다.
 		if (pItem->Stack <= 0)
-		{
+		{	
 			EEQUIP_SLOT Slot = ConvertIdxToQuickSlot(_Idx);
 			UInventory_Mgr::GetInst(m_World)->SubGameItem(Slot, pItem->ItemInfo->ID);
 		}
@@ -113,6 +114,14 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 		else
 		{
 			RenewQuickSlotUI(_Idx);
+			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+			if ( !IsValid(GameMode) )
+			{
+				UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+				return;
+			}
+			UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
+			EquipMainUI->RenewEquipItemStack(pItem->EquipedSlot, pItem->Stack);
 		}
 	}
 

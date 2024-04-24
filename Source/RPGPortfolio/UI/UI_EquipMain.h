@@ -31,4 +31,5 @@ public:
 	UUI_EquipItemList* GetItemList() { return m_ItemList; }
 
 	void RenewEquipItem(EEQUIP_SLOT _Slot, class UItem_InvenData* _ItemData = nullptr);
+	void RenewEquipItemStack(EEQUIP_SLOT _Slot, uint16 _Stack);
 };

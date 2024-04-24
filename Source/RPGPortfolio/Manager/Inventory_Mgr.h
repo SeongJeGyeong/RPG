@@ -17,8 +17,11 @@ private:
 	static UWorld* m_World;
 
 private:
+	UPROPERTY()
 	UDataTable* m_ItemDataTable;
+	UPROPERTY()
 	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;
+
 	TMap<EITEM_ID, FInvenItemRow>	m_InvenStorage[(int32)EITEM_TYPE::END];
 
 public:
@@ -41,6 +44,5 @@ public:
 	void RenewItemListUI(EITEM_TYPE _Type);
 	void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
-
 	void UseInventoryItem(EITEM_ID _ID);
 };

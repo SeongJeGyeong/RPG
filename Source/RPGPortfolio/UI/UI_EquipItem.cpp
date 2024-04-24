@@ -5,12 +5,11 @@
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "../Item/Item_InvenData.h"
 #include "UI_EquipItemList.h"
 #include "UI_ItemTooltip.h"
+#include "../Item/Item_InvenData.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../System/DataAsset/DA_MenuSound.h"
-//#include "Kismet/GameplayStatics.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
@@ -48,19 +47,27 @@ void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 {
 	m_ItemData = _ItemData;
-	if (m_ItemData == nullptr)
+	//m_ItemData = MakeShareable(_ItemData);
+	//m_ItemData.SetAllItemData(*_ItemData);
+	//m_ItemData.IsValidLowLevel()
+	if (!IsValid(m_ItemData))
 	{
 		m_ItemImg->SetVisibility(ESlateVisibility::Hidden);
 		m_DishImg->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
 	{
-		FString ItemImgPath = m_ItemData->GetItemImgPath();
+		FString ItemImgPath = _ItemData->GetItemImgPath();
 		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 		m_ItemImg->SetBrushFromTexture(pTex2D);
 		m_ItemImg->SetVisibility(ESlateVisibility::Visible);
 		m_DishImg->SetVisibility(ESlateVisibility::Visible);
 	}
+}
+
+void UUI_EquipItem::SetEquipItemStack(const uint16& _Stack)
+{
+	m_ItemData->SetItemQnt(_Stack);
 }
 
 void UUI_EquipItem::ItemBtnClicked()

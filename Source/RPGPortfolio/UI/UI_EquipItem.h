@@ -19,11 +19,17 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	EEQUIP_SLOT	eSlotType;
 
+	// UPROPERTY 리플렉션을 붙여주어야 가비지 컬렉션에서 관리되며, 해당 멤버가 포함된 클래스와 동일한 수명주기를 갖게 된다.
+	UPROPERTY()
 	class UButton*	m_ItemBtn;
+	UPROPERTY()
 	class UImage*	m_ItemImg;
+	UPROPERTY()
 	class UImage*	m_DishImg;
-
+	UPROPERTY()
 	class UItem_InvenData* m_ItemData;
+
+	//TSharedPtr<class UItem_InvenData> m_ItemData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	class UTextBlock* ItemSlotText;
@@ -32,8 +38,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	class UUI_EquipItemList*	ItemList;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
-	class UUI_ItemTooltip* m_Tooltip;
-
+	class UUI_ItemTooltip* m_Tooltip;	// 장비창 메인화면 블루프린트에서 참조
+	UPROPERTY()
 	class UDA_MenuSound* m_Sound;
 
 public:
@@ -48,6 +54,7 @@ public:
 	class UButton* GetItemBtn() { return m_ItemBtn; }
 
 	void SetEquipItem(UItem_InvenData* _ItemData);
+	void SetEquipItemStack(const uint16& _Stack);
 
 	UFUNCTION()
 	void ItemBtnClicked();
