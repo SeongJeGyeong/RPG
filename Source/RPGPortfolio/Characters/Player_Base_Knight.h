@@ -62,6 +62,10 @@ private:
 	//TSoftObjectPtr<UAnimMontage> m_UseItemMontage;
 
 private:
+	// 이동 블렌드스페이스용
+	float fFrontBack;
+	float fLeftRight;
+
 	// Lock On
 	float LockonControlRotationRate;
 
@@ -73,11 +77,11 @@ private:
 	bool bAttackToggle;
 	// 강공격 체크용 토글
 	bool bHeavyToggle;
+	// 다음 공격 입력 체크용
+	bool bNextAtkCheckOn;
 
 	bool bJumpAtk;
-
 	bool bAtkTrace;
-
 	bool bSprintToggle;
 
 	// 아이템 사용 딜레이 체크용
@@ -115,9 +119,15 @@ private:
 	TArray<class AItem_Dropped_Base*> OverlapItemArr;
 
 public:
+	float GetfFrontBack() const { return fFrontBack; }
+	void SetfFrontBack(const float& _FrontBack) { fFrontBack = _FrontBack; }
+	float GetfLeftRight() const { return fLeftRight; }
+	void SetfLeftRight(const float& _LeftRight) { fLeftRight = _LeftRight; }
 	bool GetbAtkTrace() const { return bAtkTrace; }
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
+	bool GetbNextAtkCheck() const { return bNextAtkCheckOn; }
+	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
 	bool GetbEnableJump() const { return bEnableJump; }
 	void SetbEnableJump(const bool& _EnableJump) { bEnableJump = _EnableJump; }
 	bool GetbEnableMove() const { return bEnableMove; }
@@ -127,7 +137,7 @@ public:
 	void SetbInvincible(const bool& _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
-
+	bool GetbSprintToggle() const { return bSprintToggle; }
 	void SetOrientRotation(const bool& _Val);
 
 	const UCameraComponent* GetCamera() { return m_Camera; }

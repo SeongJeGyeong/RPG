@@ -53,6 +53,8 @@ enum class EMenuSound : uint8
 	MENU_CLOSE,
 	MENU_SELECT,
 	MENU_CHANGE,
+	ITEM_EQUIP,
+	ITEM_UNEQUIP,
 };
 
 UENUM(BlueprintType)

@@ -36,13 +36,18 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
 	{
 		bIsMove = true;
+		vLocalVelocity.X = m_Player->GetfFrontBack();
+		vLocalVelocity.Y = m_Player->GetfLeftRight();
 	}
 	else
 	{
 		bIsMove = false;
+		vLocalVelocity.X = 0.f;
+		vLocalVelocity.Y = 0.f;
 	}
 
-	vLocalVelocity = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
+	//vLocalVelocity = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
+
 	bIsInAir = m_Movement->IsFalling();
 
 	// 가드 모션
@@ -70,11 +75,14 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	else
 	{
 		// 착지 애니매이션 재생중일 때 이동 불가능
-		if (FName("Land").IsEqual(state->GetCurrentStateName()))
+		if (FName("Land").IsEqual(state->GetCurrentStateName()) || FName("Fall").IsEqual(state->GetCurrentStateName()))
 		{
 			m_Player->SetbEnableMove(false);
 		}
-		m_Player->SetbEnableJump(true);
+		else
+		{
+			m_Player->SetbEnableJump(true);
+		}
 	}
 }
 
@@ -225,9 +233,14 @@ TTuple<bool, float, FVector> UAnimInstance_Knight::FootLineTrace(FName _SocketNa
 	return MakeTuple(bResult, 999.f, FVector::ZeroVector);
 }
 
-void UAnimInstance_Knight::AnimNotify_NextAttackCheck()
+void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 {
-	OnNextAttackCheck.Broadcast();
+	m_Player->SetbNextAtkCheck(true);
+}
+
+void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
+{
+	m_Player->SetbNextAtkCheck(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()

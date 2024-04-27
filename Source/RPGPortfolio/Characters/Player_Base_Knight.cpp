@@ -33,10 +33,13 @@
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
-	: bEnableJump(true)
+	: fFrontBack(0.f)
+	, fLeftRight(0.f)
+	, bEnableJump(true)
 	, bEnableMove(true)
 	, bAttackToggle(false)
 	, bHeavyToggle(false)
+	, bNextAtkCheckOn(false)
 	, bItemDelay(false)
 	, fItemDelayTime(0.f)
 	, bToggleInvinc(false)
@@ -128,6 +131,8 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	fFrontBack = 0.f;
+	fLeftRight = 0.f;
 	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
 	if (m_Arm->IsCameraLockedToTarget())
 	{
@@ -171,7 +176,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 			bJumpAtk = false;
 		}
 	}
-		
 
 	if (bAtkMove)
 	{
@@ -181,6 +185,15 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	if (bAtkTrace)
 	{
 		AttackHitCheck();
+	}
+
+	// 다음 공격 입력 체크기간
+	if (bNextAtkCheckOn)
+	{
+		if (bAttackToggle)
+		{
+			NextAttackCheck();
+		}
 	}
 
 	if (bItemDelay)
@@ -216,14 +229,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 				GetCharacterMovement()->MaxWalkSpeed = 300.f;
 				bSprintToggle = false;
 			}
-			else
-			{
-				pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * DeltaTime);
-			}
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = 300.f;
 		}
 	}
 }
@@ -312,10 +317,16 @@ void APlayer_Base_Knight::SetOrientRotation(const bool& _Val)
 //////////////////////////////////////////////////////////////////////////
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
-	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
+	FVector vInput = _Instance.GetValue().Get<FVector>();
 
 	if (!CheckMontagePlaying() && bEnableMove)
 	{
+		if (bSprintToggle)
+		{
+			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
+		}
+
 		if ((Controller != NULL) && (vInput.X != 0.0f))
 		{
 			const FRotator Rotation = m_Arm->m_Target == nullptr ? Controller->GetControlRotation() : (m_Arm->m_Target->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
@@ -324,6 +335,44 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 			// get forward vector
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, vInput.X);
+
+			if (m_Arm->IsCameraLockedToTarget())
+			{
+				if (bSprintToggle)
+				{
+					if (vInput.X > 0.f)
+					{
+						fFrontBack = 2.f;
+					}
+					else
+					{
+						fFrontBack = -2.f;
+					}
+				}
+				else
+				{
+					if (vInput.X > 0.f)
+					{
+						fFrontBack = 1.f;
+					}
+					else
+					{
+						fFrontBack = -1.f;
+					}
+				}
+			}
+			else
+			{
+				// 락온 중이 아닐때는 캐릭터의 앞으로만 이동하므로
+				if (bSprintToggle)
+				{
+					fFrontBack = 2.f;
+				}
+				else
+				{
+					fFrontBack = 1.f;
+				}
+			}
 		}
 
 		if ((Controller != NULL) && (vInput.Y != 0.0f))
@@ -334,6 +383,44 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 			// get right vector 
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			AddMovementInput(Direction, vInput.Y);
+
+			if (m_Arm->IsCameraLockedToTarget())
+			{
+				if (bSprintToggle)
+				{
+					if (vInput.Y > 0.f)
+					{
+						fLeftRight = 2.f;
+					}
+					else
+					{
+						fLeftRight = -2.f;
+					}
+				}
+				else
+				{
+					if (vInput.Y > 0.f)
+					{
+						fLeftRight = 1.f;
+					}
+					else
+					{
+						fLeftRight = -1.f;
+					}
+				}
+			}
+			else
+			{
+				// 락온 중이 아닐때는 캐릭터의 앞으로만 이동하므로
+				if (bSprintToggle)
+				{
+					fFrontBack = 2.f;
+				}
+				else
+				{
+					fFrontBack = 1.f;
+				}
+			}
 		}
 	}
 }
@@ -351,7 +438,7 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
+	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && bEnableMove)
 	{
 		ACharacter::Jump();
 	}
@@ -378,6 +465,10 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 	if (bSprintToggle)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 }
 
@@ -693,31 +784,30 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 // 연속공격 다음 모션 체크함수
 void APlayer_Base_Knight::NextAttackCheck()
 {
-	if (bAttackToggle)
+	if (CurrentCombo == MaxCombo)
 	{
-		if (CurrentCombo == MaxCombo)
-		{
-			CurrentCombo = 2;
-		}
-		else
-		{
-			CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
-		}
-
-		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
-		m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
-		bAttackToggle = false;
-
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		if (m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK) == GetAttackMontage().LoadSynchronous())
-		{
-			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
-		}
-		else
-		{
-			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
-		}
+		CurrentCombo = 2;
 	}
+	else
+	{
+		CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+	}
+
+	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
+	m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	if ( m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK) == GetAttackMontage().LoadSynchronous() )
+	{
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
+	}
+	else
+	{
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
+	}
+
+	bNextAtkCheckOn = false;
+	bAttackToggle = false;
 }
 
 void APlayer_Base_Knight::AttackHitCheck()
@@ -801,6 +891,8 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		bAtkTrace = false;
 		bAtkMove = false;
 		bItemInUse = false;
+		bNextAtkCheckOn = false;
+		bAttackToggle = false;
 
 		AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
 		

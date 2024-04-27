@@ -91,23 +91,22 @@ public:
 
 	// 다음콤보 체크
 	UFUNCTION()
-	void AnimNotify_NextAttackCheck();
+	void AnimNotify_NextCheckStart();
+	UFUNCTION()
+	void AnimNotify_NextCheckEnd();
 
 	UFUNCTION()
 	void AnimNotify_HitCheckStart();
-
 	UFUNCTION()
 	void AnimNotify_HitCheckEnd();
 
 	UFUNCTION()
 	void AnimNotify_MoveStart();
-
 	UFUNCTION()
 	void AnimNotify_MoveEnd();
 
 	UFUNCTION()
 	void AnimNotify_DodgeStart();
-
 	UFUNCTION()
 	void AnimNotify_DodgeEnd();
 

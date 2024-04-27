@@ -332,11 +332,11 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	default:
 		break;
 	}
+	FInvenItemRow* pItemRow = m_InvenStorage[(int32)_Type].Find(_ID);
 
 	// 이미 해당슬롯에 장비중인 아이템을 다시 클릭할 경우 장비슬롯을 EMPTY로 바꾼 후 스토리지에 다시 넣는다.
-	if (m_InvenStorage[(int32)_Type].Find(_ID)->EquipedSlot == _Slot)
+	if (pItemRow->EquipedSlot == _Slot)
 	{
-		FInvenItemRow* pItemRow = m_InvenStorage[(int32)_Type].Find(_ID);
 		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
 		m_InvenStorage[(int32)_Type].Add(_ID, *pItemRow);
 		RenewItemListUI(_Type);
@@ -396,8 +396,6 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		}
 	}
 	RenewItemListUI(_Type);
-
-	FInvenItemRow* pItemRow = m_InvenStorage[ (int32)_Type ].Find(_ID);
 
 	if (_Type == EITEM_TYPE::CONSUMABLE)
 	{

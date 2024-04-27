@@ -99,6 +99,15 @@ void UUI_InvenItem::ItemBtnClicked()
 	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
+		if (m_ItemData->GetEquiped() == eSelectedSlot)
+		{
+			PlaySound(m_Sound->GetMenuSound(EMenuSound::ITEM_UNEQUIP));
+		}
+		else
+		{
+			PlaySound(m_Sound->GetMenuSound(EMenuSound::ITEM_EQUIP));
+		}
+
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
 
 		// 무기 및 방어구 교체 시
