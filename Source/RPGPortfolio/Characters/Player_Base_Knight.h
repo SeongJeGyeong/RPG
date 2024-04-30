@@ -50,16 +50,7 @@ private:
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 
-	//TSoftObjectPtr<UAnimMontage> m_AttackMontage;
-	//TSoftObjectPtr<UAnimMontage> m_HeavyAttackMontage;
-	//TSoftObjectPtr<UAnimMontage> m_JumpAttackMontage;
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
-
-	//TSoftObjectPtr<UAnimMontage> m_DodgeMontage;
-	//TSoftObjectPtr<UAnimMontage> m_DodgeBWMontage;
-	//TSoftObjectPtr<UAnimMontage> m_HitMontage;
-	//TSoftObjectPtr<UAnimMontage> m_GuardBreakMontage;
-	//TSoftObjectPtr<UAnimMontage> m_UseItemMontage;
 
 private:
 	// 이동 블렌드스페이스용
@@ -110,7 +101,6 @@ private:
 	// 공격 관련
 	int32 CurrentCombo;
 	int32 MaxCombo;
-	int32 iBaseDamage;
 
 	bool bShowMenu;
 
@@ -159,16 +149,18 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 public:
+	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
 	void NextAttackCheck();
-	void AttackHitCheck();
 	void CloseMenuUI();
 	void ItemUseDelayOn();
 	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart(bool _AtkMove);
-	void BlockEnemyAttack(float _Damage);
+	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
 	void UseItem(FString _NiagaraPath);
+	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

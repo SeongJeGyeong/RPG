@@ -301,3 +301,25 @@ struct FMonsterAnimData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UAnimMontage> BlockAnim;
 };
+
+USTRUCT(Atomic, BlueprintType)
+struct FMonsterItemDropTable
+	: public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EMONSTER_TYPE	Monster;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EITEM_ID		Item;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32			Stack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			ProbabilityBottom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float			ProbabilityTop;
+};

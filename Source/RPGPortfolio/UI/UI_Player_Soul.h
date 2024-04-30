@@ -17,6 +17,8 @@ class RPGPORTFOLIO_API UUI_Player_Soul : public UUserWidget
 private:
 	class UTextBlock* m_AmountOfSoul;
 	class UTextBlock* m_GainedSoul;
+	class UDA_MenuSound* m_Sound;
+	
 	int32 iDisplayedSoul;
 	int32 iGainedSoul;
 	bool bSoulGained = false;

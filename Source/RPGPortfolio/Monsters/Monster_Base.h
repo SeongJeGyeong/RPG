@@ -21,7 +21,13 @@ private:
 	EMONSTER_TYPE	m_Type;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
-	FDataTableRowHandle	m_TableRow;
+	FDataTableRowHandle	m_MonsterInfoTableRow;
+
+	UPROPERTY()
+	UDataTable* m_ItemTable;
+
+	UPROPERTY()
+	TArray<struct FMonsterItemDropTable> m_DropItemArr;
 
 	UPROPERTY()
 	class ULockOnTargetComponent* m_TargetComp;
@@ -94,9 +100,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void MonsterAttackNormal();
+
+	void MonsterDead(AActor* DamageCauser);
 
 	UFUNCTION()
 	void OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupted);

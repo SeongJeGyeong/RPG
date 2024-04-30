@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "../System/PlayerState_Base.h"
+#include "../System/DataAsset/DA_MenuSound.h"
 
 void UUI_Player_Soul::NativeConstruct()
 {
@@ -25,6 +26,11 @@ void UUI_Player_Soul::NativeConstruct()
 		m_AmountOfSoul->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerBasePower.AmountOfSoul)));
 	}
 
+	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
+	if ( !IsValid(m_Sound) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("소울 UI 사운드 로드 실패"));
+	}
 }
 
 void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -38,15 +44,13 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 		if (bDoPlaySound)
 		{
-			USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/soul-suck.soul-suck'"));
-			PlaySound(pSound);
+			PlaySound(m_Sound->GetMenuSound(EMenuSound::SOUL_SUCK));
 			bDoPlaySound = false;
 		}
 
 		if (iDisplayedSoul < PlayerBasePower.AmountOfSoul)
 		{
 			iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 3.f * _DeltaTime, iDisplayedSoul, PlayerBasePower.AmountOfSoul);
-			UE_LOG(LogTemp, Display, TEXT("soul : %d"), iDisplayedSoul);
 			m_AmountOfSoul->SetText(FText::FromString(FString::Printf(TEXT("%d"), iDisplayedSoul)));
 		}
 		else
@@ -82,8 +86,6 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 			}
 		}
 	}
-
-
 }
 
 void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)

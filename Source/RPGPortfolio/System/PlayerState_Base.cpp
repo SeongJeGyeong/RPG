@@ -79,7 +79,7 @@ void APlayerState_Base::Tick(float DeltaTime)
 		}
 		else
 		{
-			m_PlayerBasePower.CurStamina = FMath::Clamp(m_PlayerBasePower.CurStamina + 20.f * DeltaTime, 0.f, m_PlayerBasePower.MaxStamina);
+			m_PlayerBasePower.CurStamina = FMath::Clamp(m_PlayerBasePower.CurStamina + 25.f * DeltaTime, 0.f, m_PlayerBasePower.MaxStamina);
 		}
 
 		m_UI->SetPlayerSTRatio(m_PlayerBasePower.CurStamina / m_PlayerBasePower.MaxStamina);

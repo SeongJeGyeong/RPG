@@ -47,9 +47,6 @@ void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 {
 	m_ItemData = _ItemData;
-	//m_ItemData = MakeShareable(_ItemData);
-	//m_ItemData.SetAllItemData(*_ItemData);
-	//m_ItemData.IsValidLowLevel()
 	if (!IsValid(m_ItemData))
 	{
 		m_ItemImg->SetVisibility(ESlateVisibility::Hidden);

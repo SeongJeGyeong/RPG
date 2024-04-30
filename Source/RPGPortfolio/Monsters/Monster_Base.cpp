@@ -14,6 +14,8 @@
 #include "../Characters/Player_Base_Knight.h"
 #include "../MonsterAnim/AnimInstance_Monster_Base.h"
 #include "../Item/Item_Dropped_Base.h"
+#include "../System/DamageType_Base.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -64,6 +66,12 @@ AMonster_Base::AMonster_Base()
 	}
 	m_LockOnMarker->SetWidgetSpace(EWidgetSpace::Screen);
 	m_LockOnMarker->SetDrawSize(FVector2D(50.f, 50.f));
+
+	ConstructorHelpers::FObjectFinder<UDataTable> ItemDropTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_MonsterDropTable.DT_MonsterDropTable'"));
+	if (ItemDropTable.Succeeded())
+	{
+		m_ItemTable = ItemDropTable.Object;
+	}
 }
 
 void AMonster_Base::OnConstruction(const FTransform& _Transform)
@@ -71,14 +79,26 @@ void AMonster_Base::OnConstruction(const FTransform& _Transform)
 	Super::OnConstruction(_Transform);
 
 	FMonsterInfo* pInfo;
-
-	if (IsValid(m_TableRow.DataTable) && !m_TableRow.RowName.IsNone())
+	 
+	if (IsValid(m_MonsterInfoTableRow.DataTable) && !m_MonsterInfoTableRow.RowName.IsNone())
 	{
-		pInfo = m_TableRow.DataTable->FindRow<FMonsterInfo>(m_TableRow.RowName, TEXT(""));
-
+		pInfo = m_MonsterInfoTableRow.DataTable->FindRow<FMonsterInfo>(m_MonsterInfoTableRow.RowName, TEXT(""));
+		
 		if (nullptr != pInfo)
 		{
 			m_Info = *pInfo;
+		}
+	}
+
+	FString str;
+	TArray<FMonsterItemDropTable*> DropTableArr;
+	m_ItemTable->GetAllRows(str, DropTableArr);
+
+	for (int32 i = 0; i < DropTableArr.Num(); ++i)
+	{
+		if (DropTableArr[ i ]->Monster == m_Type)
+		{
+			m_DropItemArr.Add(*DropTableArr[i]);
 		}
 	}
 }
@@ -205,7 +225,26 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	FinalDamage = FMath::Clamp(FinalDamage - m_Info.PhysicDef, 0.f, FinalDamage);
+	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
+
+	// 받은 공격타입에 따라 몬스터의 방어력 설정
+	float fMonsterDef;
+	switch ( pDamageType->GetAtkType())
+	{
+	case EATTACK_TYPE::PHYSIC_MELEE:
+	case EATTACK_TYPE::PHYSIC_RANGE:
+		fMonsterDef = m_Info.PhysicDef;
+		break;
+	case EATTACK_TYPE::MAGIC_MELEE:
+	case EATTACK_TYPE::MAGIC_RANGE:
+		fMonsterDef = m_Info.MagicDef;
+		break;
+	default:
+		break;
+	}
+
+	// 몬스터의 방어력만큼 데미지 감소 후 몬스터 hp바 위젯에 반영
+	FinalDamage = FMath::Clamp(FinalDamage - fMonsterDef, 0.f, FinalDamage);
 	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
 	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
 	m_WidgetComponent->SetVisibility(true);
@@ -216,88 +255,123 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 	pAnimInst->Montage_Stop(1.f);
 
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 	// 사망 시
 	if (m_Info.CurHP <= 0.f && GetController())
 	{
-		m_State = EMONSTER_STATE::DEAD;
-		GetController()->UnPossess();
-		GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
-		m_TargetComp->DestroyComponent();
-		m_LockOnMarker->DestroyComponent();
+		MonsterDead(DamageCauser);
+		return 0.f;
+	}
 
-		pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
-
-		FActorSpawnParameters SpawnParams;
-		// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
-		// 스폰할 위치를 찾지 못하면 충돌 상관없이 원래 위치에 스폰
-		TSubclassOf<AItem_Dropped_Base> Item = AItem_Dropped_Base::StaticClass();
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		FRotator Rotator;
-
-		AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, GetActorLocation(), Rotator, SpawnParams);
-		pDropItem->SetDropItemID(m_DropItemID);
-		pDropItem->SetDropItemStack(m_DropItemStack);
-
-		TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DeadSound;
-		if (IsValid(DeadSound.LoadSynchronous()))
+	// 행동트리 일시적으로 중지
+	AAIController* pAIController = Cast<AAIController>(GetController());
+	if ( IsValid(pAIController) )
+	{
+		if ( pAIController->GetBlackboardComponent() )
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound.LoadSynchronous(), GetActorLocation());
+			m_State = EMONSTER_STATE::IDLE;
+			pAIController->GetBrainComponent()->StopLogic("Hit");
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
-		}
-		
-		//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-		//GetMesh()->SetSimulatePhysics(true);
+	}
+
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
+
+	// 공격한 플레이어의 반대방향으로 밀려남
+	FVector LaunchVec = GetActorLocation() - pPlayer->GetActorLocation();
+	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
+	LaunchForce.Z = 0.f;
+	LaunchCharacter(LaunchForce, false, false);
+
+	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
+	if ( IsValid(HitMontage.LoadSynchronous()) )
+	{
+		pAnimInst->Montage_Play(HitMontage.LoadSynchronous());
 	}
 	else
 	{
-		// 행동트리 일시적으로 중지
-		AAIController* pAIController = Cast<AAIController>(GetController());
-		if (IsValid(pAIController))
-		{
-			if (pAIController->GetBlackboardComponent())
-			{
-				//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), true);
-				m_State = EMONSTER_STATE::IDLE;
-				pAIController->GetBrainComponent()->StopLogic("Hit");
-			}
-		}
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
+	}
 
-		// 공격한 플레이어의 반대방향으로 밀려남
-		FVector LaunchVec = GetActorLocation() - pPlayer->GetActorLocation();
-		FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
-		LaunchForce.Z = 0.f;
-
-		/*UE_LOG(LogTemp, Warning, TEXT("MonsterLocation X: %f, Y: %f, Z: %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
-		UE_LOG(LogTemp, Warning, TEXT("PlayerLocation X: %f, Y: %f, Z: %f"), pPlayer->GetActorLocation().X, pPlayer->GetActorLocation().Y, pPlayer->GetActorLocation().Z);
-		UE_LOG(LogTemp, Warning, TEXT("LaunchVec X: %f, Y: %f, Z: %f"), LaunchForce.X, LaunchForce.Y, LaunchForce.Z);*/
-		LaunchCharacter(LaunchForce, false, false);
-
-		TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
-		if (IsValid(HitMontage.LoadSynchronous()))
-		{
-			pAnimInst->Montage_Play(HitMontage.LoadSynchronous());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
-		}
-
-		TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->HitSound_Normal;
-		if (IsValid(HitSound.LoadSynchronous()))
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
-		}
+	TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->HitSound_Normal;
+	if ( IsValid(HitSound.LoadSynchronous()) )
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
 	}
 
 	return 0.0f;
+}
+
+void AMonster_Base::MonsterDead(AActor* DamageCauser)
+{
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
+
+	m_State = EMONSTER_STATE::DEAD;
+
+	GetController()->UnPossess();
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
+	m_TargetComp->DestroyComponent();
+	m_LockOnMarker->DestroyComponent();
+
+	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
+
+	EITEM_ID eId;
+	int32 iStack;
+	// 랜덤으로 드롭아이템 지정
+	float fRandNum = FMath::RandRange(1.f, 100.f);
+	for (int32 i = 0; i < m_DropItemArr.Num(); ++i)
+	{
+		if (m_DropItemArr[i].ProbabilityBottom < fRandNum && fRandNum < m_DropItemArr[i].ProbabilityTop)
+		{
+			eId = m_DropItemArr[i].Item;
+			iStack = m_DropItemArr[i].Stack;
+			break;
+		}
+	}
+	switch (eId)
+	{
+	case EITEM_ID::ARM_HELM_KNIGHT:
+		UE_LOG(LogTemp, Warning, TEXT("드롭 : 투구"));
+		break;
+	case EITEM_ID::ARM_CHEST_KNIGHT:
+		UE_LOG(LogTemp, Warning, TEXT("드롭 : 갑옷"));
+		break;
+	case EITEM_ID::CON_SOUL_LESS:
+		UE_LOG(LogTemp, Warning, TEXT("드롭 : 소울"));
+		break;
+	case EITEM_ID::WEA_SWORD_KNIGHT:
+		UE_LOG(LogTemp, Warning, TEXT("드롭 : 검"));
+		break;
+	default:
+		break;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("수량 : %d"), iStack);
+
+	FActorSpawnParameters SpawnParams;
+	// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
+	// 스폰할 위치를 찾지 못하면 충돌 상관없이 원래 위치에 스폰
+	TSubclassOf<AItem_Dropped_Base> Item = AItem_Dropped_Base::StaticClass();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	FRotator Rotator;
+
+	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, GetActorLocation(), Rotator, SpawnParams);
+	pDropItem->SetDropItemID(eId);
+	pDropItem->SetDropItemStack(iStack);
+
+	TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DeadSound;
+	if ( IsValid(DeadSound.LoadSynchronous()) )
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound.LoadSynchronous(), GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
+	}
+
+	//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	//GetMesh()->SetSimulatePhysics(true);
 }
 
 // 경직상태가 되는 몽타주들 재생 종료시
@@ -360,11 +434,11 @@ void AMonster_Base::SetbLockedOn(bool _LockedOn)
 void AMonster_Base::AttackHitCheck()
 {
 	float AtkRadius = 20.f;
-	if ( m_Type == EMONSTER_TYPE::UndeadAssassin )
+	if (m_Type == EMONSTER_TYPE::UndeadAssassin)
 	{
 		AtkRadius = 10.f;
 	}
-	else if ( m_Type == EMONSTER_TYPE::Barghest )
+	else if (m_Type == EMONSTER_TYPE::Barghest)
 	{
 		AtkRadius = 50.f;
 	}
@@ -404,20 +478,20 @@ void AMonster_Base::AttackHitCheck()
 				return;
 			}
 
-			// 플레이어 가드에 공격이 막힐 경우
+			// 무적 상태일 경우
+			if (pPlayer->GetbInvincible())
+			{
+				return;
+			}
+
+			// 플레이어가 가드중일 때
 			if (pPlayer->GetbToggleGuard())
 			{
-				// 플레이어와 몬스터가 바라보는 방향 사이의 각도 구하기
-				FVector vTarget = pPlayer->GetActorForwardVector().GetSafeNormal();
-				FVector vMonster = GetActorForwardVector().GetSafeNormal();
-				float fDot = FVector::DotProduct(vTarget, vMonster);
-				float fAcosAngle = FMath::Acos(fDot);
-				float fDegree = FMath::RadiansToDegrees(fAcosAngle);
+				FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
+				bool bBlocked = pPlayer->BlockEnemyAttack(m_Info.PhysicAtk, vMonsterDir);
 
-				// fDegree가 180도에 가까울수록 서로 마주보고 있음
-				// fDegree가 0도에 가까울수록 서로 같은 방향을 보고 있음
-				// 플레이어 정면 기준으로 160도 각도 안에서 공격했을 경우 막히도록
-				if (fDegree > 100.f)
+				// 플레이어의 가드에 공격이 막힐 경우
+				if (bBlocked)
 				{
 					UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 					TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
@@ -441,29 +515,49 @@ void AMonster_Base::AttackHitCheck()
 					}
 
 					bAtkTrace = false;
-					pPlayer->BlockEnemyAttack(m_Info.PhysicAtk);
 					return;
 				}
 			}
 
-			// 플레이어가 무적상태가 아닐 때만
-			if (!pPlayer->GetbInvincible())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
-				UGameplayStatics::ApplyDamage(HitResult.GetActor(), m_Info.PhysicAtk, GetController(), this, UDamageType::StaticClass());
-
-				TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
-				if ( IsValid(DmgSound.LoadSynchronous()) )
-				{
-					UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitResult.GetActor()->GetActorLocation());
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
-				}
-				bAtkTrace = false;
-			}
+			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
+			bAtkTrace = false;
 		}
 	}
+}
 
+void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType)
+{
+	float iDamage;
+
+	switch (_AtkType)
+	{
+	case EATTACK_TYPE::PHYSIC_MELEE:
+	case EATTACK_TYPE::PHYSIC_RANGE:
+		iDamage = m_Info.PhysicAtk;
+		break;
+	case EATTACK_TYPE::MAGIC_MELEE:
+	case EATTACK_TYPE::MAGIC_RANGE:
+		iDamage = m_Info.MagicAtk;
+		break;
+	default:
+		break;
+	}
+
+	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
+	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
+
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
+
+	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
+
+	TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
+	if ( IsValid(DmgSound.LoadSynchronous()) )
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitInfo.GetActor()->GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
+	}
+	bAtkTrace = false;
 }

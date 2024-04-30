@@ -49,12 +49,24 @@ enum class EPlayerSound : uint8
 UENUM(BlueprintType)
 enum class EMenuSound : uint8
 {
+	EMPTY,
 	MENU_OPEN,
 	MENU_CLOSE,
 	MENU_SELECT,
 	MENU_CHANGE,
 	ITEM_EQUIP,
 	ITEM_UNEQUIP,
+	SOUL_SUCK,
+	SOUL_USE,
+};
+
+UENUM(BlueprintType)
+enum class EATTACK_TYPE : uint8
+{
+	PHYSIC_MELEE,
+	PHYSIC_RANGE,
+	MAGIC_MELEE,
+	MAGIC_RANGE,
 };
 
 UENUM(BlueprintType)

@@ -30,6 +30,8 @@
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "../System/DamageType_Base.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -184,7 +186,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 
 	if (bAtkTrace)
 	{
-		AttackHitCheck();
+		AttackHitCheck(EATTACK_TYPE::PHYSIC_MELEE);
 	}
 
 	// 다음 공격 입력 체크기간
@@ -515,7 +517,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	if (GetCharacterMovement()->IsFalling())
 	{
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
+		ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
 		bAttackToggle = false;
 		bJumpAtk = true;
 		return;
@@ -526,12 +528,10 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		if (bHeavyToggle)
 		{
 			// 강공격
-
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
 			SetAttackMontage(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
 			CurrentCombo = 2;
-
-			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
+			ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
 		}
 		else
 		{
@@ -539,8 +539,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
 			SetAttackMontage(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
 			CurrentCombo = 1;
-
-			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
+			ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
 		}
 		bAttackToggle = false;
 	}
@@ -576,15 +575,15 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
 			vDodgeVector = GetActorForwardVector();
 			rDodgeRotation = GetActorRotation();
+			ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
 		}
 		else
 		{
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW));
 			vDodgeVector = GetCharacterMovement()->GetLastInputVector();
 			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
+			ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
 		}
-
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
 	}
 }
 
@@ -799,18 +798,18 @@ void APlayer_Base_Knight::NextAttackCheck()
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 	if ( m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK) == GetAttackMontage().LoadSynchronous() )
 	{
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 20.f);
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f);
 	}
 	else
 	{
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 30.f);
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 15.f);
 	}
 
 	bNextAtkCheckOn = false;
 	bAttackToggle = false;
 }
 
-void APlayer_Base_Knight::AttackHitCheck()
+void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 {
 	float AtkRadius = 10.f;
 	FHitResult HitResult;
@@ -831,45 +830,71 @@ void APlayer_Base_Knight::AttackHitCheck()
 	FColor color;
 	bResult ? color = FColor::Red : color = FColor::Green;
 	FVector vMidpoint = FMath::Lerp(vSwordTop, vSwordBottom, 0.5f);
-	// FVector vMidpoint2 = (vSwordBottom + vSwordTop) / 2;
 	DrawDebugCapsule(GetWorld(), vMidpoint, (vSwordTop - vSwordBottom).Size() * 0.5f, AtkRadius, FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(), color, false, 0.5f);
 	if (bResult)
 	{
 		if (HitResult.GetActor()->IsValidLowLevel())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));
-			float iDamage;
-			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-
-			if (GetAttackMontage() == m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK))
-			{
-				iDamage = pState->GetPlayerBasePower().PhysicAtk;
-				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
-			}
-			else if(GetAttackMontage() == m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))
-			{
-				iDamage = pState->GetPlayerBasePower().PhysicAtk * 1.5f;
-				UE_LOG(LogTemp, Display, TEXT("Damage : %d"), (int)iDamage);
-			}
-			AMonster_Base* pMonster = Cast<AMonster_Base>(HitResult.GetActor());
-			if (IsValid(pMonster))
-			{
-				iDamage -= pMonster->GetMonsterInfo().PhysicDef;
-				UE_LOG(LogTemp, Display, TEXT("Target Deffense : %d"), (int)pMonster->GetMonsterInfo().PhysicDef);
-			}
-			UGameplayStatics::ApplyDamage(HitResult.GetActor(), iDamage, GetController(), this, UDamageType::StaticClass());
-
+			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));		
+			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
 			bAtkTrace = false;
 		}
 	}
+}
+
+void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType)
+{
+	float iDamage;
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+
+	switch ( _AtkType )
+	{
+	case EATTACK_TYPE::PHYSIC_MELEE:
+	case EATTACK_TYPE::PHYSIC_RANGE:
+		iDamage = pState->GetPlayerBasePower().PhysicAtk;
+		if ( GetAttackMontage() == m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK) )
+		{
+			iDamage = iDamage * 1.5f;
+		}
+		break;
+	case EATTACK_TYPE::MAGIC_MELEE:
+	case EATTACK_TYPE::MAGIC_RANGE:
+		iDamage = pState->GetPlayerBasePower().MagicAtk;
+		break;
+	default:
+		break;
+	}
+
+	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
+	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
+
+	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 }
 
 float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	FinalDamage = FMath::Clamp(FinalDamage - pState->GetPlayerBasePower().PhysicDef, 0.f, FinalDamage);
+
+	// 받은 공격타입에 따라 몬스터의 방어력 설정
+	float fPlayerDef;
+	switch ( pDamageType->GetAtkType() )
+	{
+	case EATTACK_TYPE::PHYSIC_MELEE:
+	case EATTACK_TYPE::PHYSIC_RANGE:
+		fPlayerDef = pState->GetPlayerBasePower().PhysicDef;
+		break;
+	case EATTACK_TYPE::MAGIC_MELEE:
+	case EATTACK_TYPE::MAGIC_RANGE:
+		fPlayerDef = pState->GetPlayerBasePower().MagicDef;
+		break;
+	default:
+		break;
+	}
+
+	FinalDamage = FMath::Clamp(FinalDamage - fPlayerDef, 0.f, FinalDamage);
 	int32 iCurHP = pState->GetPlayerBasePower().CurHP;
 	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, pState->GetPlayerBasePower().MaxHP);
 
@@ -933,11 +958,26 @@ void APlayer_Base_Knight::AttackMoveStart(bool _AtkMove)
 	}
 }
 
-void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)
+bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 {
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - _Damage * 0.1f);
+	// 플레이어와 몬스터가 바라보는 방향 사이의 각도 구하기
+	// fDegree가 180도에 가까울수록 서로 마주보고 있음(몬스터가 플레이어의 정면에 있음)
+	// fDegree가 0도에 가까울수록 서로 같은 방향을 보고 있음(몬스터가 플레이어의 뒤를 노림)
+	// 플레이어 정면 기준으로 160도 각도 안에서 공격했을 경우 막히도록
+	FVector vPlayerDir = GetActorForwardVector().GetSafeNormal();
+	float fDot = FVector::DotProduct(vPlayerDir, _MonDir);
+	float fAcosAngle = FMath::Acos(fDot);
+	float fDegree = FMath::RadiansToDegrees(fAcosAngle);
 
+	// 가드 범위 밖에서 공격받을 경우 가드 실패
+	if (fDegree < 100.f)
+	{
+		return false;
+	}
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	// 몬스터의 공격력의 10분의 1 만큼 스태미나 감소
+	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - _Damage * 0.1f);
 	if (pState->GetPlayerBasePower().CurStamina < 0.f)
 	{
 		// 방어 풀리고 경직상태 되도록
@@ -946,6 +986,8 @@ void APlayer_Base_Knight::BlockEnemyAttack(float _Damage)
 		pState->SetbSTRecovSlowly(false);
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
 	}
+
+	return true;
 }
 
 void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
@@ -959,6 +1001,36 @@ void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
 	bItemInUse = true;
 	m_AnimInst->TurnOnItemUseBlend(1.f);
+}
+
+void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
+{
+	float fConsumption;
+	switch (_Montage)
+	{
+	case EPlayerMontage::DODGE_FW:
+		fConsumption = 10.f;
+		break;
+	case EPlayerMontage::DODGE_BW:
+		fConsumption = 10.f;
+		break;
+	case EPlayerMontage::ATTACK:
+		fConsumption = 10.f;
+		break;
+	case EPlayerMontage::HEAVYATTACK:
+		fConsumption = 15.f;
+		break;
+	case EPlayerMontage::JUMPATTACK:
+		fConsumption = 15.f;
+		break;
+	case EPlayerMontage::PARRY:
+		break;
+	default:
+		break;
+	}
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - fConsumption);
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
