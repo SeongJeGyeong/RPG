@@ -50,7 +50,13 @@ private:
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 
+	UPROPERTY()
+	TArray<class AItem_Dropped_Base*> OverlapItemArr;
+
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
+
+	class UUI_Base* m_MainUI;
+	class UUI_Player_Main* m_PlayerUI;
 
 private:
 	// 이동 블렌드스페이스용
@@ -103,10 +109,6 @@ private:
 	int32 MaxCombo;
 
 	bool bShowMenu;
-
-	class UUI_Base* m_MainUI;
-	class UUI_Player_Main* m_PlayerUI;
-	TArray<class AItem_Dropped_Base*> OverlapItemArr;
 
 public:
 	float GetfFrontBack() const { return fFrontBack; }

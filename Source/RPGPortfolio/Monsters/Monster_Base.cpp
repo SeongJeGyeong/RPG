@@ -205,7 +205,7 @@ void AMonster_Base::Tick(float DeltaTime)
 
 	if (bAtkTrace)
 	{
-		AttackHitCheck();
+		MeleeAttackHitCheck();
 	}
 }
 
@@ -330,24 +330,6 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 			break;
 		}
 	}
-	switch (eId)
-	{
-	case EITEM_ID::ARM_HELM_KNIGHT:
-		UE_LOG(LogTemp, Warning, TEXT("드롭 : 투구"));
-		break;
-	case EITEM_ID::ARM_CHEST_KNIGHT:
-		UE_LOG(LogTemp, Warning, TEXT("드롭 : 갑옷"));
-		break;
-	case EITEM_ID::CON_SOUL_LESS:
-		UE_LOG(LogTemp, Warning, TEXT("드롭 : 소울"));
-		break;
-	case EITEM_ID::WEA_SWORD_KNIGHT:
-		UE_LOG(LogTemp, Warning, TEXT("드롭 : 검"));
-		break;
-	default:
-		break;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("수량 : %d"), iStack);
 
 	FActorSpawnParameters SpawnParams;
 	// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
@@ -431,7 +413,7 @@ void AMonster_Base::SetbLockedOn(bool _LockedOn)
 	bLockedOn = _LockedOn;
 }
 
-void AMonster_Base::AttackHitCheck()
+void AMonster_Base::MeleeAttackHitCheck()
 {
 	float AtkRadius = 20.f;
 	if (m_Type == EMONSTER_TYPE::UndeadAssassin)
@@ -484,41 +466,6 @@ void AMonster_Base::AttackHitCheck()
 				return;
 			}
 
-			// 플레이어가 가드중일 때
-			if (pPlayer->GetbToggleGuard())
-			{
-				FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
-				bool bBlocked = pPlayer->BlockEnemyAttack(m_Info.PhysicAtk, vMonsterDir);
-
-				// 플레이어의 가드에 공격이 막힐 경우
-				if (bBlocked)
-				{
-					UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-					TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
-					if ( IsValid(BlockMontage.LoadSynchronous()) )
-					{
-						pAnimInst->Montage_Play(BlockMontage.LoadSynchronous());
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("몬스터 블록애니메이션 로드 실패"));
-					}
-
-					TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->BlockSound;
-					if ( IsValid(BlockSound.LoadSynchronous()) )
-					{
-						UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), GetActorLocation());
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("몬스터 블록사운드 로드 실패"));
-					}
-
-					bAtkTrace = false;
-					return;
-				}
-			}
-
 			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
 			bAtkTrace = false;
 		}
@@ -543,10 +490,43 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 		break;
 	}
 
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
+	// 플레이어가 가드중일 때
+	if (pPlayer->GetbToggleGuard())
+	{
+		FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
+		bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, vMonsterDir);
+
+		// 플레이어의 가드에 공격이 막힐 경우
+		if (bBlocked)
+		{
+			UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+			TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
+			if ( IsValid(BlockMontage.LoadSynchronous()) )
+			{
+				pAnimInst->Montage_Play(BlockMontage.LoadSynchronous());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록애니메이션 로드 실패"));
+			}
+
+			TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->BlockSound;
+			if ( IsValid(BlockSound.LoadSynchronous()) )
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), GetActorLocation());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록사운드 로드 실패"));
+			}
+
+			return;
+		}
+	}
+
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
-
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
 
 	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 

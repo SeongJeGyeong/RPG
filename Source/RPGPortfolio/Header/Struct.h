@@ -315,7 +315,7 @@ struct FMonsterItemDropTable
 	EITEM_ID		Item;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32			Stack;
+	int32			Stack = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float			ProbabilityBottom;
