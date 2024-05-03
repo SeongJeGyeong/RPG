@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../Header/Struct.h"
-#include "../System/DataAsset/DA_MonsterInfo.h"
+#include "../System/DataAsset/DA_GreaterSpider.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Boss_Base.generated.h"
@@ -18,7 +18,7 @@ private:
 	EMONSTER_TYPE	m_Type;
 
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
+	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
 
 	UPROPERTY()
 	UAnimInstance* m_AnimInst;

@@ -86,6 +86,8 @@ enum class EMONSTER_TYPE : uint8
 	UndeadAssassin,
 	HeavyKnight,
 	TaurusDemon,
+	GreatSpider,
+	ExiledWarrior
 };
 
 UENUM(BlueprintType)
@@ -118,7 +120,39 @@ enum class EBOSS_STATE : uint8
 	RANGEATTACK,
 	FLYCLAW,
 	DIVE,
+	RUSH,
 	HIT,
+	DEAD,
+};
+
+UENUM(BlueprintType)
+enum class EGreaterSpider_STATE : uint8
+{
+	DEFAULT,
+	WALK,
+	RIGHTATTACK,
+	LEFTATTACK,
+	CENTERATTACK,
+	RUSHATTACK,
+	RANGEATTACK,
+	SUMMONMINION,
+	STUNNED,
+	DEAD,
+};
+
+UENUM(BlueprintType)
+enum class EExiledWarrior_STATE : uint8
+{
+	DEFAULT,
+	WALK,
+	RUN,
+	RIGHTATTACK,
+	LEFTATTACK,
+	CENTERATTACK,
+	RUSHATTACK,
+	RANGEATTACK,
+	SUMMONMINION,
+	STUNNED,
 	DEAD,
 };
 

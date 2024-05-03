@@ -23,7 +23,7 @@ private:
 	TMap<EMONSTER_TYPE, FMonsterAnimData> m_MonAnimMap;
 
 public:
-	TMap<EMONSTER_TYPE, FMonsterSoundData> GetSoundMap() { return m_MonSoundMap; }
-	TMap<EMONSTER_TYPE, FMonsterAnimData> GetAnimMap() { return m_MonAnimMap; }
+	FMonsterSoundData* GetMonSoundData(EMONSTER_TYPE _MonType) { return m_MonSoundMap.Find(_MonType); }
+	FMonsterAnimData* GetMonAnimData(EMONSTER_TYPE _MonType) { return m_MonAnimMap.Find(_MonType); }
 
 };

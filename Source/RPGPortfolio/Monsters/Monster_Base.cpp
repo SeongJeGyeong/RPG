@@ -281,7 +281,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
-	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
+	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor;
 	if ( IsValid(HitMontage.LoadSynchronous()) )
 	{
 		pAnimInst->Montage_Play(HitMontage.LoadSynchronous());
@@ -291,7 +291,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
 	}
 
-	TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->HitSound_Normal;
+	TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal;
 	if ( IsValid(HitSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
@@ -342,7 +342,7 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	pDropItem->SetDropItemID(eId);
 	pDropItem->SetDropItemStack(iStack);
 
-	TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DeadSound;
+	TSoftObjectPtr<USoundBase> DeadSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DeadSound;
 	if ( IsValid(DeadSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound.LoadSynchronous(), GetActorLocation());
@@ -359,7 +359,7 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 // 경직상태가 되는 몽타주들 재생 종료시
 void AMonster_Base::OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->HitAnim_Nor;
+	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor;
 	if (IsValid(HitMontage.LoadSynchronous()))
 	{
 		if (HitMontage == Montage)
@@ -371,7 +371,7 @@ void AMonster_Base::OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupt
 			return;
 		}
 	}
-	TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
+	TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->BlockAnim;
 	if (IsValid(BlockMontage.LoadSynchronous()))
 	{
 		if (BlockMontage == Montage)
@@ -393,7 +393,7 @@ void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 void AMonster_Base::MonsterAttackNormal()
 {
 	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	TSoftObjectPtr<UAnimMontage> AtkMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->AtkAnim_Melee_Nor;
+	TSoftObjectPtr<UAnimMontage> AtkMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor;
 	if (IsValid(AtkMontage.LoadSynchronous()))
 	{
 		pAnimInst->Montage_Play(AtkMontage.LoadSynchronous());
@@ -501,7 +501,7 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 		if (bBlocked)
 		{
 			UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-			TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetAnimMap().Find(m_Type)->BlockAnim;
+			TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->BlockAnim;
 			if ( IsValid(BlockMontage.LoadSynchronous()) )
 			{
 				pAnimInst->Montage_Play(BlockMontage.LoadSynchronous());
@@ -511,7 +511,7 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록애니메이션 로드 실패"));
 			}
 
-			TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->BlockSound;
+			TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->BlockSound;
 			if ( IsValid(BlockSound.LoadSynchronous()) )
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), GetActorLocation());
@@ -530,7 +530,7 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 
 	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 
-	TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
+	TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DmgSound_Normal;
 	if ( IsValid(DmgSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitInfo.GetActor()->GetActorLocation());

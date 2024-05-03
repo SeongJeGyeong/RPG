@@ -17,7 +17,6 @@ ABoss_Base::ABoss_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -120,7 +119,7 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 		// 플레이어의 가드에 공격이 막힐 경우
 		if ( bBlocked )
 		{
-			TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->BlockSound;
+			/*TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->BlockSound;
 			if ( IsValid(BlockSound.LoadSynchronous()) )
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), GetActorLocation());
@@ -128,7 +127,7 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록사운드 로드 실패"));
-			}
+			}*/
 
 			return;
 		}
@@ -139,7 +138,7 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 
 	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 
-	TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->DmgSound_Normal;
+	/*TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DmgSound_Normal;
 	if ( IsValid(DmgSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitInfo.GetActor()->GetActorLocation());
@@ -147,7 +146,7 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
-	}
+	}*/
 }
 
 float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -199,7 +198,7 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 		StaggerGauge = 0.f;
 	}
 
-	TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetSoundMap().Find(m_Type)->HitSound_Normal;
+	/*TSoftObjectPtr<USoundBase> HitSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal;
 	if ( IsValid(HitSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
@@ -207,7 +206,7 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
-	}
+	}*/
 
 	return 0.0f;
 }

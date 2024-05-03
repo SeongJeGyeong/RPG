@@ -69,8 +69,8 @@ protected:
 	class AAIC_Monster_Base* m_AIController;
 
 public:
-	UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
-	UBlackboardData* GetBlackboard() { return m_Blackboard; }
+	UBehaviorTree* GetBehaviorTree() const { return m_BehaviroTree; }
+	UBlackboardData* GetBlackboard() const { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	EMONSTER_STATE GetState() { return m_State; }
 
