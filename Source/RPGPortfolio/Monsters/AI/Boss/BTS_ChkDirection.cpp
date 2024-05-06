@@ -10,7 +10,6 @@
 
 UBTS_ChkDirection::UBTS_ChkDirection()
 {
-	NodeName = TEXT("Check Target Direction");
 }
 
 UBTS_ChkDirection::~UBTS_ChkDirection()

@@ -5,25 +5,69 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
-#include "AI/AIC_Monster_Base.h"
+#include "AI/Boss/AIC_Boss_Base.h"
 #include "Components/WidgetComponent.h"
 #include "../System/DamageType_Base.h"
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABoss_Base::ABoss_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	AIControllerClass = AAIC_Boss_Base::StaticClass();
+	m_AIController = Cast<AAIC_Boss_Base>(AAIC_Boss_Base::StaticClass());
+
+	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	if (!IsValid(pPlayer))
+	{
+		return;
+	}
+
+	m_AIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterCapGroup"));
+	GetMesh()->SetCollisionProfileName(TEXT("MonsterMeshGroup"));
+}
+
+void ABoss_Base::OnConstruction(const FTransform& _Transform)
+{
+	Super::OnConstruction(_Transform);
+
+	FMonsterInfo* pInfo;
+
+	if ( IsValid(m_MonsterInfoTableRow.DataTable) && !m_MonsterInfoTableRow.RowName.IsNone() )
+	{
+		pInfo = m_MonsterInfoTableRow.DataTable->FindRow<FMonsterInfo>(m_MonsterInfoTableRow.RowName, TEXT(""));
+
+		if (nullptr != pInfo)
+		{
+			m_Info = *pInfo;
+		}
+	}
 }
 
 // Called when the game starts or when spawned
 void ABoss_Base::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	AAIController* pAIController = Cast<AAIController>(GetController());
+
+	if ( IsValid(pAIController) )
+	{
+		// 블랙보드에 몬스터정보 전달
+		if ( pAIController->GetBlackboardComponent() )
+		{
+			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_Info.AtkRange);
+		}
+	}
+
 }
 
 // Called every frame
@@ -31,64 +75,6 @@ void ABoss_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-// Called to bind functionality to input
-void ABoss_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
-void ABoss_Base::MeleeAttackHitCheck()
-{
-	float AtkRadius = 20.f;
-
-	FHitResult HitResult;
-	FCollisionQueryParams Params(NAME_None, false, this);
-	FVector vHitStart = GetMesh()->GetSocketLocation("Socket_HitStart");
-	FVector vHitEnd = GetMesh()->GetSocketLocation("Socket_HitEnd");
-	float fTraceHalfHeight = ( vHitEnd - vHitStart ).Size() * 0.5;
-
-	bool bResult = GetWorld()->SweepSingleByChannel
-	(
-		HitResult,
-		vHitStart,
-		vHitEnd,
-		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel6,
-		FCollisionShape::MakeCapsule(AtkRadius, fTraceHalfHeight),
-		Params
-	);
-
-	FColor color;
-	bResult ? color = FColor::Red : color = FColor::Green;
-
-	FVector vMidpoint = FMath::Lerp(vHitEnd, vHitStart, 0.5f);
-	DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat(), color, false, 0.5f);
-
-	if ( bResult )
-	{
-		if ( HitResult.GetActor()->IsValidLowLevel() )
-		{
-			APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
-
-			if ( !IsValid(pPlayer) )
-			{
-				UE_LOG(LogTemp, Display, TEXT("타격 상대가 플레이어가 아님"));
-				return;
-			}
-
-			// 무적 상태일 경우
-			if (pPlayer->GetbInvincible())
-			{
-				return;
-			}
-
-			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
-			bAtkTrace = false;
-		}
-	}
 }
 
 void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType)
@@ -99,11 +85,11 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
 	case EATTACK_TYPE::PHYSIC_RANGE:
-		iDamage = PhysicAtk;
+		iDamage = m_Info.PhysicAtk;
 		break;
 	case EATTACK_TYPE::MAGIC_MELEE:
 	case EATTACK_TYPE::MAGIC_RANGE:
-		iDamage = MagicAtk;
+		iDamage = m_Info.MagicAtk;
 		break;
 	default:
 		break;
@@ -117,17 +103,8 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 		bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, vMonsterDir);
 
 		// 플레이어의 가드에 공격이 막힐 경우
-		if ( bBlocked )
+		if (bBlocked)
 		{
-			/*TSoftObjectPtr<USoundBase> BlockSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->BlockSound;
-			if ( IsValid(BlockSound.LoadSynchronous()) )
-			{
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound.LoadSynchronous(), GetActorLocation());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록사운드 로드 실패"));
-			}*/
 
 			return;
 		}
@@ -161,11 +138,11 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
 	case EATTACK_TYPE::PHYSIC_RANGE:
-		fMonsterDef = PhysicDef;
+		fMonsterDef = m_Info.PhysicDef;
 		break;
 	case EATTACK_TYPE::MAGIC_MELEE:
 	case EATTACK_TYPE::MAGIC_RANGE:
-		fMonsterDef = MagicDef;
+		fMonsterDef = m_Info.MagicDef;
 		break;
 	default:
 		break;
@@ -173,12 +150,12 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 
 	// 몬스터의 방어력만큼 데미지 감소 후 몬스터 hp바 위젯에 반영
 	FinalDamage = FMath::Clamp(FinalDamage - fMonsterDef, 0.f, FinalDamage);
-	CurHP = FMath::Clamp(CurHP - FinalDamage, 0.f, MaxHP);
+	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
 	// m_MonsterWidget->SetHPRatio(CurHP / MaxHP);
 	// m_MonsterWidget->DisplayDMG(FinalDamage);
 
 	// 사망 시
-	if ( CurHP <= 0.f && GetController() )
+	if ( m_Info.CurHP <= 0.f && GetController() )
 	{
 		MonsterDead(DamageCauser);
 		return 0.f;
@@ -213,6 +190,7 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 
 void ABoss_Base::MonsterDead(AActor* DamageCauser)
 {
+	bIsDead = true;
 }
 
 void ABoss_Base::SetbLockedOn(bool _LockedOn)

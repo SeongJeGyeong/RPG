@@ -8,7 +8,6 @@
 #include "GameFramework/Actor.h"
 #include "Player_Base_Knight.h"
 #include "GameFramework/Controller.h"
-#include "../Monsters/Monster_Base.h"
 
 UPlayer_CameraArm::UPlayer_CameraArm()
 {
@@ -88,9 +87,9 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
 	}
 
-	if (IsValid(m_Monster)) 
+	if (IsValid(m_Target))
 	{
-		if (m_Monster->GetState() == EMONSTER_STATE::DEAD)
+		if (m_Target->IsOwnerDead())
 		{
 			BreakLockOnTarget();
 		}
@@ -100,7 +99,7 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 // Toggle Lock On
 void UPlayer_CameraArm::ToggleCameraLockOn(const FInputActionInstance& _Instance)
 {
-	bToggleLockOn = ( bToggleLockOn != _Instance.GetValue().Get<bool>() );
+	bToggleLockOn = (bToggleLockOn != _Instance.GetValue().Get<bool>());
 
 	if (bToggleLockOn)
 	{
@@ -131,8 +130,12 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 	m_Target = NewTargetComponent;
 	if (m_Target->GetOwner())
 	{
-		m_Monster = Cast<AMonster_Base>(m_Target->GetOwner());
-		m_Monster->SetbLockedOn(true);
+		if (m_Target->IsOwnerDead())
+		{
+			return;
+		}
+
+		m_Target->SetLockOn(true);
 	}
 	bEnableCameraRotationLag = true;
 	m_Player->SetOrientRotation(false);
@@ -142,10 +145,9 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 {
 	if (IsCameraLockedToTarget())
 	{
+		m_Target->SetLockOn(false);
 		m_Target = nullptr;
 
-		m_Monster->SetbLockedOn(false);
-		m_Monster = nullptr;
 		bEnableCameraRotationLag = false;
 		UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
 		bToggleLockOn = false;

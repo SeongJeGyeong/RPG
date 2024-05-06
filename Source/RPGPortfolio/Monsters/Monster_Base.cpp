@@ -209,12 +209,6 @@ void AMonster_Base::Tick(float DeltaTime)
 	}
 }
 
-// Called to bind functionality to input
-void AMonster_Base::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
 float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (m_State == EMONSTER_STATE::DEAD)
@@ -309,7 +303,7 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
 
 	m_State = EMONSTER_STATE::DEAD;
-
+	bIsDead = true;
 	GetController()->UnPossess();
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	m_TargetComp->DestroyComponent();

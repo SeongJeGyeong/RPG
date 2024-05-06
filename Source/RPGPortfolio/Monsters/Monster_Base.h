@@ -46,8 +46,11 @@ private:
 	UPROPERTY()
 	UAnimInstance* m_AnimInst;
 
+	UPROPERTY()
 	class UWidgetComponent* m_LockOnMarker;
+	UPROPERTY()
 	class UUI_Monster* m_MonsterWidget;
+	
 	EMONSTER_STATE	m_State;
 
 	float fDestroyRate = 0.f;
@@ -57,6 +60,7 @@ private:
 	bool bAtkTrace;
 	bool bStaggerWait;
 	float fHitWaitTime = 0.f;
+	bool bIsDead;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
@@ -74,11 +78,13 @@ public:
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	EMONSTER_STATE GetState() { return m_State; }
 
-	bool GetbLockedOn() { return bLockedOn; }
+	bool GetbLockedOn() const { return bLockedOn; }
 	void SetbLockedOn(bool _LockedOn);
 
-	bool GetbAtkTrace() { return bAtkTrace; }
+	bool GetbAtkTrace() const { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
+
+	bool GetbIsDead() const { return bIsDead; }
 
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
 	void MeleeAttackHitCheck();
@@ -97,9 +103,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;

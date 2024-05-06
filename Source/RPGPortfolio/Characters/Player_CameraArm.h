@@ -35,7 +35,7 @@ public:
 	FRotator rForwardRotation;
 
 	class APlayer_Base_Knight* m_Player;
-	class AMonster_Base* m_Monster;
+	//ACharacter* m_Monster;
 
 	// 록온 타겟 컴포넌트
 	UPROPERTY(BlueprintReadOnly)

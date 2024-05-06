@@ -16,18 +16,6 @@ class RPGPORTFOLIO_API UAnim_Griffon : public UAnimInstance_Boss_Base
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	float fMoveSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	bool bIsMove;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	FVector	vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	FVector	vPlayerLoc;		// 플레이어 바라보기 위해 사용
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	bool bIsFly;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
@@ -37,8 +25,8 @@ private:
 	class UCharacterMovementComponent* m_Movement;
 
 public:
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
-	EBOSS_STATE m_State;
+	//UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	//EBOSS_STATE m_State;
 
 	bool bBossAttack;
 	bool bIsAtkMove;

@@ -4,24 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "BTS_Griffon_Perceive.generated.h"
+#include "BTS_Boss_ChkDirection.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API UBTS_Griffon_Perceive : public UBTService
+class RPGPORTFOLIO_API UBTS_Boss_ChkDirection : public UBTService
 {
 	GENERATED_BODY()
 	
+private:
+	bool bInAtkRange;
+
 public:
-	UBTS_Griffon_Perceive();
-	~UBTS_Griffon_Perceive();
+	UBTS_Boss_ChkDirection();
 
 public:
 	virtual void TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DT) override;
 
-public:
-	bool bDetect;
-	bool bIsAtkRange;
 };

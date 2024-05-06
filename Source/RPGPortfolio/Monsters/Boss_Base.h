@@ -15,18 +15,18 @@ class RPGPORTFOLIO_API ABoss_Base : public ACharacter
 
 private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	EMONSTER_TYPE	m_Type;
-
-	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
-
-	UPROPERTY()
-	UAnimInstance* m_AnimInst;
+	FDataTableRowHandle	m_MonsterInfoTableRow;
 
 	UPROPERTY()
 	class UWidgetComponent* m_LockOnMarker;
 
 protected:
+	UPROPERTY(EditAnywhere, Category = "Info")
+	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	EMONSTER_TYPE	m_Type;
+
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBehaviorTree* m_BehaviroTree;
 
@@ -34,44 +34,35 @@ protected:
 	class UBlackboardData* m_Blackboard;
 
 	UPROPERTY()
-	class AAIC_Monster_Base* m_AIController;
+	FMonsterInfo	m_Info;
 
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float MaxHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float CurHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float PhysicAtk;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float PhysicDef;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float MagicAtk;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Status", meta = (AllowPrivateAccess = "true"))
-	float MagicDef;
+	UPROPERTY()
+	class AAIC_Boss_Base* m_AIController;
 
 	UPROPERTY()
 	float StaggerGauge = 0.f;
 
-public:
+private:
 	bool bLockedOn;
-	bool bAtkTrace;
+	bool bIsDead;
 
 public:
 	UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	UBlackboardData* GetBlackboard() { return m_Blackboard; }
+	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 
-	bool GetbLockedOn() { return bLockedOn; }
+	bool GetbLockedOn() {return bLockedOn;}
 	void SetbLockedOn(bool _LockedOn);
 
-	bool GetbAtkTrace() { return bAtkTrace; }
-	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
+	bool GetbIsDead() const {return bIsDead;}
 
 public:
 	// Sets default values for this character's properties
 	ABoss_Base();
 
 protected:
+	virtual void OnConstruction(const FTransform& _Transform) override;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -79,12 +70,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 public:
-	void MeleeAttackHitCheck();
-
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void MonsterDead(AActor* DamageCauser);

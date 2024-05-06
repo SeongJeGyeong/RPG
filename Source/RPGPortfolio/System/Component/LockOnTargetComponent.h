@@ -14,6 +14,12 @@ class RPGPORTFOLIO_API ULockOnTargetComponent : public USphereComponent
 {
 	GENERATED_BODY()
 
+private:
+	bool bInvalidLockOn;
+
 public:
 	ULockOnTargetComponent();
+
+	void SetLockOn(bool _LockOn);
+	bool IsOwnerDead();
 };

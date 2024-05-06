@@ -86,7 +86,7 @@ enum class EMONSTER_TYPE : uint8
 	UndeadAssassin,
 	HeavyKnight,
 	TaurusDemon,
-	GreatSpider,
+	GreaterSpider,
 	ExiledWarrior
 };
 

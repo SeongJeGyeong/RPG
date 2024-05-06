@@ -46,7 +46,7 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		vLocalVelocity.Y = 0.f;
 	}
 
-	//vLocalVelocity = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
+	vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
 
 	bIsInAir = m_Movement->IsFalling();
 

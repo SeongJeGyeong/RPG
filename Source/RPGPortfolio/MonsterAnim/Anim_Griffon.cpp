@@ -69,7 +69,7 @@ void UAnim_Griffon::NativeUpdateAnimation(float _fDeltaTime)
 		}
 	}
 
-	m_State = m_Monster->GetBossState();
+	//m_State = m_Monster->GetBossState();
 }
 
 void UAnim_Griffon::MeleeAttack(EBOSS_STATE _BState)
