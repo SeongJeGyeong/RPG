@@ -14,6 +14,12 @@ void UAnimInstance_Boss_Base::NativeInitializeAnimation()
 void UAnimInstance_Boss_Base::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
+
+	m_Player = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!IsValid(m_Player))
+	{
+		UE_LOG(LogTemp, Error, TEXT("AnimInstance_Boss_Base : 플레이어 찾지 못함"));
+	}
 }
 
 void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)

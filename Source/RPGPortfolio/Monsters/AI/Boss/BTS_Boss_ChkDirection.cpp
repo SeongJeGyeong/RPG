@@ -34,6 +34,7 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	{
 		return;
 	}
+	pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
 
 	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
 	FVector Cross = FVector::CrossProduct(vOffset, pBoss->GetActorForwardVector());
@@ -48,16 +49,21 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 
 	float Distance = FVector::Distance(pBoss->GetActorLocation(), pPlayer->GetActorLocation());
 
-	if (Distance < pBoss->GetMonsterInfo().AtkRange)
+	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
+	if (Distance < fAtkRange)
 	{
+		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), true);
+		UE_LOG(LogTemp, Warning, TEXT("Inner AtkRange"));
 		bInAtkRange = true;
 	}
 	else
 	{
+		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), false);
+		UE_LOG(LogTemp, Warning, TEXT("Outer AtkRange"));
 		bInAtkRange = false;
 	}
 
 	FColor AtkColor;
 	bInAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
-	DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), pBoss->GetMonsterInfo().AtkRange, 40, AtkColor, false, 0.4f);
+	DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fAtkRange, 40, AtkColor, false, 0.4f);
 }

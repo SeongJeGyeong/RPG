@@ -137,7 +137,9 @@ enum class EGreaterSpider_STATE : uint8
 	RANGEATTACK,
 	SUMMONMINION,
 	STUNNED,
+	HIT,
 	DEAD,
+	IDLE,
 };
 
 UENUM(BlueprintType)

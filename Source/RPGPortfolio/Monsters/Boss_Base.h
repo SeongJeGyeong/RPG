@@ -21,9 +21,6 @@ private:
 	class UWidgetComponent* m_LockOnMarker;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Info")
-	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
-
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
 	EMONSTER_TYPE	m_Type;
 

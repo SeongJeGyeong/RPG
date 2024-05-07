@@ -24,12 +24,6 @@ void UAnim_Griffon::NativeBeginPlay()
 	{
 		m_Movement = m_Monster->GetCharacterMovement();
 	}
-
-	m_Player = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (!IsValid(m_Player))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Griffon : m_Player not found"));
-	}
 }
 
 void UAnim_Griffon::NativeUpdateAnimation(float _fDeltaTime)

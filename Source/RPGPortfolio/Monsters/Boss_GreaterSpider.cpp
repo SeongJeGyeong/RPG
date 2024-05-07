@@ -83,3 +83,9 @@ void ABoss_GreaterSpider::MeleeAttackHitCheck()
 		}
 	}
 }
+
+void ABoss_GreaterSpider::PlayAttackMontage(EGreaterSpider_STATE _State)
+{
+	UAnimMontage* pMontage = m_DataAsset->GetAnimGSpider(_State).LoadSynchronous();
+	m_AnimInst->Montage_Play(pMontage);
+}

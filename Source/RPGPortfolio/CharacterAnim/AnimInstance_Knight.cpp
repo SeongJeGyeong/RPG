@@ -173,7 +173,7 @@ TTuple<bool, float> UAnimInstance_Knight::CapsuleDistance(FName _SocketName, ACh
 
 	FHitResult HitResult;
 
-	ETraceTypeQuery MeshCollision = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel2);
+	ETraceTypeQuery MeshCollision = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel11);
 
 	// 양발 좌표를 기준으로 캡슐컴포넌트 중앙 높이에서 부터 캡슐 컴포넌트 밑 30cm 높이까지 트레이스
 	UKismetSystemLibrary::LineTraceSingle(
@@ -204,7 +204,7 @@ TTuple<bool, float, FVector> UAnimInstance_Knight::FootLineTrace(FName _SocketNa
 
 	FHitResult HitResult;
 
-	ETraceTypeQuery MeshCollision = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel2);
+	ETraceTypeQuery MeshCollision = UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_GameTraceChannel11);
 
 	// 양 발 좌표를 기준으로 캐릭터의 루트 본 높이에서 상하로 100cm의 범위를 트레이스
 	UKismetSystemLibrary::LineTraceSingle(

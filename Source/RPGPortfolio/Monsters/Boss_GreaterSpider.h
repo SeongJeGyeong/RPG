@@ -15,6 +15,9 @@ class RPGPORTFOLIO_API ABoss_GreaterSpider : public ABoss_Base
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
+
 	UPROPERTY()
 	UAnimInstance* m_AnimInst;
 
@@ -40,4 +43,5 @@ public:
 
 public:
 	void MeleeAttackHitCheck();
+	void PlayAttackMontage(EGreaterSpider_STATE _State);
 };
