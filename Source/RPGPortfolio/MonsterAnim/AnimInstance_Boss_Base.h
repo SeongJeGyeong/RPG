@@ -3,11 +3,12 @@
 #pragma once
 
 #include "../Header/Struct.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "../Monsters/Boss_Base.h"
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Boss_Base.generated.h"
 
-//DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 /**
  * 
  */
@@ -15,6 +16,12 @@ UCLASS()
 class RPGPORTFOLIO_API UAnimInstance_Boss_Base : public UAnimInstance
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	ABoss_Base* m_Boss;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	UCharacterMovementComponent* m_Movement;
 
 protected:
 	UPROPERTY()
@@ -25,7 +32,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	float fMoveSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	bool bIsMove;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
@@ -33,6 +40,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	FVector	vPlayerLoc;		// 플레이어 바라보기 위해 사용
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	int32	iRotateDir = 0;		// 회전 방향
+
+	UPROPERTY()
+	FQuat qOldOrientation;	// 현재 방향과 비교해서 캐릭터가 회전중인지 파악하기 위해 사용
 
 public:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")

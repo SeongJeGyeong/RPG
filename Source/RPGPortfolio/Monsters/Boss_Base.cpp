@@ -67,14 +67,12 @@ void ABoss_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_Info.AtkRange);
 		}
 	}
-
 }
 
 // Called every frame
 void ABoss_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType)
@@ -193,7 +191,7 @@ void ABoss_Base::MonsterDead(AActor* DamageCauser)
 	bIsDead = true;
 }
 
-void ABoss_Base::SetbLockedOn(bool _LockedOn)
+void ABoss_Base::SetbLockedOn(const bool& _LockedOn)
 {
 	m_LockOnMarker->SetVisibility(_LockedOn);
 	bLockedOn = _LockedOn;

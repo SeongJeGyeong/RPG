@@ -47,6 +47,21 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 
 	pController->GetBlackboardComponent()->SetValueAsFloat(TEXT("TargetDirection"), fAngle);
 
+	// 몬스터 기준 왼쪽
+	if ( fDir >= 1.f )
+	{
+		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TurnDirection"), 1);
+	}
+	// 몬스터 기준 오른쪽
+	else if ( fDir <= -1.f )
+	{
+		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TurnDirection"), 2);
+	}
+	else
+	{
+		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TurnDirection"), 0);
+	}
+
 	float Distance = FVector::Distance(pBoss->GetActorLocation(), pPlayer->GetActorLocation());
 
 	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));

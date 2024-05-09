@@ -50,7 +50,6 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 	{
 		UE_LOG(LogTemp, Error, TEXT("추적 대상 설정 안됨"));
 
-		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
@@ -60,7 +59,6 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 	if ( !IsValid(pBoss) )
 	{
 		// InProgress 상태를 중단
-		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
@@ -68,7 +66,6 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 	ACharacter* pCharacter = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
 	if ( !IsValid(pCharacter) )
 	{
-		//FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
@@ -79,7 +76,6 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 
 	if (Distance < fAtkRange)
 	{
-		//FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), true);
 		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		return;
@@ -87,6 +83,5 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 	else
 	{
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(pController, pCharacter->GetActorLocation());
-		UE_LOG(LogTemp, Warning, TEXT("Move to Player"));
 	}
 }

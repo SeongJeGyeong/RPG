@@ -19,7 +19,7 @@ private:
 	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
 
 	UPROPERTY()
-	UAnimInstance* m_AnimInst;
+	class UAnim_GreaterSpider* m_AnimInst;
 
 	bool bAtkTrace;
 

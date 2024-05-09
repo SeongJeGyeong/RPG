@@ -13,13 +13,8 @@ UCLASS()
 class RPGPORTFOLIO_API UAnim_GreaterSpider : public UAnimInstance_Boss_Base
 {
 	GENERATED_BODY()
-	
-private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = ( AllowPrivateAccess = "true" ))
-	class ABoss_GreaterSpider* m_Boss;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = ( AllowPrivateAccess = "true" ))
-	class UCharacterMovementComponent* m_Movement;
+private:
 
 public:
 	virtual void NativeInitializeAnimation() override;

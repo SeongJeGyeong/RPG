@@ -42,16 +42,20 @@ protected:
 private:
 	bool bLockedOn;
 	bool bIsDead;
+	int32 iTurnDir;
 
 public:
 	UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	UBlackboardData* GetBlackboard() { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 
-	bool GetbLockedOn() {return bLockedOn;}
-	void SetbLockedOn(bool _LockedOn);
+	bool GetbLockedOn() const { return bLockedOn; }
+	void SetbLockedOn(const bool& _LockedOn);
 
 	bool GetbIsDead() const {return bIsDead;}
+
+	int32 GetiTurnDir() const { return iTurnDir; }
+	void SetiTurnDir(const int32& _TurnDir) { iTurnDir = _TurnDir; }
 
 public:
 	// Sets default values for this character's properties

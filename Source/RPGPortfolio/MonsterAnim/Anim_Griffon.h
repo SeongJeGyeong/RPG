@@ -21,9 +21,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
 	class AMonster_Griffon* m_Monster;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = (AllowPrivateAccess = "true"))
-	class UCharacterMovementComponent* m_Movement;
-
 public:
 	//UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
 	//EBOSS_STATE m_State;

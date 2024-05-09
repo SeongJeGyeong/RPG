@@ -112,17 +112,17 @@ void APlayer_Base_Knight::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
 
-	if ( !IsValid(m_PlayerMontage.Get()) )
+	if ( !IsValid(m_PlayerMontage.LoadSynchronous()) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
 	}
 
-	if ( !IsValid(m_PlayerSound.Get()) )
+	if ( !IsValid(m_PlayerSound.LoadSynchronous()) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
 	}
 	
-	if ( !IsValid(m_MenuSound.Get()) )
+	if ( !IsValid(m_MenuSound.LoadSynchronous()) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
 	}
@@ -938,17 +938,6 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	return 0.0f;
 }
 
-void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
-{
-	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-	if(TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
-	{
-		m_MainUI->ShowActionMessage(true);
-		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
-		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
-	}
-}
-
 void APlayer_Base_Knight::AttackMoveStart(bool _AtkMove)
 {
 	bAtkMove = _AtkMove;
@@ -986,8 +975,25 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 		pState->SetbSTRecovSlowly(false);
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Block"));
+		GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), true);
+		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.2f);
+		GetMesh()->AddImpulseToAllBodiesBelow(_MonDir * 500.f, FName(TEXT("clavicle_l")), true);
+
+		GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
+		GetWorld()->GetTimerManager().SetTimer(BlockReactTimer, this, &APlayer_Base_Knight::StopBlockPhysics, 0.1f, true);
+	}
 
 	return true;
+}
+
+void APlayer_Base_Knight::StopBlockPhysics()
+{
+	GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
+	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 }
 
 void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
@@ -1031,6 +1037,17 @@ void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - fConsumption);
+}
+
+void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
+{
+	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
+	if ( TriggerName.IsEqual(FName(TEXT("ItemTrigger"))) )
+	{
+		m_MainUI->ShowActionMessage(true);
+		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
+		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
+	}
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)

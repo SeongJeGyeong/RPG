@@ -110,6 +110,8 @@ private:
 
 	bool bShowMenu;
 
+	FTimerHandle BlockReactTimer;
+
 public:
 	float GetfFrontBack() const { return fFrontBack; }
 	void SetfFrontBack(const float& _FrontBack) { fFrontBack = _FrontBack; }
@@ -163,6 +165,8 @@ public:
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
 	void UseItem(FString _NiagaraPath);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
+	void UpdateBlockPhysics();
+	void StopBlockPhysics();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

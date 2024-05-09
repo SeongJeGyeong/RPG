@@ -6,6 +6,7 @@
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
+#include "../MonsterAnim/Anim_GreaterSpider.h"
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
@@ -20,7 +21,7 @@ void ABoss_GreaterSpider::BeginPlay()
 {
 	Super::BeginPlay();
 
-	m_AnimInst = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
+	m_AnimInst = Cast<UAnim_GreaterSpider>(GetMesh()->GetAnimInstance());
 }
 
 void ABoss_GreaterSpider::Tick(float DeltaTime)
@@ -87,5 +88,4 @@ void ABoss_GreaterSpider::MeleeAttackHitCheck()
 void ABoss_GreaterSpider::PlayAttackMontage(EGreaterSpider_STATE _State)
 {
 	UAnimMontage* pMontage = m_DataAsset->GetAnimGSpider(_State).LoadSynchronous();
-	m_AnimInst->Montage_Play(pMontage);
 }

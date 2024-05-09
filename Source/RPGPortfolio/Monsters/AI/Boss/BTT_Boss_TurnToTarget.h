@@ -14,6 +14,12 @@ class RPGPORTFOLIO_API UBTT_Boss_TurnToTarget : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
+private:
+	UPROPERTY()
+	class ABoss_Base* m_Boss;
+	UPROPERTY()
+	float fRotateRate;
+
 public:
 	UBTT_Boss_TurnToTarget();
 
