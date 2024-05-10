@@ -86,7 +86,7 @@ void UUI_Base::ShowMenu(bool _bShow)
 	}
 }
 
-void UUI_Base::ShowActionMessage(bool _bShow)
+void UUI_Base::ShowMainMessageUI(bool _bShow)
 {
 	if (_bShow)
 	{
@@ -101,7 +101,7 @@ void UUI_Base::ShowActionMessage(bool _bShow)
 	}
 }
 
-void UUI_Base::ShowRootingMessage(bool _bShow)
+void UUI_Base::ShowItemMessageUI(bool _bShow)
 {
 	bDisplayRootMessage = _bShow;
 	if ( _bShow )

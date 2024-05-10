@@ -25,6 +25,12 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 {
 	if (!IsValid(m_Movement) || !IsValid(m_Player))
 	{
+		m_Player = Cast<APlayer_Base_Knight>(GetOwningActor());
+
+		if (IsValid(m_Player))
+		{
+			m_Movement = m_Player->GetCharacterMovement();
+		}
 		return;
 	}
 
@@ -118,9 +124,7 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 
 				// 발과 닿은 바닥의 법선벡터
 				const FVector vFootRVec = FootTrace_R.Get<2>();
-				/*UE_LOG(LogTemp, Warning, TEXT("FootRVec X : %f"), vFootRVec.X);
-				UE_LOG(LogTemp, Warning, TEXT("FootRVec Y : %f"), vFootRVec.Y);
-				UE_LOG(LogTemp, Warning, TEXT("FootRVec Z : %f"), vFootRVec.Z);*/
+
 				// DegAtan2 : A/B 의 역탄젠트(ArcTangent)를 디그리 각도로 반환함
 				// Atan과 Atan2의 차이
 				// Atan : 두 점 사이의 탄젠트값을 받아서 -90 ~ 90 사이의 디그리 각도를 반환한다.(방향의 개념이 없는 단순한 두 점 사이의 각도)
@@ -138,10 +142,8 @@ void UAnimInstance_Knight::FootIK(float _DeltaTime)
 			if ( FootTrace_L.Get<0>() )
 			{
 				float fDistance_L = FootTrace_L.Get<1>();
-				fDistance_L += ( Foot_L.Get<1>() < Foot_R.Get<1>() ) ? -5.f : 0.f;
+				//fDistance_L += ( Foot_L.Get<1>() < Foot_R.Get<1>() ) ? -5.f : 0.f;
 				fLIK = FMath::FInterpTo(fLIK, ( fDistance_L - 105.f ) / -50.f, _DeltaTime, fIKInterpSpeed);
-				// UE_LOG(LogTemp, Warning, TEXT("Left Distance : %f"), fDistance_L);
-				// UE_LOG(LogTemp, Warning, TEXT("Left IK : %f"), fLIK);
 
 				const FVector vFootLVec = FootTrace_L.Get<2>();
 				const double rLRotPitch = UKismetMathLibrary::DegAtan2(vFootLVec.X, vFootLVec.Z) * -1.f;

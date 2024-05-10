@@ -231,3 +231,14 @@ enum class EEQUIP_SLOT : uint8
 
 	EMPTY,
 };
+
+UENUM(BlueprintType)
+enum class EInteractionType : uint8
+{
+	ITEM,
+	DOOR,
+	TREASUREBOX,
+	LEVER,
+	TELEPORT,
+	INVESTIGATABLE,
+};

@@ -36,8 +36,8 @@ public:
 
 	void ShowMenu(bool _bShow);
 
-	void ShowActionMessage(bool _bShow);
-	void ShowRootingMessage(bool _bShow);
+	void ShowMainMessageUI(bool _bShow);
+	void ShowItemMessageUI(bool _bShow);
 
 public:
 	virtual void NativeConstruct() override;

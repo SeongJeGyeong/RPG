@@ -656,23 +656,22 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 {
-	if (!OverlapItemArr.IsEmpty())
+	if (!OverlapInteractionArr.IsEmpty())
 	{
-		UInventory_Mgr::GetInst(GetWorld())->AddGameItem(OverlapItemArr[OverlapItemArr.Num()-1]->GetDropItemID(), (uint32)OverlapItemArr[OverlapItemArr.Num() - 1]->GetDropItemStack());
-		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(OverlapItemArr[OverlapItemArr.Num() - 1]->GetDropItemID());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::GETITEM), GetActorLocation());
+		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction();
+		//AItem_Dropped_Base* pDropItem = Cast<AItem_Dropped_Base>(OverlapInteractionArr[OverlapInteractionArr.Num() - 1]);
+		//FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pDropItem->GetDropItemID());
 
-		m_MainUI->ShowRootingMessage(true);
-		m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, OverlapItemArr[OverlapItemArr.Num() - 1]->GetDropItemStack());
-		m_MainUI->ShowActionMessage(true);
-		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"확인"));
-		OverlapItemArr[OverlapItemArr.Num() - 1]->Destroy();
+		//m_MainUI->ShowItemMessageUI(true);
+		//m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, pDropItem->GetDropItemStack());
+		//m_MainUI->ShowMainMessageUI(true);
+		//pDropItem->Destroy();
 	}
 	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때
 	else if (m_MainUI->GetRootMessageDisplayed())
 	{
-		m_MainUI->ShowRootingMessage(false);
-		m_MainUI->ShowActionMessage(false);
+		m_MainUI->ShowItemMessageUI(false);
+		m_MainUI->ShowMainMessageUI(false);
 	}
 }
 
@@ -996,6 +995,11 @@ void APlayer_Base_Knight::StopBlockPhysics()
 	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 }
 
+void APlayer_Base_Knight::BreakLockOn()
+{
+	m_Arm->BreakLockOnTarget();
+}
+
 void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
 {
 	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *_NiagaraPath);
@@ -1042,40 +1046,43 @@ void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
 {
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-	if ( TriggerName.IsEqual(FName(TEXT("ItemTrigger"))) )
+	if (TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))))
 	{
-		m_MainUI->ShowActionMessage(true);
-		m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"획득한다"));
-		OverlapItemArr.Emplace(Cast<AItem_Dropped_Base>(_OtherActor));
+		//IPlayerInteraction* Interaction = Cast<IPlayerInteraction>(_PrimitiveCom);
+		IPlayerInteraction* Interaction = Cast<IPlayerInteraction>(_OtherActor);
+		m_MainUI->GetMainMessageUI()->SetMessageText(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
+		m_MainUI->ShowMainMessageUI(true);
+		OverlapInteractionArr.Emplace(Interaction);
 	}
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
 {
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-
-	// 아이템에 오버랩된 상태일 경우
-	if (TriggerName.IsEqual(FName(TEXT("ItemTrigger"))))
+	
+	if (TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))))
 	{
-		for (int32 i = 0; i < OverlapItemArr.Num(); ++i)
+		// 오버랩 상태의 트리거에서 떨어지거나 아이템을 습득하여 트리거 오버랩이 끝났을 때
+		for (int32 i = 0; i < OverlapInteractionArr.Num(); ++i)
 		{
-			if (OverlapItemArr[i]->GetName().Equals(_OtherActor->GetName()))
+			if ( OverlapInteractionArr[i]->_getUObject()->GetName().Equals(_OtherActor->GetName()))
 			{
-				OverlapItemArr.RemoveAt(i);
+				OverlapInteractionArr.RemoveAt(i);
 				break;
 			}
 		}
 
-		if (OverlapItemArr.IsEmpty())
+		if ( OverlapInteractionArr.IsEmpty())
 		{
+			// 아이템 습득 메시지가 표시중일 때
 			if (m_MainUI->GetRootMessageDisplayed())
 			{
-				m_MainUI->ShowActionMessage(true);
 				m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"확인"));
+				m_MainUI->ShowMainMessageUI(true);
 			}
 			else
 			{
-				m_MainUI->ShowActionMessage(false);
+				m_MainUI->ShowMainMessageUI(false);
 			}
 		}
 	}

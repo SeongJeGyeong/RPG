@@ -306,8 +306,10 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	bIsDead = true;
 	GetController()->UnPossess();
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
-	m_TargetComp->DestroyComponent();
+	GetMesh()->SetCollisionProfileName(TEXT("IgnoreAll"));
+	pPlayer->BreakLockOn();
 	m_LockOnMarker->DestroyComponent();
+	m_TargetComp->DestroyComponent();
 
 	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 
@@ -345,9 +347,6 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
 	}
-
-	//GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	//GetMesh()->SetSimulatePhysics(true);
 }
 
 // 경직상태가 되는 몽타주들 재생 종료시

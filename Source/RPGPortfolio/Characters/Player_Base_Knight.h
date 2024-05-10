@@ -51,7 +51,7 @@ private:
 	UAnimInstance_Knight* m_AnimInst;
 
 	UPROPERTY()
-	TArray<class AItem_Dropped_Base*> OverlapItemArr;
+	TArray<class IPlayerInteraction*> OverlapInteractionArr;
 
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
 
@@ -165,8 +165,8 @@ public:
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
 	void UseItem(FString _NiagaraPath);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
-	void UpdateBlockPhysics();
 	void StopBlockPhysics();
+	void BreakLockOn();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);

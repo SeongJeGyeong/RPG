@@ -180,16 +180,9 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 		float fAngleX = FMath::RadiansToDegrees(acosAngleX);
 		float acosAngleY = FMath::Acos(DotY);
 		float fAngleY = FMath::RadiansToDegrees(acosAngleY);
-		UE_LOG(LogTemp, Warning, TEXT("X내적 : %f"), DotX);
-		UE_LOG(LogTemp, Warning, TEXT("X각도 : %f"), fAngleX);
-		UE_LOG(LogTemp, Warning, TEXT("Y내적 : %f"), DotY);
-		UE_LOG(LogTemp, Warning, TEXT("Y각도 : %f"), fAngleY);
 
 		float acosAngle = FMath::Acos(Dot); //내적을 각도로 변환
 		float fAngle = FMath::RadiansToDegrees(acosAngle); // 각도를 라디안 각도로 변환
-
-		UE_LOG(LogTemp, Warning, TEXT("내적 : %f"), Dot);
-		UE_LOG(LogTemp, Warning, TEXT("각도 : %f"), fAngle);
 
 		if (Dot > ClosestDotToCenter)
 		{
@@ -266,7 +259,6 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 		TargetComps.Add(Cast<ULockOnTargetComponent>(Comp));
 	}
 
-	//return TArray<class ULockOnTargetComponent*>();
 	return TargetComps;
 }
 

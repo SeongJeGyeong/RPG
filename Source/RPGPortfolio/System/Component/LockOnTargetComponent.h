@@ -15,11 +15,14 @@ class RPGPORTFOLIO_API ULockOnTargetComponent : public USphereComponent
 	GENERATED_BODY()
 
 private:
-	bool bInvalidLockOn;
+	//bool bInvalidLockOn;
 
 public:
 	ULockOnTargetComponent();
 
+	//bool GetInvalidLockOn() const { return bInvalidLockOn; }
+	//void SetInvalidLockOn(const bool& _InvalidLockOn) { bInvalidLockOn = _InvalidLockOn; }
+
 	void SetLockOn(bool _LockOn);
-	bool IsOwnerDead();
+	bool IsOwnerDead();	
 };
