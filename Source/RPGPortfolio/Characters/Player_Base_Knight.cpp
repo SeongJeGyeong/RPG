@@ -213,10 +213,13 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	// 아이템 사용 중
 	if (bItemInUse)
 	{
+		UE_LOG(LogTemp, Display, TEXT("using item"));
 		GetCharacterMovement()->MaxWalkSpeed = 100.f;
 		if (!m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM)))
 		{
+			UE_LOG(LogTemp, Display, TEXT("end using item"));
 			m_AnimInst->TurnOnItemUseBlend(0.f);
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
 			bItemInUse = false;
 		}
 	}
@@ -981,8 +984,7 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.2f);
 		GetMesh()->AddImpulseToAllBodiesBelow(_MonDir * 500.f, FName(TEXT("clavicle_l")), true);
 
-		GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
-		GetWorld()->GetTimerManager().SetTimer(BlockReactTimer, this, &APlayer_Base_Knight::StopBlockPhysics, 0.1f, true);
+		GetWorld()->GetTimerManager().SetTimer(BlockReactTimer, this, &APlayer_Base_Knight::StopBlockPhysics, 0.1f, false);
 	}
 
 	return true;
@@ -990,7 +992,7 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 
 void APlayer_Base_Knight::StopBlockPhysics()
 {
-	GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
+	//GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 }
@@ -1049,7 +1051,7 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 	if (TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))))
 	{
 		//IPlayerInteraction* Interaction = Cast<IPlayerInteraction>(_PrimitiveCom);
-		IPlayerInteraction* Interaction = Cast<IPlayerInteraction>(_OtherActor);
+		TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
 		m_MainUI->GetMainMessageUI()->SetMessageText(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
 		m_MainUI->ShowMainMessageUI(true);
 		OverlapInteractionArr.Emplace(Interaction);

@@ -49,13 +49,13 @@ private:
 
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
-
 	UPROPERTY()
-	TArray<class IPlayerInteraction*> OverlapInteractionArr;
-
+	TArray<TScriptInterface<class IPlayerInteraction>> OverlapInteractionArr;
+	UPROPERTY()
 	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
-
+	UPROPERTY()
 	class UUI_Base* m_MainUI;
+	UPROPERTY()
 	class UUI_Player_Main* m_PlayerUI;
 
 private:

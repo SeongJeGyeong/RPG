@@ -45,6 +45,9 @@ void UUI_InvenItem::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
 	}
+
+	m_MenuAnchor->OnGetUserMenuContentEvent.BindUFunction(this, FName("MenuAnchorDataSetting"));
+	//m_MenuAnchor->OnMenuOpenChanged.AddDynamic(this, &UUI_InvenItem::MenuAnchorOpened);
 }
 
 void UUI_InvenItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -93,7 +96,6 @@ void UUI_InvenItem::ItemBtnClicked()
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		bItemUseDelay = pPlayer->GetbItemDelay();
 		m_MenuAnchor->Open(true);
-
 		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
 	}
 	// 장비 아이템 선택창에서 아이템 클릭 시
@@ -121,6 +123,34 @@ void UUI_InvenItem::ItemBtnClicked()
 	}
 }
 
-void UUI_InvenItem::MenuAnchorOpened()
+void UUI_InvenItem::MenuAnchorOpened(bool _IsOpen)
 {
+	if (_IsOpen)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Anchor Open!!!"));
+		UUI_ItemSelectMenu* pMenuAnchor = Cast<UUI_ItemSelectMenu>(m_MenuAnchor);
+		if ( IsValid(pMenuAnchor) )
+		{
+			pMenuAnchor->SetSelectedItemData(m_ItemData);
+			pMenuAnchor->SetbItemUseDelay(bItemUseDelay);
+		}
+	}
+}
+
+UUserWidget* UUI_InvenItem::MenuAnchorDataSetting()
+{
+	UE_LOG(LogTemp, Warning, TEXT("GetMenuContent!!"));
+	TSubclassOf<UUserWidget> pAnchorClass = LoadClass<UUserWidget>(nullptr, TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Item_SelectMenu.BPC_UI_Item_SelectMenu_C'"));
+
+	if (!IsValid(pAnchorClass))
+	{
+		return nullptr;
+	}
+
+	UUI_ItemSelectMenu* pWidget = Cast<UUI_ItemSelectMenu>(CreateWidget(GetWorld(), pAnchorClass));
+
+	pWidget->SetbItemUseDelay(bItemUseDelay);
+	pWidget->SetSelectedItemData(m_ItemData);
+
+	return pWidget;
 }

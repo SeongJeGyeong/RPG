@@ -33,6 +33,9 @@ public:
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 public:
+	void SetSelectedItemData(class UItem_InvenData* _ItemData) { m_SelectedItemData = _ItemData; }
+	void SetbItemUseDelay(const bool& _ItemUseDelay) { bItemUseDelay = _ItemUseDelay; }
+
 	UFUNCTION()
 	void UseBtnClicked();
 

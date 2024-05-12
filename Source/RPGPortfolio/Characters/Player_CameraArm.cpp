@@ -47,8 +47,7 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		if (IsCameraLockedToTarget())
 		{
-			DrawDebugSphere(GetWorld(), m_Target->GetComponentLocation(), 20.f, 16, FColor::Red);
-
+			//DrawDebugSphere(GetWorld(), m_Target->GetComponentLocation(), 20.f, 16, FColor::Red);
 			if ((m_Target->GetComponentLocation() - GetComponentLocation()).Size() > fMaxTargetLockDistance + m_Target->GetScaledSphereRadius())
 			{
 				BreakLockOnTarget();

@@ -37,6 +37,14 @@ void UUI_ItemSelectMenu::NativeConstruct()
 		m_Btn_Use->SetIsEnabled(false);
 	}
 
+	if (IsValid(m_SelectedItemData))
+	{
+		if (m_SelectedItemData->GetItemType() != EITEM_TYPE::CONSUMABLE)
+		{
+			m_Txt_Use->SetColorAndOpacity(FLinearColor::FLinearColor(0.5f, 0.5f, 0.5f, 0.5f));
+			m_Btn_Use->SetIsEnabled(false);
+		}
+	}
 }
 
 void UUI_ItemSelectMenu::NativeTick(const FGeometry& _Geo, float _DeltaTime)

@@ -10,7 +10,6 @@
 ULockOnTargetComponent::ULockOnTargetComponent()
 {
 	SetCollisionProfileName(FName("LOT"));
-
 }
 
 void ULockOnTargetComponent::SetLockOn(bool _LockOn)

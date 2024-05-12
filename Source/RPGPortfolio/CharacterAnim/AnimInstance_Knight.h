@@ -64,7 +64,7 @@ private:
 	float fLineOutCapsule = 50.f;	// 캡슐 밖으로 뻗어나온 라인트레이스 길이
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	float fIKInterpSpeed = 10.f;	// IK가 적용되는 속도
+	float fIKInterpSpeed = 5.f;	// IK가 적용되는 속도
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
 	FRotator rRRot;

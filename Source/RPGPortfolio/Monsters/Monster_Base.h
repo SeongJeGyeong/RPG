@@ -53,14 +53,14 @@ private:
 	
 	EMONSTER_STATE	m_State;
 
-	float fDestroyRate = 0.f;
 	float fDeadEffectRatio;
 	float fWidgetVisTime;
 	bool bLockedOn;
 	bool bAtkTrace;
-	bool bStaggerWait;
-	float fHitWaitTime = 0.f;
 	bool bIsDead;
+
+	FTimerHandle DeadTimer;
+	FTimerHandle HitEndTimer;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
@@ -110,9 +110,10 @@ public:
 	void MonsterAttackNormal();
 	
 	void MonsterDead(AActor* DamageCauser);
+	void MonsterDestroy();
 
 	UFUNCTION()
-	void OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
 	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);

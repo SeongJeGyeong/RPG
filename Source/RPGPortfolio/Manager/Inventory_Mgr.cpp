@@ -46,6 +46,8 @@ UInventory_Mgr* UInventory_Mgr::GetInst(UGameInstance* _GameInst)
 
 void UInventory_Mgr::SetItemDataTable(UDataTable* _ItemDataTable)
 {
+	//AddReferencedObjects(m_InvenStorage[EITEM_TYPE::ARM_CHEST], Collec);
+
 	m_ItemDataTable = _ItemDataTable;
 
 	//데이터 테이블의 정보를 TArray에 넣는다

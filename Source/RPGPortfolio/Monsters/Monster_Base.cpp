@@ -121,7 +121,7 @@ void AMonster_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("PerceiveRange"), m_Info.BOSS_PerceiveRange);
 		}
 		m_AnimInst = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
-		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnStaggerMontageEnded);
+		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
 	
 	m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
@@ -143,55 +143,6 @@ void AMonster_Base::BeginPlay()
 void AMonster_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (m_State == EMONSTER_STATE::DEAD)
-	{
-		fDestroyRate += DeltaTime * 1.f;
-
-		if (fDestroyRate > 3.f)
-		{
-			fDeadEffectRatio += DeltaTime * 0.3f;
-			TArray<USceneComponent*> ChildMeshArr;
-			GetMesh()->GetChildrenComponents(true, ChildMeshArr);
-			if (!ChildMeshArr.IsEmpty())
-			{
-				for ( USceneComponent* ChildMesh : ChildMeshArr )
-				{
-					if ( "TargetComponent" == ChildMesh->GetName() )
-					{
-						continue;
-					}
-					USkeletalMeshComponent* ChildSkelMesh = Cast<USkeletalMeshComponent>(ChildMesh);
-					ChildSkelMesh->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
-				}
-			}
-			GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
-			if (fDeadEffectRatio > 1.f)
-			{
-				Destroy();
-			}
-		}
-	}
-
-	if (bStaggerWait)
-	{
-		fHitWaitTime += DeltaTime * 1.f;
-
-		if (fHitWaitTime > 1.f)
-		{
-			AAIController* pAIController = Cast<AAIController>(GetController());
-			if ( IsValid(pAIController) )
-			{
-				if ( pAIController->GetBlackboardComponent() )
-				{					
-					//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
-					pAIController->GetBrainComponent()->RestartLogic();
-					bStaggerWait = false;
-					fHitWaitTime = 0.f;
-				}
-			}
-		}
-	}
 
 	if (m_WidgetComponent->IsWidgetVisible() && !bLockedOn)
 	{
@@ -301,7 +252,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 void AMonster_Base::MonsterDead(AActor* DamageCauser)
 {
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
-
+	
 	m_State = EMONSTER_STATE::DEAD;
 	bIsDead = true;
 	GetController()->UnPossess();
@@ -331,10 +282,11 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
 	// 스폰할 위치를 찾지 못하면 충돌 상관없이 원래 위치에 스폰
 	TSubclassOf<AItem_Dropped_Base> Item = AItem_Dropped_Base::StaticClass();
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	FRotator Rotator;
-
-	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, GetActorLocation(), Rotator, SpawnParams);
+	FVector vDropLoc = GetActorLocation();
+	vDropLoc.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
 	pDropItem->SetDropItemID(eId);
 	pDropItem->SetDropItemStack(iStack);
 
@@ -347,36 +299,75 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
 	}
+
+	GetWorld()->GetTimerManager().SetTimer(DeadTimer, [this]()
+	{
+		bIsDead = true;
+
+		fDeadEffectRatio += 0.05f;
+		TArray<USceneComponent*> ChildMeshArr;
+		GetMesh()->GetChildrenComponents(true, ChildMeshArr);
+		if ( !ChildMeshArr.IsEmpty() )
+		{
+			for ( USceneComponent* ChildMesh : ChildMeshArr )
+			{
+				if ( "TargetComponent" == ChildMesh->GetName() )
+				{
+					continue;
+				}
+				USkeletalMeshComponent* ChildSkelMesh = Cast<USkeletalMeshComponent>(ChildMesh);
+				ChildSkelMesh->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
+			}
+		}
+		GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
+		if ( fDeadEffectRatio > 1.f )
+		{
+			GetWorld()->GetTimerManager().ClearTimer(DeadTimer);
+			Destroy();
+		}
+	}, 
+	0.1f, true, 5.f);
 }
 
 // 경직상태가 되는 몽타주들 재생 종료시
-void AMonster_Base::OnStaggerMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor;
 	if (IsValid(HitMontage.LoadSynchronous()))
 	{
 		if (HitMontage == Montage)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("피격 몽타주 종료"));
+			// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
+			GetWorld()->GetTimerManager().SetTimer(HitEndTimer, [this]()
+			{
+				AAIController* pAIController = Cast<AAIController>(GetController());
+				if ( IsValid(pAIController) )
+				{
+					if ( pAIController->GetBlackboardComponent() )
+					{
+						//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
+						pAIController->GetBrainComponent()->RestartLogic();
+					}
+				}
+			},
+			1.f, false);
 
-			bStaggerWait = true;
-			fHitWaitTime = 0.f;
 			return;
 		}
 	}
-	TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->BlockAnim;
-	if (IsValid(BlockMontage.LoadSynchronous()))
-	{
-		if (BlockMontage == Montage)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("블록 몽타주 종료"));
 
-			bStaggerWait = true;
-			fHitWaitTime = 0.f;
-			return;
-		}
-	}
+	//TSoftObjectPtr<UAnimMontage> BlockMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->BlockAnim;
+	//if (IsValid(BlockMontage.LoadSynchronous()))
+	//{
+	//	if (BlockMontage == Montage)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("블록 몽타주 종료"));
 
+	//		bStaggerWait = true;
+	//		fHitWaitTime = 0.f;
+	//		return;
+	//	}
+	//}
 }
 
 void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted)

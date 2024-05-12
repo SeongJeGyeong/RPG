@@ -22,7 +22,7 @@ private:
 	UPROPERTY()
 	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;
 
-	TMap<EITEM_ID, FInvenItemRow>	m_InvenStorage[(int32)EITEM_TYPE::END];
+	TMap<EITEM_ID, FInvenItemRow> m_InvenStorage[ (int32)EITEM_TYPE::END ];
 
 public:
 	static UInventory_Mgr* GetInst(UWorld* _World);
