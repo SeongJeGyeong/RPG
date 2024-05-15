@@ -47,6 +47,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "MenuSound", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_MenuSound> m_MenuSound;
 
+	// 락온 표시용
+	UPROPERTY()
+	TSubclassOf<class UUserWidget> m_MarkerClass;
+	UPROPERTY()
+	class UUserWidget* m_Marker;
+
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 	UPROPERTY()
@@ -110,6 +116,7 @@ private:
 
 	bool bShowMenu;
 
+	FTimerHandle LockOnTimer;
 	FTimerHandle BlockReactTimer;
 
 public:
@@ -166,6 +173,7 @@ public:
 	void UseItem(FString _NiagaraPath);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
 	void StopBlockPhysics();
+	void TargetLockOn();
 	void BreakLockOn();
 
 private:
@@ -178,6 +186,7 @@ private:
 	void HeavyAttackToggle(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
+	void LockOnToggleAction(const FInputActionInstance& _Instance);
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
 	void OpenMenu(const FInputActionInstance& _Instance);
 	void ActionCommand(const FInputActionInstance& _Instance);

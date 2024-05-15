@@ -2,14 +2,16 @@
 
 
 #include "LockOnTargetComponent.h"
-#include "Blueprint/UserWidget.h"
-#include "Components/WidgetComponent.h"
 #include "../../Monsters/Monster_Base.h"
 #include "../../Monsters/Boss_Base.h"
 
 ULockOnTargetComponent::ULockOnTargetComponent()
 {
 	SetCollisionProfileName(FName("LOT"));
+}
+
+void ULockOnTargetComponent::SetLockOnMarkVisibility(bool _Visible)
+{
 }
 
 void ULockOnTargetComponent::SetLockOn(bool _LockOn)

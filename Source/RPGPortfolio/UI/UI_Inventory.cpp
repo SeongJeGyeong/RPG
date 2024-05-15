@@ -196,7 +196,7 @@ void UUI_Inventory::SetStatUI(APlayerState* _PlayerState)
 	m_Status->SetPlayerStatUI(Cast<APlayerState_Base>(_PlayerState));
 }
 
-void UUI_Inventory::SetCategoryUI(EITEM_TYPE _Type)
+void UUI_Inventory::SetCategoryUI(const EITEM_TYPE _Type)
 {
 	UPaperSprite* pSprite = nullptr;
 	UTexture2D* Category_2DTex = nullptr;

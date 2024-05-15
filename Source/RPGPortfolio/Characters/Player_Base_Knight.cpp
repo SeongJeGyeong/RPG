@@ -32,6 +32,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "../System/DamageType_Base.h"
 #include "Engine/DamageEvents.h"
+#include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -73,6 +75,12 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	LockonControlRotationRate = 10.f;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
+	if (MarkerUI.Succeeded())
+	{
+		m_MarkerClass = MarkerUI.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -126,6 +134,22 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
 	}
+
+	if ( IsValid(m_MarkerClass) )
+	{
+		m_Marker = CreateWidget(GetWorld(), m_MarkerClass);
+
+		if ( IsValid(m_Marker) )
+		{
+			m_Marker->AddToViewport();
+			m_Marker->SetPositionInViewport(FVector2D(0.f, 0.f));
+			m_Marker->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
+		}
+	}
 }
 
 // Called every frame
@@ -135,18 +159,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 
 	fFrontBack = 0.f;
 	fLeftRight = 0.f;
-	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
-	if (m_Arm->IsCameraLockedToTarget())
-	{
-		// 플레이어에서 타겟으로의 벡터
-		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - (m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 100.f));
-		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
-		FRotator CurrentRot = GetControlRotation();
-		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
-
-		// 타겟을 바라보도록 로테이션 수정
-		GetController()->SetControlRotation(NewRot);
-	}
 	
 	// 회피 애니메이션 재생중일 때
 	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
@@ -286,7 +298,7 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ParryAction);
 				break;
 			case EInputActionType::LOCKON:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, m_Arm, &UPlayer_CameraArm::ToggleCameraLockOn);
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::LockOnToggleAction);
 				break;
 			case EInputActionType::SWITCHLOCKON:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SwitchLockOnTarget);
@@ -379,7 +391,6 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 				}
 			}
 		}
-
 		if ((Controller != NULL) && (vInput.Y != 0.0f))
 		{
 			const FRotator Rotation = m_Arm->m_Target == nullptr ? Controller->GetControlRotation() : (m_Arm->m_Target->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
@@ -595,6 +606,23 @@ void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::PARRY));
 }
 
+void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
+{
+	bool bToggleLockOn = _Instance.GetValue().Get<bool>();
+	bool bTargetLocked = m_Arm->ToggleCameraLockOn(bToggleLockOn);
+	if (bTargetLocked)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+		GetWorld()->GetTimerManager().SetTimer(LockOnTimer, this, &APlayer_Base_Knight::TargetLockOn, 0.01f, true);
+		m_Marker->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		m_Marker->SetVisibility(ESlateVisibility::Hidden);
+		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+	}
+}
+
 void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)
 {
 	float SwitchDirection = _Instance.GetValue().Get<float>();
@@ -614,25 +642,26 @@ void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 {
-	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
-
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if ( !IsValid(pGameMode) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
-	if (pGameMode->IsSubMenuUIOpened())
-	{
-		return;
-	}
-
 	APlayerController* pController = Cast<APlayerController>(GetController());
 	if ( !IsValid(pController) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
 		return;
 	}
+
+	// 세부메뉴가 열려있을 경우
+	if ( pGameMode->IsSubMenuUIOpened() )
+	{
+		return;
+	}
+
+	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
 
 	if (bShowMenu)
 	{
@@ -645,6 +674,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Display, TEXT("menu close"));
 		FInputModeGameOnly GameOnly;
 		pController->SetInputMode(GameOnly);
 
@@ -936,7 +966,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		}
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT));
 	}
-
+	
 	return 0.0f;
 }
 
@@ -997,8 +1027,46 @@ void APlayer_Base_Knight::StopBlockPhysics()
 	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 }
 
+void APlayer_Base_Knight::TargetLockOn()
+{
+	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
+	if ( m_Arm->IsCameraLockedToTarget() )
+	{
+		// 플레이어에서 타겟으로의 벡터
+		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - ( m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 100.f) );
+		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
+		FRotator CurrentRot = GetControlRotation();
+		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, GetWorld()->GetDeltaSeconds(), LockonControlRotationRate);
+
+		// 타겟을 바라보도록 로테이션 수정
+		GetController()->SetControlRotation(NewRot);
+
+		// 락온 타겟 컴포넌트의 위치를 스크린 좌표로 변환해서 해당 좌표에 락온 마커를 표시
+		APlayerController* pController = Cast<APlayerController>(GetController());
+		FVector2D ScreenPos;
+		bool bConverted = UGameplayStatics::ProjectWorldToScreen(pController, m_Arm->m_Target->GetComponentLocation(), ScreenPos);
+		if ( bConverted )
+		{
+			ScreenPos.X -= 5.f;
+			ScreenPos.Y -= 5.f;
+			m_Marker->SetPositionInViewport(ScreenPos);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("락온 스크린 좌표 계산 실패"));
+		}
+	}
+	else
+	{
+		m_Marker->SetVisibility(ESlateVisibility::Hidden);
+		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+	}
+}
+
 void APlayer_Base_Knight::BreakLockOn()
 {
+	GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+	m_Marker->SetVisibility(ESlateVisibility::Hidden);
 	m_Arm->BreakLockOnTarget();
 }
 
@@ -1050,7 +1118,6 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
 	if (TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))))
 	{
-		//IPlayerInteraction* Interaction = Cast<IPlayerInteraction>(_PrimitiveCom);
 		TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
 		m_MainUI->GetMainMessageUI()->SetMessageText(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
 		m_MainUI->ShowMainMessageUI(true);

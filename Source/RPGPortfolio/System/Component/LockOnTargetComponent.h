@@ -9,19 +9,15 @@
 /**
  * 
  */
-UCLASS(meta = (BlueprintSpawnableComponent))
+UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class RPGPORTFOLIO_API ULockOnTargetComponent : public USphereComponent
 {
 	GENERATED_BODY()
 
-private:
-	//bool bInvalidLockOn;
-
 public:
 	ULockOnTargetComponent();
 
-	//bool GetInvalidLockOn() const { return bInvalidLockOn; }
-	//void SetInvalidLockOn(const bool& _InvalidLockOn) { bInvalidLockOn = _InvalidLockOn; }
+	void SetLockOnMarkVisibility(bool _Visible);
 
 	void SetLockOn(bool _LockOn);
 	bool IsOwnerDead();	

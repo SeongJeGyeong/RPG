@@ -50,7 +50,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 
 		if (IsValid(m_MainHUD))
 		{
-			m_MainHUD->AddToViewport();
+			m_MainHUD->AddToViewport(1);
 		}
 		else
 		{

@@ -35,11 +35,14 @@ public:
 	FRotator rForwardRotation;
 
 	class APlayer_Base_Knight* m_Player;
-	//ACharacter* m_Monster;
 
 	// 록온 타겟 컴포넌트
 	UPROPERTY(BlueprintReadOnly)
 	class ULockOnTargetComponent* m_Target;
+
+	// 록온 타겟 컴포넌트
+	/*UPROPERTY(BlueprintReadOnly)
+	class ULockOnComponent* m_Target2;*/
 
 protected:
 	virtual void BeginPlay() override;
@@ -47,7 +50,7 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void ToggleCameraLockOn(const FInputActionInstance& _Instance);
+	bool ToggleCameraLockOn(const bool& _ToggleLockOn);
 	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
 	void BreakLockOnTarget();
 	class ULockOnTargetComponent* GetLockTarget();

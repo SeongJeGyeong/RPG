@@ -28,12 +28,13 @@ AMonster_Base::AMonster_Base()
 	AIControllerClass = AAIC_Monster_Base::StaticClass();
 	m_AIController = Cast<AAIC_Monster_Base>(AAIC_Monster_Base::StaticClass());
 
-	m_TargetComp = CreateDefaultSubobject<ULockOnTargetComponent>(TEXT("TargetComponent"));
-	if (!IsValid(m_TargetComp))
+	/*m_TargetComponent = CreateDefaultSubobject<ULockOnTargetComponent>(TEXT("TargetComponent"));
+	if (!IsValid(m_TargetComponent))
 	{
 		UE_LOG(LogTemp, Error, TEXT("타겟 컴포넌트 생성 실패"));
 	}
-	m_TargetComp->SetupAttachment(GetMesh());
+	m_TargetComponent->SetupAttachment(GetMesh());
+	m_TargetComponent->SetSphereRadius(5.f);*/
 
 	// widgetComponent
 	m_WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
@@ -50,22 +51,6 @@ AMonster_Base::AMonster_Base()
 	{
 		m_WidgetComponent->SetWidgetClass(MonsterUI.Class);
 	}
-
-	// Lock On Mark
-	m_LockOnMarker = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnMarker"));
-	if ( !IsValid(m_LockOnMarker) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
-	}
-	m_LockOnMarker->SetupAttachment(m_TargetComp);
-	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
-	if ( MarkerUI.Succeeded() )
-	{
-		m_LockOnMarker->SetWidgetClass(MarkerUI.Class);
-		//m_MarkerClass = MarkerUI.Class;
-	}
-	m_LockOnMarker->SetWidgetSpace(EWidgetSpace::Screen);
-	m_LockOnMarker->SetDrawSize(FVector2D(50.f, 50.f));
 
 	ConstructorHelpers::FObjectFinder<UDataTable> ItemDropTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_MonsterDropTable.DT_MonsterDropTable'"));
 	if (ItemDropTable.Succeeded())
@@ -136,7 +121,6 @@ void AMonster_Base::BeginPlay()
 		m_Info.CurHP = m_Info.MaxHP;
 	}
 	m_WidgetComponent->SetVisibility(false);
-	m_LockOnMarker->SetVisibility(false);
 }
 
 // Called every frame
@@ -259,8 +243,20 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	GetMesh()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	pPlayer->BreakLockOn();
-	m_LockOnMarker->DestroyComponent();
-	m_TargetComp->DestroyComponent();
+	//m_TargetComponent->DestroyComponent();
+	TArray<TObjectPtr<USceneComponent>> LockOnCompArr = GetMesh()->GetAttachChildren();
+	if (LockOnCompArr.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("부착된 락온 컴포넌트 없음"));
+	}
+	for (TObjectPtr<USceneComponent> LockOnComp : LockOnCompArr)
+	{
+		// LockOnTarget 타입 Component일 경우
+		if (LockOnComp->GetCollisionObjectType() == ECollisionChannel::ECC_GameTraceChannel1)
+		{
+			LockOnComp->DestroyComponent();
+		}
+	}
 
 	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 
@@ -393,8 +389,11 @@ void AMonster_Base::MonsterAttackNormal()
 void AMonster_Base::SetbLockedOn(bool _LockedOn)
 {
 	m_WidgetComponent->SetVisibility(_LockedOn);
-	m_LockOnMarker->SetVisibility(_LockedOn);
+	//m_TargetComponent->SetVisibility(_LockedOn);
+	//m_TargetComponent->SetLockOnMarkVisibility(_LockedOn);
 	bLockedOn = _LockedOn;
+	GetMesh()->SetRenderCustomDepth(_LockedOn);
+	//m_LockOnMarker->SetVisibility(true);
 }
 
 void AMonster_Base::MeleeAttackHitCheck()

@@ -29,8 +29,8 @@ private:
 	UPROPERTY()
 	TArray<struct FMonsterItemDropTable> m_DropItemArr;
 
-	UPROPERTY()
-	class ULockOnTargetComponent* m_TargetComp;
+	//UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	//class ULockOnTargetComponent* m_TargetComponent;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* m_WidgetComponent;
@@ -38,16 +38,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
 
-	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	EITEM_ID m_DropItemID;
-	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	int32 m_DropItemStack = 1;
-
 	UPROPERTY()
 	UAnimInstance* m_AnimInst;
 
-	UPROPERTY()
-	class UWidgetComponent* m_LockOnMarker;
 	UPROPERTY()
 	class UUI_Monster* m_MonsterWidget;
 	

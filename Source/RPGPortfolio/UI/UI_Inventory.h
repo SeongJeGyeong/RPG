@@ -31,7 +31,8 @@ public:
 	void Clear();
 	bool IsInventoryOpened();
 	void SetStatUI(APlayerState* _PlayerState);
-	void SetCategoryUI(EITEM_TYPE _Type);
+	void SetCategoryEnum(const EITEM_TYPE _Type) { eCategory = _Type; }
+	void SetCategoryUI(const EITEM_TYPE _Type);
 
 public:
 	virtual void NativeConstruct() override;
