@@ -89,6 +89,7 @@ Content/Weapon_Pack/*
 Content/IthrisCemetery/*
 Content/InfinityBladeWeapons/*
 Content/InfinityBladeAdversaries/*
+Content/InfinityBladeEffects/*
 Content/paladin/*
 Content/CityofBrass_Enemies/*
 Content/KoreanTraditionalMartialArts/*
@@ -100,4 +101,8 @@ Content/sA_PickupSet_1/*
 Content/Megascans/*
 Content/Maps/*
 Content/ParagonKhaimera/*
+Content/AdvancedMagicFX12/*
+Content/AdvancedMagicFX13/*
+Content/Crossbow/*
+Content/Hack_And_Slash_FX/*
 backup/*
