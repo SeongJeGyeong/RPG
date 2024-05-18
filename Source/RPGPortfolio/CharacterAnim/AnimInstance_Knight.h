@@ -110,6 +110,10 @@ public:
 	UFUNCTION()
 	void AnimNotify_DodgeEnd();
 
+	// 원거리공격 발사
+	UFUNCTION()
+	void AnimNotify_ShotProjectile();
+
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;

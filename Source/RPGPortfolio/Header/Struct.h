@@ -323,3 +323,18 @@ struct FMonsterItemDropTable
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float			ProbabilityTop;
 };
+
+USTRUCT(Atomic, BlueprintType)
+struct FProjectileAssets
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraSystem*		ProjectileEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraSystem*		ProjHitEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase*			ProjHitSound;
+};

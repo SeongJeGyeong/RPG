@@ -64,6 +64,9 @@ private:
 	UPROPERTY()
 	class UUI_Player_Main* m_PlayerUI;
 
+	UPROPERTY()
+	TArray<AActor*> HitActorArr;
+
 private:
 	// 이동 블렌드스페이스용
 	float fFrontBack;
@@ -116,6 +119,9 @@ private:
 
 	bool bShowMenu;
 
+	bool bToggleLockOn;
+	FTimerDelegate LockOnDelegate;
+
 	FTimerHandle LockOnTimer;
 	FTimerHandle BlockReactTimer;
 
@@ -149,6 +155,8 @@ public:
 
 	void GainMonsterSoul(int32 _GainedSoul);
 
+	void EmptyHitActorArr() { HitActorArr.Empty(); }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -173,8 +181,11 @@ public:
 	void UseItem(FString _NiagaraPath);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
 	void StopBlockPhysics();
+
+	UFUNCTION()
 	void TargetLockOn();
 	void BreakLockOn();
+	void ShotProjectile();
 
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
@@ -193,6 +204,7 @@ private:
 	void BackToPrevMenu(const FInputActionInstance& _Instance);
 	void QuickSlotChange(const FInputActionInstance& _Instance);
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
+	void UseSkill_1(const FInputActionInstance& _Instance);
 
 	bool CheckMontagePlaying();
 

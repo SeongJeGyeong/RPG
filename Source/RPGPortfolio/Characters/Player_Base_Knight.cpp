@@ -29,11 +29,12 @@
 #include "../Manager/Equip_Mgr.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
 #include "../System/DamageType_Base.h"
 #include "Engine/DamageEvents.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "NiagaraFunctionLibrary.h"
+#include "../Projectiles/Proj_Player_Cutter.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -150,6 +151,8 @@ void APlayer_Base_Knight::BeginPlay()
 			UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
 		}
 	}
+
+	LockOnDelegate.BindUFunction(this, FName("TargetLockOn"));
 }
 
 // Called every frame
@@ -317,6 +320,9 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				break;
 			case EInputActionType::USELOWERQUICKSLOT:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::UseLowerQuickSlot);
+				break;
+			case EInputActionType::USESKILL_1:
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::UseSkill_1);
 				break;
 			default:
 				break;
@@ -608,18 +614,20 @@ void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
 {
-	bool bToggleLockOn = _Instance.GetValue().Get<bool>();
+	bToggleLockOn = _Instance.GetValue().Get<bool>();
 	bool bTargetLocked = m_Arm->ToggleCameraLockOn(bToggleLockOn);
 	if (bTargetLocked)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
-		GetWorld()->GetTimerManager().SetTimer(LockOnTimer, this, &APlayer_Base_Knight::TargetLockOn, 0.01f, true);
+		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
+
+		//GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+		//GetWorld()->GetTimerManager().SetTimer(LockOnTimer, this, &APlayer_Base_Knight::TargetLockOn, 0.01f, true);
 		m_Marker->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
-		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+		//GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
 
@@ -789,6 +797,18 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		return;
 	}
 }
+void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
+{
+	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && bEnableMove)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("skill 1 play"));
+		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("skill 1 can't activate"));
+	}
+}
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
 
@@ -803,9 +823,11 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT))			||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
 		GetCharacterMovement()->IsFalling()
 		)
 	{
+		UE_LOG(LogTemp, Display, TEXT("몽타주를 재생 불가능한 상태입니다."));
 		return true;
 	}
 
@@ -867,9 +889,17 @@ void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 	{
 		if (HitResult.GetActor()->IsValidLowLevel())
 		{
+			for (AActor* HitActor : HitActorArr)
+			{
+				if (HitResult.GetActor() == HitActor)
+				{
+					return;
+				}
+			}
+
 			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));		
 			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
-			bAtkTrace = false;
+			HitActorArr.Add(HitResult.GetActor());
 		}
 	}
 }
@@ -1045,21 +1075,24 @@ void APlayer_Base_Knight::TargetLockOn()
 		APlayerController* pController = Cast<APlayerController>(GetController());
 		FVector2D ScreenPos;
 		bool bConverted = UGameplayStatics::ProjectWorldToScreen(pController, m_Arm->m_Target->GetComponentLocation(), ScreenPos);
-		if ( bConverted )
+		if (bConverted)
 		{
-			ScreenPos.X -= 5.f;
-			ScreenPos.Y -= 5.f;
 			m_Marker->SetPositionInViewport(ScreenPos);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("락온 스크린 좌표 계산 실패"));
 		}
+
+		if (bToggleLockOn)
+		{
+			GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
+		}
 	}
 	else
 	{
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
-		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+		//GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
 
@@ -1070,13 +1103,32 @@ void APlayer_Base_Knight::BreakLockOn()
 	m_Arm->BreakLockOnTarget();
 }
 
+void APlayer_Base_Knight::ShotProjectile()
+{
+	FActorSpawnParameters param = {};
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	param.OverrideLevel = GetLevel();
+	param.bDeferConstruction = false;	// 지연생성(BeginPlay 호출 X)
+
+	// 카메라 위치 + 카메라 전방방향 * 10미터
+	//FVector CamForwardPos = m_Camera->GetComponentLocation() + m_Camera->GetForwardVector() * 2000;
+
+	// 투사체 생성위치	
+	FVector ProjectileLocation = GetActorLocation() + FVector(0.f, 0.f, 10.f) + GetActorForwardVector() * 200.f;
+
+	// 투사체 위치에서 카메라 전방 10미터 위치를 향하는 방향벡터 구하기
+	FVector vDir = GetActorForwardVector() * 1000.f;
+
+	TSubclassOf<AProj_Player_Cutter> ProjClass = LoadClass<AProj_Player_Cutter>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_Proj_Cutter.BPC_Proj_Cutter_C'"));
+	AProj_Player_Cutter* pProjectile = GetWorld()->SpawnActor<AProj_Player_Cutter>(ProjClass, ProjectileLocation, GetActorRotation(), param);
+	pProjectile->LaunchMotion(vDir);
+}
+
 void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
 {
 	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *_NiagaraPath);
 	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/EST-drink.EST-drink'"));
-	FVector vLoc = GetActorLocation();
-	vLoc.Z -= 40.f;
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), pSystem, vLoc);
+	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
 	bItemInUse = true;

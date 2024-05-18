@@ -20,11 +20,14 @@ enum class EInputActionType : uint8
 	BACKTOPREV,
 	QUICKSLOTCHANGE,
 	USELOWERQUICKSLOT,
+	USESKILL_1,
+	USESKILL_2,
 };
 
 UENUM(BlueprintType)
 enum class EPlayerMontage : uint8
 {
+	DEFAULT,
 	DODGE_FW,
 	DODGE_BW,
 	ATTACK,
@@ -34,6 +37,7 @@ enum class EPlayerMontage : uint8
 	HIT,
 	GUARDBREAK,
 	USEITEM,
+	SLASH_CUTTER,
 };
 
 UENUM(BlueprintType)

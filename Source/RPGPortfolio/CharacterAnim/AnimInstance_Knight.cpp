@@ -253,8 +253,10 @@ void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 {
 	m_Player->SetbAtkTrace(false);
+	m_Player->EmptyHitActorArr();
 	// 공격 판정 끝난 뒤에 공격 입력이 들어와야만 다음 콤보로 넘어가도록
 	m_Player->SetbAtkToggle(false);
+
 }
 
 void UAnimInstance_Knight::AnimNotify_MoveStart()
@@ -275,4 +277,9 @@ void UAnimInstance_Knight::AnimNotify_DodgeStart()
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
 	OnInvincibleTimeCheck.Broadcast(false);
+}
+
+void UAnimInstance_Knight::AnimNotify_ShotProjectile()
+{
+	m_Player->ShotProjectile();
 }
