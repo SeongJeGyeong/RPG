@@ -32,10 +32,10 @@ APlayerState_Base::APlayerState_Base()
 	m_PlayerBasePower.CurMP = m_PlayerBasePower.MaxMP;
 	m_PlayerBasePower.MaxStamina = m_PlayerStat.Endurance * 10.f;
 	m_PlayerBasePower.CurStamina = m_PlayerBasePower.MaxStamina;
-	m_PlayerBasePower.PhysicAtk = ( m_PlayerStat.Strength + m_PlayerStat.Dexterity ) * 10.f;
-	m_PlayerBasePower.PhysicDef = ( m_PlayerStat.Strength + m_PlayerStat.Dexterity ) * 5.f;
+	m_PlayerBasePower.PhysicAtk = ((m_PlayerStat.Strength + m_PlayerStat.Dexterity) / 2) * 20.f;
+	m_PlayerBasePower.PhysicDef = (( m_PlayerStat.Strength + m_PlayerStat.Dexterity) / 2) * 10.f;
 	m_PlayerBasePower.MagicAtk = m_PlayerStat.Intelligence * 20.f;
-	m_PlayerBasePower.MagicDef = ( m_PlayerStat.Attunement + m_PlayerStat.Intelligence ) * 5.f;
+	m_PlayerBasePower.MagicDef = ((m_PlayerStat.Attunement + m_PlayerStat.Intelligence) / 2) * 10.f;
 }
 
 void APlayerState_Base::BeginPlay()

@@ -246,3 +246,11 @@ enum class EInteractionType : uint8
 	TELEPORT,
 	INVESTIGATABLE,
 };
+
+UENUM(BlueprintType)
+enum class EProjectileType : uint8
+{
+	NONE,
+	BOMB,
+	SLASH_CUTTER,
+};

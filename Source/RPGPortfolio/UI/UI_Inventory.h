@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_Inventory.generated.h"
@@ -23,7 +24,7 @@ private:
 	class UButton*			m_LeftBtn;
 	class UButton*			m_RightBtn;
 	class UImage*			m_Category_Img;
-	enum EITEM_TYPE			eCategory;
+	EITEM_TYPE			eCategory;
 	class UDA_MenuSound* m_Sound;
 
 public:

@@ -2,13 +2,15 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
 #include "../System/Interface/ProjectileInterface.h"
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+//#include "GameFramework/Actor.h"
+#include "Projectile_Base.h"
 #include "Proj_Player_Cutter.generated.h"
 
 UCLASS()
-class RPGPORTFOLIO_API AProj_Player_Cutter : public AActor, public IProjectileInterface
+class RPGPORTFOLIO_API AProj_Player_Cutter : public AProjectile_Base, public IProjectileInterface
 {
 	GENERATED_BODY()
 
@@ -22,8 +24,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UNiagaraComponent* m_BaseNiagara;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
-	class UNiagaraSystem* m_HitNiagara;
+	EATTACK_TYPE	eAtkType;
+	float			fAtkDamage;
 
 public:	
 	// Sets default values for this actor's properties
@@ -40,6 +42,7 @@ public:
 public:
 	virtual void HitEffect() override;
 	virtual void LaunchMotion(FVector _LaunchVec) override;
+	void SetProjDamage(EATTACK_TYPE _AtkType, float _AtkDamage) { eAtkType = _AtkType; fAtkDamage = _AtkDamage; };
 
 	UFUNCTION()
 	void OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);

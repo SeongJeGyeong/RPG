@@ -46,7 +46,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bHeavyToggle(false)
 	, bNextAtkCheckOn(false)
 	, bItemDelay(false)
-	, fItemDelayTime(0.f)
 	, bToggleInvinc(false)
 	, fInvincTime(0.f)
 	, CurrentCombo(1)
@@ -153,6 +152,7 @@ void APlayer_Base_Knight::BeginPlay()
 	}
 
 	LockOnDelegate.BindUFunction(this, FName("TargetLockOn"));
+	ItemDelayDelegate.BindUFunction(this, FName("ItemDelaytime"), 1.f);
 }
 
 // Called every frame
@@ -213,26 +213,12 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		}
 	}
 
-	if (bItemDelay)
-	{
-		fItemDelayTime += 1.f * DeltaTime;
-		if (fItemDelayTime > 3.f)
-		{
-			UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-			pQuickSlotUI->SetQuickSlotColor(1.f, 1.f, 1.f, 1.f, false);
-			bItemDelay = false;
-			fItemDelayTime = 0.f;
-		}
-	}
-
 	// 아이템 사용 중
 	if (bItemInUse)
 	{
-		UE_LOG(LogTemp, Display, TEXT("using item"));
 		GetCharacterMovement()->MaxWalkSpeed = 100.f;
 		if (!m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM)))
 		{
-			UE_LOG(LogTemp, Display, TEXT("end using item"));
 			m_AnimInst->TurnOnItemUseBlend(0.f);
 			GetCharacterMovement()->MaxWalkSpeed = 300.f;
 			bItemInUse = false;
@@ -504,14 +490,12 @@ void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 		{
 			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 			pState->SetbSTRecovSlowly(true);
-			UE_LOG(LogTemp, Warning, TEXT("GuardTrue"));
 		}
 		else
 		{
 			bToggleGuard = false;
 			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 			pState->SetbSTRecovSlowly(false);
-			UE_LOG(LogTemp, Warning, TEXT("GuardFalse"));
 		}
 	}
 }
@@ -568,14 +552,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instance)
 {
 	bHeavyToggle = _Instance.GetValue().Get<bool>();
-	if ( bHeavyToggle )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HeavyTrue"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HeavyFalse"));
-	}
 }
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
@@ -620,22 +596,17 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	{
 		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
 
-		//GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
-		//GetWorld()->GetTimerManager().SetTimer(LockOnTimer, this, &APlayer_Base_Knight::TargetLockOn, 0.01f, true);
 		m_Marker->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
-		//GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
 
 void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)
 {
 	float SwitchDirection = _Instance.GetValue().Get<float>();
-
-	UE_LOG(LogTemp, Warning, TEXT("SwitchDirection : %f"), SwitchDirection);
 
 	if (SwitchDirection > 0.f)
 	{
@@ -664,8 +635,39 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 	}
 
 	// 세부메뉴가 열려있을 경우
-	if ( pGameMode->IsSubMenuUIOpened() )
+	if (pGameMode->IsSubMenuUIOpened())
 	{
+		if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
+		{
+			UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
+			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			return;
+		}
+
+		UUI_StatusMain* StatusUI = pGameMode->GetStatusUI();
+		pGameMode->GetStatusUI()->GetVisibility();
+		if (StatusUI->GetVisibility() == ESlateVisibility::Visible)
+		{
+			StatusUI->SetVisibility(ESlateVisibility::Hidden);
+			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			return;
+		}
+
+		UUI_EquipMain* EquipUI = pGameMode->GetEquipUI();
+		if ( EquipUI->GetVisibility() == ESlateVisibility::Visible )
+		{
+			if ( EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible )
+			{
+				EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
+				UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+				return;
+			}
+
+			EquipUI->SetVisibility(ESlateVisibility::Hidden);
+			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			return;
+		}
+
 		return;
 	}
 
@@ -700,13 +702,6 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	if (!OverlapInteractionArr.IsEmpty())
 	{
 		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction();
-		//AItem_Dropped_Base* pDropItem = Cast<AItem_Dropped_Base>(OverlapInteractionArr[OverlapInteractionArr.Num() - 1]);
-		//FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pDropItem->GetDropItemID());
-
-		//m_MainUI->ShowItemMessageUI(true);
-		//m_MainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, pDropItem->GetDropItemStack());
-		//m_MainUI->ShowMainMessageUI(true);
-		//pDropItem->Destroy();
 	}
 	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때
 	else if (m_MainUI->GetRootMessageDisplayed())
@@ -775,14 +770,13 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx))
 		{
 			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
-			UInventory_Mgr::GetInst(GetWorld())->UseInventoryItem(pItem->ItemInfo->ID);
+			UInventory_Mgr::GetInst(GetWorld())->UseInventoryItem(pItem->ItemInfo->ID, pItem->EquipedSlot);
 
 			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
 
 			// 아이템 사용후 대기시간 on
 			UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-			pQuickSlotUI->SetQuickSlotColor(0.5f, 0.5f, 0.5f, 0.5f, false);
-			fItemDelayTime = 0.f;
+			GetWorld()->GetTimerManager().SetTimerForNextTick(ItemDelayDelegate);
 			bItemDelay = true;
 		}
 		else
@@ -799,14 +793,31 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 }
 void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 {
+	if ( !IsValid(m_AnimInst) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
+		return;
+	}
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	// 스테미너가 0일 경우 공격 불가
+	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
+	{
+		return;
+	}
+
+	// 마나가 0일 경우 공격 불가
+	if (pState->GetPlayerBasePower().CurMP <= 0.f)
+	{
+		return;
+	}
+
 	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && bEnableMove)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("skill 1 play"));
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("skill 1 can't activate"));
+		ConsumeStaminaForMontage(EPlayerMontage::SLASH_CUTTER);
+		pState->SetPlayerCurrentMP(pState->GetPlayerBasePower().CurMP - 20.f);
+		// ShotProjectile로
 	}
 }
 //////////////////////////////////////////////////////////////////////////
@@ -896,8 +907,6 @@ void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 					return;
 				}
 			}
-
-			UE_LOG(LogTemp, Warning, TEXT("Hit!!!"));		
 			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
 			HitActorArr.Add(HitResult.GetActor());
 		}
@@ -1092,15 +1101,33 @@ void APlayer_Base_Knight::TargetLockOn()
 	else
 	{
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
-		//GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
 
 void APlayer_Base_Knight::BreakLockOn()
 {
-	GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	m_Marker->SetVisibility(ESlateVisibility::Hidden);
 	m_Arm->BreakLockOnTarget();
+}
+
+void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
+{
+	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
+	pQuickSlotUI->SetLowerSlotDelay(_DelayPercent);
+	if (_DelayPercent > 0.f)
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
+			{
+				float fDelayPercent = FMath::Clamp(_DelayPercent - GetWorld()->GetDeltaSeconds() / 3.f, 0.f, 1.f);
+				UE_LOG(LogTemp, Warning, TEXT("delay : %f"), fDelayPercent);
+				ItemDelaytime(fDelayPercent);
+			}
+		));
+	}
+	else
+	{
+		bItemDelay = false;
+	}
 }
 
 void APlayer_Base_Knight::ShotProjectile()
@@ -1109,18 +1136,19 @@ void APlayer_Base_Knight::ShotProjectile()
 	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	param.OverrideLevel = GetLevel();
 	param.bDeferConstruction = false;	// 지연생성(BeginPlay 호출 X)
-
-	// 카메라 위치 + 카메라 전방방향 * 10미터
-	//FVector CamForwardPos = m_Camera->GetComponentLocation() + m_Camera->GetForwardVector() * 2000;
+	param.Owner = this;
 
 	// 투사체 생성위치	
 	FVector ProjectileLocation = GetActorLocation() + FVector(0.f, 0.f, 10.f) + GetActorForwardVector() * 200.f;
 
-	// 투사체 위치에서 카메라 전방 10미터 위치를 향하는 방향벡터 구하기
+	// 투사체 발사 방향
 	FVector vDir = GetActorForwardVector() * 1000.f;
 
-	TSubclassOf<AProj_Player_Cutter> ProjClass = LoadClass<AProj_Player_Cutter>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_Proj_Cutter.BPC_Proj_Cutter_C'"));
+	TSubclassOf<AProj_Player_Cutter> ProjClass = LoadClass<AProj_Player_Cutter>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_SlashCutter.BPC_SlashCutter_C'"));
 	AProj_Player_Cutter* pProjectile = GetWorld()->SpawnActor<AProj_Player_Cutter>(ProjClass, ProjectileLocation, GetActorRotation(), param);
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, pState->GetPlayerBasePower().MagicAtk);
+	pProjectile->SetShotInstigator(this);
 	pProjectile->LaunchMotion(vDir);
 }
 
@@ -1155,7 +1183,8 @@ void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 	case EPlayerMontage::JUMPATTACK:
 		fConsumption = 15.f;
 		break;
-	case EPlayerMontage::PARRY:
+	case EPlayerMontage::SLASH_CUTTER:
+		fConsumption = 20.f;
 		break;
 	default:
 		break;
@@ -1232,15 +1261,6 @@ void APlayer_Base_Knight::CloseMenuUI()
 
 	m_MainUI->ShowMenu(false);
 	bShowMenu = false;
-}
-
-// 아이템 사용 후 대기시간 계산 시작
-void APlayer_Base_Knight::ItemUseDelayOn()
-{
-	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-	pQuickSlotUI->SetQuickSlotColor(0.5f, 0.5f, 0.5f, 0.5f, false);
-	fItemDelayTime = 0.f;
-	bItemDelay = true;
 }
 
 // 무적시간 동안 데미지 안받도록 설정

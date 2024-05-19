@@ -92,7 +92,7 @@ private:
 
 	// 아이템 사용 딜레이 체크용
 	bool bItemDelay;
-	float fItemDelayTime;
+	FTimerDelegate ItemDelayDelegate;
 
 	// 아이템 사용 애니메이션 재생 중
 	bool bItemInUse;
@@ -122,7 +122,7 @@ private:
 	bool bToggleLockOn;
 	FTimerDelegate LockOnDelegate;
 
-	FTimerHandle LockOnTimer;
+	//FTimerHandle LockOnTimer;
 	FTimerHandle BlockReactTimer;
 
 public:
@@ -140,12 +140,14 @@ public:
 	bool GetbEnableMove() const { return bEnableMove; }
 	void SetbEnableMove(const bool& _EnableMove) { bEnableMove = _EnableMove; }
 	bool GetbItemDelay() const { return bItemDelay; }
+	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
 	bool GetbInvincible() const { return bToggleInvinc; }
 	void SetbInvincible(const bool& _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
 	bool GetbSprintToggle() const { return bSprintToggle; }
 	void SetOrientRotation(const bool& _Val);
+	bool GetbToggleLockOn() const { return bToggleLockOn; }
 
 	const UCameraComponent* GetCamera() { return m_Camera; }
 	const UPlayer_CameraArm* GetArm() { return m_Arm; }
@@ -174,7 +176,6 @@ public:
 	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
 	void NextAttackCheck();
 	void CloseMenuUI();
-	void ItemUseDelayOn();
 	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart(bool _AtkMove);
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
@@ -184,6 +185,9 @@ public:
 
 	UFUNCTION()
 	void TargetLockOn();
+	UFUNCTION()
+	void ItemDelaytime(float _DelayPercent);
+
 	void BreakLockOn();
 	void ShotProjectile();
 

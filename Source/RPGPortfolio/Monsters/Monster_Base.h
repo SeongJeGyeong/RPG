@@ -102,7 +102,7 @@ public:
 
 	void MonsterAttackNormal();
 	
-	void MonsterDead(AActor* DamageCauser);
+	void MonsterDead(AController* EventInstigator);
 	void MonsterDestroy();
 
 	UFUNCTION()

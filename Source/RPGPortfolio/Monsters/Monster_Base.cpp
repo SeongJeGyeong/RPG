@@ -187,7 +187,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	// 사망 시
 	if (m_Info.CurHP <= 0.f && GetController())
 	{
-		MonsterDead(DamageCauser);
+		MonsterDead(EventInstigator);
 		return 0.f;
 	}
 
@@ -201,11 +201,9 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 			pAIController->GetBrainComponent()->StopLogic("Hit");
 		}
 	}
-
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
-
+	
 	// 공격한 플레이어의 반대방향으로 밀려남
-	FVector LaunchVec = GetActorLocation() - pPlayer->GetActorLocation();
+	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
 	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
@@ -233,17 +231,21 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return 0.0f;
 }
 
-void AMonster_Base::MonsterDead(AActor* DamageCauser)
+void AMonster_Base::MonsterDead(AController* EventInstigator)
 {
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(DamageCauser);
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
 	
 	m_State = EMONSTER_STATE::DEAD;
 	bIsDead = true;
 	GetController()->UnPossess();
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	GetMesh()->SetCollisionProfileName(TEXT("IgnoreAll"));
-	pPlayer->BreakLockOn();
-	//m_TargetComponent->DestroyComponent();
+	// 록온 상태일 경우 해제
+	if (pPlayer->GetbToggleLockOn())
+	{
+		pPlayer->BreakLockOn();
+	}
+
 	TArray<TObjectPtr<USceneComponent>> LockOnCompArr = GetMesh()->GetAttachChildren();
 	if (LockOnCompArr.Num() == 0)
 	{
@@ -281,7 +283,7 @@ void AMonster_Base::MonsterDead(AActor* DamageCauser)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	FRotator Rotator;
 	FVector vDropLoc = GetActorLocation();
-	vDropLoc.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	vDropLoc.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 20.f;
 	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
 	pDropItem->SetDropItemID(eId);
 	pDropItem->SetDropItemStack(iStack);

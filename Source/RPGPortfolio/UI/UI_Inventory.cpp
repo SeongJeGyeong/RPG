@@ -8,7 +8,6 @@
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
 #include "../System/PlayerState_Base.h"
-#include "../Header/Enum.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "PaperSprite.h"
 #include "Styling/SlateBrush.h"

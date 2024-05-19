@@ -7,6 +7,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "../System/DamageType_Base.h"
 
 // Sets default values
 AProj_Player_Cutter::AProj_Player_Cutter()
@@ -15,7 +16,7 @@ AProj_Player_Cutter::AProj_Player_Cutter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	m_Hitbox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
-	//m_Hitbox->SetCollisionProfileName("");
+	m_Hitbox->SetCollisionProfileName("PlayerRangeAtk");
 	SetRootComponent(m_Hitbox);
 	m_Hitbox->SetEnableGravity(false);
 
@@ -52,9 +53,15 @@ void AProj_Player_Cutter::LaunchMotion(FVector _LaunchVec)
 
 void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), m_HitNiagara, Hit.Location);
-	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_CutterHit.SC_Player_CutterHit'"));
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), GetProjHitNiagara(), Hit.Location);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
+	if ( GetOwner() == nullptr )
+	{
+		return;
+	}
+
+	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
+	DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);
+	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
 	Destroy();
 }
-

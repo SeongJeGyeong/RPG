@@ -4,6 +4,7 @@
 #include "UI_Player_QuickSlot.h"
 #include "UI_Player_QuickSlotItem.h"
 #include "../Manager/Equip_Mgr.h"
+#include "Components/ProgressBar.h"
 
 void UUI_Player_QuickSlot::NativeConstruct()
 {
@@ -12,8 +13,9 @@ void UUI_Player_QuickSlot::NativeConstruct()
 	m_UpperSlotItem = Cast<UUI_Player_QuickSlotItem>(GetWidgetFromName("UI_UpperSlot"));
 	m_LowerSlotItem = Cast<UUI_Player_QuickSlotItem>(GetWidgetFromName("UI_LowerSlot"));
 	m_NextQuickSlotItem = Cast<UUI_Player_QuickSlotItem>(GetWidgetFromName("UI_NextQuickSlot"));
+	m_LowerSlotDelayBar = Cast<UProgressBar>(GetWidgetFromName("LowerSlot_DelayBar"));
 
-	if (!IsValid(m_UpperSlotItem) || !IsValid(m_LowerSlotItem) || !IsValid(m_NextQuickSlotItem))
+	if (!IsValid(m_UpperSlotItem) || !IsValid(m_LowerSlotItem) || !IsValid(m_NextQuickSlotItem) || !IsValid(m_LowerSlotDelayBar))
 	{
 		UE_LOG(LogTemp, Error, TEXT("퀵슬롯 UI 캐스팅 실패"));
 	}
@@ -73,16 +75,21 @@ void UUI_Player_QuickSlot::RenewNextQuickSlot(int32 _Idx)
 	m_NextQuickSlotItem->RenewNextQuickSlotItem(ItemData);
 }
 
-void UUI_Player_QuickSlot::SetQuickSlotColor(float R, float G, float B, float A, bool UroL)
-{
-	// true면 위쪽 슬롯의 컬러 세팅
-	// false면 아래쪽 슬롯 컬러 세팅
-	if (UroL)
-	{
-		m_UpperSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
-	}
-	else
-	{
-		m_LowerSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
-	}
+//void UUI_Player_QuickSlot::SetQuickSlotColor(float R, float G, float B, float A, bool UroL)
+//{
+//	// true면 위쪽 슬롯의 컬러 세팅
+//	// false면 아래쪽 슬롯 컬러 세팅
+//	if (UroL)
+//	{
+//		m_UpperSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
+//	}
+//	else
+//	{
+//		m_LowerSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
+//	}
+//}
+
+void UUI_Player_QuickSlot::SetLowerSlotDelay(float _DelayPercent)
+{	
+	m_LowerSlotDelayBar->SetPercent(_DelayPercent);
 }

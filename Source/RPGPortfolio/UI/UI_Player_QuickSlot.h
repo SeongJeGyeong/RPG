@@ -18,6 +18,9 @@ private:
 	class UUI_Player_QuickSlotItem* m_UpperSlotItem;
 	class UUI_Player_QuickSlotItem* m_LowerSlotItem;
 	class UUI_Player_QuickSlotItem* m_NextQuickSlotItem;
+	class UProgressBar*				m_LowerSlotDelayBar;
+
+	float fItemDelayTime = 0.f;
 
 public:
 	virtual void NativeConstruct() override;
@@ -25,5 +28,6 @@ public:
 
 	void RenewLowerQuickSlot(int32 _Idx);
 	void RenewNextQuickSlot(int32 _Idx);
-	void SetQuickSlotColor(float R, float G, float B, float A, bool UroL);
+	//void SetQuickSlotColor(float R, float G, float B, float A, bool UroL);
+	void SetLowerSlotDelay(float _DelayPercent);
 };

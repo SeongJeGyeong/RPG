@@ -69,7 +69,8 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 		}
 
 		// 아이템 사용후 대기시간 on
-		pPlayer->ItemUseDelayOn();
+		pPlayer->ItemDelaytime(1.f);
+		pPlayer->SetbItemDelay(true);
 
 		UE_LOG(LogTemp, Warning, TEXT("데이터 전달 성공"));
 		UE_LOG(LogTemp, Warning, L"%s", *m_SelectedItemData->GetItemName());

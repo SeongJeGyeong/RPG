@@ -46,7 +46,8 @@ UInventory_Mgr* UInventory_Mgr::GetInst(UGameInstance* _GameInst)
 
 void UInventory_Mgr::SetItemDataTable(UDataTable* _ItemDataTable)
 {
-	//AddReferencedObjects(m_InvenStorage[EITEM_TYPE::ARM_CHEST], Collec);
+	//AddReferencedObjects(m_InvenStorage[
+	// ::ARM_CHEST], Collec);
 
 	m_ItemDataTable = _ItemDataTable;
 
@@ -121,7 +122,10 @@ void UInventory_Mgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
 	}
 	else
 	{
-		RenewEquipConsumeUI(_Slot, pItemRow, true);
+		if (_Slot != EEQUIP_SLOT::EMPTY)
+		{
+			RenewEquipConsumeUI(_Slot, pItemRow, true);
+		}
 		m_InvenStorage[(int32)pItemInfo->Type].Remove(_ID);
 	}
 }
@@ -522,7 +526,7 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 }
 
-void UInventory_Mgr::UseInventoryItem(EITEM_ID _ID)
+void UInventory_Mgr::UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 
@@ -546,6 +550,42 @@ void UInventory_Mgr::UseInventoryItem(EITEM_ID _ID)
 		pMainUI->GetSoulUI()->RenewAmountOfSoul(pItemInfo->Gained_Soul);
 	}
 
+	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
+	if (_Slot == EEQUIP_SLOT::EMPTY)
+	{
+		DecreaseInventoryItem(_ID);
+	}
+
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(m_World, 0));
 	pPlayer->UseItem(pItemInfo->NiagaraPath);
+}
+
+void UInventory_Mgr::DecreaseInventoryItem(EITEM_ID _ID)
+{
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+
+	if (nullptr == pItemInfo)
+	{
+		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		return;
+	}
+
+	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
+	// 없으면 아무것도 수행하지 않고, 있으면 인벤토리에서 삭제한다. 
+	FInvenItemRow* pItemRow = m_InvenStorage[ (int32)pItemInfo->Type ].Find(_ID);
+	if ( nullptr == pItemRow )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("삭제할 아이템이 존재하지 않음"));
+		return;
+	}
+
+	if (pItemRow->Stack > 0)
+	{
+		--pItemRow->Stack;
+
+		if (pItemRow->Stack <= 0)
+		{
+			UInventory_Mgr::GetInst(m_World)->SubGameItem(pItemRow->EquipedSlot, pItemRow->ItemInfo->ID);
+		}
+	}
 }
