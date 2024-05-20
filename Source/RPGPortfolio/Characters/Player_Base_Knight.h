@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "GenericTeamAgentInterface.h"
 #include "../System/DataAsset/DA_MenuSound.h"
 #include "../System/DataAsset/DA_PlayerSound.h"
 #include "../System/DataAsset/DA_PlayerMontage.h"
@@ -17,7 +18,7 @@ class UAnimInstance_Knight;
 class UPlayer_CameraArm;
 
 UCLASS()
-class RPGPORTFOLIO_API APlayer_Base_Knight : public ACharacter
+class RPGPORTFOLIO_API APlayer_Base_Knight : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -191,6 +192,8 @@ public:
 	void BreakLockOn();
 	void ShotProjectile();
 
+	virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(0); };	// 플레이어 팀 설정(0)
+
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);
@@ -218,4 +221,6 @@ private:
 
 	UFUNCTION()
 	void ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);
+
+
 };

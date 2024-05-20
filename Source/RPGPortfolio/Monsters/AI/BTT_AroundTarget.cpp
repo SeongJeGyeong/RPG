@@ -74,9 +74,6 @@ void UBTT_AroundTarget::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeM
 	FRotator CurrentRot = pMonster->GetControlRotation();
 	FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, _DeltaSeconds, 20.f);
 	pMonster->SetActorRotation(NewRot);
-	
-	/*FRotator newrot = ( pPlayer->GetActorLocation() - pMonster->GetActorLocation() ).Rotation();
-	pMonster->SetActorRotation(newrot);*/
 
 	const FRotator YawRotation(0, TargetRot.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);

@@ -2,10 +2,6 @@
 
 #pragma once
 
-#include "behaviortree/BehaviorTree.h"
-#include "behaviortree/blackboarddata.h"
-#include "behaviortree/blackboardcomponent.h"
-
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "AIC_Monster_Base.generated.h"
@@ -18,13 +14,33 @@ class RPGPORTFOLIO_API AAIC_Monster_Base : public AAIController
 {
 	GENERATED_BODY()
 	
+public:
+	AAIC_Monster_Base();
+
 private:
-	UBehaviorTree* m_BehaviorTree;
-	UBlackboardData* m_Blackboard;
+	UPROPERTY()
+	class UBehaviorTree* m_BehaviorTree;
+	UPROPERTY()
+	class UBlackboardData* m_Blackboard;
+	UPROPERTY()
+	class UAIPerceptionComponent* m_AIPerception;
+	UPROPERTY()
+	class UAISenseConfig_Sight* m_AISight;
+
+protected:
+	virtual void BeginPlay() override;
 
 public:
 	virtual void OnPossess(APawn* _Owner) override;
 	virtual void OnUnPossess() override;
+
+	float GetLoseSightRadius() const;
+
+	UFUNCTION()
+	void PerceptionUpdate(const TArray<AActor*>& _UpdateActors);
+
+	UFUNCTION()
+	void OnTargetPerceived(AActor* _Actor, FAIStimulus const _Stimulus);
 
 	static const FName PatternNumber;
 };

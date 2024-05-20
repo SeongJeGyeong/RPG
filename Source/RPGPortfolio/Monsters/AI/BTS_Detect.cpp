@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+
 #include "BTS_Detect.h"
-#include "AIController.h"
+#include "AIC_Monster_Base.h"
 #include "../Monster_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -12,6 +13,7 @@ UBTS_Detect::UBTS_Detect()
 	: bDetect(false)
 	, bIsAtkRange(false)
 {
+	// 감지된 플레이어가 탐지범위 내에 있는지 확인
 	NodeName = TEXT("Detect Player");
 	Interval = 0.5f;
 }
@@ -24,7 +26,7 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 {
 	Super::TickNode(_OwnComp, _NodeMemory, _DT);
 
-	AAIController* pController = _OwnComp.GetAIOwner();
+	AAIC_Monster_Base* pController = Cast<AAIC_Monster_Base>(_OwnComp.GetAIOwner());
 
 	if (!IsValid(pController))
 	{
@@ -38,12 +40,11 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 		return;
 	}
 
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ACharacter* pPlayer = Cast<ACharacter>(pController->GetBlackboardComponent()->GetValueAsObject(TEXT("Target")));
 	float Distance = FVector::Distance(pMonster->GetActorLocation(), pPlayer->GetActorLocation());
-
-	if (Distance < pMonster->GetMonsterInfo().DetectRange)
+	
+	if (Distance < pController->GetLoseSightRadius())
 	{
-		pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
 		bDetect = true;
 	}
 	else

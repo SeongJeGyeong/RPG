@@ -343,12 +343,12 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 				{
 					if ( pAIController->GetBlackboardComponent() )
 					{
-						//pAIController->GetBlackboardComponent()->SetValueAsBool(FName("WasHit"), false);
+						pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
 						pAIController->GetBrainComponent()->RestartLogic();
 					}
 				}
 			},
-			1.f, false);
+			0.5f, false);
 
 			return;
 		}
