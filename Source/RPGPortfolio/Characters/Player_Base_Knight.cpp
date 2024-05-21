@@ -152,6 +152,7 @@ void APlayer_Base_Knight::BeginPlay()
 	}
 
 	LockOnDelegate.BindUFunction(this, FName("TargetLockOn"));
+	DodgeDelegate.BindUFunction(this, FName("DodgeAnimPlaying"));
 	ItemDelayDelegate.BindUFunction(this, FName("ItemDelaytime"), 1.f);
 }
 
@@ -349,38 +350,17 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 			{
 				if (bSprintToggle)
 				{
-					if (vInput.X > 0.f)
-					{
-						fFrontBack = 2.f;
-					}
-					else
-					{
-						fFrontBack = -2.f;
-					}
+					fFrontBack = (vInput.X > 0.f) ? 2.f : -2.f;
 				}
 				else
 				{
-					if (vInput.X > 0.f)
-					{
-						fFrontBack = 1.f;
-					}
-					else
-					{
-						fFrontBack = -1.f;
-					}
+					fFrontBack = (vInput.X > 0.f) ? 1.f : -1.f;
 				}
 			}
 			else
 			{
 				// 락온 중이 아닐때는 캐릭터의 앞으로만 이동하므로
-				if (bSprintToggle)
-				{
-					fFrontBack = 2.f;
-				}
-				else
-				{
-					fFrontBack = 1.f;
-				}
+				fFrontBack = bSprintToggle ? 2.f : 1.f;
 			}
 		}
 		if ((Controller != NULL) && (vInput.Y != 0.0f))
@@ -396,38 +376,17 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 			{
 				if (bSprintToggle)
 				{
-					if (vInput.Y > 0.f)
-					{
-						fLeftRight = 2.f;
-					}
-					else
-					{
-						fLeftRight = -2.f;
-					}
+					fLeftRight = ( vInput.Y > 0.f ) ? 2.f : -2.f;
 				}
 				else
 				{
-					if (vInput.Y > 0.f)
-					{
-						fLeftRight = 1.f;
-					}
-					else
-					{
-						fLeftRight = -1.f;
-					}
+					fLeftRight = ( vInput.Y > 0.f ) ? 1.f : -1.f;
 				}
 			}
 			else
 			{
 				// 락온 중이 아닐때는 캐릭터의 앞으로만 이동하므로
-				if (bSprintToggle)
-				{
-					fFrontBack = 2.f;
-				}
-				else
-				{
-					fFrontBack = 1.f;
-				}
+				fFrontBack = bSprintToggle ? 2.f : 1.f;
 			}
 		}
 	}
@@ -570,7 +529,8 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		{
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
 			vDodgeVector = GetActorForwardVector();
-			rDodgeRotation = GetActorRotation();
+			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
+			//rDodgeRotation = GetActorRotation();
 			ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
 		}
 		else
@@ -580,6 +540,8 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 			ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
 		}
+
+		//GetWorld()->GetTimerManager().SetTimerForNextTick(DodgeDelegate);
 	}
 }
 
@@ -1101,6 +1063,31 @@ void APlayer_Base_Knight::TargetLockOn()
 	else
 	{
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void APlayer_Base_Knight::DodgeAnimPlaying()
+{
+	if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)) )
+	{
+		SetActorRotation(FRotator::ZeroRotator);
+		GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * GetWorld()->GetDeltaSeconds());
+		//AddMovementInput(vDodgeVector, -2000.f * GetWorld()->GetDeltaSeconds());
+		UE_LOG(LogTemp, Warning, TEXT("DodgeRot Yaw : %f"), rDodgeRotation.Yaw);
+		UE_LOG(LogTemp, Warning, TEXT("ActorRot Yaw : %f"), GetActorRotation().Yaw);
+		GetWorld()->GetTimerManager().SetTimerForNextTick(DodgeDelegate);
+		return;
+	}
+	else
+	{
+	}
+
+	if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW)) )
+	{
+		SetActorRotation(rDodgeRotation);
+		AddMovementInput(vDodgeVector, 2000.f * GetWorld()->GetDeltaSeconds());
+		GetWorld()->GetTimerManager().SetTimerForNextTick(DodgeDelegate);
+		return;
 	}
 }
 

@@ -54,6 +54,7 @@ private:
 
 	FTimerHandle DeadTimer;
 	FTimerHandle HitEndTimer;
+	FTimerHandle WidgetDisplayTimer;
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
@@ -80,7 +81,6 @@ public:
 	bool GetbIsDead() const { return bIsDead; }
 
 	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
-	void MeleeAttackHitCheck();
 
 public:
 	// Sets default values for this character's properties
@@ -100,8 +100,8 @@ public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	void MeleeAttackHitCheck();
 	void MonsterAttackNormal();
-	
 	void MonsterDead(AController* EventInstigator);
 	void MonsterDestroy();
 

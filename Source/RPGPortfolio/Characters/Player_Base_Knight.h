@@ -122,8 +122,7 @@ private:
 
 	bool bToggleLockOn;
 	FTimerDelegate LockOnDelegate;
-
-	//FTimerHandle LockOnTimer;
+	FTimerDelegate DodgeDelegate;
 	FTimerHandle BlockReactTimer;
 
 public:
@@ -186,6 +185,8 @@ public:
 
 	UFUNCTION()
 	void TargetLockOn();
+	UFUNCTION()
+	void DodgeAnimPlaying();
 	UFUNCTION()
 	void ItemDelaytime(float _DelayPercent);
 

@@ -39,7 +39,13 @@ void AProj_Player_Cutter::BeginPlay()
 void AProj_Player_Cutter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	fDestroyTime += DeltaTime;
 
+	if (fDestroyTime > 1.f)
+	{
+		Destroy();
+	}
 }
 
 void AProj_Player_Cutter::HitEffect()

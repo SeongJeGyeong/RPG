@@ -26,7 +26,7 @@ private:
 
 	EATTACK_TYPE	eAtkType;
 	float			fAtkDamage;
-
+	float			fDestroyTime = 0.f;
 public:	
 	// Sets default values for this actor's properties
 	AProj_Player_Cutter();

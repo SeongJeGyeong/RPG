@@ -28,14 +28,6 @@ AMonster_Base::AMonster_Base()
 	AIControllerClass = AAIC_Monster_Base::StaticClass();
 	m_AIController = Cast<AAIC_Monster_Base>(AAIC_Monster_Base::StaticClass());
 
-	/*m_TargetComponent = CreateDefaultSubobject<ULockOnTargetComponent>(TEXT("TargetComponent"));
-	if (!IsValid(m_TargetComponent))
-	{
-		UE_LOG(LogTemp, Error, TEXT("타겟 컴포넌트 생성 실패"));
-	}
-	m_TargetComponent->SetupAttachment(GetMesh());
-	m_TargetComponent->SetSphereRadius(5.f);*/
-
 	// widgetComponent
 	m_WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	if (!IsValid(m_WidgetComponent))
@@ -128,16 +120,6 @@ void AMonster_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (m_WidgetComponent->IsWidgetVisible() && !bLockedOn)
-	{
-		fWidgetVisTime += DeltaTime * 1.f;
-		if (fWidgetVisTime > 3.f)
-		{
-			m_WidgetComponent->SetVisibility(false);
-			fWidgetVisTime = 0.f;
-		}
-	}
-
 	if (bAtkTrace)
 	{
 		MeleeAttackHitCheck();
@@ -178,31 +160,43 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	m_MonsterWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
 	m_WidgetComponent->SetVisibility(true);
 	m_MonsterWidget->DisplayDMG(FinalDamage);
-	fWidgetVisTime = 0.f;
-
-	// 피격 시 모든 애니메이션 중지
-	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	pAnimInst->Montage_Stop(1.f);
 
 	// 사망 시
-	if (m_Info.CurHP <= 0.f && GetController())
+	if ( m_Info.CurHP <= 0.f && GetController() )
 	{
 		MonsterDead(EventInstigator);
 		return 0.f;
 	}
 
-	// 행동트리 일시적으로 중지
+	if (!bLockedOn)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
+		// 락온되지 않은 상태에서 3초 동안 맞지 않았을 경우 위젯 사라지도록
+		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(true); }, 0.1f, false, 3.f);
+	}
+
+	// 피격 시 모든 애니메이션 중지
+	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+	pAnimInst->Montage_Stop(1.f);
+
+	// 비헤이비어 트리 피격 상태로 전환
 	AAIController* pAIController = Cast<AAIController>(GetController());
-	if ( IsValid(pAIController) )
+	if (IsValid(pAIController))
 	{
 		if ( pAIController->GetBlackboardComponent() )
 		{
 			m_State = EMONSTER_STATE::IDLE;
-			pAIController->GetBrainComponent()->StopLogic("Hit");
+			pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
+			ACharacter* pTarget = Cast<ACharacter>(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target")));
+			if (!IsValid(pTarget))
+			{
+				// 공격한 대상 타겟으로 설정
+				pAIController->GetBlackboardComponent()->SetValueAsObject(FName("Target"), EventInstigator->GetPawn());
+			}
 		}
 	}
 	
-	// 공격한 플레이어의 반대방향으로 밀려남
+	// 공격한 대상(투사체 포함)의 반대방향으로 밀려남
 	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
 	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
 	LaunchForce.Z = 0.f;
@@ -247,16 +241,19 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 	}
 
 	TArray<TObjectPtr<USceneComponent>> LockOnCompArr = GetMesh()->GetAttachChildren();
-	if (LockOnCompArr.Num() == 0)
+	if (LockOnCompArr.Num() <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("부착된 락온 컴포넌트 없음"));
 	}
-	for (TObjectPtr<USceneComponent> LockOnComp : LockOnCompArr)
+	else
 	{
-		// LockOnTarget 타입 Component일 경우
-		if (LockOnComp->GetCollisionObjectType() == ECollisionChannel::ECC_GameTraceChannel1)
+		for ( TObjectPtr<USceneComponent> LockOnComp : LockOnCompArr )
 		{
-			LockOnComp->DestroyComponent();
+			// LockOnTarget 타입 Component일 경우
+			if ( LockOnComp->GetCollisionObjectType() == ECollisionChannel::ECC_GameTraceChannel1 )
+			{
+				LockOnComp->DestroyComponent();
+			}
 		}
 	}
 
@@ -298,6 +295,7 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
 	}
 
+	// 5초 뒤 사망 이펙트 처리
 	GetWorld()->GetTimerManager().SetTimer(DeadTimer, [this]()
 	{
 		bIsDead = true;
@@ -307,12 +305,8 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 		GetMesh()->GetChildrenComponents(true, ChildMeshArr);
 		if ( !ChildMeshArr.IsEmpty() )
 		{
-			for ( USceneComponent* ChildMesh : ChildMeshArr )
+			for (USceneComponent* ChildMesh : ChildMeshArr)
 			{
-				if ( "TargetComponent" == ChildMesh->GetName() )
-				{
-					continue;
-				}
 				USkeletalMeshComponent* ChildSkelMesh = Cast<USkeletalMeshComponent>(ChildMesh);
 				ChildSkelMesh->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
 			}
@@ -336,6 +330,7 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 		if (HitMontage == Montage)
 		{
 			// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
+			GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
 			GetWorld()->GetTimerManager().SetTimer(HitEndTimer, [this]()
 			{
 				AAIController* pAIController = Cast<AAIController>(GetController());
@@ -343,8 +338,7 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 				{
 					if ( pAIController->GetBlackboardComponent() )
 					{
-						pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
-						pAIController->GetBrainComponent()->RestartLogic();
+						pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), false);
 					}
 				}
 			},
@@ -390,12 +384,17 @@ void AMonster_Base::MonsterAttackNormal()
 
 void AMonster_Base::SetbLockedOn(bool _LockedOn)
 {
-	m_WidgetComponent->SetVisibility(_LockedOn);
-	//m_TargetComponent->SetVisibility(_LockedOn);
-	//m_TargetComponent->SetLockOnMarkVisibility(_LockedOn);
-	bLockedOn = _LockedOn;
-	GetMesh()->SetRenderCustomDepth(_LockedOn);
-	//m_LockOnMarker->SetVisibility(true);
+	if ( _LockedOn )
+	{
+		m_WidgetComponent->SetVisibility(_LockedOn);
+		bLockedOn = _LockedOn;
+		GetMesh()->SetRenderCustomDepth(_LockedOn);
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
+		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(true); }, 0.1f, false, 2.f);
+	}
 }
 
 void AMonster_Base::MeleeAttackHitCheck()
