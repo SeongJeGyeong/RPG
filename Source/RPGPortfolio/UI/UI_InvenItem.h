@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"

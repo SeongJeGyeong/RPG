@@ -104,6 +104,8 @@ private:
 	FRotator rAtkMoveRot;
 
 	// 구르기 관련
+	bool bDodging;
+	bool bDodgeMove;
 	FVector vDodgeVector;
 	FRotator rDodgeRotation;
 
@@ -122,7 +124,6 @@ private:
 
 	bool bToggleLockOn;
 	FTimerDelegate LockOnDelegate;
-	FTimerDelegate DodgeDelegate;
 	FTimerHandle BlockReactTimer;
 
 public:
@@ -146,8 +147,12 @@ public:
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
 	bool GetbSprintToggle() const { return bSprintToggle; }
+	// 락온 중 플레이어가 적을 바라보고 있도록 설정
 	void SetOrientRotation(const bool& _Val);
+	// 락온 토글 상태 확인
 	bool GetbToggleLockOn() const { return bToggleLockOn; }
+	// 회피 애니메이션 종료 설정
+	void SetbDodging(const bool& _Dodging) { bDodging = _Dodging; }
 
 	const UCameraComponent* GetCamera() { return m_Camera; }
 	const UPlayer_CameraArm* GetArm() { return m_Arm; }
@@ -185,8 +190,6 @@ public:
 
 	UFUNCTION()
 	void TargetLockOn();
-	UFUNCTION()
-	void DodgeAnimPlaying();
 	UFUNCTION()
 	void ItemDelaytime(float _DelayPercent);
 

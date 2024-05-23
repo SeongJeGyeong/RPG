@@ -279,6 +279,12 @@ void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 	OnInvincibleTimeCheck.Broadcast(false);
 }
 
+void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
+{
+	m_Player->SetbDodging(false);
+	UE_LOG(LogTemp, Warning, TEXT("dodge end"));
+}
+
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 {
 	m_Player->ShotProjectile();

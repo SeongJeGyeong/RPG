@@ -62,7 +62,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 1500.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 500.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
@@ -152,7 +152,6 @@ void APlayer_Base_Knight::BeginPlay()
 	}
 
 	LockOnDelegate.BindUFunction(this, FName("TargetLockOn"));
-	DodgeDelegate.BindUFunction(this, FName("DodgeAnimPlaying"));
 	ItemDelayDelegate.BindUFunction(this, FName("ItemDelaytime"), 1.f);
 }
 
@@ -165,14 +164,19 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	fLeftRight = 0.f;
 	
 	// 회피 애니메이션 재생중일 때
-	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
+	if (bDodging)
 	{
-		GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * DeltaTime);
-		SetActorRotation(rDodgeRotation);
-	}
-	else if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW)))
-	{
-		AddMovementInput(vDodgeVector, 2000.f * DeltaTime);
+		if (bDodgeMove)
+		{
+			if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)) )
+			{
+				GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * DeltaTime);
+			}
+			else if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW)) )
+			{
+				AddMovementInput(vDodgeVector, 2000.f * DeltaTime);
+			}
+		}
 		SetActorRotation(rDodgeRotation);
 	}
 
@@ -529,8 +533,8 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		{
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
 			vDodgeVector = GetActorForwardVector();
-			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
-			//rDodgeRotation = GetActorRotation();
+			//rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
+			rDodgeRotation = GetActorRotation();
 			ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
 		}
 		else
@@ -540,8 +544,7 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 			ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
 		}
-
-		//GetWorld()->GetTimerManager().SetTimerForNextTick(DodgeDelegate);
+		bDodging = true;
 	}
 }
 
@@ -792,16 +795,24 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK))		||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW))	||
+		//m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW))	||
+		//m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT))			||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
-		GetCharacterMovement()->IsFalling()
+		GetCharacterMovement()->IsFalling() ||
+		bDodging == true
 		)
 	{
 		UE_LOG(LogTemp, Display, TEXT("몽타주를 재생 불가능한 상태입니다."));
 		return true;
+	}
+	else
+	{
+		if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
+		{
+			m_AnimInst->Montage_Stop(1.f);
+		}
 	}
 
 	return false;
@@ -1066,31 +1077,6 @@ void APlayer_Base_Knight::TargetLockOn()
 	}
 }
 
-void APlayer_Base_Knight::DodgeAnimPlaying()
-{
-	if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)) )
-	{
-		SetActorRotation(FRotator::ZeroRotator);
-		GetCharacterMovement()->AddInputVector(vDodgeVector * -100.f * GetWorld()->GetDeltaSeconds());
-		//AddMovementInput(vDodgeVector, -2000.f * GetWorld()->GetDeltaSeconds());
-		UE_LOG(LogTemp, Warning, TEXT("DodgeRot Yaw : %f"), rDodgeRotation.Yaw);
-		UE_LOG(LogTemp, Warning, TEXT("ActorRot Yaw : %f"), GetActorRotation().Yaw);
-		GetWorld()->GetTimerManager().SetTimerForNextTick(DodgeDelegate);
-		return;
-	}
-	else
-	{
-	}
-
-	if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW)) )
-	{
-		SetActorRotation(rDodgeRotation);
-		AddMovementInput(vDodgeVector, 2000.f * GetWorld()->GetDeltaSeconds());
-		GetWorld()->GetTimerManager().SetTimerForNextTick(DodgeDelegate);
-		return;
-	}
-}
-
 void APlayer_Base_Knight::BreakLockOn()
 {
 	m_Marker->SetVisibility(ESlateVisibility::Hidden);
@@ -1258,9 +1244,11 @@ void APlayer_Base_Knight::InvincibleTimeCheck(bool _Invincible)
 	if (_Invincible)
 	{
 		SetCanBeDamaged(false);
+		bDodgeMove = true;
 	}
 	else
 	{
 		SetCanBeDamaged(true);
+		bDodgeMove = false;
 	}
 }

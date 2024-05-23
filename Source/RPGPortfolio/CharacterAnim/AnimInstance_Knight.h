@@ -109,6 +109,8 @@ public:
 	void AnimNotify_DodgeStart();
 	UFUNCTION()
 	void AnimNotify_DodgeEnd();
+	UFUNCTION()
+	void AnimNotify_DodgeAnimEnd();
 
 	// 원거리공격 발사
 	UFUNCTION()
