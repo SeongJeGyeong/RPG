@@ -19,6 +19,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UStaticMeshComponent* m_Mesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sequence", meta = ( AllowPrivateAccess = "true" ))
+	class ULevelSequence* m_LevelSeq;
+
+	UPROPERTY()
+	class ULevelSequencePlayer* m_SeqPlayer;
+
 	UPROPERTY()
 	AActor* Connected_Actor;
 
@@ -26,6 +32,9 @@ private:
 	FText tCommand_Key;
 	UPROPERTY()
 	FText tCommand_Name;
+
+	UPROPERTY()
+	bool bDoOnce;
 
 public:	
 	// Sets default values for this actor's properties
@@ -45,4 +54,7 @@ public:
 	virtual FText GetCommand_Name() const override { return tCommand_Name; }
 
 	virtual void Interaction() override;
+
+	UFUNCTION()
+	void EndLevelSequence();
 };
