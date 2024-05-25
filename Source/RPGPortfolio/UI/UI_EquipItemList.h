@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_EquipItemList.generated.h"
@@ -38,6 +39,5 @@ public:
 
 	void AddEquipItemList(UObject* _ItemData);
 	void ClearTileView();
-	//void RenewItemListUI(EITEM_TYPE _Type);
 	void OnTileHovered(UObject* _ItemData, bool _Hovered);
 };

@@ -63,7 +63,7 @@ void APlayerState_Base::Tick(float DeltaTime)
 	if (!bSTRecovery && m_PlayerBasePower.CurStamina != m_PlayerBasePower.MaxStamina)
 	{
 		fSTRecoveryWait += DeltaTime;
-		if (fSTRecoveryWait > 2.f)
+		if (fSTRecoveryWait > 1.f)
 		{
 			bSTRecovery = true;
 			fSTRecoveryWait = 0.f;

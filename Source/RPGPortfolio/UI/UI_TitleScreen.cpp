@@ -40,7 +40,7 @@ void UUI_TitleScreen::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_TitleScreen::NewBtnClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("NewMap"));
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainMap_WP"));
 }
 
 void UUI_TitleScreen::NewBtnHovered()

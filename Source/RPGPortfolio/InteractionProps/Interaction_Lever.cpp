@@ -25,15 +25,17 @@ AInteraction_Lever::AInteraction_Lever()
 	m_Trigger->SetCollisionProfileName(TEXT("InteractionTrigger"));
 	m_Mesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 
-	static ConstructorHelpers::FObjectFinder<ULevelSequence> LevelSequence (TEXT("/Script/LevelSequence.LevelSequence'/Game/Blueprint/Sequence/LS_Interaction.LS_Interaction'"));
-	if (LevelSequence.Succeeded())
-	{
-		m_LevelSeq = LevelSequence.Object;
-	}
+	//static ConstructorHelpers::FObjectFinder<ULevelSequence> LevelSequence (TEXT("/Script/LevelSequence.LevelSequence'/Game/Blueprint/Sequence/LS_Interaction.LS_Interaction'"));
+	//if (LevelSequence.Succeeded())
+	//{
+	//	m_LevelSeq = LevelSequence.Object;
+	//}
 }
 
 void AInteraction_Lever::OnConstruction(const FTransform& _Transform)
 {
+	Super::OnConstruction(_Transform);
+
 	tCommand_Key = FText::FromString(TEXT("E"));
 	tCommand_Name = FText::FromString(TEXT("당긴다"));
 }
@@ -69,7 +71,7 @@ void AInteraction_Lever::Interaction()
 			m_SeqPlayer->OnFinished.AddDynamic(this, &AInteraction_Lever::EndLevelSequence);
 
 			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-			if ( IsValid(GameMode) )
+			if (IsValid(GameMode))
 			{
 				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
 			}

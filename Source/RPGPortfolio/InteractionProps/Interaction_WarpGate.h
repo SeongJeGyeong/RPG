@@ -5,10 +5,10 @@
 #include "../System/Interface/PlayerInteraction.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interaction_Lever.generated.h"
+#include "Interaction_WarpGate.generated.h"
 
 UCLASS()
-class RPGPORTFOLIO_API AInteraction_Lever : public AActor, public IPlayerInteraction
+class RPGPORTFOLIO_API AInteraction_WarpGate : public AActor, public IPlayerInteraction
 {
 	GENERATED_BODY()
 	
@@ -19,23 +19,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UStaticMeshComponent* m_Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sequence", meta = ( AllowPrivateAccess = "true" ))
-	class ULevelSequence* m_LevelSeq;
-
-	UPROPERTY()
-	class ULevelSequencePlayer* m_SeqPlayer;	// 레벨시퀀스 플레이하는 객체
-
 	UPROPERTY()
 	FText tCommand_Key;
 	UPROPERTY()
 	FText tCommand_Name;
 
-	UPROPERTY()
-	bool bDoOnce;
-
 public:	
 	// Sets default values for this actor's properties
-	AInteraction_Lever();
+	AInteraction_WarpGate();
 
 protected:
 	virtual void OnConstruction(const FTransform& _Transform) override;
@@ -52,6 +43,4 @@ public:
 
 	virtual void Interaction() override;
 
-	UFUNCTION()
-	void EndLevelSequence();
 };

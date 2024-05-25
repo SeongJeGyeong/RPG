@@ -10,7 +10,6 @@
 #include "UI_InvenItem.h"
 #include "UI_PlayerStat.h"
 #include "../System/DataAsset/DA_MenuSound.h"
-//#include "Kismet/GameplayStatics.h"
 
 void UUI_EquipItemList::NativeConstruct()
 {
