@@ -559,12 +559,13 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	bool bTargetLocked = m_Arm->ToggleCameraLockOn(bToggleLockOn);
 	if (bTargetLocked)
 	{
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
-
 		m_Marker->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
@@ -1052,7 +1053,7 @@ void APlayer_Base_Knight::TargetLockOn()
 
 		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
-
+		UE_LOG(LogTemp, Warning, TEXT("locked on"));
 		// 락온 타겟 컴포넌트의 위치를 스크린 좌표로 변환해서 해당 좌표에 락온 마커를 표시
 		APlayerController* pController = Cast<APlayerController>(GetController());
 		FVector2D ScreenPos;

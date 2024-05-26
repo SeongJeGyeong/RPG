@@ -24,13 +24,6 @@ ABoss_Base::ABoss_Base()
 	AIControllerClass = AAIC_Boss_Base::StaticClass();
 	m_AIController = Cast<AAIC_Boss_Base>(AAIC_Boss_Base::StaticClass());
 
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	if (!IsValid(pPlayer))
-	{
-		return;
-	}
-
-	m_AIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterCapGroup"));
 	GetMesh()->SetCollisionProfileName(TEXT("MonsterMeshGroup"));
 }
@@ -65,6 +58,14 @@ void ABoss_Base::BeginPlay()
 		if ( pAIController->GetBlackboardComponent() )
 		{
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_Info.AtkRange);
+			ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+			if (!IsValid(pPlayer))
+			{
+				return;
+			}
+			pAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
+
+			pAIController->GetBrainComponent()->StopLogic("Wait");
 		}
 	}
 }
@@ -193,6 +194,6 @@ void ABoss_Base::MonsterDead(AActor* DamageCauser)
 
 void ABoss_Base::SetbLockedOn(const bool& _LockedOn)
 {
-	m_LockOnMarker->SetVisibility(_LockedOn);
 	bLockedOn = _LockedOn;
+	GetMesh()->SetRenderCustomDepth(_LockedOn);
 }

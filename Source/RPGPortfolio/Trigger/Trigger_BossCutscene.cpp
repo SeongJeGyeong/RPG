@@ -8,6 +8,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
+#include "../Monsters/Boss_Base.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 
 void ATrigger_BossCutscene::BeginPlay()
 {
@@ -18,7 +21,7 @@ void ATrigger_BossCutscene::BeginPlay()
 
 void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherActor)
 {
-	if ( IsValid(m_LevelSeq) )
+	if (IsValid(m_LevelSeq))
 	{
 		FMovieSceneSequencePlaybackSettings Settings = {};
 		Settings.bRestoreState = false;
@@ -31,12 +34,11 @@ void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherAc
 
 			// 레벨시퀀스 종료시 호출할 Delegate 등록
 			m_SeqPlayer->OnFinished.AddDynamic(this, &ATrigger_BossCutscene::EndLevelSequence);
-
-			//ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-			//if ( IsValid(GameMode) )
-			//{
-			//	GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
-			//}
+			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+			if ( IsValid(GameMode) )
+			{
+				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
+			}
 			m_SeqPlayer->Play();
 		}
 	}
@@ -44,5 +46,18 @@ void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherAc
 
 void ATrigger_BossCutscene::EndLevelSequence()
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( IsValid(GameMode) )
+	{
+		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
+	}
+	TArray<AActor*> OutActorsArr;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoss_Base::StaticClass(), OutActorsArr);
+	if (OutActorsArr.Num() > 0)
+	{		
+		AAIController* pAIController = Cast<AAIController>(OutActorsArr[0]->GetInstigatorController());
+		pAIController->GetBrainComponent()->RestartLogic();
+	}
+
 	Destroy();
 }

@@ -17,9 +17,6 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	FDataTableRowHandle	m_MonsterInfoTableRow;
 
-	UPROPERTY()
-	class UWidgetComponent* m_LockOnMarker;
-
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
 	EMONSTER_TYPE	m_Type;
@@ -45,8 +42,8 @@ private:
 	int32 iTurnDir;
 
 public:
-	UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
-	UBlackboardData* GetBlackboard() { return m_Blackboard; }
+	class UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
+	class UBlackboardData* GetBlackboard() { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 
 	bool GetbLockedOn() const { return bLockedOn; }
