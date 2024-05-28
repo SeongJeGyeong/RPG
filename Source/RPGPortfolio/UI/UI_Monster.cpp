@@ -41,18 +41,6 @@ void UUI_Monster::NativeDestruct()
 void UUI_Monster::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 {
 	Super::NativeTick(_Geo, _DeltaTime);
-
-	if (m_DMGFigure->GetVisibility() == ESlateVisibility::Visible)
-	{
-		if (fDisplayTime >= 3.f)
-		{
-			fDisplayTime = 0.f;
-			fTakedDMG = 0.f;
-			m_DMGFigure->SetVisibility(ESlateVisibility::Hidden);
-		}
-
-		fDisplayTime += _DeltaTime * 1.f;
-	}
 }
 
 void UUI_Monster::SetHPRatio(float _Ratio)
@@ -71,12 +59,6 @@ void UUI_Monster::SetName(const FString& _Name)
 {
 	// ui 생성 전에 이름 저장
 	m_MonsterName = FText::FromString(_Name);
-
-	//if (IsValid(m_Name))
-	//{
-	//	
-	//	m_Name->SetText(FText::FromString(_Name));
-	//}
 }
 
 void UUI_Monster::DisplayDMG(const float _DMG)
@@ -87,6 +69,13 @@ void UUI_Monster::DisplayDMG(const float _DMG)
 	}
 	fTakedDMG += _DMG;
 	m_DMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
-	fDisplayTime = 0.f;
 	m_DMGFigure->SetVisibility(ESlateVisibility::Visible);
+
+	GetWorld()->GetTimerManager().ClearTimer(DmgDisplayTimer);
+	GetWorld()->GetTimerManager().SetTimer(DmgDisplayTimer, [this]()
+	{
+		fTakedDMG = 0.f;
+		m_DMGFigure->SetVisibility(ESlateVisibility::Hidden);
+	},
+	0.1f, false, 3.f);
 }

@@ -24,9 +24,7 @@ AMonster_Base::AMonster_Base()
 	PrimaryActorTick.bCanEverTick = true;
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
 	AIControllerClass = AAIC_Monster_Base::StaticClass();
-	m_AIController = Cast<AAIC_Monster_Base>(AAIC_Monster_Base::StaticClass());
 
 	// widgetComponent
 	m_WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
@@ -161,6 +159,10 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	m_WidgetComponent->SetVisibility(true);
 	m_MonsterWidget->DisplayDMG(FinalDamage);
 
+	// 피격 시 모든 애니메이션 중지
+	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+	pAnimInst->Montage_Stop(1.f);
+
 	// 사망 시
 	if ( m_Info.CurHP <= 0.f && GetController() )
 	{
@@ -175,10 +177,6 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(true); }, 0.1f, false, 3.f);
 	}
 
-	// 피격 시 모든 애니메이션 중지
-	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	pAnimInst->Montage_Stop(1.f);
-
 	// 비헤이비어 트리 피격 상태로 전환
 	AAIController* pAIController = Cast<AAIController>(GetController());
 	if (IsValid(pAIController))
@@ -187,8 +185,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		{
 			m_State = EMONSTER_STATE::IDLE;
 			pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
-			ACharacter* pTarget = Cast<ACharacter>(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target")));
-			if (!IsValid(pTarget))
+			if (!IsValid(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target"))))
 			{
 				// 공격한 대상 타겟으로 설정
 				pAIController->GetBlackboardComponent()->SetValueAsObject(FName("Target"), EventInstigator->GetPawn());
@@ -227,8 +224,11 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 void AMonster_Base::MonsterDead(AController* EventInstigator)
 {
+	AAIController* pAIController = Cast<AAIController>(GetController());
+	pAIController->GetBrainComponent()->StopLogic(TEXT("Dead"));
+
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
-	
+
 	m_State = EMONSTER_STATE::DEAD;
 	bIsDead = true;
 	GetController()->UnPossess();
@@ -384,11 +384,12 @@ void AMonster_Base::MonsterAttackNormal()
 
 void AMonster_Base::SetbLockedOn(bool _LockedOn)
 {
-	if ( _LockedOn )
+	bLockedOn = _LockedOn;
+	GetMesh()->SetRenderCustomDepth(_LockedOn);
+	
+	if (_LockedOn)
 	{
 		m_WidgetComponent->SetVisibility(_LockedOn);
-		bLockedOn = _LockedOn;
-		GetMesh()->SetRenderCustomDepth(_LockedOn);
 	}
 	else
 	{

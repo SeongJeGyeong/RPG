@@ -12,7 +12,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "Components/CapsuleComponent.h"
-
+#include "../RPGPortfolioGameModeBase.h"
+#include "../UI/UI_Base.h"
+#include "../UI/UI_Boss.h"
 // Sets default values
 ABoss_Base::ABoss_Base()
 {
@@ -20,9 +22,8 @@ ABoss_Base::ABoss_Base()
 	PrimaryActorTick.bCanEverTick = true;
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
 	AIControllerClass = AAIC_Boss_Base::StaticClass();
-	m_AIController = Cast<AAIC_Boss_Base>(AAIC_Boss_Base::StaticClass());
+	//m_AIController = Cast<AAIC_Boss_Base>(AAIC_Boss_Base::StaticClass());
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterCapGroup"));
 	GetMesh()->SetCollisionProfileName(TEXT("MonsterMeshGroup"));
@@ -51,8 +52,7 @@ void ABoss_Base::BeginPlay()
 	Super::BeginPlay();
 
 	AAIController* pAIController = Cast<AAIController>(GetController());
-
-	if ( IsValid(pAIController) )
+	if (IsValid(pAIController))
 	{
 		// 블랙보드에 몬스터정보 전달
 		if ( pAIController->GetBlackboardComponent() )
@@ -64,10 +64,20 @@ void ABoss_Base::BeginPlay()
 				return;
 			}
 			pAIController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
-
-			pAIController->GetBrainComponent()->StopLogic("Wait");
+			pAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("bStop"), true);
 		}
 	}
+
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+	UUI_Base* pMainUI = pGameMode->GetMainHUD();
+	m_BossWidget = pMainUI->GetBossUI();
+	m_BossWidget->SetName(m_Info.Name);
+	m_BossWidget->SetHPRatio(1.f);
 }
 
 // Called every frame
@@ -127,8 +137,25 @@ void ABoss_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkTy
 
 float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bIsDead)
+	{
+		return 0.f;
+	}
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	// 공격 모션중이 아닐 때도 조건에 추가해야함
+	if ( DamageEvent.IsOfType(FPointDamageEvent::ClassID) )
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>( &DamageEvent );
+		fPhysicsWeight = 1.f;
+		GetMesh()->SetAllBodiesBelowSimulatePhysics(PointDamageEvent->HitInfo.BoneName, true);
+		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(PointDamageEvent->HitInfo.BoneName, fPhysicsWeight);
+		GetMesh()->AddImpulseToAllBodiesBelow(PointDamageEvent->ShotDirection * 500.f, PointDamageEvent->HitInfo.BoneName, true);
+
+		HitReactDelegate.BindUObject(this, &ABoss_Base::StopBoneHitReaction, PointDamageEvent->HitInfo.BoneName);
+		GetWorld()->GetTimerManager().SetTimer(HitReactTimer, HitReactDelegate, 0.01f, true, 0.1f);
+	}
+	
 	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
 
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
@@ -150,9 +177,8 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 	// 몬스터의 방어력만큼 데미지 감소 후 몬스터 hp바 위젯에 반영
 	FinalDamage = FMath::Clamp(FinalDamage - fMonsterDef, 0.f, FinalDamage);
 	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
-	// m_MonsterWidget->SetHPRatio(CurHP / MaxHP);
-	// m_MonsterWidget->DisplayDMG(FinalDamage);
-
+	m_BossWidget->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
+	m_BossWidget->DisplayDMG(FinalDamage);
 	// 사망 시
 	if ( m_Info.CurHP <= 0.f && GetController() )
 	{
@@ -190,6 +216,17 @@ float ABoss_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent
 void ABoss_Base::MonsterDead(AActor* DamageCauser)
 {
 	bIsDead = true;
+}
+
+void ABoss_Base::StopBoneHitReaction(FName _BoneName)
+{
+	fPhysicsWeight -= GetWorld()->GetDeltaSeconds();
+	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(_BoneName, fPhysicsWeight);
+	if (fPhysicsWeight <= 0.f)
+	{
+		GetMesh()->SetAllBodiesBelowSimulatePhysics(_BoneName, false);
+		GetWorld()->GetTimerManager().ClearTimer(HitReactTimer);
+	}
 }
 
 void ABoss_Base::SetbLockedOn(const bool& _LockedOn)

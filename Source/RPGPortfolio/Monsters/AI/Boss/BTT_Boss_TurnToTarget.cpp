@@ -32,22 +32,17 @@ EBTNodeResult::Type UBTT_Boss_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& 
 	
 	if (pBoss->GetActorRotation().Yaw > TargetRot.Yaw)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Turn Left"));
 		pBoss->SetiTurnDir(1);
 	}
-	else if( pBoss->GetActorRotation().Yaw < TargetRot.Yaw )
+	else if( pBoss->GetActorRotation().Yaw < TargetRot.Yaw)
 	{
-		// UE_LOG(LogTemp, Warning, TEXT("Turn Right"));
 		pBoss->SetiTurnDir(2);
 	}
 	else
 	{
 		pBoss->SetiTurnDir(0);
 	}
-
-	int32 iTurnDir = _OwnComp.GetBlackboardComponent()->GetValueAsInt(TEXT("TurnDirection"));
-	UE_LOG(LogTemp, Warning, TEXT("TurnDir"), iTurnDir);
-	pBoss->SetiTurnDir(iTurnDir);
+	//pBoss->SetiTurnDir(iTurnDir);
 
 	pBoss->SetActorRotation(FMath::RInterpTo(pBoss->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 5.f));
 

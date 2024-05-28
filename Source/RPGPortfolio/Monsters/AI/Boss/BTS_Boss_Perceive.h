@@ -7,7 +7,7 @@
 #include "BTS_Boss_Perceive.generated.h"
 
 /**
- * 
+ *  사용안함
  */
 UCLASS()
 class RPGPORTFOLIO_API UBTS_Boss_Perceive : public UBTService

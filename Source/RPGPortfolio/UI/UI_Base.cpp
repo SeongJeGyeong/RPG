@@ -113,3 +113,16 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 		m_ItemMessageUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+
+void UUI_Base::ShowBossUI(bool _bShow)
+{
+	if ( _bShow )
+	{
+		m_BossUI->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		m_BossUI->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+}

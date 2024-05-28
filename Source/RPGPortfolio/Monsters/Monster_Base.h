@@ -29,9 +29,6 @@ private:
 	UPROPERTY()
 	TArray<struct FMonsterItemDropTable> m_DropItemArr;
 
-	//UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	//class ULockOnTargetComponent* m_TargetComponent;
-
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* m_WidgetComponent;
 
@@ -62,9 +59,6 @@ protected:
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBlackboardData* m_Blackboard;
-
-	UPROPERTY()
-	class AAIC_Monster_Base* m_AIController;
 
 public:
 	UBehaviorTree* GetBehaviorTree() const { return m_BehaviroTree; }
@@ -103,7 +97,6 @@ public:
 	void MeleeAttackHitCheck();
 	void MonsterAttackNormal();
 	void MonsterDead(AController* EventInstigator);
-	void MonsterDestroy();
 
 	UFUNCTION()
 	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);

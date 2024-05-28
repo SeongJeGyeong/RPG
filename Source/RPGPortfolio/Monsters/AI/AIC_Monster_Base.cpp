@@ -33,7 +33,6 @@ void AAIC_Monster_Base::BeginPlay()
 	Super::BeginPlay();
 
 	m_AIPerception->OnPerceptionUpdated.AddDynamic(this, &AAIC_Monster_Base::PerceptionUpdate);
-	//m_AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &AAIC_Monster_Base::OnTargetPerceived);
 }
 
 void AAIC_Monster_Base::OnPossess(APawn* _Owner)
@@ -71,8 +70,6 @@ void AAIC_Monster_Base::OnPossess(APawn* _Owner)
 			RunBehaviorTree(m_BehaviorTree);
 		}
 	}
-	//m_AISight->SightRadius = pMonster->GetMonsterInfo().DetectRange;			// 시야 반경
-	//m_AISight->LoseSightRadius = pMonster->GetMonsterInfo().DetectRange * 2.f;	// 포착한 대상을 상실하는 시야 반경
 }
 
 void AAIC_Monster_Base::OnUnPossess()
@@ -87,38 +84,14 @@ float AAIC_Monster_Base::GetLoseSightRadius() const
 
 void AAIC_Monster_Base::PerceptionUpdate(const TArray<AActor*>& _UpdateActors)
 {
+	// 인자로 받은 액터배열은 LoseSightRadius를 벗어날 때에도 타겟 정보를 가져오기 때문에 타겟이 들어왔을때와 나갔을 때를 분간하기 어렵다
+	// GetCurrentlyPerceivedActors 함수를 사용해 시야 안에 들어올 때만 액터를 가져옴
 	TArray<AActor*> PerceivedActors;
-
 	m_AIPerception->GetCurrentlyPerceivedActors(nullptr, PerceivedActors);
 
-	// 인자로 받은 액터배열은 LoseSightRadius를 벗어날 때에도 타겟 정보를 가져오기 때문에 타겟이 들어왔을때와 나갔을 때를 분간하기 어렵다
-	if ( _UpdateActors.Num() > 0 )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Perceived 1 : %s"), *_UpdateActors[0]->GetName());
-	}
-
+	// 시야에 들어오면 타겟을 세팅하고 타겟 추적 범위에서 벗어났을 때 세팅을 해제한다
 	if (PerceivedActors.Num() > 0)
 	{
 		GetBlackboardComponent()->SetValueAsObject("Target", PerceivedActors[0]);
-		UE_LOG(LogTemp, Warning, TEXT("Perceived 2 : %s"), *PerceivedActors[0]->GetName());
-
-	}
-	else
-	{
-		//GetBlackboardComponent()->SetValueAsObject("Target", nullptr);
-		UE_LOG(LogTemp, Warning, TEXT("Perceived 2 : Not Perceived"));
-	}
-
-}
-
-void AAIC_Monster_Base::OnTargetPerceived(AActor* _Actor, FAIStimulus const _Stimulus)
-{
-	if (_Stimulus.WasSuccessfullySensed())
-	{
-		GetBlackboardComponent()->SetValueAsObject("Target", _Actor);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Perceived"));
 	}
 }

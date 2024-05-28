@@ -34,7 +34,6 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	{
 		return;
 	}
-	pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), pPlayer);
 
 	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
 	FVector Cross = FVector::CrossProduct(vOffset, pBoss->GetActorForwardVector());
@@ -42,8 +41,8 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	vOffset = vOffset.GetSafeNormal();
 	float fAngle = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
 
-	UE_LOG(LogTemp, Warning, TEXT("player Direction : %f"), fDir);
-	UE_LOG(LogTemp, Warning, TEXT("player Angle : %f"), fAngle);
+	//UE_LOG(LogTemp, Warning, TEXT("player Direction : %f"), fDir);
+	//UE_LOG(LogTemp, Warning, TEXT("player Angle : %f"), fAngle);
 
 	pController->GetBlackboardComponent()->SetValueAsFloat(TEXT("TargetDirection"), fAngle);
 

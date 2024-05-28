@@ -805,7 +805,7 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 		bDodging == true
 		)
 	{
-		UE_LOG(LogTemp, Display, TEXT("몽타주를 재생 불가능한 상태입니다."));
+		//UE_LOG(LogTemp, Display, TEXT("몽타주를 재생 불가능한 상태입니다."));
 		return true;
 	}
 	else
@@ -1035,7 +1035,6 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 
 void APlayer_Base_Knight::StopBlockPhysics()
 {
-	//GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 }
@@ -1053,7 +1052,6 @@ void APlayer_Base_Knight::TargetLockOn()
 
 		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
-		UE_LOG(LogTemp, Warning, TEXT("locked on"));
 		// 락온 타겟 컴포넌트의 위치를 스크린 좌표로 변환해서 해당 좌표에 락온 마커를 표시
 		APlayerController* pController = Cast<APlayerController>(GetController());
 		FVector2D ScreenPos;

@@ -31,7 +31,7 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 		m_Boss = Cast<ABoss_Base>(TryGetPawnOwner());
 		if (!IsValid(m_Boss))
 		{
-			UE_LOG(LogTemp, Error, TEXT("Anim_Boss_Base: 애님클래스 오너 찾지 못함"));
+			//UE_LOG(LogTemp, Error, TEXT("Anim_Boss_Base: 애님클래스 오너 찾지 못함"));
 		}
 		else
 		{

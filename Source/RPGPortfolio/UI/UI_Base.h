@@ -31,6 +31,7 @@ public:
 	class UUI_Message_Item* GetItemMessageUI() { return m_ItemMessageUI; }
 	class UUI_Player_QuickSlot* GetQuickSlotUI() { return m_QuickSlotUI; }
 	class UUI_Player_Soul* GetSoulUI() { return m_SoulUI; }
+	class UUI_Boss* GetBossUI() { return m_BossUI; }
 
 	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
 
@@ -38,6 +39,7 @@ public:
 
 	void ShowMainMessageUI(bool _bShow);
 	void ShowItemMessageUI(bool _bShow);
+	void ShowBossUI(bool _bShow);
 
 public:
 	virtual void NativeConstruct() override;

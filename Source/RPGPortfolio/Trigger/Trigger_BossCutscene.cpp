@@ -11,6 +11,7 @@
 #include "../Monsters/Boss_Base.h"
 #include "AIController.h"
 #include "BrainComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 void ATrigger_BossCutscene::BeginPlay()
 {
@@ -50,13 +51,18 @@ void ATrigger_BossCutscene::EndLevelSequence()
 	if ( IsValid(GameMode) )
 	{
 		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
+		GameMode->GetMainHUD()->ShowBossUI(true);
 	}
 	TArray<AActor*> OutActorsArr;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoss_Base::StaticClass(), OutActorsArr);
 	if (OutActorsArr.Num() > 0)
-	{		
+	{
 		AAIController* pAIController = Cast<AAIController>(OutActorsArr[0]->GetInstigatorController());
-		pAIController->GetBrainComponent()->RestartLogic();
+		if (IsValid(pAIController))
+		{
+			pAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("bStop"), false);
+		}
+
 	}
 
 	Destroy();

@@ -39,8 +39,8 @@ public:
 	UFUNCTION()
 	void PerceptionUpdate(const TArray<AActor*>& _UpdateActors);
 
-	UFUNCTION()
-	void OnTargetPerceived(AActor* _Actor, FAIStimulus const _Stimulus);
+	// UFUNCTION()
+	// void OnTargetPerceived(AActor* _Actor, FAIStimulus const _Stimulus);
 
 	static const FName PatternNumber;
 };

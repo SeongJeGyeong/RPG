@@ -29,16 +29,21 @@ protected:
 
 	UPROPERTY()
 	FMonsterInfo	m_Info;
-
 	UPROPERTY()
-	class AAIC_Boss_Base* m_AIController;
+	class UUI_Boss* m_BossWidget;
 
 	UPROPERTY()
 	float StaggerGauge = 0.f;
+	UPROPERTY()
+	float fPhysicsWeight = 1.f;
+	FTimerHandle HitReactTimer;
+	FTimerDelegate HitReactDelegate;
+	
 
 private:
 	bool bLockedOn;
 	bool bIsDead;
+	UPROPERTY()
 	int32 iTurnDir;
 
 public:
@@ -72,4 +77,5 @@ public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void MonsterDead(AActor* DamageCauser);
+	void StopBoneHitReaction(FName _BoneName);
 };
