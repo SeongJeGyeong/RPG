@@ -39,6 +39,8 @@ protected:
 	FTimerHandle HitReactTimer;
 	FTimerDelegate HitReactDelegate;
 	
+	FTimerHandle DeadTimer;
+	float fDeadEffectRatio;
 
 private:
 	bool bLockedOn;
@@ -50,6 +52,7 @@ public:
 	class UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	class UBlackboardData* GetBlackboard() { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
+	class UUI_Boss* GetBossWidget() { return m_BossWidget; }
 
 	bool GetbLockedOn() const { return bLockedOn; }
 	void SetbLockedOn(const bool& _LockedOn);
@@ -74,8 +77,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	void MonsterDead(AActor* DamageCauser);
+	void MonsterDead();
 	void StopBoneHitReaction(FName _BoneName);
 };

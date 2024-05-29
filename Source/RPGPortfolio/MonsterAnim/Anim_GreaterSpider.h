@@ -15,14 +15,17 @@ class RPGPORTFOLIO_API UAnim_GreaterSpider : public UAnimInstance_Boss_Base
 	GENERATED_BODY()
 
 private:
+	bool bBossAttack;
+	bool bIsAtkMove;
+	bool bIsTurn;
 
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
 
-private:
-	bool bBossAttack;
-	bool bIsAtkMove;
-	bool bIsTurn;
+	UFUNCTION()
+	void AnimNotify_DeadAnimEnd();
+
+
 };

@@ -43,11 +43,14 @@ enum class EPlayerMontage : uint8
 UENUM(BlueprintType)
 enum class EPlayerSound : uint8
 {
+	EMPTY,
 	PARRY,
 	HIT,
 	GUARDBREAK,
 	GETITEM,
-	USEITEM,
+	USETHROW,
+	USERESTORE,
+	USESOUL,
 };
 
 UENUM(BlueprintType)

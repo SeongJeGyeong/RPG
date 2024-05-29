@@ -61,24 +61,15 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
 		pPlayer->CloseMenuUI();
 
-		UInventory_Mgr::GetInst(GetWorld())->UseInventoryItem(m_SelectedItemData->GetItemID());
-		if (m_SelectedItemData->GetEquiped() != EEQUIP_SLOT::EMPTY)
-		{
-			int32 idx = UEquip_Mgr::GetInst(GetWorld())->ConvertQuickSlotToIdx(m_SelectedItemData->GetEquiped());
-			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(idx);
-		}
+		pPlayer->UseItem(m_SelectedItemData->GetItemID(), m_SelectedItemData->GetEquiped());
 
 		// 아이템 사용후 대기시간 on
-		pPlayer->ItemDelaytime(1.f);
 		pPlayer->SetbItemDelay(true);
-
-		UE_LOG(LogTemp, Warning, TEXT("데이터 전달 성공"));
-		UE_LOG(LogTemp, Warning, L"%s", *m_SelectedItemData->GetItemName());
-		UE_LOG(LogTemp, Warning, TEXT("%d"), m_SelectedItemData->GetItemQnt());
+		pPlayer->ItemDelaytime(1.f);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("데이터 전달 실패"));
+		UE_LOG(LogTemp, Warning, TEXT("인벤토리 앵커 데이터 전달 실패"));
 	}
 
 }

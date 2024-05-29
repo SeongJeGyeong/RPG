@@ -152,7 +152,6 @@ void APlayer_Base_Knight::BeginPlay()
 	}
 
 	LockOnDelegate.BindUFunction(this, FName("TargetLockOn"));
-	ItemDelayDelegate.BindUFunction(this, FName("ItemDelaytime"), 1.f);
 }
 
 // Called every frame
@@ -736,14 +735,11 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx))
 		{
 			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
-			UInventory_Mgr::GetInst(GetWorld())->UseInventoryItem(pItem->ItemInfo->ID, pItem->EquipedSlot);
-
-			UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(iCurIdx);
+			UseItem(pItem->ItemInfo->ID, pItem->EquipedSlot);
 
 			// 아이템 사용후 대기시간 on
-			UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-			GetWorld()->GetTimerManager().SetTimerForNextTick(ItemDelayDelegate);
 			bItemDelay = true;
+			ItemDelaytime(1.f);
 		}
 		else
 		{
@@ -925,7 +921,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
 	float fPlayerDef;
-	switch ( pDamageType->GetAtkType() )
+	switch (pDamageType->GetAtkType())
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
 	case EATTACK_TYPE::PHYSIC_RANGE:
@@ -948,38 +944,39 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	if ( iCurHP <= 0.f && GetController() )
 	{
 		// 사망처리
-	}
-	else
-	{
-		// 방어 상태 해제
-		m_AnimInst->SetbIsGaurd(false);
-		bToggleGuard = false;
-		pState->SetbSTRecovSlowly(false);
-
-		// 현재 행동상태 해제
-		bJumpAtk = false;
-		bAtkTrace = false;
-		bAtkMove = false;
-		bItemInUse = false;
-		bNextAtkCheckOn = false;
-		bAttackToggle = false;
-
-		AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
-		
-		// 피격 시 피격지점 반대방향으로 밀려나도록
-		FVector LaunchVec = GetActorLocation() - pMonster->GetActorLocation();
-		FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
-		LaunchCharacter(LaunchForce, false, false);
-
-		// 피격 애니메이션 재생
-		if (CheckMontagePlaying())
-		{
-			m_AnimInst->Montage_Stop(1.f);
-			bAtkMove = false;
-		}
-		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT));
+		return 0.f;
 	}
 	
+	// 방어 상태 해제
+	m_AnimInst->SetbIsGaurd(false);
+	bToggleGuard = false;
+	pState->SetbSTRecovSlowly(false);
+
+	// 현재 행동상태 해제
+	bJumpAtk = false;
+	bAtkTrace = false;
+	bAtkMove = false;
+	bItemInUse = false;
+	bNextAtkCheckOn = false;
+	bAttackToggle = false;
+
+	AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
+
+	// 피격 시 피격지점 반대방향으로 밀려나도록
+	FVector LaunchVec = GetActorLocation() - pMonster->GetActorLocation();
+	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
+	LaunchCharacter(LaunchForce, false, false);
+
+	// 피격 애니메이션 재생
+	if ( CheckMontagePlaying() )
+	{
+		m_AnimInst->Montage_Stop(1.f);
+		bAtkMove = false;
+	}
+	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT));
+	// 피격 사운드 재생
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::HIT), GetActorLocation());
+
 	return 0.0f;
 }
 
@@ -1082,26 +1079,6 @@ void APlayer_Base_Knight::BreakLockOn()
 	m_Arm->BreakLockOnTarget();
 }
 
-void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
-{
-	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-	pQuickSlotUI->SetLowerSlotDelay(_DelayPercent);
-	if (_DelayPercent > 0.f)
-	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
-			{
-				float fDelayPercent = FMath::Clamp(_DelayPercent - GetWorld()->GetDeltaSeconds() / 3.f, 0.f, 1.f);
-				UE_LOG(LogTemp, Warning, TEXT("delay : %f"), fDelayPercent);
-				ItemDelaytime(fDelayPercent);
-			}
-		));
-	}
-	else
-	{
-		bItemDelay = false;
-	}
-}
-
 void APlayer_Base_Knight::ShotProjectile()
 {
 	FActorSpawnParameters param = {};
@@ -1124,15 +1101,82 @@ void APlayer_Base_Knight::ShotProjectile()
 	pProjectile->LaunchMotion(vDir);
 }
 
-void APlayer_Base_Knight::UseItem(FString _NiagaraPath)
+//void APlayer_Base_Knight::UseItem(FString _NiagaraPath, EPlayerSound _Sound)
+//{
+//
+//	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *_NiagaraPath);
+//	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/EST-drink.EST-drink'"));
+//	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
+//	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
+//	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
+//	bItemInUse = true;
+//	m_AnimInst->TurnOnItemUseBlend(1.f);
+//}
+
+void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
-	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *_NiagaraPath);
-	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/EST-drink.EST-drink'"));
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
+
+	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_ID);
+	if ( pItemInfo->Restore_HP >= 0 )
+	{
+		pState->SetPlayerCurrentHP(FMath::Clamp(pState->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, pState->GetPlayerBasePower().MaxHP));
+		SoundEnum = EPlayerSound::USERESTORE;
+	}
+	if ( pItemInfo->Restore_MP >= 0 )
+	{
+		pState->SetPlayerCurrentMP(FMath::Clamp(pState->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, pState->GetPlayerBasePower().MaxMP));
+		SoundEnum = EPlayerSound::USERESTORE;
+	}
+	if ( pItemInfo->Gained_Soul >= 0 )
+	{
+		pState->PlayerGainSoul(pItemInfo->Gained_Soul);
+		m_MainUI->GetSoulUI()->RenewAmountOfSoul(pItemInfo->Gained_Soul);
+		SoundEnum = EPlayerSound::USESOUL;
+	}
+
+	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItemInfo->NiagaraPath);
 	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(SoundEnum), GetActorLocation());
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
+	
 	bItemInUse = true;
 	m_AnimInst->TurnOnItemUseBlend(1.f);
+
+	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
+	if ( _Slot == EEQUIP_SLOT::EMPTY )
+	{
+		UInventory_Mgr::GetInst(GetWorld())->DecreaseInventoryItem(_ID);
+	}
+	// 퀵슬롯에 장착되어있을 경우 퀵슬롯을 통해 수량 감소
+	else
+	{
+		int32 idx = UEquip_Mgr::GetInst(GetWorld())->ConvertQuickSlotToIdx(_Slot);
+		UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(idx);
+		UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
+		pQuickSlotUI->SetQuickSlotOpacity(0.5f, false);
+	}
+}
+
+void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
+{
+	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
+	pQuickSlotUI->SetLowerSlotDelay(_DelayPercent);
+	if ( _DelayPercent > 0.f )
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
+			{
+				float fDelayPercent = FMath::Clamp(_DelayPercent - GetWorld()->GetDeltaSeconds() / 3.f, 0.f, 1.f);
+				ItemDelaytime(fDelayPercent);
+			}
+		));
+	}
+	else
+	{
+		bItemDelay = false;
+		pQuickSlotUI->SetQuickSlotOpacity(1.f, false);
+	}
 }
 
 void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)

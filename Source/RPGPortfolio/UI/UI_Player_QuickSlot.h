@@ -28,6 +28,10 @@ public:
 
 	void RenewLowerQuickSlot(int32 _Idx);
 	void RenewNextQuickSlot(int32 _Idx);
-	//void SetQuickSlotColor(float R, float G, float B, float A, bool UroL);
+	
+	
+	/*	false면 아래쪽 슬롯 투명도 세팅
+		true면 위쪽 슬롯의 투명도 세팅	*/
+	void SetQuickSlotOpacity(float Alpha, bool UorL);
 	void SetLowerSlotDelay(float _DelayPercent);
 };

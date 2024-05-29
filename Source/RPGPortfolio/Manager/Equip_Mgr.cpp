@@ -100,9 +100,17 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 {
 	FInvenItemRow* pItem = GetQSItemForIndex(_Idx);
 
+	if (nullptr == pItem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		return;
+	}
+
 	if (pItem->Stack > 0)
 	{
 		--pItem->Stack;
+
+		UE_LOG(LogTemp, Warning, TEXT("남은 개수 : %d"), pItem->Stack);
 
 		// 개수가 0이 되면 퀵슬롯에서 해당 아이템을 없앤다.
 		if (pItem->Stack <= 0)

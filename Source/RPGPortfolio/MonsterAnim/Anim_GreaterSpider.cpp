@@ -2,7 +2,7 @@
 
 
 #include "Anim_GreaterSpider.h"
-
+#include "../Monsters/Boss_GreaterSpider.h"
 
 void UAnim_GreaterSpider::NativeInitializeAnimation()
 {
@@ -17,4 +17,10 @@ void UAnim_GreaterSpider::NativeBeginPlay()
 void UAnim_GreaterSpider::NativeUpdateAnimation(float _fDeltaTime)
 {
 	Super::NativeUpdateAnimation(_fDeltaTime);
+}
+
+void UAnim_GreaterSpider::AnimNotify_DeadAnimEnd()
+{
+	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
+	pSpider->DeadCollisionSetting();
 }

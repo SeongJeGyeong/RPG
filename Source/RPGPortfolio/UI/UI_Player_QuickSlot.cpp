@@ -75,19 +75,19 @@ void UUI_Player_QuickSlot::RenewNextQuickSlot(int32 _Idx)
 	m_NextQuickSlotItem->RenewNextQuickSlotItem(ItemData);
 }
 
-//void UUI_Player_QuickSlot::SetQuickSlotColor(float R, float G, float B, float A, bool UroL)
-//{
-//	// true면 위쪽 슬롯의 컬러 세팅
-//	// false면 아래쪽 슬롯 컬러 세팅
-//	if (UroL)
-//	{
-//		m_UpperSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
-//	}
-//	else
-//	{
-//		m_LowerSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
-//	}
-//}
+void UUI_Player_QuickSlot::SetQuickSlotOpacity(float Alpha, bool UorL)
+{
+	if (UorL)
+	{
+		m_UpperSlotItem->SetRenderOpacity(Alpha);
+		//m_UpperSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
+	}
+	else
+	{
+		m_LowerSlotItem->SetRenderOpacity(Alpha);
+		//m_LowerSlotItem->SetColorAndOpacity(FLinearColor::FLinearColor(R, G, B, A));
+	}
+}
 
 void UUI_Player_QuickSlot::SetLowerSlotDelay(float _DelayPercent)
 {	

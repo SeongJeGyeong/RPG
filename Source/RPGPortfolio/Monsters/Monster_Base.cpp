@@ -515,14 +515,14 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 
 	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 
-	TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DmgSound_Normal;
-	if ( IsValid(DmgSound.LoadSynchronous()) )
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitInfo.GetActor()->GetActorLocation());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
-	}
+	//TSoftObjectPtr<USoundBase> DmgSound = m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DmgSound_Normal;
+	//if ( IsValid(DmgSound.LoadSynchronous()) )
+	//{
+	//	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DmgSound.LoadSynchronous(), HitInfo.GetActor()->GetActorLocation());
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("몬스터 타격사운드 로드 실패"));
+	//}
 	bAtkTrace = false;
 }

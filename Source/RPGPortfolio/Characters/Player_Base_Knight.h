@@ -93,7 +93,6 @@ private:
 
 	// 아이템 사용 딜레이 체크용
 	bool bItemDelay;
-	FTimerDelegate ItemDelayDelegate;
 
 	// 아이템 사용 애니메이션 재생 중
 	bool bItemInUse;
@@ -184,7 +183,8 @@ public:
 	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart(bool _AtkMove);
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
-	void UseItem(FString _NiagaraPath);
+	//void UseItem(FString _NiagaraPath, EPlayerSound _Sound);
+	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
 	void StopBlockPhysics();
 

@@ -42,6 +42,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void MeleeAttackHitCheck();
 	void PlayAttackMontage(EGreaterSpider_STATE _State);
+	void MonsterDead(AController* EventInstigator);
+	void DeadCollisionSetting();
 };
