@@ -17,13 +17,7 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 {
 	Super::TickNode(_OwnComp, _NodeMemory, _DT);
 
-	AAIController* pController = _OwnComp.GetAIOwner();
-	if (!IsValid(pController))
-	{
-		return;
-	}
-
-	ABoss_Base* pBoss = Cast<ABoss_Base>(pController->GetPawn());
+	ABoss_Base* pBoss = Cast<ABoss_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if (!IsValid(pBoss))
 	{
 		return;
@@ -41,25 +35,7 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	vOffset = vOffset.GetSafeNormal();
 	float fAngle = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
 
-	//UE_LOG(LogTemp, Warning, TEXT("player Direction : %f"), fDir);
-	//UE_LOG(LogTemp, Warning, TEXT("player Angle : %f"), fAngle);
-
-	pController->GetBlackboardComponent()->SetValueAsFloat(TEXT("TargetDirection"), fAngle);
-
-	// 몬스터 기준 왼쪽
-	if ( fDir >= 1.f )
-	{
-		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TurnDirection"), 1);
-	}
-	// 몬스터 기준 오른쪽
-	else if ( fDir <= -1.f )
-	{
-		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TurnDirection"), 2);
-	}
-	else
-	{
-		pController->GetBlackboardComponent()->SetValueAsInt(TEXT("TurnDirection"), 0);
-	}
+	_OwnComp.GetBlackboardComponent()->SetValueAsFloat(TEXT("TargetDirection"), fAngle);
 
 	float Distance = FVector::Distance(pBoss->GetActorLocation(), pPlayer->GetActorLocation());
 

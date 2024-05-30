@@ -94,9 +94,6 @@ private:
 	// 아이템 사용 딜레이 체크용
 	bool bItemDelay;
 
-	// 아이템 사용 애니메이션 재생 중
-	bool bItemInUse;
-
 	// 공격 중 이동 체크용
 	bool bAtkMove;
 	FVector vAtkMoveVec;

@@ -152,7 +152,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		StaggerGauge = 0.f;
 	}
 
-	TSoftObjectPtr<USoundBase> HitSound = m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::HIT);
+	TSoftObjectPtr<USoundBase> HitSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::HIT).LoadSynchronous();
 	if ( IsValid(HitSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound.LoadSynchronous(), GetActorLocation());
@@ -218,7 +218,13 @@ void ABoss_GreaterSpider::MeleeAttackHitCheck()
 
 void ABoss_GreaterSpider::PlayAttackMontage(EGreaterSpider_STATE _State)
 {
-	UAnimMontage* pMontage = m_DataAsset->GetAnimGSpider(_State).LoadSynchronous();
+	TSoftObjectPtr<UAnimMontage> pMontage = m_DataAsset->GetAnimGSpider(_State).LoadSynchronous();
+	if (!IsValid(pMontage.LoadSynchronous()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("거미여왕 공격몽타주 로드 실패"));
+		return;
+	}
+	m_AnimInst->Montage_Play(pMontage.LoadSynchronous());
 }
 
 void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
@@ -228,7 +234,7 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
 
-	TSoftObjectPtr<USoundBase> DeadSound = m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::DEAD);
+	TSoftObjectPtr<USoundBase> DeadSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::DEAD).LoadSynchronous();
 	if ( IsValid(DeadSound.LoadSynchronous()) )
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound.LoadSynchronous(), GetActorLocation());
@@ -237,15 +243,6 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
 	}
-	//TSoftObjectPtr<UAnimMontage> DeadAnim = m_DataAsset.LoadSynchronous()->GetAnimGSpider(EGreaterSpider_STATE::DEAD);
-	//if ( IsValid(DeadAnim.LoadSynchronous()) )
-	//{
-	//	m_AnimInst->Montage_Play(DeadAnim.LoadSynchronous());
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("몬스터 사망몽타주 로드 실패"));
-	//}
 	m_AnimInst->SetDeadAnim();
 
 	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);

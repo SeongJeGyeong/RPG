@@ -14,4 +14,6 @@ class RPGPORTFOLIO_API UBTS_Boss_ChkAtkRange : public UBTService
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory, float _DT) override;
 };

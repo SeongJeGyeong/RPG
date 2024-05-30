@@ -44,6 +44,5 @@ public:
 	void RenewItemListUI(EITEM_TYPE _Type);
 	void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
-	EPlayerSound UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot = EEQUIP_SLOT::EMPTY);
 	void DecreaseInventoryItem(EITEM_ID _ID);
 };

@@ -217,28 +217,14 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		}
 	}
 
-	// 아이템 사용 중
-	if (bItemInUse)
+	if (bSprintToggle)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 100.f;
-		if (!m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM)))
+		// 스테미너가 0일 경우 달리기 불가
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+		if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
 		{
-			m_AnimInst->TurnOnItemUseBlend(0.f);
 			GetCharacterMovement()->MaxWalkSpeed = 300.f;
-			bItemInUse = false;
-		}
-	}
-	else
-	{
-		if (bSprintToggle)
-		{
-			// 스테미너가 0일 경우 달리기 불가
-			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-			if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
-			{
-				GetCharacterMovement()->MaxWalkSpeed = 300.f;
-				bSprintToggle = false;
-			}
+			bSprintToggle = false;
 		}
 	}
 }
@@ -797,6 +783,7 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT))			||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM))		||
 		GetCharacterMovement()->IsFalling() ||
 		bDodging == true
 		)
@@ -956,7 +943,6 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	bJumpAtk = false;
 	bAtkTrace = false;
 	bAtkMove = false;
-	bItemInUse = false;
 	bNextAtkCheckOn = false;
 	bAttackToggle = false;
 
@@ -1101,18 +1087,6 @@ void APlayer_Base_Knight::ShotProjectile()
 	pProjectile->LaunchMotion(vDir);
 }
 
-//void APlayer_Base_Knight::UseItem(FString _NiagaraPath, EPlayerSound _Sound)
-//{
-//
-//	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *_NiagaraPath);
-//	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundWave'/Game/DSResource/Sound/Player/Item/EST-drink.EST-drink'"));
-//	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
-//	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
-//	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
-//	bItemInUse = true;
-//	m_AnimInst->TurnOnItemUseBlend(1.f);
-//}
-
 void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
@@ -1140,9 +1114,6 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(SoundEnum), GetActorLocation());
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
-	
-	bItemInUse = true;
-	m_AnimInst->TurnOnItemUseBlend(1.f);
 
 	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
 	if ( _Slot == EEQUIP_SLOT::EMPTY )

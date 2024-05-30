@@ -20,24 +20,6 @@ UBTT_GS_Trace::UBTT_GS_Trace()
 EBTNodeResult::Type UBTT_GS_Trace::ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory)
 {
 	Super::ExecuteTask(_OwnComp, _NodeMemory);
-	
-	/* AAIController* pController = _OwnComp.GetAIOwner();
-	ABoss_GreaterSpider* pBoss = Cast<ABoss_GreaterSpider>(pController->GetPawn());
-	if (nullptr == pBoss)
-	{
-		//return EBTNodeResult::Succeeded;
-		return EBTNodeResult::Failed;
-	}
-	pBoss->GetCharacterMovement()->MaxWalkSpeed = 400.f;
-
-	ACharacter* pCharacter = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(m_TargetKey.SelectedKeyName));
-	if (!IsValid(pCharacter))
-	{
-		//return EBTNodeResult::Succeeded;
-		return EBTNodeResult::Failed;
-	}
-
-	UAIBlueprintHelperLibrary::SimpleMoveToLocation(pController, pCharacter->GetActorLocation()); */
 
 	return EBTNodeResult::InProgress;
 }
@@ -77,6 +59,7 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 	if (Distance < fAtkRange)
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), true);
+		pController->StopMovement();
 		FinishLatentTask(_OwnComp, EBTNodeResult::Succeeded);
 		return;
 	}

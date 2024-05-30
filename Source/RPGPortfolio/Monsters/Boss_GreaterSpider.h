@@ -16,7 +16,7 @@ class RPGPORTFOLIO_API ABoss_GreaterSpider : public ABoss_Base
 	
 private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
-	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
+	UDA_GreaterSpider*	m_DataAsset;
 
 	UPROPERTY()
 	class UAnim_GreaterSpider* m_AnimInst;

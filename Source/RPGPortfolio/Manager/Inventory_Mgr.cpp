@@ -526,47 +526,6 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 }
 
-// 퀵슬롯에서 사용할 경우 플레이어 -> 인벤토리 매니저 -> 플레이어 순으로 호출
-// 인벤토리에서 사용할 경우 인벤토리 UI -> 인벤토리 매니저 -> 플레이어 순으로 호출
-EPlayerSound UInventory_Mgr::UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
-{
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-
-	UUI_Base* pMainUI = GameMode->GetMainHUD();
-	
-	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
-	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
-
-	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
-	if ( pItemInfo->Restore_HP >= 0 )
-	{
-		pPlayerState->SetPlayerCurrentHP(FMath::Clamp(pPlayerState->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, pPlayerState->GetPlayerBasePower().MaxHP));
-		SoundEnum = EPlayerSound::USERESTORE;
-	}
-	if ( pItemInfo->Restore_MP >= 0 )
-	{
-		pPlayerState->SetPlayerCurrentMP(FMath::Clamp(pPlayerState->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, pPlayerState->GetPlayerBasePower().MaxMP));
-		SoundEnum = EPlayerSound::USERESTORE;
-	}
-	if ( pItemInfo->Gained_Soul >= 0 )
-	{
-		pPlayerState->PlayerGainSoul(pItemInfo->Gained_Soul);
-		pMainUI->GetSoulUI()->RenewAmountOfSoul(pItemInfo->Gained_Soul);
-		SoundEnum = EPlayerSound::USESOUL;
-	}
-
-	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
-	if (_Slot == EEQUIP_SLOT::EMPTY)
-	{
-		DecreaseInventoryItem(_ID);
-	}
-
-	//APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(m_World, 0));
-	//pPlayer->UseItem(pItemInfo->NiagaraPath, SoundEnum);
-
-	return SoundEnum;
-}
-
 void UInventory_Mgr::DecreaseInventoryItem(EITEM_ID _ID)
 {
 	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
