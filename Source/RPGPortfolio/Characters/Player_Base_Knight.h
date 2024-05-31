@@ -180,7 +180,6 @@ public:
 	void InvincibleTimeCheck(bool _Invincible);
 	void AttackMoveStart(bool _AtkMove);
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
-	//void UseItem(FString _NiagaraPath, EPlayerSound _Sound);
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
 	void StopBlockPhysics();
@@ -209,7 +208,6 @@ private:
 	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
 	void OpenMenu(const FInputActionInstance& _Instance);
 	void ActionCommand(const FInputActionInstance& _Instance);
-	void BackToPrevMenu(const FInputActionInstance& _Instance);
 	void QuickSlotChange(const FInputActionInstance& _Instance);
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 	void UseSkill_1(const FInputActionInstance& _Instance);

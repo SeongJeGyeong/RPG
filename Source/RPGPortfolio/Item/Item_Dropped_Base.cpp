@@ -37,7 +37,7 @@ AItem_Dropped_Base::AItem_Dropped_Base()
 
 void AItem_Dropped_Base::OnConstruction(const FTransform& _Transform)
 {
-	tCommand_Key = FText::FromString(TEXT("E"));
+	tCommand_Key = FText::FromString(TEXT("F"));
 	tCommand_Name = FText::FromString(TEXT("획득한다"));
 }
 

@@ -36,7 +36,7 @@ void AInteraction_Lever::OnConstruction(const FTransform& _Transform)
 {
 	Super::OnConstruction(_Transform);
 
-	tCommand_Key = FText::FromString(TEXT("E"));
+	tCommand_Key = FText::FromString(TEXT("F"));
 	tCommand_Name = FText::FromString(TEXT("당긴다"));
 }
 

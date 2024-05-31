@@ -18,7 +18,7 @@ private:
 	class UButton*	m_Equip;
 	class UButton*	m_Inventory;
 	class UButton*	m_Status;
-	class UButton*	m_Tutorial;
+	class UButton*	m_Manual;
 	class UButton*	m_Settings;
 	class UTextBlock* m_MenuName;
 
@@ -51,11 +51,11 @@ public:
 	void StatusBtnUnHovered();
 
 	UFUNCTION()
-	void TutorialBtnClicked();
+	void ManualBtnClicked();
 	UFUNCTION()
-	void TutorialBtnHovered();
+	void ManualBtnHovered();
 	UFUNCTION()
-	void TutorialBtnUnHovered();
+	void ManualBtnUnHovered();
 
 	UFUNCTION()
 	void SettingsBtnClicked();

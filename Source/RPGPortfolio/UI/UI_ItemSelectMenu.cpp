@@ -29,6 +29,10 @@ void UUI_ItemSelectMenu::NativeConstruct()
 	else
 	{
 		m_Btn_Use->OnClicked.AddDynamic(this, &UUI_ItemSelectMenu::UseBtnClicked);
+		m_Btn_Drop->SetIsEnabled(false);
+		m_Btn_Discard->SetIsEnabled(false);
+		m_Btn_DropAll->SetIsEnabled(false);
+		m_Btn_DiscardAll->SetIsEnabled(false);
 	}
 
 	if (bItemUseDelay)

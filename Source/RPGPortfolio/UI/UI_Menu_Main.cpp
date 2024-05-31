@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI_StatusMain.h"
 #include "UI_EquipMain.h"
+#include "UI_Manual.h"
 #include "../System/DataAsset/DA_MenuSound.h"
 
 void UUI_Menu_Main::NativeConstruct()
@@ -18,11 +19,11 @@ void UUI_Menu_Main::NativeConstruct()
 	m_Equip = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Equip")));
 	m_Inventory = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Inventory")));
 	m_Status = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Status")));
-	m_Tutorial = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Tutorial")));
+	m_Manual = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Manual")));
 	m_Settings = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Settings")));
 	m_MenuName = Cast<UTextBlock>(GetWidgetFromName(TEXT("MenuName")));
 
-	if (!IsValid(m_Equip) || !IsValid(m_Inventory) || !IsValid(m_Status) || !IsValid(m_Tutorial) || !IsValid(m_Settings))
+	if (!IsValid(m_Equip) || !IsValid(m_Inventory) || !IsValid(m_Status) || !IsValid(m_Manual) || !IsValid(m_Settings))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Menu Button Load Failed"));
 	}
@@ -40,9 +41,9 @@ void UUI_Menu_Main::NativeConstruct()
 		m_Status->OnHovered.AddDynamic(this, &UUI_Menu_Main::StatusBtnHovered);
 		m_Status->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::StatusBtnUnHovered);
 
-		m_Tutorial->OnClicked.AddDynamic(this, &UUI_Menu_Main::TutorialBtnClicked);
-		m_Tutorial->OnHovered.AddDynamic(this, &UUI_Menu_Main::TutorialBtnHovered);
-		m_Tutorial->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::TutorialBtnUnHovered);
+		m_Manual->OnClicked.AddDynamic(this, &UUI_Menu_Main::ManualBtnClicked);
+		m_Manual->OnHovered.AddDynamic(this, &UUI_Menu_Main::ManualBtnHovered);
+		m_Manual->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::ManualBtnUnHovered);
 
 		m_Settings->OnClicked.AddDynamic(this, &UUI_Menu_Main::SettingsBtnClicked);
 		m_Settings->OnHovered.AddDynamic(this, &UUI_Menu_Main::SettingsBtnHovered);
@@ -137,18 +138,29 @@ void UUI_Menu_Main::StatusBtnUnHovered()
 	m_MenuName->SetText(FText::GetEmpty());
 }
 
-void UUI_Menu_Main::TutorialBtnClicked()
+void UUI_Menu_Main::ManualBtnClicked()
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+
+	UUI_Manual* ManualUI = GameMode->GetManualUI();
+	ManualUI->SetVisibility(ESlateVisibility::Visible);
+
 	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
 }
 
-void UUI_Menu_Main::TutorialBtnHovered()
+void UUI_Menu_Main::ManualBtnHovered()
 {
-	m_MenuName->SetText(FText::FromString(L"튜토리얼"));
+	m_MenuName->SetText(FText::FromString(L"조작법"));
 	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
 }
 
-void UUI_Menu_Main::TutorialBtnUnHovered()
+void UUI_Menu_Main::ManualBtnUnHovered()
 {
 	m_MenuName->SetText(FText::GetEmpty());
 }

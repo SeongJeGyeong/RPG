@@ -7,6 +7,7 @@
 #include "UI/UI_Inventory.h"
 #include "UI/UI_StatusMain.h"
 #include "UI/UI_EquipMain.h"
+#include "UI/UI_Manual.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
@@ -32,6 +33,12 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 	if (Equip.Succeeded())
 	{
 		m_EquipUIClass = Equip.Class;
+	}
+
+	ConstructorHelpers::FClassFinder<UUserWidget> Manual(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Manual/BPC_UI_Manual.BPC_UI_Manual_C'"));
+	if ( Manual.Succeeded() )
+	{
+		m_ManualUIClass = Manual.Class;
 	}
 }
 
@@ -95,6 +102,17 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		}
 	}
 
+	if ( IsValid(m_ManualUIClass) )
+	{
+		m_ManualUI = Cast<UUI_Manual>(CreateWidget(GetWorld(), m_ManualUIClass));
+
+		if ( IsValid(m_ManualUIClass) )
+		{
+			m_ManualUI->AddToViewport(5);
+			m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
 	APlayerController* pController = GetWorld()->GetFirstPlayerController();
 
 	FInputModeGameOnly GameOnly;
@@ -102,11 +120,44 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 	pController->bShowMouseCursor = false;
 }
 
+bool ARPGPortfolioGameModeBase::IsStatusOpened()
+{
+	if (m_StatusUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void ARPGPortfolioGameModeBase::CloseStatus()
+{
+	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+bool ARPGPortfolioGameModeBase::IsManualOpened()
+{
+	if (m_ManualUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void ARPGPortfolioGameModeBase::CloseManual()
+{
+	m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
 bool ARPGPortfolioGameModeBase::IsSubMenuUIOpened()
 {
 	if (m_InventoryUI->GetVisibility() == ESlateVisibility::Visible ||
 		m_StatusUI->GetVisibility() == ESlateVisibility::Visible ||
-		m_EquipUI->GetVisibility() == ESlateVisibility::Visible)
+		m_EquipUI->GetVisibility() == ESlateVisibility::Visible	||
+		m_ManualUI->GetVisibility() == ESlateVisibility::Visible
+		)
+
 	{
 		return true;
 	}

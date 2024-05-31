@@ -16,7 +16,6 @@
 #include "../UI/UI_Player_Main.h"
 #include "../UI/UI_Message_Main.h"
 #include "../UI/UI_Message_Item.h"
-#include "../UI/UI_StatusMain.h"
 #include "../UI/UI_EquipMain.h"
 #include "../UI/UI_EquipItemList.h"
 #include "../UI/UI_Player_QuickSlot.h"
@@ -235,7 +234,6 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-
 	if (nullptr == InputComp)
 	{
 		return;
@@ -244,7 +242,6 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	if (!m_IA_Setting.IsNull())
 	{
 		UDA_InputAction* pIADA = m_IA_Setting.LoadSynchronous();
-	
 		for (int32 i = 0; i < pIADA->IADataArr.Num(); ++i)
 		{
 			switch (pIADA->IADataArr[i].Type)
@@ -287,9 +284,6 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				break;
 			case EInputActionType::ACTION:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ActionCommand);
-				break;
-			case EInputActionType::BACKTOPREV:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::BackToPrevMenu);
 				break;
 			case EInputActionType::QUICKSLOTCHANGE:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::QuickSlotChange);
@@ -594,20 +588,23 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 			return;
 		}
-
-		UUI_StatusMain* StatusUI = pGameMode->GetStatusUI();
-		pGameMode->GetStatusUI()->GetVisibility();
-		if (StatusUI->GetVisibility() == ESlateVisibility::Visible)
+		if (pGameMode->IsStatusOpened())
 		{
-			StatusUI->SetVisibility(ESlateVisibility::Hidden);
+			pGameMode->CloseStatus();
+			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			return;
+		}
+		if (pGameMode->IsManualOpened())
+		{
+			pGameMode->CloseManual();
 			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
 			return;
 		}
 
 		UUI_EquipMain* EquipUI = pGameMode->GetEquipUI();
-		if ( EquipUI->GetVisibility() == ESlateVisibility::Visible )
+		if (EquipUI->GetVisibility() == ESlateVisibility::Visible)
 		{
-			if ( EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible )
+			if (EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
 			{
 				EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
 				UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
@@ -659,47 +656,6 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	{
 		m_MainUI->ShowItemMessageUI(false);
 		m_MainUI->ShowMainMessageUI(false);
-	}
-}
-
-void APlayer_Base_Knight::BackToPrevMenu(const FInputActionInstance& _Instance)
-{
-	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(pGameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
-		return;
-	}
-
-	if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
-	{
-		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
-		return;
-	}
-
-	UUI_StatusMain* StatusUI = pGameMode->GetStatusUI();
-	pGameMode->GetStatusUI()->GetVisibility();
-	if (StatusUI->GetVisibility() == ESlateVisibility::Visible)
-	{
-		StatusUI->SetVisibility(ESlateVisibility::Hidden);
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
-		return;
-	}
-
-	UUI_EquipMain* EquipUI = pGameMode->GetEquipUI();
-	if (EquipUI->GetVisibility() == ESlateVisibility::Visible)
-	{
-		if ( EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
-		{
-			EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
-			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
-			return;
-		}
-
-		EquipUI->SetVisibility(ESlateVisibility::Hidden);
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
-		return;
 	}
 }
 
@@ -1214,7 +1170,7 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 			// 아이템 습득 메시지가 표시중일 때
 			if (m_MainUI->GetRootMessageDisplayed())
 			{
-				m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"E"), FText::FromString(L"확인"));
+				m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"F"), FText::FromString(L"확인"));
 				m_MainUI->ShowMainMessageUI(true);
 			}
 			else
