@@ -24,3 +24,26 @@ void UAnim_GreaterSpider::AnimNotify_DeadAnimEnd()
 	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
 	pSpider->DeadCollisionSetting();
 }
+
+void UAnim_GreaterSpider::AnimNotify_RushStart()
+{
+	OnRushAttack.Broadcast(true);
+}
+
+void UAnim_GreaterSpider::AnimNotify_RushEnd()
+{
+	OnRushAttack.Broadcast(false);
+}
+
+void UAnim_GreaterSpider::AnimNotify_AttackStart()
+{
+	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
+	pSpider->SetbAtkTrace(true);
+}
+
+void UAnim_GreaterSpider::AnimNotify_AttackEnd()
+{
+	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
+	pSpider->SetbAtkTrace(false);
+	pSpider->EmptyHitArr();
+}

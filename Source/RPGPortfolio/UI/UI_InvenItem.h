@@ -55,8 +55,5 @@ public:
 	void ItemBtnClicked();
 
 	UFUNCTION()
-	void MenuAnchorOpened(bool _IsOpen);
-
-	UFUNCTION()
 	UUserWidget* MenuAnchorDataSetting();
 };

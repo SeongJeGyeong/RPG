@@ -512,7 +512,6 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		{
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
 			vDodgeVector = GetActorForwardVector();
-			//rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 			rDodgeRotation = GetActorRotation();
 			ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
 		}
@@ -579,25 +578,33 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		return;
 	}
 
+	USoundBase* pCloseSound = m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE);
+	USoundBase* pOpenSound = m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_OPEN);
+	if (!IsValid(pCloseSound) || !IsValid(pOpenSound))
+	{
+		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
+		return;
+	}
+
 	// 세부메뉴가 열려있을 경우
 	if (pGameMode->IsSubMenuUIOpened())
 	{
 		if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
 		{
 			UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
-			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 			return;
 		}
 		if (pGameMode->IsStatusOpened())
 		{
 			pGameMode->CloseStatus();
-			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 			return;
 		}
 		if (pGameMode->IsManualOpened())
 		{
 			pGameMode->CloseManual();
-			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 			return;
 		}
 
@@ -607,12 +614,12 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 			if (EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
 			{
 				EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
-				UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+				UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 				return;
 			}
 
 			EquipUI->SetVisibility(ESlateVisibility::Hidden);
-			UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 			return;
 		}
 
@@ -628,15 +635,14 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		GAU.SetHideCursorDuringCapture(false);
 		pController->SetInputMode(GAU);
 
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_OPEN));
+		UGameplayStatics::PlaySound2D(GetWorld(), pOpenSound);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("menu close"));
 		FInputModeGameOnly GameOnly;
 		pController->SetInputMode(GameOnly);
 
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE));
+		UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 	}
 		
 	pController->bShowMouseCursor = bShowMenu;
@@ -734,8 +740,6 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK))		||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK))	||
-		//m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW))	||
-		//m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT))			||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
@@ -889,7 +893,14 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		// 사망처리
 		return 0.f;
 	}
-	
+	// 피격 이펙트 스폰
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
+		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
+	}
+
 	// 방어 상태 해제
 	m_AnimInst->SetbIsGaurd(false);
 	bToggleGuard = false;
@@ -902,10 +913,8 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	bNextAtkCheckOn = false;
 	bAttackToggle = false;
 
-	AMonster_Base* pMonster = Cast<AMonster_Base>(DamageCauser);
-
-	// 피격 시 피격지점 반대방향으로 밀려나도록
-	FVector LaunchVec = GetActorLocation() - pMonster->GetActorLocation();
+	// 피격 시 공격대상 반대방향으로 밀려나도록
+	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
 	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
 	LaunchCharacter(LaunchForce, false, false);
 
@@ -917,7 +926,13 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	}
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT));
 	// 피격 사운드 재생
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::HIT), GetActorLocation());
+	USoundBase* pHitSound = m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::HIT);
+	if (!IsValid(pHitSound))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("플레이어 피격사운드 로드 실패"));
+		return 0.0f;
+	}
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pHitSound, GetActorLocation());
 
 	return 0.0f;
 }
@@ -1068,7 +1083,16 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItemInfo->NiagaraPath);
 	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound.LoadSynchronous()->GetPlayerSound(SoundEnum), GetActorLocation());
+	
+	USoundBase* pItemSound = m_PlayerSound.LoadSynchronous()->GetPlayerSound(SoundEnum);
+	if(!IsValid(pItemSound))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 사운드 로드 실패"));
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), pItemSound, GetActorLocation());
+	}
 	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
 
 	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소

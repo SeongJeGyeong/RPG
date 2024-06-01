@@ -47,7 +47,6 @@ void UUI_InvenItem::NativeConstruct()
 	}
 
 	m_MenuAnchor->OnGetUserMenuContentEvent.BindUFunction(this, FName("MenuAnchorDataSetting"));
-	//m_MenuAnchor->OnMenuOpenChanged.AddDynamic(this, &UUI_InvenItem::MenuAnchorOpened);
 }
 
 void UUI_InvenItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -119,20 +118,6 @@ void UUI_InvenItem::ItemBtnClicked()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("스테이터스 갱신"));
 			m_StatUI->RenewBasePower();
-		}
-	}
-}
-
-void UUI_InvenItem::MenuAnchorOpened(bool _IsOpen)
-{
-	if (_IsOpen)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Anchor Open!!!"));
-		UUI_ItemSelectMenu* pMenuAnchor = Cast<UUI_ItemSelectMenu>(m_MenuAnchor);
-		if ( IsValid(pMenuAnchor) )
-		{
-			pMenuAnchor->SetSelectedItemData(m_ItemData);
-			pMenuAnchor->SetbItemUseDelay(bItemUseDelay);
 		}
 	}
 }

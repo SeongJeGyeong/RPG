@@ -34,19 +34,33 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
 
 	UE_LOG(LogTemp, Warning, TEXT("fDir : %f"), fDir);
+
+
+	if (pBoss->GetMonsterInfo().CurHP <= pBoss->GetMonsterInfo().MaxHP / 2)
+	{
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 3);
+		return;
+
+		int iNum = FMath::RandRange(1, 10);
+		if (iNum > 7)
+		{
+			_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 3);
+			return;
+		}
+	}
 	// 몬스터 기준 왼쪽
 	if ( fDir >= 45.f )
 	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("AttackDirection"), 1);
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 1);
 	}
 	// 몬스터 기준 오른쪽
 	else if ( fDir <= -45.f )
 	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("AttackDirection"), 2);
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 2);
 	}
 	else
 	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("AttackDirection"), 0);
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 0);
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("OnBecomeRelevant"));

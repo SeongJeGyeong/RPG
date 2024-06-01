@@ -6,6 +6,7 @@
 #include "AnimInstance_Boss_Base.h"
 #include "Anim_GreaterSpider.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRushAttackDelegate, bool);	// 러시공격 델리게이트
 /**
  * 
  */
@@ -20,6 +21,8 @@ private:
 	bool bIsTurn;
 
 public:
+	FOnRushAttackDelegate	OnRushAttack;
+
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
@@ -27,5 +30,18 @@ public:
 	UFUNCTION()
 	void AnimNotify_DeadAnimEnd();
 
+	//UFUNCTION()
+	//void AnimNotify_BodySlamed();
+
+	UFUNCTION()
+	void AnimNotify_RushStart();
+
+	UFUNCTION()
+	void AnimNotify_RushEnd();
+
+	UFUNCTION()
+	void AnimNotify_AttackStart();
+	UFUNCTION()
+	void AnimNotify_AttackEnd();
 
 };

@@ -21,12 +21,17 @@ private:
 	UPROPERTY()
 	class UAnim_GreaterSpider* m_AnimInst;
 
-	bool bAtkTrace;
+	UPROPERTY()
+	TArray<AActor*> HitActorArr;
 
+	bool bAtkTrace;
+	bool bRushTrace;
+	bool bRushMove;
+	EGreaterSpider_STATE m_State;
 public:
 	bool GetbAtkTrace() { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
-
+	void EmptyHitArr() { HitActorArr.Empty(); }
 public:
 	// Sets default values for this character's properties
 	ABoss_GreaterSpider();
@@ -45,7 +50,14 @@ public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void MeleeAttackHitCheck();
+	void LeftArmTrace();
+	void RightArmTrace();
+	void HeadTrace();
+	void SweepArmTrace(FVector _Start, FVector _End);
+	void RushAttackHitCheck();
 	void PlayAttackMontage(EGreaterSpider_STATE _State);
 	void MonsterDead(AController* EventInstigator);
 	void DeadCollisionSetting();
+
+	void RushAttack(bool _Rush);
 };

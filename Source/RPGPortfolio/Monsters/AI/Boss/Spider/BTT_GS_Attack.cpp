@@ -28,27 +28,28 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 		return EBTNodeResult::Succeeded;
 	}
 
-	int32 fAttackAngle = pController->GetBlackboardComponent()->GetValueAsInt(TEXT("AttackDirection"));
+	int32 fAttackPattern = pController->GetBlackboardComponent()->GetValueAsInt(TEXT("PatternNumber"));
 
 	// 왼쪽 공격
-	if ( fAttackAngle == 1 )
+	if ( fAttackPattern == 1 )
 	{
 		pBoss->PlayAttackMontage(EGreaterSpider_STATE::LEFTATTACK);
-		UE_LOG(LogTemp, Warning, TEXT("LeftAttack"));
 	}
 	// 오른쪽 공격
-	else if( fAttackAngle == 2 )
+	else if( fAttackPattern == 2 )
 	{
 		pBoss->PlayAttackMontage(EGreaterSpider_STATE::RIGHTATTACK);
-		UE_LOG(LogTemp, Warning, TEXT("RightAttack"));
 	}
 	// 정면 공격
-	else
+	else if( fAttackPattern == 0 )
 	{
 		pBoss->PlayAttackMontage(EGreaterSpider_STATE::CENTERATTACK);
-		UE_LOG(LogTemp, Warning, TEXT("CenterAttack"));
 	}
+	else if ( fAttackPattern == 3 )
+	{
+		pBoss->PlayAttackMontage(EGreaterSpider_STATE::RUSHATTACK);
 
+	}
 
 	return EBTNodeResult::InProgress;
 }
@@ -71,7 +72,7 @@ void UBTT_GS_Attack::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemo
 		return;
 	}
 
-	if ( !AnimInst->IsAnyMontagePlaying() )
+	if (!AnimInst->IsAnyMontagePlaying())
 	{
 		// idle 상태로
 		pBoss->SetiTurnDir(0);
