@@ -10,7 +10,7 @@
 
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam (FOnInvincibleTimeCheckDelegate, bool); // 무적시간 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam (FOnDodgeTimeCheckDelegate, bool); // 무적시간 체크 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam (FOnAttackMoveDelegate, bool);	// 공격 중 이동 델리게이트
 
 /**
@@ -86,8 +86,11 @@ public:
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
-	FOnInvincibleTimeCheckDelegate OnInvincibleTimeCheck;
+	FOnDodgeTimeCheckDelegate OnDodgeTimeCheck;
 	FOnAttackMoveDelegate	OnAttackMove;
+
+	UFUNCTION()
+	void AnimNotify_AtkSectionStart();
 
 	// 다음콤보 체크
 	UFUNCTION()

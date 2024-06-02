@@ -61,7 +61,7 @@ void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 {
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), GetProjHitNiagara(), Hit.Location);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
-	if ( GetOwner() == nullptr )
+	if (GetOwner() == nullptr)
 	{
 		return;
 	}

@@ -80,12 +80,14 @@ private:
 	bool bEnableJump;
 	bool bEnableMove;
 
-	// 다음 공격 체크용 토글
+	// 공격 체크용 토글
 	bool bAttackToggle;
 	// 강공격 체크용 토글
 	bool bHeavyToggle;
 	// 다음 공격 입력 체크용
 	bool bNextAtkCheckOn;
+	// 공격 모션 도중 움직이지 못하는 상태 체크
+	bool bInvalidInput;
 
 	bool bJumpAtk;
 	bool bAtkTrace;
@@ -127,21 +129,29 @@ public:
 	void SetfFrontBack(const float& _FrontBack) { fFrontBack = _FrontBack; }
 	float GetfLeftRight() const { return fLeftRight; }
 	void SetfLeftRight(const float& _LeftRight) { fLeftRight = _LeftRight; }
-	bool GetbAtkTrace() const { return bAtkTrace; }
+
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
-	bool GetbNextAtkCheck() const { return bNextAtkCheckOn; }
 	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
+	// 조작 불가 상태
+	bool GetbInvalidInput() const { return bInvalidInput; }
+	void SetbInvalidInput(const bool& _InvalidInput) { bInvalidInput = _InvalidInput; }
+	// 점프 가능 상태
 	bool GetbEnableJump() const { return bEnableJump; }
 	void SetbEnableJump(const bool& _EnableJump) { bEnableJump = _EnableJump; }
+	// 이동 가능 상태
 	bool GetbEnableMove() const { return bEnableMove; }
 	void SetbEnableMove(const bool& _EnableMove) { bEnableMove = _EnableMove; }
+	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
 	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
+	// 무적상태
 	bool GetbInvincible() const { return bToggleInvinc; }
 	void SetbInvincible(const bool& _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
+	// 가드상태
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
+
 	bool GetbSprintToggle() const { return bSprintToggle; }
 	// 락온 중 플레이어가 적을 바라보고 있도록 설정
 	void SetOrientRotation(const bool& _Val);
@@ -171,13 +181,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
+	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 public:
 	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
 	void NextAttackCheck();
 	void CloseMenuUI();
-	void InvincibleTimeCheck(bool _Invincible);
+	void DodgeTimeCheck(bool _Dodge);
 	void AttackMoveStart(bool _AtkMove);
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);

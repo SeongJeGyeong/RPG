@@ -235,9 +235,16 @@ TTuple<bool, float, FVector> UAnimInstance_Knight::FootLineTrace(FName _SocketNa
 	return MakeTuple(bResult, 999.f, FVector::ZeroVector);
 }
 
+void UAnimInstance_Knight::AnimNotify_AtkSectionStart()
+{
+	m_Player->SetbInvalidInput(true);
+}
+
 void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 {
 	m_Player->SetbNextAtkCheck(true);
+	m_Player->SetbInvalidInput(false);
+	UE_LOG(LogTemp, Warning, TEXT("nextcheckstart notify"));
 }
 
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
@@ -248,6 +255,7 @@ void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
 	m_Player->SetbAtkTrace(true);
+	UE_LOG(LogTemp, Warning, TEXT("hitcheckstart notify"));
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
@@ -271,12 +279,12 @@ void UAnimInstance_Knight::AnimNotify_MoveEnd()
 
 void UAnimInstance_Knight::AnimNotify_DodgeStart()
 {
-	OnInvincibleTimeCheck.Broadcast(true);
+	OnDodgeTimeCheck.Broadcast(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 {
-	OnInvincibleTimeCheck.Broadcast(false);
+	OnDodgeTimeCheck.Broadcast(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()

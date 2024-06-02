@@ -27,7 +27,6 @@ private:
 	int32 iAtkPattern;
 
 public:
-	bool GetbAtkTrace() { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
 	int32 GetiAtkPattern() { return iAtkPattern; }
 	void SetiAtkPattern(int32 _AtkPattern) { iAtkPattern = _AtkPattern; }

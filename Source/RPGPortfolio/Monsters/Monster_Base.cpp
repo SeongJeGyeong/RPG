@@ -491,16 +491,6 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록애니메이션 로드 실패"));
 			}
 
-			USoundBase* BlockSound = m_DataAssetInfo->GetMonSoundData(m_Type)->BlockSound.LoadSynchronous();
-			if ( IsValid(BlockSound) )
-			{
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockSound, GetActorLocation());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록사운드 로드 실패"));
-			}
-
 			return;
 		}
 	}

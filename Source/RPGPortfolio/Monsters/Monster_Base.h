@@ -69,7 +69,6 @@ public:
 	bool GetbLockedOn() const { return bLockedOn; }
 	void SetbLockedOn(bool _LockedOn);
 
-	bool GetbAtkTrace() const { return bAtkTrace; }
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
 
 	bool GetbIsDead() const { return bIsDead; }

@@ -50,6 +50,7 @@ enum class EPlayerSound : uint8
 	USETHROW,
 	USERESTORE,
 	USESOUL,
+	GUARDBLOCK,
 };
 
 UENUM(BlueprintType)

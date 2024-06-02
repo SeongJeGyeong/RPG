@@ -43,13 +43,11 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	if (Distance < fAtkRange)
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), true);
-		UE_LOG(LogTemp, Warning, TEXT("Inner AtkRange"));
 		bInAtkRange = true;
 	}
 	else
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), false);
-		UE_LOG(LogTemp, Warning, TEXT("Outer AtkRange"));
 		bInAtkRange = false;
 	}
 
