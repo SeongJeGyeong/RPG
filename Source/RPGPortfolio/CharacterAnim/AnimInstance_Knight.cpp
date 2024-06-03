@@ -33,6 +33,7 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		}
 		return;
 	}
+	vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
 
 	// Foot IK
 	FootIK(_DT);
@@ -42,8 +43,6 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
 	{
 		bIsMove = true;
-		vLocalVelocity.X = m_Player->GetfFrontBack();
-		vLocalVelocity.Y = m_Player->GetfLeftRight();
 	}
 	else
 	{
@@ -52,12 +51,8 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 		vLocalVelocity.Y = 0.f;
 	}
 
-	vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
-
-	bIsInAir = m_Movement->IsFalling();
-
 	// 가드 모션
-	if (bIsGuard && !bIsInAir)
+	if (bIsGuard)
 	{
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight + _DT * 15.f, 0.f, 1.f);
 
@@ -244,7 +239,6 @@ void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 {
 	m_Player->SetbNextAtkCheck(true);
 	m_Player->SetbInvalidInput(false);
-	UE_LOG(LogTemp, Warning, TEXT("nextcheckstart notify"));
 }
 
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
@@ -255,7 +249,6 @@ void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
 	m_Player->SetbAtkTrace(true);
-	UE_LOG(LogTemp, Warning, TEXT("hitcheckstart notify"));
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
@@ -290,7 +283,6 @@ void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
 	m_Player->SetbDodging(false);
-	UE_LOG(LogTemp, Warning, TEXT("dodge end"));
 }
 
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()

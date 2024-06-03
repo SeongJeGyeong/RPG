@@ -55,14 +55,13 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Don't rotate when the controller rotates. Let that just affect the camera.
+	// 카메라와 컨트롤러의 회전 분리
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 1500.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->bOrientRotationToMovement = true; // 캐릭터가 입력된 이동방향으로 자동으로 회전하도록
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 1500.0f, 0.0f); // 이동방향으로의 회전 속도
 	GetCharacterMovement()->JumpZVelocity = 500.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
@@ -71,10 +70,10 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Arm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
 
 	m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	m_Camera->SetupAttachment(m_Arm, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	m_Camera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	m_Camera->SetupAttachment(m_Arm);
+	m_Camera->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
-	LockonControlRotationRate = 10.f;
+	LockonControlRotationRate = 10.f;	// 락온 시 카메라 보간 속도
 
 	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
 	if (MarkerUI.Succeeded())
@@ -135,11 +134,11 @@ void APlayer_Base_Knight::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
 	}
 
-	if ( IsValid(m_MarkerClass) )
+	if (IsValid(m_MarkerClass))
 	{
 		m_Marker = CreateWidget(GetWorld(), m_MarkerClass);
 
-		if ( IsValid(m_Marker) )
+		if (IsValid(m_Marker))
 		{
 			m_Marker->AddToViewport();
 			m_Marker->SetPositionInViewport(FVector2D(0.f, 0.f));
@@ -151,7 +150,8 @@ void APlayer_Base_Knight::BeginPlay()
 		}
 	}
 
-	LockOnDelegate.BindUFunction(this, FName("TargetLockOn"));
+	LockOnDelegate.BindUObject(this, &APlayer_Base_Knight::TargetLockOn);
+	JumpAtkDelegate.BindUObject(this, &APlayer_Base_Knight::JumpAttack);
 }
 
 // Called every frame
@@ -159,9 +159,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	fFrontBack = 0.f;
-	fLeftRight = 0.f;
-	
 	// 회피 애니메이션 재생중일 때
 	if (bDodging)
 	{
@@ -179,30 +176,13 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		SetActorRotation(rDodgeRotation);
 	}
 
-	// 점프공격
-	if (bJumpAtk)
-	{
-		float CurTime = m_AnimInst->Montage_GetPosition(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-
-		// 바닥에 착지하기 전까지는 공격 준비 자세에서 정지한다.
-		if (CurTime > 0.3f)
-		{
-			m_AnimInst->Montage_Pause(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-		}
-
-		// 바닥에 착지하면 애니메이션을 다시 재생
-		if (!GetCharacterMovement()->IsFalling())
-		{
-			m_AnimInst->Montage_Resume(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-			bJumpAtk = false;
-		}
-	}
-
+	// 공격 중 전진
 	if (bAtkMove)
 	{
 		AddMovementInput(vAtkMoveVec, 1.f);
 	}
 
+	// 공격 판정 트레이스
 	if (bAtkTrace)
 	{
 		AttackHitCheck(EATTACK_TYPE::PHYSIC_MELEE);
@@ -216,6 +196,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 			NextAttackCheck();
 		}
 	}
+
 
 	if (bSprintToggle)
 	{
@@ -313,71 +294,52 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	//FVector vInput = _Instance.GetValue().Get<FVector>();
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
-	if (!CheckMontagePlaying() && bEnableMove)
+	if (!CheckMontagePlaying() && bEnableMove && Controller != NULL)
 	{
 		m_AnimInst->StopAllMontages(0.25f);
 
+		float fSpeedRate = 1.f;
 		if (bSprintToggle)
 		{
 			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
+			fSpeedRate = 2.f;
 		}
 
-		if ((Controller != NULL) && (vInput.X != 0.0f))
+		if (vInput.X != 0.0f)
 		{
-			// 락온 대상이 없을 경우 플레이어의 회전방향을, 대상이 있을 경우 대상을 바라보는 회전방향을 가져옴
-			//const FRotator Rotation = m_Arm->m_Target == nullptr ? Controller->GetControlRotation() : (m_Arm->m_Target->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
-			//const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 			// get forward vector
 			const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, vInput.X);
-
-			if (m_Arm->IsCameraLockedToTarget())
-			{
-				if (bSprintToggle)
-				{
-					fFrontBack = (vInput.X > 0.f) ? 2.f : -2.f;
-				}
-				else
-				{
-					fFrontBack = (vInput.X > 0.f) ? 1.f : -1.f;
-				}
-			}
-			else
-			{
-				// 락온 중이 아닐때는 캐릭터의 앞으로만 이동하므로
-				fFrontBack = bSprintToggle ? 2.f : 1.f;
-			}
 		}
-		if ((Controller != NULL) && (vInput.Y != 0.0f))
+		if (vInput.Y != 0.0f)
 		{
-			//const FRotator Rotation = m_Arm->m_Target == nullptr ? Controller->GetControlRotation() : (m_Arm->m_Target->GetOwner()->GetActorLocation() - GetActorLocation()).GetSafeNormal().Rotation();
-			//const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 			// get right vector 
 			const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			AddMovementInput(Direction, vInput.Y);
+		}
 
-			if (m_Arm->IsCameraLockedToTarget())
+		FVector2D vLocVelocity;
+		if (!m_Arm->IsCameraLockedToTarget())
+		{
+			// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
+			vLocVelocity.X = fSpeedRate;
+		}
+		else
+		{
+			if (vInput.X != 0.0f)
 			{
-				if (bSprintToggle)
-				{
-					fLeftRight = ( vInput.Y > 0.f ) ? 2.f : -2.f;
-				}
-				else
-				{
-					fLeftRight = ( vInput.Y > 0.f ) ? 1.f : -1.f;
-				}
+				vLocVelocity.X = ( vInput.X > 0.f ) ? fSpeedRate : -fSpeedRate;
 			}
-			else
+			if (vInput.Y != 0.0f)
 			{
-				// 락온 중이 아닐때는 캐릭터의 앞으로만 이동하므로
-				fFrontBack = bSprintToggle ? 2.f : 1.f;
+				vLocVelocity.Y = ( vInput.Y > 0.f ) ? fSpeedRate : -fSpeedRate;
 			}
 		}
+
+		m_AnimInst->SetLocalVelocityXY(vLocVelocity);
 	}
 }
 
@@ -466,11 +428,14 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
-	if (GetCharacterMovement()->IsFalling())
+	if (GetCharacterMovement()->IsFalling() && 
+		GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f && 
+		!bJumpAtk)
 	{
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 		ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
 		bAttackToggle = false;
+		GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
 		bJumpAtk = true;
 		return;
 	}
@@ -1020,6 +985,26 @@ void APlayer_Base_Knight::StopBlockPhysics()
 {
 	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
+}
+
+void APlayer_Base_Knight::JumpAttack()
+{
+	float CurTime = m_AnimInst->Montage_GetPosition(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+
+	// 바닥에 착지하기 전까지는 공격 준비 자세에서 정지한다.
+	if (CurTime > 0.2f)
+	{
+		m_AnimInst->Montage_Pause(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+	}
+
+	// 바닥에 착지하면 애니메이션을 다시 재생
+	if (!GetCharacterMovement()->IsFalling())
+	{
+		m_AnimInst->Montage_Resume(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+		bJumpAtk = false;
+		return;
+	}
+	GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
 }
 
 void APlayer_Base_Knight::TargetLockOn()

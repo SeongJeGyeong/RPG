@@ -122,6 +122,7 @@ private:
 
 	bool bToggleLockOn;
 	FTimerDelegate LockOnDelegate;
+	FTimerDelegate JumpAtkDelegate;
 	FTimerHandle BlockReactTimer;
 
 public:
@@ -193,6 +194,7 @@ public:
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
 	void StopBlockPhysics();
+	void JumpAttack();
 
 	UFUNCTION()
 	void TargetLockOn();

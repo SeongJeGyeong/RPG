@@ -13,9 +13,6 @@ UCLASS()
 class RPGPORTFOLIO_API UBTS_Boss_ChkDirection : public UBTService
 {
 	GENERATED_BODY()
-	
-private:
-	bool bInAtkRange;
 
 public:
 	UBTS_Boss_ChkDirection();

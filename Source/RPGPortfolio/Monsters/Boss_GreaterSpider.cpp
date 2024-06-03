@@ -12,6 +12,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "Components/ShapeComponent.h"
 #include "Engine/Classes/Particles/ParticleSystemComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
@@ -35,6 +36,16 @@ void ABoss_GreaterSpider::OnConstruction(const FTransform& _Transform)
 void ABoss_GreaterSpider::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AAIController* pAIController = Cast<AAIController>(GetController());
+	if (IsValid(pAIController))
+	{
+		// 블랙보드에 몬스터정보 전달
+		if (pAIController->GetBlackboardComponent())
+		{
+			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("RangedAtkRange"), RangedAtkRange);
+		}
+	}
 
 	m_AnimInst = Cast<UAnim_GreaterSpider>(GetMesh()->GetAnimInstance());
 
@@ -201,7 +212,6 @@ void ABoss_GreaterSpider::RushAttackHitCheck()
 {
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
-	//float fTraceHalfHeight = ( vEnd - vStart ).Size() * 0.5;
 
 	bool bResult = GetWorld()->SweepSingleByChannel
 	(
@@ -210,7 +220,7 @@ void ABoss_GreaterSpider::RushAttackHitCheck()
 		GetActorLocation(),
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel6,
-		FCollisionShape::MakeSphere(200.f),
+		FCollisionShape::MakeSphere(250.f),
 		Params
 	);
 
@@ -325,6 +335,19 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	{
 		MonsterDead(EventInstigator);
 		return 0.f;
+	}
+
+	// 체력 50% 이하 시 2페이즈
+	if (m_Info.CurHP <= m_Info.MaxHP / 2.f)
+	{
+		AAIController* pAIController = Cast<AAIController>(GetController());
+		if (IsValid(pAIController))
+		{
+			if (pAIController->GetBlackboardComponent())
+			{
+				pAIController->GetBlackboardComponent()->SetValueAsBool(FName("Phase2"), true);
+			}
+		}
 	}
 
 	// 공격 모션중이 아닐 때도 조건에 추가해야함

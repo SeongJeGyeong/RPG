@@ -28,27 +28,29 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 		return EBTNodeResult::Succeeded;
 	}
 
-	int32 fAttackPattern = pController->GetBlackboardComponent()->GetValueAsInt(TEXT("PatternNumber"));
-
-	// 왼쪽 공격
-	if ( fAttackPattern == 1 )
-	{
-		pBoss->PlayAttackMontage(EGreaterSpider_STATE::LEFTATTACK);
-	}
-	// 오른쪽 공격
-	else if( fAttackPattern == 2 )
-	{
-		pBoss->PlayAttackMontage(EGreaterSpider_STATE::RIGHTATTACK);
-	}
-	// 정면 공격
-	else if( fAttackPattern == 0 )
-	{
-		pBoss->PlayAttackMontage(EGreaterSpider_STATE::CENTERATTACK);
-	}
-	else if ( fAttackPattern == 3 )
+	if (pController->GetBlackboardComponent()->GetValueAsBool(TEXT("bAtkRangeType")))
 	{
 		pBoss->PlayAttackMontage(EGreaterSpider_STATE::RUSHATTACK);
+	}
+	else
+	{
+		int32 fAttackPattern = pController->GetBlackboardComponent()->GetValueAsInt(TEXT("PatternNumber"));
 
+		// 왼쪽 공격
+		if ( fAttackPattern == 1 )
+		{
+			pBoss->PlayAttackMontage(EGreaterSpider_STATE::LEFTATTACK);
+		}
+		// 오른쪽 공격
+		else if ( fAttackPattern == 2 )
+		{
+			pBoss->PlayAttackMontage(EGreaterSpider_STATE::RIGHTATTACK);
+		}
+		// 정면 공격
+		else if ( fAttackPattern == 0 )
+		{
+			pBoss->PlayAttackMontage(EGreaterSpider_STATE::CENTERATTACK);
+		}
 	}
 
 	return EBTNodeResult::InProgress;

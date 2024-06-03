@@ -27,8 +27,10 @@ private:
 	UPROPERTY()
 	TArray<AActor*> HitActorArr;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	float RangedAtkRange;
+
 	bool bAtkTrace;
-	//bool bRushTrace;
 	bool bRushMove;
 	EGreaterSpider_STATE m_State;
 

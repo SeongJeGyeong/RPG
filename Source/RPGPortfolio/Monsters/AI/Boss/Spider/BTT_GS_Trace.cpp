@@ -54,7 +54,16 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 
 	// 몬스터와 타겟 사이의 거리
 	float Distance = FVector::Distance(pCharacter->GetActorLocation(), pBoss->GetActorLocation());
+
 	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
+	// 2페이즈 일 경우
+	if (_OwnComp.GetBlackboardComponent()->GetValueAsBool(FName("Phase2")))
+	{
+		if (_OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber")) == 3)
+		{
+			fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("RangedAtkRange"));
+		}
+	}
 
 	if (Distance < fAtkRange)
 	{

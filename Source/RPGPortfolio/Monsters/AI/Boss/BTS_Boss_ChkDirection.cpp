@@ -40,18 +40,36 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	float Distance = FVector::Distance(pBoss->GetActorLocation(), pPlayer->GetActorLocation());
 
 	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
+	bool InAtkRange;
 	if (Distance < fAtkRange)
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), true);
-		bInAtkRange = true;
+		InAtkRange = true;
 	}
 	else
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InAtkRange"), false);
-		bInAtkRange = false;
+		InAtkRange = false;
 	}
 
 	FColor AtkColor;
-	bInAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
+	InAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
 	DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fAtkRange, 40, AtkColor, false, 0.4f);
+
+	float fRangedAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("RangedAtkRange"));
+	bool InRangedAtkRange;
+	if (Distance < fRangedAtkRange)
+	{
+		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InRangedAtkRange"), true);
+		InRangedAtkRange = true;
+	}
+	else
+	{
+		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("InRangedAtkRange"), false);
+		InRangedAtkRange = false;
+	}
+
+	FColor RangedAtkColor;
+	InRangedAtkRange ? RangedAtkColor = FColor::Red : RangedAtkColor = FColor::Blue;
+	DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fRangedAtkRange, 40, RangedAtkColor, false, 0.4f);
 }

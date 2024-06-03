@@ -41,17 +41,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	FVector	vCameraLookAt;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	bool bIsInAir;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	bool bIsGuard;			// 가드액션 여부
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
-
-	//UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
-	//float fItemBlendWeight;// 아이템 사용 애니메이션 블렌드용 수치
 
 	// IK용 변수
 	UPROPERTY()
@@ -81,6 +75,8 @@ private:
 public:
 	bool GetbIsGuard() { return bIsGuard; }
 	void SetbIsGaurd(bool _IsGuard) { bIsGuard = _IsGuard; }
+
+	void SetLocalVelocityXY(FVector2D _Velocity) { vLocalVelocity.X = _Velocity.X; vLocalVelocity.Y = _Velocity.Y; }
 
 	//void TurnOnItemUseBlend(float _BlentWeight) { fItemBlendWeight = _BlentWeight; }
 
