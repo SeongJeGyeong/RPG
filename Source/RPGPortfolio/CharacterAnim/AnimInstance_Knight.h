@@ -111,6 +111,11 @@ public:
 	UFUNCTION()
 	void AnimNotify_DodgeAnimEnd();
 
+	UFUNCTION()
+	void AnimNotify_JumpStart();
+	UFUNCTION()
+	void AnimNotify_JumpEnd();
+
 	// 원거리공격 발사
 	UFUNCTION()
 	void AnimNotify_ShotProjectile();

@@ -69,15 +69,12 @@ private:
 	TArray<AActor*> HitActorArr;
 
 private:
-	// 이동 블렌드스페이스용
-	float fFrontBack;
-	float fLeftRight;
-
 	// Lock On
 	float LockonControlRotationRate;
+	bool bLockOn;
+	FTimerDelegate LockOnDelegate;
 
-	// 점프, 이동 가능한 상태인지 체크용
-	bool bEnableJump;
+	// 이동 가능한 상태인지 체크용
 	bool bEnableMove;
 
 	// 공격 체크용 토글
@@ -86,6 +83,9 @@ private:
 	bool bHeavyToggle;
 	// 다음 공격 입력 체크용
 	bool bNextAtkCheckOn;
+	// 약공격인지 강공격인지 판별(true = 강, false = 약)
+	bool bAtkType;
+
 	// 공격 모션 도중 움직이지 못하는 상태 체크
 	bool bInvalidInput;
 
@@ -116,56 +116,38 @@ private:
 
 	// 공격 관련
 	int32 CurrentCombo;
-	int32 MaxCombo;
 
 	bool bShowMenu;
-
-	bool bToggleLockOn;
-	FTimerDelegate LockOnDelegate;
+	
 	FTimerDelegate JumpAtkDelegate;
 	FTimerHandle BlockReactTimer;
 
 public:
-	float GetfFrontBack() const { return fFrontBack; }
-	void SetfFrontBack(const float& _FrontBack) { fFrontBack = _FrontBack; }
-	float GetfLeftRight() const { return fLeftRight; }
-	void SetfLeftRight(const float& _LeftRight) { fLeftRight = _LeftRight; }
-
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
 	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
 	// 조작 불가 상태
-	bool GetbInvalidInput() const { return bInvalidInput; }
 	void SetbInvalidInput(const bool& _InvalidInput) { bInvalidInput = _InvalidInput; }
-	// 점프 가능 상태
-	bool GetbEnableJump() const { return bEnableJump; }
-	void SetbEnableJump(const bool& _EnableJump) { bEnableJump = _EnableJump; }
 	// 이동 가능 상태
-	bool GetbEnableMove() const { return bEnableMove; }
 	void SetbEnableMove(const bool& _EnableMove) { bEnableMove = _EnableMove; }
 	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
 	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
 	// 무적상태
 	bool GetbInvincible() const { return bToggleInvinc; }
-	void SetbInvincible(const bool& _ToggleInvinc) { bToggleInvinc = _ToggleInvinc; }
 	// 가드상태
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
 
-	bool GetbSprintToggle() const { return bSprintToggle; }
 	// 락온 중 플레이어가 적을 바라보고 있도록 설정
 	void SetOrientRotation(const bool& _Val);
 	// 락온 토글 상태 확인
-	bool GetbToggleLockOn() const { return bToggleLockOn; }
+	bool GetbToggleLockOn() const { return bLockOn; }
 	// 회피 애니메이션 종료 설정
 	void SetbDodging(const bool& _Dodging) { bDodging = _Dodging; }
 
 	const UCameraComponent* GetCamera() { return m_Camera; }
 	const UPlayer_CameraArm* GetArm() { return m_Arm; }
-
-	const TSoftObjectPtr<UAnimMontage> GetAttackMontage() { return m_SettingAttackMontage; }
-	void SetAttackMontage(TSoftObjectPtr<UAnimMontage> _SettingAttackMontage) { m_SettingAttackMontage = _SettingAttackMontage; }
 
 	void GainMonsterSoul(int32 _GainedSoul);
 
@@ -184,16 +166,17 @@ public:
 
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 public:
 	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
 	void NextAttackCheck();
 	void CloseMenuUI();
 	void DodgeTimeCheck(bool _Dodge);
-	void AttackMoveStart(bool _AtkMove);
-	bool BlockEnemyAttack(float _Damage, FVector _MonDir);
+	void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
+	bool BlockEnemyAttack(float _Damage, FVector _MonDir); // 적 공격 방어
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
-	void ConsumeStaminaForMontage(EPlayerMontage _Montage);
-	void StopBlockPhysics();
+	void ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
+	void StopBlockPhysics(); // 적 공격 방어시 피직스 효과
 	void JumpAttack();
 
 	UFUNCTION()

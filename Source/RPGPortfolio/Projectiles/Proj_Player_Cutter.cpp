@@ -48,10 +48,6 @@ void AProj_Player_Cutter::Tick(float DeltaTime)
 	}
 }
 
-void AProj_Player_Cutter::HitEffect()
-{
-}
-
 void AProj_Player_Cutter::LaunchMotion(FVector _LaunchVec)
 {
 	m_ProjectileMovement->Velocity = _LaunchVec;

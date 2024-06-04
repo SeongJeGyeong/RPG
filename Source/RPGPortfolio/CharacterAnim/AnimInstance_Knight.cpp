@@ -65,26 +65,6 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	{
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 15.f, 0.f, 1.f);
 	}
-
-	const FAnimNode_StateMachine* state = GetStateMachineInstanceFromName(FName("Main"));
-	// Idle/Move 스테이트일 때 이동가능
-	if (FName("Idle/Move").IsEqual(state->GetCurrentStateName()))
-	{
-		m_Player->SetbEnableJump(false);
-		m_Player->SetbEnableMove(true);
-	}
-	else
-	{
-		// 착지 애니매이션 재생중일 때 이동 불가능
-		if (FName("Land").IsEqual(state->GetCurrentStateName()) || FName("Fall").IsEqual(state->GetCurrentStateName()))
-		{
-			m_Player->SetbEnableMove(false);
-		}
-		else
-		{
-			m_Player->SetbEnableJump(true);
-		}
-	}
 }
 
 void UAnimInstance_Knight::FootIK(float _DeltaTime)
@@ -283,6 +263,18 @@ void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
 	m_Player->SetbDodging(false);
+}
+
+void UAnimInstance_Knight::AnimNotify_JumpStart()
+{
+	m_Player->SetbEnableMove(false);
+	UE_LOG(LogTemp, Warning, TEXT("JumpStart"));
+}
+
+void UAnimInstance_Knight::AnimNotify_JumpEnd()
+{
+	m_Player->SetbEnableMove(true);
+	UE_LOG(LogTemp, Warning, TEXT("JumpEnd"));
 }
 
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()

@@ -333,7 +333,13 @@ struct FProjectileAssets
 	UNiagaraSystem*		ProjectileEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UParticleSystem*	ProjectileEffect_Legacy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraSystem*		ProjHitEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UParticleSystem*	ProjHitEffect_Legacy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase*			ProjHitSound;

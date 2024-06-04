@@ -47,3 +47,10 @@ void UAnim_GreaterSpider::AnimNotify_AttackEnd()
 	pSpider->SetbAtkTrace(false);
 	pSpider->EmptyHitArr();
 }
+
+void UAnim_GreaterSpider::AnimNotify_ShotProj()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ShotProj"));
+	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
+	pSpider->RangedAttack();
+}

@@ -257,4 +257,5 @@ enum class EProjectileType : uint8
 	NONE,
 	BOMB,
 	SLASH_CUTTER,
+	SummonSpiderling,
 };

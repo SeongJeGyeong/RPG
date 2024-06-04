@@ -35,12 +35,12 @@ EBTNodeResult::Type UBTT_Boss_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& 
 	float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
 
 	// 몬스터 기준 왼쪽
-	if ( fDir >= 120.f )
+	if ( fDir >= 100.f )
 	{
 		pBoss->SetiTurnDir(1);
 	}
 	// 몬스터 기준 오른쪽
-	else if ( fDir <= -120.f )
+	else if ( fDir <= -100.f )
 	{
 		pBoss->SetiTurnDir(2);
 	}
@@ -48,19 +48,6 @@ EBTNodeResult::Type UBTT_Boss_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& 
 	{
 		pBoss->SetiTurnDir(0);
 	}
-
-	//if (pBoss->GetActorRotation().Yaw > TargetRot.Yaw)
-	//{
-	//	pBoss->SetiTurnDir(1);
-	//}
-	//else if( pBoss->GetActorRotation().Yaw < TargetRot.Yaw)
-	//{
-	//	pBoss->SetiTurnDir(2);
-	//}
-	//else
-	//{
-	//	pBoss->SetiTurnDir(0);
-	//}
 
 	pBoss->SetActorRotation(FMath::RInterpTo(pBoss->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 5.f));
 

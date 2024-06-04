@@ -22,6 +22,5 @@ class RPGPORTFOLIO_API IProjectileInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void HitEffect() = 0;
 	virtual void LaunchMotion(FVector _LaunchVec) = 0;
 };

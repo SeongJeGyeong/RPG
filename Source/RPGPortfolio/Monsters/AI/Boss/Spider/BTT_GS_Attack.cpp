@@ -28,13 +28,15 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 		return EBTNodeResult::Succeeded;
 	}
 
-	if (pController->GetBlackboardComponent()->GetValueAsBool(TEXT("bAtkRangeType")))
+	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
+	if (!IsValid(pPlayer))
 	{
-		pBoss->PlayAttackMontage(EGreaterSpider_STATE::RUSHATTACK);
+		return EBTNodeResult::Failed;
 	}
-	else
+
+	if (_OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) == 1)
 	{
-		int32 fAttackPattern = pController->GetBlackboardComponent()->GetValueAsInt(TEXT("PatternNumber"));
+		int32 fAttackPattern = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber"));
 
 		// 왼쪽 공격
 		if ( fAttackPattern == 1 )
@@ -50,6 +52,22 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 		else if ( fAttackPattern == 0 )
 		{
 			pBoss->PlayAttackMontage(EGreaterSpider_STATE::CENTERATTACK);
+		}
+	}
+	else
+	{
+		FVector LookVector = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
+		LookVector.Z = 0.f;
+		FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
+		pBoss->SetActorRotation(TargetRot);
+	
+		if ( _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) == 2 )
+		{
+			pBoss->PlayAttackMontage(EGreaterSpider_STATE::RANGEATTACK);
+		}
+		else
+		{
+			pBoss->PlayAttackMontage(EGreaterSpider_STATE::RUSHATTACK);
 		}
 	}
 

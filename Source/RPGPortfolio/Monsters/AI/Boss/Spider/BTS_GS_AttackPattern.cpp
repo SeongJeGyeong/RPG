@@ -23,7 +23,7 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 		return;
 	}
 
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
 	if (!IsValid(pPlayer))
 	{
 		return;
@@ -36,18 +36,18 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	// 몬스터 기준 왼쪽
 	if ( fDir >= 50.f )
 	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 1);
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 1);
 		UE_LOG(LogTemp, Warning, TEXT("Pattern1"));
 	}
 	// 몬스터 기준 오른쪽
 	else if ( fDir <= -50.f )
 	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 2);
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 2);
 		UE_LOG(LogTemp, Warning, TEXT("Pattern2"));
 	}
 	else
 	{
-		_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("PatternNumber"), 0);
+		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 0);
 		UE_LOG(LogTemp, Warning, TEXT("Pattern0"));
 	}
 

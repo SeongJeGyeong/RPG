@@ -13,6 +13,7 @@
 #include "Components/ShapeComponent.h"
 #include "Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "../Projectiles/Proj_GS_Spiderling.h"
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
@@ -61,6 +62,7 @@ void ABoss_GreaterSpider::Tick(float DeltaTime)
 
 	if (bAtkTrace)
 	{
+		fTraceInterval -= DeltaTime;
 		MeleeAttackHitCheck();
 	}
 	/*if (bRushTrace)
@@ -76,13 +78,6 @@ void ABoss_GreaterSpider::Tick(float DeltaTime)
 void ABoss_GreaterSpider::PlayAttackMontage(EGreaterSpider_STATE _State)
 {
 	m_State = _State;
-	if ( EGreaterSpider_STATE::RUSHATTACK == _State )
-	{
-		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		FVector TargetVect = pPlayer->GetActorLocation() - GetActorLocation();
-		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
-		GetController()->SetControlRotation(TargetRot);
-	}
 
 	UAnimMontage* pMontage = m_DataAsset->GetAnimGSpider(_State).LoadSynchronous();
 	if ( !IsValid(pMontage) )
@@ -120,7 +115,30 @@ void ABoss_GreaterSpider::RushAttack(bool _Rush)
 
 		m_PSC->ToggleActive();
 		bAtkTrace = false;
+
+		HitActorArr.Empty();
 	}
+}
+
+void ABoss_GreaterSpider::RangedAttack()
+{
+	FActorSpawnParameters param = {};
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	param.OverrideLevel = GetLevel();
+	param.bDeferConstruction = false;	// 지연생성(BeginPlay 호출 X)
+	param.Owner = this;
+
+	// 투사체 생성위치	
+	FVector ProjectileLocation = GetMesh()->GetSocketLocation(FName("HeadAttack_End"));
+
+	TSubclassOf<AProj_GS_Spiderling> ProjClass = LoadClass<AProj_GS_Spiderling>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_ShotSpiderling.BPC_ShotSpiderling_C'"));
+	AProj_GS_Spiderling* pProjectile = GetWorld()->SpawnActor<AProj_GS_Spiderling>(ProjClass, ProjectileLocation, GetActorRotation(), param);
+	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, m_Info.MagicAtk);
+	pProjectile->SetShotInstigator(this);
+
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	pProjectile->LaunchMotion(pPlayer->GetActorLocation());
 }
 
 void ABoss_GreaterSpider::MeleeAttackHitCheck()
@@ -141,7 +159,11 @@ void ABoss_GreaterSpider::MeleeAttackHitCheck()
 		SweepAtkTrace(FName("HeadAttack_Start"), FName("HeadAttack_End"), 40.f);
 		break;
 	case EGreaterSpider_STATE::RUSHATTACK:
-		RushAttackHitCheck();
+		if (fTraceInterval <= 0.f)
+		{
+			fTraceInterval = 0.1f;
+			RushAttackHitCheck();
+		}
 		break;
 	case EGreaterSpider_STATE::BODYSLAM:
 		break;
@@ -203,7 +225,7 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 			HitActorArr.Add(HitResult.GetActor());
 
 			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, m_State);
-			bAtkTrace = false;
+			//bAtkTrace = false;
 		}
 	}
 }
@@ -255,7 +277,7 @@ void ABoss_GreaterSpider::RushAttackHitCheck()
 			HitActorArr.Add(HitResult.GetActor());
 
 			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, m_State);
-			bAtkTrace = false;
+			//bAtkTrace = false;
 		}
 	}
 }
@@ -283,9 +305,10 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 	}
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
-	// 플레이어가 가드중일 때
-	if ( pPlayer->GetbToggleGuard() )
+	// 러시어택이 아니고 플레이어가 가드중일 때
+	if (m_State != EGreaterSpider_STATE::RUSHATTACK && pPlayer->GetbToggleGuard())
 	{	
+		UE_LOG(LogTemp, Warning, TEXT("Guard"));
 		FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
 		bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, -HitInfo.ImpactNormal.GetSafeNormal());
 		if (bBlocked)
@@ -360,13 +383,17 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 
-		// 본 흔들림 표현
-		GetMesh()->SetAllBodiesBelowSimulatePhysics(PointDamageEvent->HitInfo.BoneName, true);
-		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(PointDamageEvent->HitInfo.BoneName, fPhysicsWeight);
-		GetMesh()->AddImpulseToAllBodiesBelow(PointDamageEvent->ShotDirection * 500.f, PointDamageEvent->HitInfo.BoneName, true);
+		// 피격 부위가 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
+		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Plevis")))
+		{
+			// 본 흔들림 표현
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(PointDamageEvent->HitInfo.BoneName, true);
+			GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(PointDamageEvent->HitInfo.BoneName, fPhysicsWeight);
+			GetMesh()->AddImpulseToAllBodiesBelow(PointDamageEvent->ShotDirection * 500.f, PointDamageEvent->HitInfo.BoneName, true);
 
-		HitReactDelegate.BindUObject(this, &ABoss_Base::StopBoneHitReaction, PointDamageEvent->HitInfo.BoneName);
-		GetWorld()->GetTimerManager().SetTimer(HitReactTimer, HitReactDelegate, 0.01f, true, 0.1f);
+			HitReactDelegate.BindUObject(this, &ABoss_Base::StopBoneHitReaction, PointDamageEvent->HitInfo.BoneName);
+			GetWorld()->GetTimerManager().SetTimer(HitReactTimer, HitReactDelegate, 0.01f, true, 0.1f);
+		}
 	}
 
 	// 경직 수치 최대로 채우면 스턴 상태에 빠트리고 행동트리 일시적으로 중지

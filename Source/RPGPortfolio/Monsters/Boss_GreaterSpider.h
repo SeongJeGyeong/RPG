@@ -28,11 +28,12 @@ private:
 	TArray<AActor*> HitActorArr;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	float RangedAtkRange;
+	float RangedAtkRange; // 원거리 공격 거리
 
 	bool bAtkTrace;
 	bool bRushMove;
 	EGreaterSpider_STATE m_State;
+	float fTraceInterval = 0.1f;
 
 public:
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
@@ -63,4 +64,5 @@ public:
 	void DeadCollisionSetting();
 
 	void RushAttack(bool _Rush);
+	void RangedAttack();
 };

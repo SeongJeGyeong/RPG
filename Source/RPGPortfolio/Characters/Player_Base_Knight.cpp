@@ -37,10 +37,7 @@
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
-	: fFrontBack(0.f)
-	, fLeftRight(0.f)
-	, bEnableJump(true)
-	, bEnableMove(true)
+	: bEnableMove(true)
 	, bAttackToggle(false)
 	, bHeavyToggle(false)
 	, bNextAtkCheckOn(false)
@@ -49,7 +46,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bToggleInvinc(false)
 	, fInvincTime(0.f)
 	, CurrentCombo(1)
-	, MaxCombo(3)
 	, bShowMenu(false)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -392,21 +388,23 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	if (!CheckMontagePlaying())
+	if (CheckMontagePlaying() || bSprintToggle)
 	{
-		bool bGuard = _Instance.GetValue().Get<bool>();
-		m_AnimInst->SetbIsGaurd(bGuard);
-		if (bGuard)
-		{
-			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-			pState->SetbSTRecovSlowly(true);
-		}
-		else
-		{
-			bToggleGuard = false;
-			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-			pState->SetbSTRecovSlowly(false);
-		}
+		return;
+	}
+
+	bool bGuard = _Instance.GetValue().Get<bool>();
+	m_AnimInst->SetbIsGaurd(bGuard);
+	if (bGuard)
+	{
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+		pState->SetbSTRecovSlowly(true);
+	}
+	else
+	{
+		bToggleGuard = false;
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+		pState->SetbSTRecovSlowly(false);
 	}
 }
 
@@ -429,7 +427,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
 	if (GetCharacterMovement()->IsFalling() && 
-		GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f && 
+		GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 50.f && 
 		!bJumpAtk)
 	{
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
@@ -449,19 +447,20 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		{
 			// 강공격
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-			SetAttackMontage(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-			CurrentCombo = 2;
+			bAtkType = true;
+			CurrentCombo = 1;
 			ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
 		}
 		else
 		{
 			// 약공격
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
-			SetAttackMontage(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
+			bAtkType = false;
 			CurrentCombo = 1;
 			ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
 		}
 		bAttackToggle = false;
+		bNextAtkCheckOn = false;
 	}
 }
 
@@ -508,8 +507,8 @@ void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
 {
-	bToggleLockOn = _Instance.GetValue().Get<bool>();
-	bool bTargetLocked = m_Arm->ToggleCameraLockOn(bToggleLockOn);
+	bLockOn = _Instance.GetValue().Get<bool>();
+	bool bTargetLocked = m_Arm->ToggleCameraLockOn(bLockOn);
 	if (bTargetLocked)
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -520,6 +519,7 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = false;
 		m_Marker->SetVisibility(ESlateVisibility::Hidden);
+		bLockOn = false;
 	}
 }
 
@@ -739,9 +739,16 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 // 연속공격 다음 모션 체크함수
 void APlayer_Base_Knight::NextAttackCheck()
 {
+	// 강공격 중에 강공격 토글을 해제할 경우 다음공격 재생안함
+	if (bAtkType && !bHeavyToggle)
+	{
+		return;
+	}
+
+	int32 MaxCombo = bAtkType ? 2 : 3;
 	if (CurrentCombo == MaxCombo)
 	{
-		CurrentCombo = 2;
+		CurrentCombo = bAtkType ? 1 : 2;
 	}
 	else
 	{
@@ -749,22 +756,23 @@ void APlayer_Base_Knight::NextAttackCheck()
 	}
 
 	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
-	m_AnimInst->Montage_JumpToSection(NextComboCount, GetAttackMontage().LoadSynchronous());
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	if ( m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK) == GetAttackMontage().LoadSynchronous() )
+	if (bAtkType)
 	{
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f);
+		m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
+		ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
 	}
 	else
 	{
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 15.f);
+		m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
+		ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
 	}
 
 	bNextAtkCheckOn = false;
 	bAttackToggle = false;
 }
 
+// 공격 트레이스 함수
 void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 {
 	float AtkRadius = 10.f;
@@ -798,7 +806,7 @@ void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 					return;
 				}
 			}
-			if (GetAttackMontage() == m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))
+			if (bAtkType)
 			{
 				ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
 			}
@@ -921,6 +929,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	return 0.0f;
 }
 
+// 공격 모션 중 이동
 void APlayer_Base_Knight::AttackMoveStart(bool _AtkMove)
 {
 	bAtkMove = _AtkMove;
@@ -970,7 +979,7 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), pBlockSound, GetActorLocation());
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Block"));
+
 		GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), true);
 		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.2f);
 		GetMesh()->AddImpulseToAllBodiesBelow(_MonDir * 500.f, FName(TEXT("clavicle_l")), true);
@@ -1033,7 +1042,7 @@ void APlayer_Base_Knight::TargetLockOn()
 			UE_LOG(LogTemp, Warning, TEXT("락온 스크린 좌표 계산 실패"));
 		}
 
-		if (bToggleLockOn)
+		if (bLockOn)
 		{
 			GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
 		}
