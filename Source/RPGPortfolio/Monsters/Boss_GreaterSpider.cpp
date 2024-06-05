@@ -62,12 +62,9 @@ void ABoss_GreaterSpider::Tick(float DeltaTime)
 
 	if (bAtkTrace)
 	{
-		fTraceInterval -= DeltaTime;
 		MeleeAttackHitCheck();
 	}
-	/*if (bRushTrace)
-	{
-	}*/
+
 	if (bRushMove)
 	{
 		AddMovementInput(GetActorForwardVector(), 1.f);
@@ -75,7 +72,7 @@ void ABoss_GreaterSpider::Tick(float DeltaTime)
 	
 }
 
-void ABoss_GreaterSpider::PlayAttackMontage(EGreaterSpider_STATE _State)
+void ABoss_GreaterSpider::PlayGSMontage(EGreaterSpider_STATE _State)
 {
 	m_State = _State;
 
@@ -112,7 +109,7 @@ void ABoss_GreaterSpider::RushAttack(bool _Rush)
 		}
 		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Blueprint/Monster/Effect/GreaterSpider/P_HeldCharge_Fire_01_BodySlam.P_HeldCharge_Fire_01_BodySlam'"));
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), FName("Root"), FVector(0.f, 0.f, 100.f), FRotator(0.f, 90.f, 0.f), FVector(2.f, 2.f, 2.f));
-
+		RushAttackHitCheck(400.f);
 		m_PSC->ToggleActive();
 		bAtkTrace = false;
 
@@ -159,11 +156,7 @@ void ABoss_GreaterSpider::MeleeAttackHitCheck()
 		SweepAtkTrace(FName("HeadAttack_Start"), FName("HeadAttack_End"), 40.f);
 		break;
 	case EGreaterSpider_STATE::RUSHATTACK:
-		if (fTraceInterval <= 0.f)
-		{
-			fTraceInterval = 0.1f;
-			RushAttackHitCheck();
-		}
+		RushAttackHitCheck(250.f);
 		break;
 	case EGreaterSpider_STATE::BODYSLAM:
 		break;
@@ -230,7 +223,7 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 	}
 }
 
-void ABoss_GreaterSpider::RushAttackHitCheck()
+void ABoss_GreaterSpider::RushAttackHitCheck(float _Radius)
 {
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
@@ -242,14 +235,14 @@ void ABoss_GreaterSpider::RushAttackHitCheck()
 		GetActorLocation(),
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel6,
-		FCollisionShape::MakeSphere(250.f),
+		FCollisionShape::MakeSphere(_Radius),
 		Params
 	);
 
 	FColor color;
 	bResult ? color = FColor::Red : color = FColor::Green;
 
-	DrawDebugSphere(GetWorld(), GetActorLocation(), 200.f, 40, color, false, 0.4f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), _Radius, 40, color, false, 0.4f);
 	if ( bResult )
 	{
 		if ( HitResult.GetActor()->IsValidLowLevel() )
@@ -277,7 +270,6 @@ void ABoss_GreaterSpider::RushAttackHitCheck()
 			HitActorArr.Add(HitResult.GetActor());
 
 			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, m_State);
-			//bAtkTrace = false;
 		}
 	}
 }
@@ -361,14 +353,16 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	}
 
 	// 체력 50% 이하 시 2페이즈
-	if (m_Info.CurHP <= m_Info.MaxHP / 2.f)
+	if (m_Info.CurHP <= m_Info.MaxHP / 2.f && !bPhase2)
 	{
 		AAIController* pAIController = Cast<AAIController>(GetController());
 		if (IsValid(pAIController))
 		{
 			if (pAIController->GetBlackboardComponent())
 			{
+				pAIController->GetBlackboardComponent()->SetValueAsBool(FName("DoOnce"), true);
 				pAIController->GetBlackboardComponent()->SetValueAsBool(FName("Phase2"), true);
+				bPhase2 = true;
 			}
 		}
 	}
@@ -384,8 +378,9 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 
 		// 피격 부위가 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
-		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Plevis")))
+		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Pelvis")) && !PointDamageEvent->HitInfo.BoneName.IsEqual(FName("None")))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit Bone : %s"), *PointDamageEvent->HitInfo.BoneName.ToString());
 			// 본 흔들림 표현
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(PointDamageEvent->HitInfo.BoneName, true);
 			GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(PointDamageEvent->HitInfo.BoneName, fPhysicsWeight);
@@ -427,7 +422,7 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 {
 	AAIController* pAIController = Cast<AAIController>(GetController());
 	pAIController->GetBrainComponent()->StopLogic(TEXT("Dead"));
-
+	m_AnimInst->StopAllMontages(1.f);
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
 
 	USoundBase* DeadSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::DEAD).LoadSynchronous();
@@ -447,22 +442,19 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 	}
 	GetController()->UnPossess();
 
-	TArray<TObjectPtr<USceneComponent>> LockOnCompArr = GetMesh()->GetAttachChildren();
-	if ( LockOnCompArr.Num() <= 0 )
+	TArray<TObjectPtr<USceneComponent>> AttachCompArr = GetMesh()->GetAttachChildren();
+	if ( AttachCompArr.Num() <= 0 )
 	{
 		UE_LOG(LogTemp, Warning, TEXT("부착된 락온 컴포넌트 없음"));
 	}
 	else
 	{
-		for ( TObjectPtr<USceneComponent> LockOnComp : LockOnCompArr )
+		for (TObjectPtr<USceneComponent> AttachComp : AttachCompArr)
 		{
-			// LockOnTarget 타입 Component일 경우
-			if ( LockOnComp->GetCollisionObjectType() == ECollisionChannel::ECC_GameTraceChannel1 )
-			{
-				LockOnComp->DestroyComponent();
-			}
+			AttachComp->DestroyComponent();
 		}
 	}
+
 	Super::MonsterDead();
 }
 

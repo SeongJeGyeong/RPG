@@ -33,8 +33,9 @@ private:
 	bool bAtkTrace;
 	bool bRushMove;
 	EGreaterSpider_STATE m_State;
-	float fTraceInterval = 0.1f;
-
+	UPROPERTY()
+	bool bPhase2;
+	FTimerHandle Phase2timer;
 public:
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
 	void EmptyHitArr() { HitActorArr.Empty(); }
@@ -58,8 +59,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void MeleeAttackHitCheck();
 	void SweepAtkTrace(FName _Start, FName _End, float _Radius);
-	void RushAttackHitCheck();
-	void PlayAttackMontage(EGreaterSpider_STATE _State);
+	void RushAttackHitCheck(float _Radius);
+	void PlayGSMontage(EGreaterSpider_STATE _State);
 	void MonsterDead(AController* EventInstigator);
 	void DeadCollisionSetting();
 

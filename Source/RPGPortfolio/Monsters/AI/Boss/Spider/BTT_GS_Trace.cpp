@@ -56,13 +56,11 @@ void UBTT_GS_Trace::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemor
 	float Distance = FVector::Distance(pCharacter->GetActorLocation(), pBoss->GetActorLocation());
 
 	float fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
-	// 2페이즈 일 경우
-	if (_OwnComp.GetBlackboardComponent()->GetValueAsBool(FName("Phase2")))
+
+	// 2페이즈 패턴을 사용할 경우
+	if (_OwnComp.GetBlackboardComponent()->GetValueAsBool(FName("Phase2")) && _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) != 1)
 	{
-		if (_OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber")) == 3)
-		{
-			fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("RangedAtkRange"));
-		}
+		fAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("RangedAtkRange"));
 	}
 
 	if (Distance < fAtkRange)

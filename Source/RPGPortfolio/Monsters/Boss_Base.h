@@ -46,7 +46,7 @@ private:
 	bool bLockedOn;
 	bool bIsDead;
 	UPROPERTY()
-	int32 iTurnDir;
+	int32 iTurnDir;	// 포즈 블렌딩용 변수
 
 public:
 	class UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }

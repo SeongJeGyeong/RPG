@@ -92,7 +92,7 @@ void ABoss_Base::MonsterDead()
 	// 5초 뒤 사망 이펙트 처리
 	GetWorld()->GetTimerManager().SetTimer(DeadTimer, [this]()
 	{
-		fDeadEffectRatio += 0.05f;
+		fDeadEffectRatio += 0.001f;
 
 		GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
 
@@ -102,7 +102,7 @@ void ABoss_Base::MonsterDead()
 			Destroy();
 		}
 	},
-	0.1f, true, 5.f);
+	0.01f, true, 5.f);
 }
 
 void ABoss_Base::StopBoneHitReaction(FName _BoneName)

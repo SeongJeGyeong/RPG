@@ -1,5 +1,12 @@
 #pragma once
 
+#include "Enum.generated.h"
+
+class RPGPORTFOLIO_API Enum
+{
+
+};
+
 UENUM(BlueprintType)
 enum class EInputActionType : uint8
 {
@@ -148,6 +155,7 @@ enum class EGreaterSpider_STATE : uint8
 	HIT,
 	DEAD,
 	IDLE,
+	PHASE2,
 };
 
 UENUM(BlueprintType)

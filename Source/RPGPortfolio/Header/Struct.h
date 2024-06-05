@@ -7,6 +7,11 @@
 #include "Engine/DataTable.h"
 #include "Struct.generated.h"
 
+class RPGPORTFOLIO_API Struct
+{
+
+};
+
 USTRUCT(Atomic, BlueprintType)
 struct FInputActionData
 {
@@ -340,6 +345,9 @@ struct FProjectileAssets
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UParticleSystem*	ProjHitEffect_Legacy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UParticleSystem*	ProjHitEffect_Ground_Legacy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase*			ProjHitSound;

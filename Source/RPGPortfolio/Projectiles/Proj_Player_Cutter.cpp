@@ -33,6 +33,10 @@ void AProj_Player_Cutter::BeginPlay()
 	Super::BeginPlay();
 	
 	m_Hitbox->OnComponentHit.AddDynamic(this, &AProj_Player_Cutter::OnHitProj);
+	if (!IsValid(m_BaseNiagara))
+	{
+		m_BaseNiagara->SetAsset(GetProjBaseNiagara());
+	}
 }
 
 // Called every frame
@@ -55,7 +59,7 @@ void AProj_Player_Cutter::LaunchMotion(FVector _LaunchVec)
 
 void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), GetProjHitNiagara(), Hit.Location);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), GetProjHitNiagara(), Hit.ImpactPoint);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
 	if (GetOwner() == nullptr)
 	{

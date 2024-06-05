@@ -34,6 +34,9 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
 	vOffset = vOffset.GetSafeNormal();
 	float fAngle = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
+	// fAngle : 1에 가까울 수록 몬스터의 정면에 가까우며, -1에 가까울 수록 몬스터의 후면에 가까움
+	// 0 = 몬스터의 90도 측면에 있음
+	float fDegree = FMath::RadiansToDegrees(fAngle);
 
 	_OwnComp.GetBlackboardComponent()->SetValueAsFloat(TEXT("TargetDirection"), fAngle);
 

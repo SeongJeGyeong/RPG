@@ -103,16 +103,18 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 
 	if ( bToggleLockOn )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("LockOn : True"));
 		ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
 
 		if ( NewLockOnTarget != nullptr )
 		{
+			UE_LOG(LogTemp, Warning, TEXT("LockOn : True"));
+			UE_LOG(LogTemp, Warning, TEXT("LockOn Target : %s"), *NewLockOnTarget->GetName());
 			LockOnTarget(NewLockOnTarget);
 			return true;
 		}
 		else
 		{
+			UE_LOG(LogTemp, Warning, TEXT("LockOn : false"));
 			rForwardRotation = m_Player->GetActorRotation();
 			return false;
 		}

@@ -52,6 +52,7 @@ public:
 	UNiagaraSystem* GetProjHitNiagara() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitEffect; }
 	UParticleSystem* GetProjBaseParticle() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjectileEffect_Legacy; }
 	UParticleSystem* GetProjHitParticle() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitEffect_Legacy; }
+	UParticleSystem* GetProjHitGroundParticle() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitEffect_Ground_Legacy; }
 	USoundBase* GetProjHitSound() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitSound; }
 
 };

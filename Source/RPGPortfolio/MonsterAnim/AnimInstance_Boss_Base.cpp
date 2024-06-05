@@ -40,6 +40,7 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 		return;
 	}
 
+	// 인티저 포즈 블렌딩용
 	iRotateDir = m_Boss->GetiTurnDir();
 
 	FQuat Orientation = m_Movement->UpdatedComponent->GetComponentQuat();

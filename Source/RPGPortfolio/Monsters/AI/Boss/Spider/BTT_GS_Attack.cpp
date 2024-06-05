@@ -17,59 +17,86 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 	Super::ExecuteTask(_OwnComp, _NodeMemory);
 
 	AAIController* pController = _OwnComp.GetAIOwner();
-	if (!IsValid(pController))
+	if ( !IsValid(pController) )
 	{
 		return EBTNodeResult::Succeeded;
 	}
 
 	ABoss_GreaterSpider* pBoss = Cast<ABoss_GreaterSpider>(pController->GetPawn());
-	if (!IsValid(pBoss))
+	if ( !IsValid(pBoss) )
 	{
 		return EBTNodeResult::Succeeded;
 	}
 
 	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
-	if (!IsValid(pPlayer))
+	if ( !IsValid(pPlayer) )
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	if (_OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) == 1)
-	{
-		int32 fAttackPattern = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber"));
+	UE_LOG(LogTemp, Warning, TEXT(""));
 
-		// 왼쪽 공격
-		if ( fAttackPattern == 1 )
+	EGreaterSpider_STATE AtkState;
+
+	if ( _OwnComp.GetBlackboardComponent()->GetValueAsBool(FName("Phase2")) )
+	{
+		if ( _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) != 1 )
 		{
-			pBoss->PlayAttackMontage(EGreaterSpider_STATE::LEFTATTACK);
+			FVector LookVector = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
+			LookVector.Z = 0.f;
+			FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
+			pBoss->SetActorRotation(TargetRot);
+
+			if (_OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) == 2)
+			{
+				AtkState = EGreaterSpider_STATE::RANGEATTACK;
+			}
+			else
+			{
+				AtkState = EGreaterSpider_STATE::RUSHATTACK;
+			}
 		}
-		// 오른쪽 공격
-		else if ( fAttackPattern == 2 )
+		else
 		{
-			pBoss->PlayAttackMontage(EGreaterSpider_STATE::RIGHTATTACK);
-		}
-		// 정면 공격
-		else if ( fAttackPattern == 0 )
-		{
-			pBoss->PlayAttackMontage(EGreaterSpider_STATE::CENTERATTACK);
+			int32 fAttackPattern = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber"));
+			// 왼쪽 공격
+			if (fAttackPattern == 1)
+			{
+				AtkState = EGreaterSpider_STATE::LEFTATTACK;
+			}
+			// 오른쪽 공격
+			else if (fAttackPattern == 2)
+			{
+				AtkState = EGreaterSpider_STATE::RIGHTATTACK;
+			}
+			// 정면 공격
+			else if (fAttackPattern == 0)
+			{
+				AtkState = EGreaterSpider_STATE::CENTERATTACK;
+			}
 		}
 	}
 	else
 	{
-		FVector LookVector = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-		LookVector.Z = 0.f;
-		FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
-		pBoss->SetActorRotation(TargetRot);
-	
-		if ( _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("Phase2Pattern")) == 2 )
+		int32 fAttackPattern = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber"));
+
+		// 왼쪽 공격
+		if (fAttackPattern == 1)
 		{
-			pBoss->PlayAttackMontage(EGreaterSpider_STATE::RANGEATTACK);
+			AtkState = EGreaterSpider_STATE::LEFTATTACK;
 		}
-		else
+		// 오른쪽 공격
+		else if (fAttackPattern == 2)
 		{
-			pBoss->PlayAttackMontage(EGreaterSpider_STATE::RUSHATTACK);
+			AtkState = EGreaterSpider_STATE::RIGHTATTACK;
+		}
+		// 정면 공격
+		else if (fAttackPattern == 0)
+		{
+			AtkState = EGreaterSpider_STATE::CENTERATTACK;
 		}
 	}
+	pBoss->PlayGSMontage(AtkState);
 
 	return EBTNodeResult::InProgress;
 }

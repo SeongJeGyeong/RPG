@@ -89,6 +89,7 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		ULocalPlayer* pLocalPlayer = pController->GetLocalPlayer();
 
+		// 향상된 입력 매핑 컨텍스트 추가
 		if (pLocalPlayer && !m_IMC.IsNull())
 		{
 			UEnhancedInputLocalPlayerSubsystem* pSubsystem = pLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -288,7 +289,6 @@ void APlayer_Base_Knight::SetOrientRotation(const bool& _Val)
 //////////////////////////////////////////////////////////////////////////
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
-	//FVector vInput = _Instance.GetValue().Get<FVector>();
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 	if (!CheckMontagePlaying() && bEnableMove && Controller != NULL)
 	{
@@ -447,7 +447,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		{
 			// 강공격
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-			bAtkType = true;
+			bHeavyAtk = true;
 			CurrentCombo = 1;
 			ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
 		}
@@ -455,7 +455,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		{
 			// 약공격
 			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
-			bAtkType = false;
+			bHeavyAtk = false;
 			CurrentCombo = 1;
 			ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
 		}
@@ -535,7 +535,6 @@ void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instan
 	{
 		m_Arm->SwitchTarget(ELockOnDirection::Right);
 	}
-
 }
 
 void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
@@ -740,15 +739,15 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 void APlayer_Base_Knight::NextAttackCheck()
 {
 	// 강공격 중에 강공격 토글을 해제할 경우 다음공격 재생안함
-	if (bAtkType && !bHeavyToggle)
+	if ( bHeavyAtk && !bHeavyToggle)
 	{
 		return;
 	}
 
-	int32 MaxCombo = bAtkType ? 2 : 3;
+	int32 MaxCombo = bHeavyAtk ? 2 : 3;
 	if (CurrentCombo == MaxCombo)
 	{
-		CurrentCombo = bAtkType ? 1 : 2;
+		CurrentCombo = bHeavyAtk ? 1 : 2;
 	}
 	else
 	{
@@ -757,7 +756,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 
 	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 
-	if (bAtkType)
+	if ( bHeavyAtk )
 	{
 		m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
 		ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
@@ -776,13 +775,14 @@ void APlayer_Base_Knight::NextAttackCheck()
 void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 {
 	float AtkRadius = 10.f;
-	FHitResult HitResult;
+	TArray<FHitResult> OutHits;
+	//FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	FVector vSwordBottom = GetMesh()->GetSocketLocation("FX_Sword_Bottom");
 	FVector vSwordTop = GetMesh()->GetSocketLocation("FX_Sword_Top");
-	bool bResult = GetWorld()->SweepSingleByChannel
+	bool bResult = GetWorld()->SweepMultiByChannel
 	(
-		HitResult,
+		OutHits,
 		vSwordBottom,
 		vSwordTop,
 		FQuat::Identity,
@@ -797,25 +797,29 @@ void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
 	DrawDebugCapsule(GetWorld(), vMidpoint, (vSwordTop - vSwordBottom).Size() * 0.5f, AtkRadius, FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(), color, false, 0.5f);
 	if (bResult)
 	{
-		if (HitResult.GetActor()->IsValidLowLevel())
+		for (FHitResult HitInfo : OutHits)
 		{
-			for (AActor* HitActor : HitActorArr)
+			if (HitInfo.GetActor()->IsValidLowLevel())
 			{
-				if (HitResult.GetActor() == HitActor)
+				for (AActor* HitActor : HitActorArr)
 				{
-					return;
+					if (HitInfo.GetActor() == HitActor)
+					{
+						return;
+					}
 				}
-			}
-			if (bAtkType)
-			{
-				ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
-			}
-			else
-			{
-				ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::ATTACK);
-			}
 
-			HitActorArr.Add(HitResult.GetActor());
+				if (bHeavyAtk)
+				{
+					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
+				}
+				else
+				{
+					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::ATTACK);
+				}
+
+				HitActorArr.Add(HitInfo.GetActor());
+			}
 		}
 	}
 }
@@ -905,6 +909,8 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	bInvalidInput = false;
 	bDodging = false;
 	bDodgeMove = false;
+	bSprintToggle = false;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 
 	// 피격 시 공격대상 반대방향으로 밀려나도록
 	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
@@ -1263,6 +1269,7 @@ void APlayer_Base_Knight::DodgeTimeCheck(bool _Dodge)
 		SetCanBeDamaged(false);
 		bDodgeMove = true;
 		GetCharacterMovement()->MaxWalkSpeed = 500.f;
+		bSprintToggle = false;
 	}
 	else
 	{

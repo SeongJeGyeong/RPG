@@ -6,6 +6,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../System/DamageType_Base.h"
+#include "../Characters/Player_Base_Knight.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AProj_GS_Spiderling::AProj_GS_Spiderling()
 {
@@ -28,6 +30,10 @@ void AProj_GS_Spiderling::BeginPlay()
 	Super::BeginPlay();
 
 	m_Hitbox->OnComponentHit.AddDynamic(this, &AProj_GS_Spiderling::OnHitProj);
+	if (!IsValid(m_Particle))
+	{
+		m_Particle->SetTemplate(GetProjBaseParticle());
+	}
 }
 
 void AProj_GS_Spiderling::Tick(float DeltaTime)
@@ -47,12 +53,53 @@ void AProj_GS_Spiderling::LaunchMotion(FVector _TargetVec)
 void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	UE_LOG(LogTemp, Warning, TEXT("HitProj"));
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GetProjHitParticle(), Hit.Location);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
-	if ( GetOwner() == nullptr )
+	APlayer_Base_Knight* pTarget = Cast<APlayer_Base_Knight>(OtherActor);
+	if (!IsValid(pTarget))
 	{
+		FRotator HitRot = UKismetMathLibrary::MakeRotFromZ(Hit.ImpactNormal);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GetProjHitGroundParticle(), Hit.ImpactPoint, HitRot);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
+
+		FHitResult HitResult;
+		FCollisionQueryParams Params(NAME_None, false, this);
+
+		bool bResult = GetWorld()->SweepSingleByChannel
+		(
+			HitResult,
+			Hit.ImpactPoint,
+			Hit.ImpactPoint,
+			FQuat::Identity,
+			ECollisionChannel::ECC_GameTraceChannel6,
+			FCollisionShape::MakeBox(FVector(200.f, 200.f, 20.f)),
+			Params
+		);
+
+		FColor color;
+		bResult ? color = FColor::Red : color = FColor::Green;
+
+		DrawDebugBox(GetWorld(), Hit.ImpactPoint, FVector(200.f, 200.f, 20.f), color, false, 0.5f);
+
+		if (bResult)
+		{
+			if ( HitResult.GetActor()->IsValidLowLevel() )
+			{
+				APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
+
+				// 무적 상태가 아닐 경우
+				if (IsValid(pPlayer) && !pPlayer->GetbInvincible())
+				{
+					TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
+					DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);
+					UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
+				}
+			}
+		}
+
+		Destroy();
 		return;
 	}
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GetProjHitParticle(), Hit.Location);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);

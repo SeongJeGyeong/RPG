@@ -8,6 +8,33 @@
 #include "GameFramework/PlayerState.h"
 #include "PlayerState_Base.generated.h"
 
+
+USTRUCT(Atomic)
+struct FEquipmentStat
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	float Helm_PhyDef = 0.f;
+	UPROPERTY()
+	float Helm_MagDef = 0.f;
+	UPROPERTY()
+	float Chest_PhyDef = 0.f;
+	UPROPERTY()
+	float Chest_MagDef = 0.f;
+	UPROPERTY()
+	float Gaunt_PhyDef = 0.f;
+	UPROPERTY()
+	float Gaunt_MagDef = 0.f;
+	UPROPERTY()
+	float Leg_PhyDef = 0.f;
+	UPROPERTY()
+	float Leg_MagDef = 0.f;
+	UPROPERTY()
+	float Wea_PhyAtk = 0.f;
+	UPROPERTY()
+	float Wea_MagAtk = 0.f;
+};
 /**
  * 
  */
@@ -27,21 +54,11 @@ private:
 	UPROPERTY()
 	class UUI_Player_Main* m_UI;
 
-	float Helm_PhyDef = 0.f;
-	float Helm_MagDef = 0.f;
-	float Chest_PhyDef = 0.f;
-	float Chest_MagDef = 0.f;
-	float Gaunt_PhyDef = 0.f;
-	float Gaunt_MagDef = 0.f;
-	float Leg_PhyDef = 0.f;
-	float Leg_MagDef = 0.f;
-
-	float Wea_PhyAtk = 0.f;
-	float Wea_MagAtk = 0.f;
-
 	float fSTRecoveryWait = 0.f;
 	bool bSTRecovery = false;
 	bool bSTRecovSlowly = false;
+
+	FEquipmentStat EquipmentStat;
 
 public:
 	virtual void BeginPlay() override;
@@ -63,30 +80,7 @@ public:
 	void SetPlayerCurrentStamina(float _CurStamina);
 	void PlayerGainSoul(int32 _Soul);
 
-	const float& GetHelmPhyDef() { return Helm_PhyDef; }
-	void SetHelmPhyDef(const float& _HelmPhyDef) { Helm_PhyDef = _HelmPhyDef; }
-	const float& GetHelmMagDef() { return Helm_MagDef; }
-	void SetHelmMagDef(const float& _HelmMagDef) { Helm_MagDef = _HelmMagDef; }
-
-	const float& GetChestPhyDef() { return Chest_PhyDef; }
-	void SetChestPhyDef(const float& _ChestPhyDef) { Chest_PhyDef = _ChestPhyDef; }
-	const float& GetChestMagDef() { return Chest_MagDef; }
-	void SetChestMagDef(const float& _ChestMagDef) { Chest_MagDef = _ChestMagDef; }
-
-	const float& GetGauntPhyDef() { return Gaunt_PhyDef; }
-	void SetGauntPhyDef(const float& _GauntPhyDef) { Gaunt_PhyDef = _GauntPhyDef; }
-	const float& GetGauntMagDef() { return Gaunt_MagDef; }
-	void SetGauntMagDef(const float& _GauntMagDef) { Gaunt_MagDef = _GauntMagDef; }
-
-	const float& GetLegPhyDef() { return Leg_PhyDef; }
-	void SetLegPhyDef(const float& _LegPhyDef) { Leg_PhyDef = _LegPhyDef; }
-	const float& GetLegMagDef() { return Leg_MagDef; }
-	void SetLegMagDef(const float& _LegMagDef) { Leg_MagDef = _LegMagDef; }
-
-	const float& GetWeaPhyAtk() { return Wea_PhyAtk; }
-	void SetWeaPhyAtk(const float& _WeaPhyAtk) { Wea_PhyAtk = _WeaPhyAtk; }
-	const float& GetWeaMagAtk() { return Wea_MagAtk; }
-	void SetWeaMagAtk(const float& _WeaMagAtk) { Wea_MagAtk = _WeaMagAtk; }
+	const FEquipmentStat& GetEquipmentStat() { return EquipmentStat; }
 
 	bool GetbSTRecovery() const { return bSTRecovery; }
 	void SetbSTRecovery(const bool& _STRecovery) { bSTRecovery = _STRecovery; }

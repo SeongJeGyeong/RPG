@@ -84,7 +84,7 @@ private:
 	// 다음 공격 입력 체크용
 	bool bNextAtkCheckOn;
 	// 약공격인지 강공격인지 판별(true = 강, false = 약)
-	bool bAtkType;
+	bool bHeavyAtk;
 
 	// 공격 모션 도중 움직이지 못하는 상태 체크
 	bool bInvalidInput;
@@ -119,7 +119,9 @@ private:
 
 	bool bShowMenu;
 	
+	// 점프공격 타이머
 	FTimerDelegate JumpAtkDelegate;
+	// 방어 표현 타이머
 	FTimerHandle BlockReactTimer;
 
 public:
