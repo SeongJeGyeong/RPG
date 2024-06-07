@@ -15,13 +15,13 @@ class RPGPORTFOLIO_API UUI_Boss : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-	class UTextBlock* m_Name;
-	UPROPERTY()
-	class UTextBlock* m_DMGFigure;
-	UPROPERTY()
-	class UProgressBar* m_HPBar;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock* m_BossName;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock* m_BossDMGFigure;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UProgressBar* m_BossHP;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	float fTakedDMG = 0.f;
 
 	FTimerHandle BossDmgDisplayTimer;

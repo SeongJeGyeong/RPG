@@ -16,11 +16,16 @@ class RPGPORTFOLIO_API UUI_EquipMain : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UTextBlock*		m_SelItemName;
-	class UTextBlock*		m_SelItemSlot;
-	class UUI_ItemTooltip*	m_Tooltip;
-	class UUI_PlayerStat*	m_Stat;
-	class UUI_EquipItemList* m_ItemList;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*		m_Sel_ItemName;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*		m_Sel_ItemSlot;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_ItemTooltip*	m_ItemTooltipUI;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_PlayerStat*	m_Equip_StatUI;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_EquipItemList* m_Equip_ItemListUI;
 
 public:
 	virtual void NativeConstruct() override;
@@ -29,8 +34,9 @@ public:
 	void ListVisibilityChanged(ESlateVisibility _Visibility);
 
 public:
-	UUI_EquipItemList* GetItemList() { return m_ItemList; }
-
+	UUI_EquipItemList* GetItemList() { return m_Equip_ItemListUI; }
+	bool GetItemListVisibility();
+	void CloseItemList();
 	void RenewEquipItem(EEQUIP_SLOT _Slot, class UItem_InvenData* _ItemData = nullptr);
 	void RenewEquipItemStack(EEQUIP_SLOT _Slot, uint16 _Stack);
 };

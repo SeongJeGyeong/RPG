@@ -15,25 +15,42 @@ class RPGPORTFOLIO_API UUI_ItemTooltip : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UTextBlock* m_ItemName;
-	class UTextBlock* m_Category;
-	class UTextBlock* m_SubCategory;
-	class UTextBlock* m_CurQnt_Inven;
-	class UTextBlock* m_MaxQnt_Inven;
-	class UTextBlock* m_CurQnt_Storage;
-	class UTextBlock* m_MaxQnt_Storage;
-	class UTextBlock* m_PhysicAtk;
-	class UTextBlock* m_PhysicDef;
-	class UTextBlock* m_MagicAtk;
-	class UTextBlock* m_MagicDef;
-	class UTextBlock* m_Restore_HP;
-	class UTextBlock* m_Restore_MP;
-	class UTextBlock* m_Desc;
-	class UTextBlock* m_Req_Str;
-	class UTextBlock* m_Req_Dex;
-	class UTextBlock* m_Req_Int;
-
-	class UImage* m_ItemImg;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_ItemName;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_Category;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_Sub_Category;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_CurQnt_Inven;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_MaxQnt_Inven;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_CurQnt_Storage;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_MaxQnt_Storage;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_PhysicAtk;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_PhysicDef;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_MagicAtk;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_MagicDef;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Restore_HP;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Restore_MP;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Item_Desc;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_Req_Str;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_Req_Dex;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_Sel_Req_Int;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UImage*		m_Sel_ItemImg;
 
 public:
 	virtual void NativeConstruct() override;

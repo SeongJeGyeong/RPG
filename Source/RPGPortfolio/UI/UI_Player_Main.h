@@ -15,10 +15,12 @@ class RPGPORTFOLIO_API UUI_Player_Main : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UProgressBar* m_HP;
-	class UProgressBar* m_MP;
-	class UProgressBar* m_Stamina;
-	class APlayerState_Base* m_PlayerState;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UProgressBar* m_PlayerHP;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UProgressBar* m_PlayerMP;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UProgressBar* m_PlayerStamina;
 
 public:
 	virtual void NativeConstruct() override;

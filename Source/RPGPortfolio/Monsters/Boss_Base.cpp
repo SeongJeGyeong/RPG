@@ -77,6 +77,7 @@ void ABoss_Base::BeginPlay()
 	m_BossWidget = pMainUI->GetBossUI();
 	m_BossWidget->SetName(m_Info.Name);
 	m_BossWidget->SetHPRatio(1.f);
+	m_BossWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 // Called every frame
@@ -89,16 +90,25 @@ void ABoss_Base::MonsterDead()
 {
 	bIsDead = true;
 
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (IsValid(GameMode))
+	{
+		GameMode->PlayBGM(false);
+	}
+
+	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/SC_Boss_Defeat.SC_Boss_Defeat'"));
+	UGameplayStatics::PlaySound2D(GetWorld(), pSound);
 	// 5초 뒤 사망 이펙트 처리
 	GetWorld()->GetTimerManager().SetTimer(DeadTimer, [this]()
 	{
-		fDeadEffectRatio += 0.001f;
+		fDeadEffectRatio += 0.005f;
 
 		GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
 
-		if ( fDeadEffectRatio > 1.f )
+		if (fDeadEffectRatio > 0.7f)
 		{
 			GetWorld()->GetTimerManager().ClearTimer(DeadTimer);
+			m_BossWidget->SetVisibility(ESlateVisibility::Hidden);
 			Destroy();
 		}
 	},

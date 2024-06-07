@@ -12,61 +12,40 @@
 
 void UUI_Base::NativeConstruct()
 {
+	if(!IsValid(m_UI_MenuMain))
+	{
+		UE_LOG(LogTemp, Error, TEXT("메뉴 UI 로드 실패"));
+	}
+	else
+	{
+		m_UI_MenuMain->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (!IsValid(m_UI_Boss))
+	{
+		UE_LOG(LogTemp, Error, TEXT("보스 UI 로드 실패"));
+	}
+	else
+	{
+		m_UI_Boss->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (!IsValid(m_UI_MessageBox_Main))
+	{
+		UE_LOG(LogTemp, Error, TEXT("메인 메시지박스 UI 로드 실패"));
+	}
+	else
+	{
+		m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (!IsValid(m_UI_MessageBox_Item))
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이템 메시지박스 UI 로드 실패"));
+	}
+	else
+	{
+		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	Super::NativeConstruct();
-
-	m_MainUI = Cast<UUI_Player_Main>(GetWidgetFromName(FName("UI_Progress")));
-	m_QuickSlotUI = Cast<UUI_Player_QuickSlot>(GetWidgetFromName(FName("UI_ItemSlotMain")));
-	m_SoulUI = Cast<UUI_Player_Soul>(GetWidgetFromName(FName("UI_Soul")));
-	m_MenuUI = Cast<UUI_Menu_Main>(GetWidgetFromName(FName("UI_MenuMain")));
-	m_BossUI = Cast<UUI_Boss>(GetWidgetFromName(FName("UI_Monster_Boss")));
-	m_MainMessageUI = Cast<UUI_Message_Main>(GetWidgetFromName("UI_MessageBox_Main"));
-	m_ItemMessageUI = Cast<UUI_Message_Item>(GetWidgetFromName("UI_MessageBox_Item"));
-
-	if (!IsValid(m_MainUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Player Main UI Casting Failed"));
-	}
-	if (!IsValid(m_QuickSlotUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("QuickSlot UI Casting Failed"));
-	}
-	if (!IsValid(m_SoulUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Amount Of Soul UI Casting Failed"));
-	}
-	if (!IsValid(m_MenuUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("MainMenu UI Casting Failed"));
-	}
-	else
-	{
-		m_MenuUI->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (!IsValid(m_BossUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Boss UI Casting Failed"));
-	}
-	else
-	{
-		m_BossUI->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (!IsValid(m_MainMessageUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Main MessageBox UI Casting Failed"));
-	}
-	else
-	{
-		m_MainMessageUI->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (!IsValid(m_ItemMessageUI))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Item MessageBox UI Casting Failed"));
-	}
-	else
-	{
-		m_ItemMessageUI->SetVisibility(ESlateVisibility::Hidden);
-	}
-
 }
 
 void UUI_Base::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -78,11 +57,11 @@ void UUI_Base::ShowMenu(bool _bShow)
 {
 	if (_bShow)
 	{
-		m_MenuUI->SetVisibility(ESlateVisibility::Visible);
+		m_UI_MenuMain->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
-		m_MenuUI->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_MenuMain->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -90,13 +69,13 @@ void UUI_Base::ShowMainMessageUI(bool _bShow)
 {
 	if (_bShow)
 	{
-		m_MainMessageUI->SetVisibility(ESlateVisibility::Visible);
+		m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
 		if (!bDisplayRootMessage)
 		{
-			m_MainMessageUI->SetVisibility(ESlateVisibility::Hidden);
+			m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
@@ -106,23 +85,10 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 	bDisplayRootMessage = _bShow;
 	if ( _bShow )
 	{
-		m_ItemMessageUI->SetVisibility(ESlateVisibility::Visible);
+		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
-		m_ItemMessageUI->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-void UUI_Base::ShowBossUI(bool _bShow)
-{
-	if ( _bShow )
-	{
-		m_BossUI->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		m_BossUI->SetVisibility(ESlateVisibility::Hidden);
-	}
-
 }

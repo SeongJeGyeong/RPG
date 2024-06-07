@@ -15,7 +15,9 @@ class RPGPORTFOLIO_API UUI_Message_Main : public UUserWidget
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock* m_ActionText;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock* m_CommandText;
 
 public:

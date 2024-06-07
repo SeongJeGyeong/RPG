@@ -51,7 +51,7 @@ void ATrigger_BossCutscene::EndLevelSequence()
 	if ( IsValid(GameMode) )
 	{
 		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
-		GameMode->GetMainHUD()->ShowBossUI(true);
+		GameMode->PlayBGM(true);
 	}
 	TArray<AActor*> OutActorsArr;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoss_Base::StaticClass(), OutActorsArr);
@@ -62,7 +62,6 @@ void ATrigger_BossCutscene::EndLevelSequence()
 		{
 			pAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("bStop"), false);
 		}
-
 	}
 
 	Destroy();

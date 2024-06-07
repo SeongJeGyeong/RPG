@@ -171,9 +171,9 @@ public:
 
 public:
 	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
-	void NextAttackCheck();
-	void CloseMenuUI();
-	void DodgeTimeCheck(bool _Dodge);
+	void NextAttackCheck();	// 다음 공격 발동 체크
+	void CloseMenuUI();	
+	void DodgeTimeCheck(bool _Dodge); // 회피 무적시간 체크
 	void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir); // 적 공격 방어
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);

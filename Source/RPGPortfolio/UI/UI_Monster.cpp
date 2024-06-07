@@ -7,28 +7,24 @@
 
 void UUI_Monster::NativeConstruct()
 {
-	Super::NativeConstruct();
-
 	// NativeOnInitialized 함수는 몬스터 이름과 체력을 가져오기 전에 호출되기 때문에 이름과 체력이 ui에 표시되지 않는다.
 	// 또한 몬스터는 여러 마리 존재하므로 캐릭터가 존재하는 레벨에 몬스터가 많을수록 몬스터 ui가 동시에 초기화 될 때 부하가 걸릴 수 있다.
-	m_Name = Cast<UTextBlock>(GetWidgetFromName(TEXT("MonsterName")));
-	m_DMGFigure = Cast<UTextBlock>(GetWidgetFromName(TEXT("DMGFigure")));
-	m_HPBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("MonsterHP")));
-
-	if (!IsValid(m_Name) || !IsValid(m_HPBar))
+	if (!IsValid(m_MonsterName) || !IsValid(m_MonsterHP))
 	{
 		UE_LOG(LogTemp, Error, TEXT("MonsterUI Casting Failed"));
 	}
 	else
 	{
-		m_Name->SetText(m_MonsterName);
-		m_HPBar->SetPercent(m_Ratio);
+		m_MonsterName->SetText(m_Name);
+		m_MonsterHP->SetPercent(m_Ratio);
 	}
 
-	if (!IsValid(m_DMGFigure))
+	if (!IsValid(m_MonDMGFigure))
 	{
 		UE_LOG(LogTemp, Error, TEXT("DMGFigure Casting Failed"));
 	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_Monster::NativeDestruct()
@@ -48,34 +44,34 @@ void UUI_Monster::SetHPRatio(float _Ratio)
 	// ui 생성 전에 비율 저장
 	m_Ratio = _Ratio;
 
-	if (IsValid(m_HPBar))
+	if (IsValid(m_MonsterHP))
 	{
 		// ui 생성 후 비율 재설정시 사용
-		m_HPBar->SetPercent(m_Ratio);
+		m_MonsterHP->SetPercent(m_Ratio);
 	}
 }
 
 void UUI_Monster::SetName(const FString& _Name)
 {
 	// ui 생성 전에 이름 저장
-	m_MonsterName = FText::FromString(_Name);
+	m_Name = FText::FromString(_Name);
 }
 
 void UUI_Monster::DisplayDMG(const float _DMG)
 {
-	if (!IsValid(m_DMGFigure))
+	if (!IsValid(m_MonDMGFigure))
 	{
-		m_DMGFigure = Cast<UTextBlock>(GetWidgetFromName(TEXT("DMGFigure")));
+		m_MonDMGFigure = Cast<UTextBlock>(GetWidgetFromName(TEXT("DMGFigure")));
 	}
 	fTakedDMG += _DMG;
-	m_DMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
-	m_DMGFigure->SetVisibility(ESlateVisibility::Visible);
+	m_MonDMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
+	m_MonDMGFigure->SetVisibility(ESlateVisibility::Visible);
 
 	GetWorld()->GetTimerManager().ClearTimer(DmgDisplayTimer);
 	GetWorld()->GetTimerManager().SetTimer(DmgDisplayTimer, [this]()
 	{
 		fTakedDMG = 0.f;
-		m_DMGFigure->SetVisibility(ESlateVisibility::Hidden);
+		m_MonDMGFigure->SetVisibility(ESlateVisibility::Hidden);
 	},
 	0.1f, false, 3.f);
 }

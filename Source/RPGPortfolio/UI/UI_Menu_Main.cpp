@@ -10,44 +10,36 @@
 #include "UI_StatusMain.h"
 #include "UI_EquipMain.h"
 #include "UI_Manual.h"
+#include "UI_Settings.h"
 #include "../System/DataAsset/DA_MenuSound.h"
 
 void UUI_Menu_Main::NativeConstruct()
 {
-	Super::NativeConstruct();
-
-	m_Equip = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Equip")));
-	m_Inventory = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Inventory")));
-	m_Status = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Status")));
-	m_Manual = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Manual")));
-	m_Settings = Cast<UButton>(GetWidgetFromName(TEXT("Btn_Settings")));
-	m_MenuName = Cast<UTextBlock>(GetWidgetFromName(TEXT("MenuName")));
-
-	if (!IsValid(m_Equip) || !IsValid(m_Inventory) || !IsValid(m_Status) || !IsValid(m_Manual) || !IsValid(m_Settings))
+	if (!IsValid(m_Btn_Equip) || !IsValid(m_Btn_Inventory) || !IsValid(m_Btn_Status) || !IsValid(m_Btn_Manual) || !IsValid(m_Btn_Settings))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Menu Button Load Failed"));
 	}
 	else
 	{
-		m_Equip->OnClicked.AddDynamic(this, &UUI_Menu_Main::EquipBtnClicked);
-		m_Equip->OnHovered.AddDynamic(this, &UUI_Menu_Main::EquipBtnHovered);
-		m_Equip->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::EquipBtnUnHovered);
+		m_Btn_Equip->OnClicked.AddDynamic(this, &UUI_Menu_Main::EquipBtnClicked);
+		m_Btn_Equip->OnHovered.AddDynamic(this, &UUI_Menu_Main::EquipBtnHovered);
+		m_Btn_Equip->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::EquipBtnUnHovered);
 
-		m_Inventory->OnClicked.AddDynamic(this, &UUI_Menu_Main::InventoryBtnClicked);
-		m_Inventory->OnHovered.AddDynamic(this, &UUI_Menu_Main::InventoryBtnHovered);
-		m_Inventory->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::InventoryBtnUnHovered);
+		m_Btn_Inventory->OnClicked.AddDynamic(this, &UUI_Menu_Main::InventoryBtnClicked);
+		m_Btn_Inventory->OnHovered.AddDynamic(this, &UUI_Menu_Main::InventoryBtnHovered);
+		m_Btn_Inventory->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::InventoryBtnUnHovered);
 
-		m_Status->OnClicked.AddDynamic(this, &UUI_Menu_Main::StatusBtnClicked);
-		m_Status->OnHovered.AddDynamic(this, &UUI_Menu_Main::StatusBtnHovered);
-		m_Status->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::StatusBtnUnHovered);
+		m_Btn_Status->OnClicked.AddDynamic(this, &UUI_Menu_Main::StatusBtnClicked);
+		m_Btn_Status->OnHovered.AddDynamic(this, &UUI_Menu_Main::StatusBtnHovered);
+		m_Btn_Status->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::StatusBtnUnHovered);
 
-		m_Manual->OnClicked.AddDynamic(this, &UUI_Menu_Main::ManualBtnClicked);
-		m_Manual->OnHovered.AddDynamic(this, &UUI_Menu_Main::ManualBtnHovered);
-		m_Manual->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::ManualBtnUnHovered);
+		m_Btn_Manual->OnClicked.AddDynamic(this, &UUI_Menu_Main::ManualBtnClicked);
+		m_Btn_Manual->OnHovered.AddDynamic(this, &UUI_Menu_Main::ManualBtnHovered);
+		m_Btn_Manual->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::ManualBtnUnHovered);
 
-		m_Settings->OnClicked.AddDynamic(this, &UUI_Menu_Main::SettingsBtnClicked);
-		m_Settings->OnHovered.AddDynamic(this, &UUI_Menu_Main::SettingsBtnHovered);
-		m_Settings->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::SettingsBtnUnHovered);
+		m_Btn_Settings->OnClicked.AddDynamic(this, &UUI_Menu_Main::SettingsBtnClicked);
+		m_Btn_Settings->OnHovered.AddDynamic(this, &UUI_Menu_Main::SettingsBtnHovered);
+		m_Btn_Settings->OnUnhovered.AddDynamic(this, &UUI_Menu_Main::SettingsBtnUnHovered);
 	}
 
 	if (!IsValid(m_MenuName))
@@ -58,8 +50,10 @@ void UUI_Menu_Main::NativeConstruct()
 	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
 	if ( !IsValid(m_Sound) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
+		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
 	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_Menu_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -167,6 +161,17 @@ void UUI_Menu_Main::ManualBtnUnHovered()
 
 void UUI_Menu_Main::SettingsBtnClicked()
 {
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		return;
+	}
+
+	UUI_Settings* SettingsUI = GameMode->GetSettingsUI();
+	SettingsUI->SetVisibility(ESlateVisibility::Visible);
+
 	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
 }
 

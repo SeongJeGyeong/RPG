@@ -44,7 +44,7 @@ void UUI_StatusMain::RenewStatusUI()
 {
 	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 
-	m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Level)));
+	m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerLevel())));
 	m_Souls->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerBasePower().AmountOfSoul)));
 	//m_Required_Souls;
 	m_Vigor->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Vigor)));

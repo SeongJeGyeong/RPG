@@ -13,23 +13,17 @@
 
 void UUI_EquipItem::NativeConstruct()
 {
-	Super::NativeConstruct();
-
-	m_ItemBtn = Cast<UButton>(GetWidgetFromName(TEXT("ItemBtn")));
-	m_ItemImg = Cast<UImage>(GetWidgetFromName(TEXT("ItemImg")));
-	m_DishImg = Cast<UImage>(GetWidgetFromName(TEXT("DishImg")));
-
-	if (!IsValid(m_ItemBtn) || !IsValid(m_ItemImg) || !IsValid(m_DishImg) )
+	if (!IsValid(m_EquipItemBtn) || !IsValid(m_EquipItemImg) || !IsValid(m_EquipDishImg))
 	{
-		UE_LOG(LogTemp, Error, TEXT("장비창 아이템 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("장비창 아이템 UI 로드 실패"));
 	}
 	else
 	{
-		m_ItemImg->SetVisibility(ESlateVisibility::Hidden);
-		m_DishImg->SetVisibility(ESlateVisibility::Hidden);
-		m_ItemBtn->OnClicked.AddDynamic(this, &UUI_EquipItem::ItemBtnClicked);
-		m_ItemBtn->OnHovered.AddDynamic(this, &UUI_EquipItem::ItemBtnHovered);
-		m_ItemBtn->OnUnhovered.AddDynamic(this, &UUI_EquipItem::ItemBtnUnHovered);
+		m_EquipItemImg->SetVisibility(ESlateVisibility::Hidden);
+		m_EquipDishImg->SetVisibility(ESlateVisibility::Hidden);
+		m_EquipItemBtn->OnClicked.AddDynamic(this, &UUI_EquipItem::ItemBtnClicked);
+		m_EquipItemBtn->OnHovered.AddDynamic(this, &UUI_EquipItem::ItemBtnHovered);
+		m_EquipItemBtn->OnUnhovered.AddDynamic(this, &UUI_EquipItem::ItemBtnUnHovered);
 	}
 
 	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
@@ -37,6 +31,8 @@ void UUI_EquipItem::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
 	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -49,16 +45,16 @@ void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 	m_ItemData = _ItemData;
 	if (!IsValid(m_ItemData))
 	{
-		m_ItemImg->SetVisibility(ESlateVisibility::Hidden);
-		m_DishImg->SetVisibility(ESlateVisibility::Hidden);
+		m_EquipItemImg->SetVisibility(ESlateVisibility::Hidden);
+		m_EquipDishImg->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
 	{
 		FString ItemImgPath = _ItemData->GetItemImgPath();
 		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
-		m_ItemImg->SetBrushFromTexture(pTex2D);
-		m_ItemImg->SetVisibility(ESlateVisibility::Visible);
-		m_DishImg->SetVisibility(ESlateVisibility::Visible);
+		m_EquipItemImg->SetBrushFromTexture(pTex2D);
+		m_EquipItemImg->SetVisibility(ESlateVisibility::Visible);
+		m_EquipDishImg->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 

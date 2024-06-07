@@ -15,10 +15,14 @@ class RPGPORTFOLIO_API UUI_Player_QuickSlot : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UUI_Player_QuickSlotItem* m_UpperSlotItem;
-	class UUI_Player_QuickSlotItem* m_LowerSlotItem;
-	class UUI_Player_QuickSlotItem* m_NextQuickSlotItem;
-	class UProgressBar*				m_LowerSlotDelayBar;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_Player_QuickSlotItem* m_UI_UpperSlot;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_Player_QuickSlotItem* m_UI_LowerSlot;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_Player_QuickSlotItem* m_UI_NextQuickSlot;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UProgressBar*				m_LowerSlot_DelayBar;
 
 	float fItemDelayTime = 0.f;
 

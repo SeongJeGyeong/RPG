@@ -15,9 +15,12 @@ class RPGPORTFOLIO_API UUI_Message_Item : public UUserWidget
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UImage*		m_ItemImg;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock*	m_ItemName;
-	class UTextBlock* m_ItemQnt;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_ItemQnt;
 
 public:
 	virtual void NativeConstruct() override;

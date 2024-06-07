@@ -16,15 +16,7 @@
 #include "Kismet/GameplayStatics.h"
 
 void UUI_InvenItem::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	m_ItemImg = Cast<UImage>(GetWidgetFromName(TEXT("ItemImg")));
-	m_EquipMark = Cast<UImage>(GetWidgetFromName(TEXT("EquipMark")));
-	m_ItemQnt = Cast<UTextBlock>(GetWidgetFromName(TEXT("Quantity")));
-	m_ItemBtn = Cast<UButton>(GetWidgetFromName(TEXT("ItemBtn")));
-	m_MenuAnchor = Cast<UMenuAnchor>(GetWidgetFromName(TEXT("ItemMenuAnchor")));
-	
+{	
 	if (!IsValid(m_ItemImg) || !IsValid(m_ItemQnt) || !IsValid(m_EquipMark))
 	{
 		UE_LOG(LogTemp, Error, TEXT("InvenItem의 하위 위젯을 찾지 못함"));
@@ -46,7 +38,9 @@ void UUI_InvenItem::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
 	}
 
-	m_MenuAnchor->OnGetUserMenuContentEvent.BindUFunction(this, FName("MenuAnchorDataSetting"));
+	m_ItemMenuAnchor->OnGetUserMenuContentEvent.BindUFunction(this, FName("MenuAnchorDataSetting"));
+
+	Super::NativeConstruct();
 }
 
 void UUI_InvenItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -94,7 +88,7 @@ void UUI_InvenItem::ItemBtnClicked()
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		bItemUseDelay = pPlayer->GetbItemDelay();
-		m_MenuAnchor->Open(true);
+		m_ItemMenuAnchor->Open(true);
 		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
 	}
 	// 장비 아이템 선택창에서 아이템 클릭 시

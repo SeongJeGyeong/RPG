@@ -10,9 +10,10 @@ void UUI_Message_Item::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	m_ItemImg = Cast<UImage>(GetWidgetFromName(TEXT("ItemImg")));
-	m_ItemName = Cast<UTextBlock>(GetWidgetFromName(TEXT("ItemName")));
-	m_ItemQnt = Cast<UTextBlock>(GetWidgetFromName(TEXT("ItemQnt")));
+	if ( !IsValid(m_ItemImg) || !IsValid(m_ItemName) || !IsValid(m_ItemQnt) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("아이템 메시지박스 로드 실패"));
+	}
 }
 
 void UUI_Message_Item::NativeTick(const FGeometry& _Geo, float _DeltaTime)

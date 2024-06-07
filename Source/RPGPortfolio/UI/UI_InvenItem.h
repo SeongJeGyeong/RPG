@@ -17,13 +17,16 @@ class RPGPORTFOLIO_API UUI_InvenItem : public UUserWidget, public IUserObjectLis
 	GENERATED_BODY()
 	
 private:
-	class UTextBlock*	m_ItemName;
-	class UTextBlock*	m_ItemDesc;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock*	m_ItemQnt;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UImage*		m_ItemImg;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UImage*		m_EquipMark;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UButton*		m_ItemBtn;
-	class UMenuAnchor*	m_MenuAnchor;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UMenuAnchor* m_ItemMenuAnchor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UItem_InvenData* m_ItemData;
@@ -32,11 +35,13 @@ private:
 	bool bItemUseDelay;
 
 	bool bAnchorActive;
+
+	UPROPERTY()
 	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
 
 	// 아이템 장착시 변경될 능력치 표시용
 	class UUI_PlayerStat* m_StatUI;
-
+	UPROPERTY()
 	class UDA_MenuSound* m_Sound;
 
 public:

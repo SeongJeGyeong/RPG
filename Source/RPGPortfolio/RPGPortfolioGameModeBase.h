@@ -19,20 +19,32 @@ public:
 	~ARPGPortfolioGameModeBase();
 
 private:
-	TSubclassOf<UUserWidget> m_MainHUDClass;
+	UPROPERTY()
+	TArray<TSubclassOf<UUserWidget>> m_WidgetClassArr;
+
+	UPROPERTY()
 	class UUI_Base* m_MainHUD;
 
-	TSubclassOf<UUserWidget> m_InventoryUIClass;
+	UPROPERTY()
 	class UUI_Inventory* m_InventoryUI;
 
-	TSubclassOf<UUserWidget> m_StatusUIClass;
+	UPROPERTY()
 	class UUI_StatusMain* m_StatusUI;
 
-	TSubclassOf<UUserWidget> m_EquipUIClass;
+	UPROPERTY()
 	class UUI_EquipMain* m_EquipUI;
 
-	TSubclassOf<UUserWidget> m_ManualUIClass;
+	UPROPERTY()
 	class UUI_Manual* m_ManualUI;
+
+	UPROPERTY()
+	class UUI_Settings* m_SettingsUI;
+
+	UPROPERTY()
+	class UAudioComponent* m_BGMComp;
+
+	UPROPERTY()
+	class USoundBase* m_BGM;
 
 public:
 	class UUI_Base* GetMainHUD() { return m_MainHUD; }
@@ -40,11 +52,11 @@ public:
 	class UUI_StatusMain* GetStatusUI() { return m_StatusUI; }
 	class UUI_EquipMain* GetEquipUI() { return m_EquipUI; }
 	class UUI_Manual* GetManualUI() { return m_ManualUI; }
-	bool IsStatusOpened();
-	void CloseStatus();
-	bool IsManualOpened();
-	void CloseManual();
+	class UUI_Settings* GetSettingsUI() { return m_SettingsUI; }
 	bool IsSubMenuUIOpened();
+	void CloseSubMenu();
+
+	void PlayBGM(bool _Play);
 
 public:
 	virtual void BeginPlay() override;

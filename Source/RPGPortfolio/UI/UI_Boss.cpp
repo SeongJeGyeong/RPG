@@ -7,19 +7,16 @@
 
 void UUI_Boss::NativeConstruct()
 {
-	Super::NativeConstruct();
-	m_Name = Cast<UTextBlock>(GetWidgetFromName(TEXT("BossName")));
-	m_DMGFigure = Cast<UTextBlock>(GetWidgetFromName(TEXT("DMGFigure")));
-	m_HPBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("BossHP")));
-
-	if (!IsValid(m_Name) || !IsValid(m_HPBar) || !IsValid(m_DMGFigure))
+	if (!IsValid(m_BossDMGFigure))
 	{
-		UE_LOG(LogTemp, Error, TEXT("BossUI Casting Failed"));
+		UE_LOG(LogTemp, Error, TEXT("보스 데미지 표기 UI 로드 실패"));
 	}
 	else
 	{
-		m_DMGFigure->SetVisibility(ESlateVisibility::Hidden);
+		m_BossDMGFigure->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_Boss::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -29,24 +26,24 @@ void UUI_Boss::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_Boss::SetHPRatio(float _Ratio)
 {
-	m_HPBar->SetPercent(_Ratio);
+	m_BossHP->SetPercent(_Ratio);
 }
 
 void UUI_Boss::SetName(const FString& _Name)
 {
-	m_Name->SetText(FText::FromString(_Name));
+	m_BossName->SetText(FText::FromString(_Name));
 }
 
 void UUI_Boss::DisplayDMG(const float _DMG)
 {
 	fTakedDMG += _DMG;
-	m_DMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
-	m_DMGFigure->SetVisibility(ESlateVisibility::Visible);
+	m_BossDMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
+	m_BossDMGFigure->SetVisibility(ESlateVisibility::Visible);
 	GetWorld()->GetTimerManager().ClearTimer(BossDmgDisplayTimer);
 	GetWorld()->GetTimerManager().SetTimer(BossDmgDisplayTimer, [this]()
 	{
 		fTakedDMG = 0.f;
-		m_DMGFigure->SetVisibility(ESlateVisibility::Hidden);
+		m_BossDMGFigure->SetVisibility(ESlateVisibility::Hidden);
 	}, 
 	0.1f, false, 3.f);
 }

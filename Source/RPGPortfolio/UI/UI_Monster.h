@@ -15,14 +15,14 @@ class RPGPORTFOLIO_API UUI_Monster : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY()
-	class UTextBlock* m_Name;
-	UPROPERTY()
-	class UTextBlock* m_DMGFigure;
-	UPROPERTY()
-	class UProgressBar* m_HPBar;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock* m_MonsterName;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock* m_MonDMGFigure;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UProgressBar* m_MonsterHP;
 
-	FText m_MonsterName;
+	FText m_Name;
 	float m_Ratio;
 
 	float fDisplayTime = 0.f;

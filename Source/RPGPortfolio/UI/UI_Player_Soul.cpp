@@ -9,12 +9,7 @@
 
 void UUI_Player_Soul::NativeConstruct()
 {
-	Super::NativeConstruct();
-
-	m_AmountOfSoul = Cast<UTextBlock>(GetWidgetFromName(TEXT("AmountOfSoul")));
-	m_GainedSoul = Cast<UTextBlock>(GetWidgetFromName(TEXT("GainedSoul")));
-
-	if (!IsValid(m_AmountOfSoul) || !IsValid(m_GainedSoul))
+	if (!IsValid(m_Soul) || !IsValid(m_GainSoul))
 	{
 		UE_LOG(LogTemp, Error, TEXT("소지소울 UI 캐스팅 실패"));
 	}
@@ -23,7 +18,7 @@ void UUI_Player_Soul::NativeConstruct()
 		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
 		iDisplayedSoul = PlayerBasePower.AmountOfSoul;
-		m_AmountOfSoul->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerBasePower.AmountOfSoul)));
+		m_Soul->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerBasePower.AmountOfSoul)));
 	}
 
 	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
@@ -31,6 +26,8 @@ void UUI_Player_Soul::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("소울 UI 사운드 로드 실패"));
 	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -46,7 +43,7 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 		if (iDisplayedSoul < PlayerBasePower.AmountOfSoul)
 		{
 			iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 3.f * _DeltaTime, iDisplayedSoul, PlayerBasePower.AmountOfSoul);
-			m_AmountOfSoul->SetText(FText::FromString(FString::Printf(TEXT("%d"), iDisplayedSoul)));
+			m_Soul->SetText(FText::FromString(FString::Printf(TEXT("%d"), iDisplayedSoul)));
 		}
 		else
 		{
@@ -59,10 +56,10 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 	if (bFadeOutGainedSoul)
 	{
 		fOpacity = FMath::Clamp(fOpacity - _DeltaTime, 0.f, 1.f);
-		m_GainedSoul->SetOpacity(fOpacity);
+		m_GainSoul->SetOpacity(fOpacity);
 		if (fOpacity <= 0.f)
 		{
-			m_GainedSoul->SetVisibility(ESlateVisibility::Hidden);
+			m_GainSoul->SetVisibility(ESlateVisibility::Hidden);
 			bFadeOutGainedSoul = false;
 		}
 	}
@@ -71,10 +68,10 @@ void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)
 {
 	iGainedSoul = _GainedSoul;
-	m_GainedSoul->SetText(FText::FromString(FString::Printf(TEXT("+%d"), iGainedSoul)));
+	m_GainSoul->SetText(FText::FromString(FString::Printf(TEXT("+%d"), iGainedSoul)));
 	fOpacity = 1.f;
-	m_GainedSoul->SetOpacity(fOpacity);
-	m_GainedSoul->SetVisibility(ESlateVisibility::Visible);
+	m_GainSoul->SetOpacity(fOpacity);
+	m_GainSoul->SetVisibility(ESlateVisibility::Visible);
 
 	GetWorld()->GetTimerManager().SetTimer(SoulGainTimer, this, &UUI_Player_Soul::StartSoulGain, 2.f, false);
 }

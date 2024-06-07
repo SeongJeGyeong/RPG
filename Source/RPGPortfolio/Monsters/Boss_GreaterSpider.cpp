@@ -380,7 +380,6 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		// 피격 부위가 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
 		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Pelvis")) && !PointDamageEvent->HitInfo.BoneName.IsEqual(FName("None")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit Bone : %s"), *PointDamageEvent->HitInfo.BoneName.ToString());
 			// 본 흔들림 표현
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(PointDamageEvent->HitInfo.BoneName, true);
 			GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(PointDamageEvent->HitInfo.BoneName, fPhysicsWeight);

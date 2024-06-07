@@ -6,10 +6,12 @@
 
 void UUI_Message_Main::NativeConstruct()
 {
+	if ( !IsValid(m_ActionText) || !IsValid(m_CommandText) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("메인 메시지박스 로드 실패"));
+	}
+
 	Super::NativeConstruct();
-	m_ActionText = Cast<UTextBlock>(GetWidgetFromName(TEXT("ActionText")));
-	m_CommandText = Cast<UTextBlock>(GetWidgetFromName(TEXT("CommandText")));
-	
 }
 
 void UUI_Message_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)

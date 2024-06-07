@@ -24,9 +24,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UMG", meta = ( AllowPrivateAccess = true ))
 	class UUI_PlayerStat* m_Stat;
 
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock*	m_SlotName;
-	class UTextBlock*	m_ListItemName;
-	class UTileView*	m_TileView;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*	m_List_ItemName;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTileView*	m_EquipItemTileView;
+
+
 	EEQUIP_SLOT		eEquipSlot;
 
 	class UDA_MenuSound* m_Sound;

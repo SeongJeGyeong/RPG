@@ -563,40 +563,8 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 	// 세부메뉴가 열려있을 경우
 	if (pGameMode->IsSubMenuUIOpened())
 	{
-		if (UInventory_Mgr::GetInst(GetWorld())->CheckInventoryOpened())
-		{
-			UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
-			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
-			return;
-		}
-		if (pGameMode->IsStatusOpened())
-		{
-			pGameMode->CloseStatus();
-			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
-			return;
-		}
-		if (pGameMode->IsManualOpened())
-		{
-			pGameMode->CloseManual();
-			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
-			return;
-		}
-
-		UUI_EquipMain* EquipUI = pGameMode->GetEquipUI();
-		if (EquipUI->GetVisibility() == ESlateVisibility::Visible)
-		{
-			if (EquipUI->GetItemList()->GetVisibility() == ESlateVisibility::Visible)
-			{
-				EquipUI->GetItemList()->SetVisibility(ESlateVisibility::Hidden);
-				UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
-				return;
-			}
-
-			EquipUI->SetVisibility(ESlateVisibility::Hidden);
-			UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
-			return;
-		}
-
+		pGameMode->CloseSubMenu();
+		UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
 		return;
 	}
 

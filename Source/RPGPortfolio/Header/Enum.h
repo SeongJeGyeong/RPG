@@ -137,6 +137,7 @@ enum class EBOSS_STATE : uint8
 	RUSH,
 	HIT,
 	DEAD,
+	DEFEAT,
 };
 
 UENUM(BlueprintType)
@@ -150,12 +151,11 @@ enum class EGreaterSpider_STATE : uint8
 	RUSHATTACK,
 	BODYSLAM,
 	RANGEATTACK,
-	SUMMONMINION,
-	STUNNED,
 	HIT,
 	DEAD,
 	IDLE,
 	PHASE2,
+	SHOUT,
 };
 
 UENUM(BlueprintType)

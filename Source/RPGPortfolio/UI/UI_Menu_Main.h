@@ -15,13 +15,20 @@ class RPGPORTFOLIO_API UUI_Menu_Main : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UButton*	m_Equip;
-	class UButton*	m_Inventory;
-	class UButton*	m_Status;
-	class UButton*	m_Manual;
-	class UButton*	m_Settings;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton* m_Btn_Equip;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton* m_Btn_Inventory;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton* m_Btn_Status;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton* m_Btn_Manual;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton* m_Btn_Settings;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock* m_MenuName;
 
+	UPROPERTY() 
 	class UDA_MenuSound* m_Sound;
 
 public:

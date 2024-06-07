@@ -8,20 +8,12 @@
 
 void UUI_Player_Main::NativeConstruct()
 {
-	Super::NativeConstruct();
-
-	m_HP = Cast<UProgressBar>(GetWidgetFromName(TEXT("PlayerHP")));
-	m_MP = Cast<UProgressBar>(GetWidgetFromName(TEXT("PlayerMP")));
-	m_Stamina = Cast<UProgressBar>(GetWidgetFromName(TEXT("PlayerStamina")));
-
-	if (!IsValid(m_HP) || !IsValid(m_MP) || !IsValid(m_Stamina))
+	if (!IsValid(m_PlayerHP) || !IsValid(m_PlayerMP) || !IsValid(m_PlayerStamina))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("프로그레스바 UI 캐스팅 실패"));
 	}
-	else
-	{
-		m_PlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_Player_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -31,15 +23,15 @@ void UUI_Player_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 
 void UUI_Player_Main::SetPlayerHPRatio(float _HPRatio)
 {
-	m_HP->SetPercent(_HPRatio);
+	m_PlayerHP->SetPercent(_HPRatio);
 }
 
 void UUI_Player_Main::SetPlayerMPRatio(float _MPRatio)
 {
-	m_MP->SetPercent(_MPRatio);
+	m_PlayerMP->SetPercent(_MPRatio);
 }
 
 void UUI_Player_Main::SetPlayerSTRatio(float _STRatio)
 {
-	m_Stamina->SetPercent(_STRatio);
+	m_PlayerStamina->SetPercent(_STRatio);
 }

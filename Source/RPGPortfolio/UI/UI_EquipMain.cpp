@@ -13,27 +13,19 @@
 #include "../Item/Item_InvenData.h"
 
 void UUI_EquipMain::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	m_SelItemName = Cast<UTextBlock>(GetWidgetFromName(TEXT("Sel_ItemName")));
-	m_SelItemSlot = Cast<UTextBlock>(GetWidgetFromName(TEXT("Sel_ItemSlot")));
-	m_Tooltip = Cast<UUI_ItemTooltip>(GetWidgetFromName(TEXT("ItemTooltipUI")));
-	m_Stat = Cast<UUI_PlayerStat>(GetWidgetFromName(TEXT("PlayerStatUI")));
-	m_ItemList = Cast<UUI_EquipItemList>(GetWidgetFromName(TEXT("ItemListUI")));
-	
-	if ( !IsValid(m_SelItemName) || !IsValid(m_SelItemSlot) )
+{	
+	if ( !IsValid(m_Sel_ItemName) || !IsValid(m_Sel_ItemSlot) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("장비창 텍스트 UI 캐스팅 실패"));
 	}
 
-	if ( !IsValid(m_Tooltip) || !IsValid(m_Stat) )
+	if ( !IsValid(m_ItemTooltipUI) || !IsValid(m_Equip_StatUI) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("장비창 서브 UI 캐스팅 실패"));
 	}
 	else
 	{
-		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
+		m_ItemTooltipUI->SetVisibility(ESlateVisibility::Hidden);
 		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		if ( !IsValid(pPlayerState) )
 		{
@@ -41,20 +33,21 @@ void UUI_EquipMain::NativeConstruct()
 		}
 		else
 		{
-			m_Stat->SetPlayerStatUI(Cast<APlayerState_Base>(pPlayerState));
+			m_Equip_StatUI->SetPlayerStatUI(Cast<APlayerState_Base>(pPlayerState));
 		}
 	}
 
-	if ( !IsValid(m_ItemList) )
+	if ( !IsValid(m_Equip_ItemListUI) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("아이템 리스트 UI 캐스팅 실패"));
 	}
 	else
 	{
-		m_ItemList->SetVisibility(ESlateVisibility::Hidden);
+		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
 		OnNativeVisibilityChanged.AddUObject(this, &UUI_EquipMain::ListVisibilityChanged);
 	}
 
+	Super::NativeConstruct();
 }
 
 void UUI_EquipMain::NativeTick(const FGeometry& _Geo, float _DeltaTime)
@@ -66,8 +59,23 @@ void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 {
 	if (_Visibility == ESlateVisibility::Hidden)
 	{
-		m_ItemList->SetVisibility(ESlateVisibility::Hidden);
+		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+bool UUI_EquipMain::GetItemListVisibility()
+{
+	if ( m_Equip_ItemListUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void UUI_EquipMain::CloseItemList()
+{
+	m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, UItem_InvenData* _ItemData)

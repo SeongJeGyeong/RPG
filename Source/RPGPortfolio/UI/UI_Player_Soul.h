@@ -15,10 +15,11 @@ class RPGPORTFOLIO_API UUI_Player_Soul : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY()
-	class UTextBlock* m_AmountOfSoul;
-	UPROPERTY()
-	class UTextBlock* m_GainedSoul;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock* m_Soul;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock* m_GainSoul;
+
 	UPROPERTY()
 	class UDA_MenuSound* m_Sound;
 	

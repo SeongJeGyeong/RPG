@@ -12,15 +12,6 @@
 
 void UUI_ItemSelectMenu::NativeConstruct()
 {
-	Super::NativeConstruct();
-
-	m_Txt_Use = Cast<UTextBlock>(GetWidgetFromName(L"Txt_Use"));
-	m_Btn_Use = Cast<UButton>(GetWidgetFromName(L"Btn_Use"));
-	m_Btn_Drop = Cast<UButton>(GetWidgetFromName(L"Btn_Drop"));
-	m_Btn_Discard = Cast<UButton>(GetWidgetFromName(L"Btn_Discard"));
-	m_Btn_DropAll = Cast<UButton>(GetWidgetFromName(L"Btn_Drop_All"));
-	m_Btn_DiscardAll = Cast<UButton>(GetWidgetFromName(L"Btn_Discard_All"));
-
 	if (!IsValid(m_Txt_Use) || !IsValid(m_Btn_Use) || !IsValid(m_Btn_Drop) ||
 		!IsValid(m_Btn_Discard) || !IsValid(m_Btn_DropAll) || !IsValid(m_Btn_DiscardAll))
 	{
@@ -49,6 +40,8 @@ void UUI_ItemSelectMenu::NativeConstruct()
 			m_Btn_Use->SetIsEnabled(false);
 		}
 	}
+
+	Super::NativeConstruct();
 }
 
 void UUI_ItemSelectMenu::NativeTick(const FGeometry& _Geo, float _DeltaTime)

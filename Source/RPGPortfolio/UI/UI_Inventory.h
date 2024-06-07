@@ -16,15 +16,25 @@ class RPGPORTFOLIO_API UUI_Inventory : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-	class UTileView*		m_TileView;
-	class UUI_ItemTooltip*	m_Tooltip;
-	class UTextBlock*		m_Category;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTileView*		m_ItemTileView;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_ItemTooltip*	m_ItemTooltipUI;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UTextBlock*		m_CategoryText;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock*		m_ItemName;
-	class UUI_PlayerStat*	m_Status;
-	class UButton*			m_LeftBtn;
-	class UButton*			m_RightBtn;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UUI_PlayerStat*	m_PlayerStatUI;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton*			m_Btn_Cat_Left;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	class UButton*			m_Btn_Cat_Right;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UImage*			m_Category_Img;
+
 	EITEM_TYPE			eCategory;
+	UPROPERTY()
 	class UDA_MenuSound* m_Sound;
 
 public:

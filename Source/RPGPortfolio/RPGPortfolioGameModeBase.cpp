@@ -8,38 +8,49 @@
 #include "UI/UI_StatusMain.h"
 #include "UI/UI_EquipMain.h"
 #include "UI/UI_Manual.h"
+#include "UI/UI_Settings.h"
+#include "Components/AudioComponent.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
 	ConstructorHelpers::FClassFinder<UUserWidget> mainHUD(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_MainHUD.UI_MainHUD_C'"));
 	if (mainHUD.Succeeded())
 	{
-		m_MainHUDClass = mainHUD.Class;
+		m_WidgetClassArr.Add(mainHUD.Class);
 	}
 
 	ConstructorHelpers::FClassFinder<UUserWidget> Inventory(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
 	if (Inventory.Succeeded())
 	{
-		m_InventoryUIClass = Inventory.Class;
+		m_WidgetClassArr.Add(Inventory.Class);
 	}
 
 	ConstructorHelpers::FClassFinder<UUserWidget> Status(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Status/BPC_UI_Status.BPC_UI_Status_C'"));
 	if (Status.Succeeded())
 	{
-		m_StatusUIClass = Status.Class;
+		m_WidgetClassArr.Add(Status.Class);
 	}
 
 	ConstructorHelpers::FClassFinder<UUserWidget> Equip(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Equip/BPC_UI_Equip.BPC_UI_Equip_C'"));
 	if (Equip.Succeeded())
 	{
-		m_EquipUIClass = Equip.Class;
+		m_WidgetClassArr.Add(Equip.Class);
 	}
 
 	ConstructorHelpers::FClassFinder<UUserWidget> Manual(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Manual/BPC_UI_Manual.BPC_UI_Manual_C'"));
-	if ( Manual.Succeeded() )
+	if (Manual.Succeeded())
 	{
-		m_ManualUIClass = Manual.Class;
+		m_WidgetClassArr.Add(Manual.Class);
 	}
+
+	ConstructorHelpers::FClassFinder<UUserWidget> Settings(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Settings/BPC_UI_Settings.BPC_UI_Settings_C'"));
+	if (Settings.Succeeded())
+	{
+		m_WidgetClassArr.Add(Settings.Class);
+	}
+
+	m_BGMComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	m_BGMComp->bAutoActivate = false;
 }
 
 ARPGPortfolioGameModeBase::~ARPGPortfolioGameModeBase()
@@ -51,9 +62,9 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (IsValid(m_MainHUDClass))
+	if (IsValid(m_WidgetClassArr[0]))
 	{
-		m_MainHUD = Cast<UUI_Base>(CreateWidget(GetWorld(), m_MainHUDClass));
+		m_MainHUD = Cast<UUI_Base>(CreateWidget(GetWorld(), m_WidgetClassArr[0]));
 
 		if (IsValid(m_MainHUD))
 		{
@@ -65,9 +76,9 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		}
 	}
 
-	if (IsValid(m_InventoryUIClass))
+	if (IsValid(m_WidgetClassArr[1]))
 	{
-		m_InventoryUI = Cast<UUI_Inventory>(CreateWidget(GetWorld(), m_InventoryUIClass));
+		m_InventoryUI = Cast<UUI_Inventory>(CreateWidget(GetWorld(), m_WidgetClassArr[1]));
 
 		if (IsValid(m_InventoryUI))
 		{
@@ -80,9 +91,9 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		}
 	}
 
-	if (IsValid(m_StatusUIClass))
+	if (IsValid(m_WidgetClassArr[2]))
 	{
-		m_StatusUI = Cast<UUI_StatusMain>(CreateWidget(GetWorld(), m_StatusUIClass));
+		m_StatusUI = Cast<UUI_StatusMain>(CreateWidget(GetWorld(), m_WidgetClassArr[2]));
 		
 		if (IsValid(m_StatusUI))
 		{
@@ -91,25 +102,36 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		}
 	}
 
-	if (IsValid(m_EquipUIClass))
+	if (IsValid(m_WidgetClassArr[3]))
 	{
-		m_EquipUI = Cast<UUI_EquipMain>(CreateWidget(GetWorld(), m_EquipUIClass));
+		m_EquipUI = Cast<UUI_EquipMain>(CreateWidget(GetWorld(), m_WidgetClassArr[3]));
 
-		if (IsValid(m_EquipUIClass))
+		if (IsValid(m_EquipUI))
 		{
 			m_EquipUI->AddToViewport(5);
 			m_EquipUI->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 
-	if ( IsValid(m_ManualUIClass) )
+	if ( IsValid(m_WidgetClassArr[4]) )
 	{
-		m_ManualUI = Cast<UUI_Manual>(CreateWidget(GetWorld(), m_ManualUIClass));
+		m_ManualUI = Cast<UUI_Manual>(CreateWidget(GetWorld(), m_WidgetClassArr[4]));
 
-		if ( IsValid(m_ManualUIClass) )
+		if ( IsValid(m_ManualUI) )
 		{
 			m_ManualUI->AddToViewport(5);
 			m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	if ( IsValid(m_WidgetClassArr[5]) )
+	{
+		m_SettingsUI = Cast<UUI_Settings>(CreateWidget(GetWorld(), m_WidgetClassArr[5]));
+
+		if ( IsValid(m_SettingsUI) )
+		{
+			m_SettingsUI->AddToViewport(5);
+			m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 
@@ -120,47 +142,52 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 	pController->bShowMouseCursor = false;
 }
 
-bool ARPGPortfolioGameModeBase::IsStatusOpened()
-{
-	if (m_StatusUI->GetVisibility() == ESlateVisibility::Visible)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-void ARPGPortfolioGameModeBase::CloseStatus()
-{
-	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
-}
-
-bool ARPGPortfolioGameModeBase::IsManualOpened()
-{
-	if (m_ManualUI->GetVisibility() == ESlateVisibility::Visible)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-void ARPGPortfolioGameModeBase::CloseManual()
-{
-	m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
-}
-
 bool ARPGPortfolioGameModeBase::IsSubMenuUIOpened()
 {
 	if (m_InventoryUI->GetVisibility() == ESlateVisibility::Visible ||
 		m_StatusUI->GetVisibility() == ESlateVisibility::Visible ||
 		m_EquipUI->GetVisibility() == ESlateVisibility::Visible	||
-		m_ManualUI->GetVisibility() == ESlateVisibility::Visible
+		m_ManualUI->GetVisibility() == ESlateVisibility::Visible ||
+		m_SettingsUI->GetVisibility() == ESlateVisibility::Visible
 		)
-
 	{
 		return true;
 	}
 
 	return false;
+}
+
+void ARPGPortfolioGameModeBase::CloseSubMenu()
+{
+	m_InventoryUI->SetVisibility(ESlateVisibility::Hidden);
+	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
+
+	if (m_EquipUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		if (m_EquipUI->GetItemListVisibility())
+		{
+			m_EquipUI->CloseItemList();
+		}
+		else
+		{
+			m_EquipUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+	m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ARPGPortfolioGameModeBase::PlayBGM(bool _Play)
+{
+	if (_Play)
+	{
+		USoundBase* pBGM = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/GreaterSpider/SC_GS_BGM.SC_GS_BGM'"));
+		m_BGMComp->SetSound(pBGM);
+		m_BGMComp->Play();
+	}
+	else
+	{
+		m_BGMComp->Stop();
+	}
 }

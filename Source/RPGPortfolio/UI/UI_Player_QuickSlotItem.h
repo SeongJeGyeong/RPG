@@ -15,12 +15,14 @@ class RPGPORTFOLIO_API UUI_Player_QuickSlotItem : public UUserWidget
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UImage*		m_Dish;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UImage*		m_ItemImg;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock*	m_ItemName;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTextBlock*	m_Amount;
-
-	class UItem_InvenData* m_ItemData;
 
 public:
 	virtual void NativeConstruct() override;
