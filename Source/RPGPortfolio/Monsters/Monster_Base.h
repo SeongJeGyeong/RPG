@@ -44,8 +44,7 @@ private:
 	EMONSTER_STATE	m_State;
 
 	float fDeadEffectRatio;
-	float fWidgetVisTime;
-	bool bLockedOn;
+	bool bMonLockedOn;
 	bool bAtkTrace;
 	bool bIsDead;
 
@@ -66,8 +65,7 @@ public:
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	EMONSTER_STATE GetState() { return m_State; }
 
-	bool GetbLockedOn() const { return bLockedOn; }
-	void SetbLockedOn(bool _LockedOn);
+	void SetMonLockedOn(bool _LockedOn);
 
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
 

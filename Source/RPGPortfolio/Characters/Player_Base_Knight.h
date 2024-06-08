@@ -58,8 +58,7 @@ private:
 	UAnimInstance_Knight* m_AnimInst;
 	UPROPERTY()
 	TArray<TScriptInterface<class IPlayerInteraction>> OverlapInteractionArr;
-	UPROPERTY()
-	TSoftObjectPtr<UAnimMontage> m_SettingAttackMontage;
+
 	UPROPERTY()
 	class UUI_Base* m_MainUI;
 	UPROPERTY()
@@ -87,9 +86,8 @@ private:
 	bool bHeavyAtk;
 
 	// 공격 모션 도중 움직이지 못하는 상태 체크
-	bool bInvalidInput;
+	bool bImmovableInAtk;	// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
 
-	bool bJumpAtk;
 	bool bAtkTrace;
 	bool bSprintToggle;
 
@@ -129,7 +127,7 @@ public:
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
 	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
 	// 조작 불가 상태
-	void SetbInvalidInput(const bool& _InvalidInput) { bInvalidInput = _InvalidInput; }
+	void SetbImmovableInAtk(const bool& _ImmovableInAtk) { bImmovableInAtk = _ImmovableInAtk; }
 	// 이동 가능 상태
 	void SetbEnableMove(const bool& _EnableMove) { bEnableMove = _EnableMove; }
 	// 아이템 사용 딜레이
@@ -139,7 +137,7 @@ public:
 	bool GetbInvincible() const { return bToggleInvinc; }
 	// 가드상태
 	bool GetbToggleGuard() const { return bToggleGuard; }
-	void SetbToggleGuard(const bool& _ToggleGuard) { bToggleGuard = _ToggleGuard; }
+	void SetbToggleGuard(const bool& _ToggleGuard);
 
 	// 락온 중 플레이어가 적을 바라보고 있도록 설정
 	void SetOrientRotation(const bool& _Val);
@@ -149,7 +147,6 @@ public:
 	void SetbDodging(const bool& _Dodging) { bDodging = _Dodging; }
 
 	const UCameraComponent* GetCamera() { return m_Camera; }
-	const UPlayer_CameraArm* GetArm() { return m_Arm; }
 
 	void GainMonsterSoul(int32 _GainedSoul);
 

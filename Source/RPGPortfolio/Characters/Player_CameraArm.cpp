@@ -13,20 +13,21 @@
 UPlayer_CameraArm::UPlayer_CameraArm()
 {
 	// 스프링 암 내장 설정
-	TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
-	bUsePawnControlRotation = true; // Rotate the arm based on the controller
-	bEnableCameraLag = true;
-	bEnableCameraRotationLag = false;
-	CameraLagSpeed = 3.f;
-	CameraRotationLagSpeed = 2.f;
-	CameraLagMaxDistance = 100.f;
+	TargetArmLength = 400.0f;			// 스프링암 길이
+	bUsePawnControlRotation = true;		// 스프링암이 플레이어의 회전을 따라가도록 설정
+	bEnableCameraLag = true;			// 카메라 위치가 조금 지연되서 따라오도록 설정
+	bEnableCameraRotationLag = false;	// 카메라 회전 지연(록온 상태일때만 활성화)
+	CameraLagSpeed = 3.f;				// 위치 지연 속도
+	CameraRotationLagSpeed = 2.f;		// 회전 지연 속도
+	CameraLagMaxDistance = 100.f;		// 카메라가 현재 위치보다 지연될 수 있는 최대거리
 
 	// 록온 범위
 	fMaxTargetLockDistance = 1500.f;
 
 	bDrawDebug = true;
 	bToggleLockOn = false;
-	UCameraComponent* m_Camera = Cast<UCameraComponent>(GetChildComponent(0));
+
+	//UCameraComponent* m_Camera = Cast<UCameraComponent>(GetChildComponent(0));
 }
 
 void UPlayer_CameraArm::BeginPlay()
@@ -38,40 +39,24 @@ void UPlayer_CameraArm::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("스프링 암의 루트 액터 찾지 못함"));
 	}
+
+	LockOnFailedDelegate.BindUObject(this, &UPlayer_CameraArm::ResetCamera);
 }
 
 void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if ( bToggleLockOn )
+	if ( IsCameraLockedToTarget() )
 	{
-		if ( IsCameraLockedToTarget() )
+		if ( bDrawDebug )
 		{
 			DrawDebugSphere(GetWorld(), m_Target->GetComponentLocation(), 5.f, 16, FColor::Red);
-			if ( ( m_Target->GetComponentLocation() - GetComponentLocation() ).Size() > fMaxTargetLockDistance + m_Target->GetScaledSphereRadius() )
-			{
-				BreakLockOnTarget();
-			}
 		}
-		else
-		{
-			if ( ULockOnTargetComponent* NewLockOnTarget = GetLockTarget() )
-			{
-				LockOnTarget(NewLockOnTarget);
-			}
-			else
-			{
-				// 록온 대상 찾기 실패 시 캐릭터 정면 방향으로 카메라 회전
-				FRotator NewRot = FMath::RInterpTo(m_Player->GetControlRotation(), rForwardRotation, DeltaTime, 10.f);
-				m_Player->GetController()->SetControlRotation(NewRot);
 
-				if ( m_Player->GetControlRotation().Equals(rForwardRotation, 1) )
-				{
-					UE_LOG(LogTemp, Warning, TEXT("ToggleFalse"));
-					bToggleLockOn = false;
-				}
-			}
+		if ( ( m_Target->GetComponentLocation() - GetComponentLocation() ).Size() > fMaxTargetLockDistance + m_Target->GetScaledSphereRadius() )
+		{
+			BreakLockOnTarget();
 		}
 	}
 
@@ -81,10 +66,8 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		{
 			DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
 		}
-		/*FVector CameraLine = GetComponentLocation() + (m_Player->GetCamera()->GetForwardVector()) * 500.f;
-		DrawDebugLine(GetWorld(), GetComponentLocation(), CameraLine, FColor::Blue);*/
 
-		DrawDebugSphere(GetWorld(), GetOwner()->GetActorLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
+		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
 	}
 
 	if ( IsValid(m_Target) )
@@ -99,35 +82,33 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 // Toggle Lock On
 bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 {
-	bToggleLockOn = (bToggleLockOn != _ToggleLockOn);
-
-	if ( bToggleLockOn )
+	bool bLockTarget = (IsCameraLockedToTarget() != _ToggleLockOn);
+	if (bLockTarget)
 	{
 		ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
 
 		if ( NewLockOnTarget != nullptr )
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LockOn : True"));
-			UE_LOG(LogTemp, Warning, TEXT("LockOn Target : %s"), *NewLockOnTarget->GetName());
 			LockOnTarget(NewLockOnTarget);
+			bToggleLockOn = true;
 			return true;
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LockOn : false"));
 			rForwardRotation = m_Player->GetActorRotation();
-			return false;
+			// 록온 대상 찾기 실패 시 캐릭터 정면 방향으로 카메라 회전
+			ResetCamera();
+			bToggleLockOn = false;
 		}
-		
 	}
 	else
 	{
 		if ( IsCameraLockedToTarget() )
 		{
 			BreakLockOnTarget();
-			return false;
 		}
 	}
+
 	return false;
 }
 
@@ -156,8 +137,9 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 
 		bEnableCameraRotationLag = false;
 		UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
-		bToggleLockOn = false;
 		m_Player->SetOrientRotation(true);
+
+		bToggleLockOn = false;
 	}
 }
 
@@ -170,31 +152,46 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 	}
 
 	float ClosestDotToCenter = 0.f;
+	float ClosestAngleToCenter = 90.f;
 	ULockOnTargetComponent* TargetComponent = nullptr;
 
 	for ( int32 i = 0; i < AvailableTargets.Num(); ++i )
 	{
-		// 카메라 컴포넌트의 정면 방향벡터와 씬 컴포넌트에서 타겟으로의 방향벡터의 내적을 구한다.
+		// 카메라 컴포넌트의 정면 방향벡터와 카메라암 컴포넌트에서 타겟으로의 방향벡터의 내적을 구한다.
 		// 내적 구하기 : A . B = Ax * Bx + Ay * By + Az * Bz
+		// 1 : 평행, -1 : 정반대, 0 : 수직
+		float Dot = FVector::DotProduct(m_Player->GetCamera()->GetForwardVector(), ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal());
 
-		float Dot = FVector::DotProduct(m_Player->GetCamera()->GetForwardVector(), ( AvailableTargets[ i ]->GetComponentLocation() - ( GetComponentLocation() ) ).GetSafeNormal());
-		float DotX = m_Player->GetCamera()->GetForwardVector().X * ( AvailableTargets[ i ]->GetComponentLocation() - ( GetComponentLocation() ) ).GetSafeNormal().X;
-		float DotY = m_Player->GetCamera()->GetForwardVector().Y * ( AvailableTargets[ i ]->GetComponentLocation() - ( GetComponentLocation() ) ).GetSafeNormal().Y;
+		if (TargetComponent != nullptr  && Dot > 0.9f)
+		{
+			float ex_distance = (TargetComponent->GetComponentLocation() - GetComponentLocation()).Size();
+			float new_distance = (AvailableTargets[i]->GetComponentLocation() - GetComponentLocation()).Size();
+			if (new_distance < ex_distance)
+			{
+				ClosestDotToCenter = Dot;
+				TargetComponent = AvailableTargets[i];
+			}
+			continue;
+		}
 
-
-		float acosAngleX = FMath::Acos(DotX);
-		float fAngleX = FMath::RadiansToDegrees(acosAngleX);
-		float acosAngleY = FMath::Acos(DotY);
-		float fAngleY = FMath::RadiansToDegrees(acosAngleY);
-
-		float acosAngle = FMath::Acos(Dot); //내적을 각도로 변환
-		float fAngle = FMath::RadiansToDegrees(acosAngle); // 각도를 라디안 각도로 변환
-
-		if ( Dot > ClosestDotToCenter )
+		if (Dot > ClosestDotToCenter)
 		{
 			ClosestDotToCenter = Dot;
 			TargetComponent = AvailableTargets[ i ];
 		}
+
+		/*float DotX = m_Player->GetCamera()->GetForwardVector().X * ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal().X;
+		float DotY = m_Player->GetCamera()->GetForwardVector().Y * ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal().Y;
+
+		float acosAngleX = FMath::Acos(DotX);
+		float fAngleX = FMath::RadiansToDegrees(acosAngleX);
+		float acosAngleY = FMath::Acos(DotY);
+		float fAngleY = FMath::RadiansToDegrees(acosAngleY);*/
+
+		//float acosAngle = FMath::Acos(Dot); //내적을 각도로 변환
+		//float fAngle = FMath::RadiansToDegrees(acosAngle); // 각도를 라디안 각도로 변환
+
+		//UE_LOG(LogTemp, Warning, TEXT("Angle : %f"), fAngle);
 	}
 
 	return TargetComponent;
@@ -258,6 +255,7 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 	// LockOnTarget 타입 오브젝트를 검출하도록 설정
 	TEnumAsByte<EObjectTypeQuery> LockOnTarget = UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 	ObjectTypes.Add(LockOnTarget);
+	// 락온 범위 내의 락온 콜리전 타입을 가진 컴포넌트들을 가져옴
 	UKismetSystemLibrary::SphereOverlapComponents(GetOwner(), GetComponentLocation(), fMaxTargetLockDistance, ObjectTypes, ULockOnTargetComponent::StaticClass(), TArray<AActor*>{GetOwner()}, TargetPrimitive);
 
 	TArray<ULockOnTargetComponent*> TargetComps;
@@ -267,6 +265,16 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 	}
 
 	return TargetComps;
+}
+
+void UPlayer_CameraArm::ResetCamera()
+{
+	FRotator NewRot = FMath::RInterpTo(m_Player->GetControlRotation(), rForwardRotation, GetWorld()->GetDeltaSeconds(), 10.f);
+	m_Player->GetController()->SetControlRotation(NewRot);
+	if (!m_Player->GetControlRotation().Equals(rForwardRotation, 1))
+	{
+		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnFailedDelegate);
+	}
 }
 
 bool UPlayer_CameraArm::IsCameraLockedToTarget()

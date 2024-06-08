@@ -33,6 +33,7 @@ private:
 	bool bAtkTrace;
 	bool bRushMove;
 	EGreaterSpider_STATE m_State;
+
 	UPROPERTY()
 	bool bPhase2;
 	FTimerHandle Phase2timer;

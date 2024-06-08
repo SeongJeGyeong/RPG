@@ -43,7 +43,6 @@ protected:
 	float fDeadEffectRatio;
 
 private:
-	bool bLockedOn;
 	bool bIsDead;
 	UPROPERTY()
 	int32 iTurnDir;	// 포즈 블렌딩용 변수
@@ -54,8 +53,7 @@ public:
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	class UUI_Boss* GetBossWidget() { return m_BossWidget; }
 
-	bool GetbLockedOn() const { return bLockedOn; }
-	void SetbLockedOn(const bool& _LockedOn);
+	void SetBossLockedOn(const bool& _LockedOn);
 
 	bool GetbIsDead() const {return bIsDead;}
 

@@ -212,18 +212,18 @@ TTuple<bool, float, FVector> UAnimInstance_Knight::FootLineTrace(FName _SocketNa
 
 void UAnimInstance_Knight::AnimNotify_AtkSectionStart()
 {
-	m_Player->SetbInvalidInput(true);
+	m_Player->SetbImmovableInAtk(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 {
 	m_Player->SetbNextAtkCheck(true);
-	m_Player->SetbInvalidInput(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
 	m_Player->SetbNextAtkCheck(false);
+	m_Player->SetbImmovableInAtk(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
@@ -268,13 +268,16 @@ void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 void UAnimInstance_Knight::AnimNotify_JumpStart()
 {
 	m_Player->SetbEnableMove(false);
-	UE_LOG(LogTemp, Warning, TEXT("JumpStart"));
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpEnd()
 {
 	m_Player->SetbEnableMove(true);
-	UE_LOG(LogTemp, Warning, TEXT("JumpEnd"));
+}
+
+void UAnimInstance_Knight::AnimNotify_FallEnd()
+{
+	m_Player->SetbEnableMove(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()

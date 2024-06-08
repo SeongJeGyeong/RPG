@@ -19,12 +19,12 @@ void ULockOnTargetComponent::SetLockOn(bool _LockOn)
 	if (GetOwner()->IsA(AMonster_Base::StaticClass()))
 	{
 		AMonster_Base* pMonster = Cast<AMonster_Base>(GetOwner());
-		pMonster->SetbLockedOn(_LockOn);
+		pMonster->SetMonLockedOn(_LockOn);
 	}
 	else if (GetOwner()->IsA(ABoss_Base::StaticClass()))
 	{
 		ABoss_Base* pBoss = Cast<ABoss_Base>(GetOwner());
-		pBoss->SetbLockedOn(_LockOn);
+		pBoss->SetBossLockedOn(_LockOn);
 	}
 }
 

@@ -177,7 +177,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 	}
 
-	if (!bLockedOn)
+	if (!bMonLockedOn)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
 		// 락온되지 않은 상태에서 3초 동안 맞지 않았을 경우 위젯 사라지도록
@@ -239,6 +239,7 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 
 	m_State = EMONSTER_STATE::DEAD;
 	bIsDead = true;
+	m_WidgetComponent->DestroyComponent();
 	GetController()->UnPossess();
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	GetMesh()->SetCollisionProfileName(TEXT("IgnoreAll"));
@@ -306,7 +307,6 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 	// 5초 뒤 사망 이펙트 처리
 	GetWorld()->GetTimerManager().SetTimer(DeadTimer, [this]()
 	{
-		bIsDead = true;
 
 		fDeadEffectRatio += 0.05f;
 		TArray<USceneComponent*> ChildMeshArr;
@@ -374,16 +374,18 @@ void AMonster_Base::MonsterAttackNormal()
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격애니메이션 로드 실패"));
 	}
 
-	ChangeState(EMONSTER_STATE::IDLE);
+	m_State = EMONSTER_STATE::IDLE;
 }
 
-void AMonster_Base::SetbLockedOn(bool _LockedOn)
+void AMonster_Base::SetMonLockedOn(bool _LockedOn)
 {
-	bLockedOn = _LockedOn;
+	bMonLockedOn = _LockedOn;
 	GetMesh()->SetRenderCustomDepth(_LockedOn);
 	
 	if (_LockedOn)
 	{
+		// 캐릭터가 타격 후 락온시 이전 타이머로 인해 위젯이 감춰질 수 있으므로
+		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
 		m_WidgetComponent->SetVisibility(_LockedOn);
 	}
 	else

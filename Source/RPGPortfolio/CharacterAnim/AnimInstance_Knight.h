@@ -74,11 +74,9 @@ private:
 
 public:
 	bool GetbIsGuard() { return bIsGuard; }
-	void SetbIsGaurd(bool _IsGuard) { bIsGuard = _IsGuard; }
+	void SetbIsGuard(bool _IsGuard) { bIsGuard = _IsGuard; }
 
 	void SetLocalVelocityXY(FVector2D _Velocity) { vLocalVelocity.X = _Velocity.X; vLocalVelocity.Y = _Velocity.Y; }
-
-	//void TurnOnItemUseBlend(float _BlentWeight) { fItemBlendWeight = _BlentWeight; }
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
@@ -115,6 +113,8 @@ public:
 	void AnimNotify_JumpStart();
 	UFUNCTION()
 	void AnimNotify_JumpEnd();
+	UFUNCTION()
+	void AnimNotify_FallEnd();	// 점프 없이 그냥 떨어졌을 때
 
 	// 원거리공격 발사
 	UFUNCTION()

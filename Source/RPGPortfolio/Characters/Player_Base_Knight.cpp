@@ -41,7 +41,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bAttackToggle(false)
 	, bHeavyToggle(false)
 	, bNextAtkCheckOn(false)
-	, bInvalidInput(false)
+	, bImmovableInAtk(false)
 	, bItemDelay(false)
 	, bToggleInvinc(false)
 	, fInvincTime(0.f)
@@ -61,7 +61,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	GetCharacterMovement()->JumpZVelocity = 500.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
-	m_Arm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SpringArm"));
+	m_Arm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("LockOnSpringArm"));
 	m_Arm->SetupAttachment(GetRootComponent());
 	m_Arm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
 
@@ -69,7 +69,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->SetupAttachment(m_Arm);
 	m_Camera->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
-	LockonControlRotationRate = 10.f;	// 락온 시 카메라 보간 속도
+	LockonControlRotationRate = 10.f;	// 락온 시 캐릭터 회전 보간 속도
 
 	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
 	if (MarkerUI.Succeeded())
@@ -185,16 +185,6 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		AttackHitCheck(EATTACK_TYPE::PHYSIC_MELEE);
 	}
 
-	// 다음 공격 입력 체크기간
-	if (bNextAtkCheckOn)
-	{
-		if (bAttackToggle)
-		{
-			NextAttackCheck();
-		}
-	}
-
-
 	if (bSprintToggle)
 	{
 		// 스테미너가 0일 경우 달리기 불가
@@ -280,6 +270,13 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void APlayer_Base_Knight::SetbToggleGuard(const bool& _ToggleGuard)
+{
+	bToggleGuard = _ToggleGuard;
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	pState->SetbSTRecovSlowly(bToggleGuard);
+}
+
 void APlayer_Base_Knight::SetOrientRotation(const bool& _Val)
 {
 	GetCharacterMovement()->bOrientRotationToMovement = _Val;
@@ -289,54 +286,57 @@ void APlayer_Base_Knight::SetOrientRotation(const bool& _Val)
 //////////////////////////////////////////////////////////////////////////
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
-	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
-	if (!CheckMontagePlaying() && bEnableMove && Controller != NULL)
+	if (CheckMontagePlaying() || GetCharacterMovement()->IsFalling() || !bEnableMove || Controller == NULL || bImmovableInAtk)
 	{
-		m_AnimInst->StopAllMontages(0.25f);
-
-		float fSpeedRate = 1.f;
-		if (bSprintToggle)
-		{
-			APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-			pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
-			fSpeedRate = 2.f;
-		}
-
-		if (vInput.X != 0.0f)
-		{
-			// get forward vector
-			const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
-			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-			AddMovementInput(Direction, vInput.X);
-		}
-		if (vInput.Y != 0.0f)
-		{
-			// get right vector 
-			const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
-			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-			AddMovementInput(Direction, vInput.Y);
-		}
-
-		FVector2D vLocVelocity;
-		if (!m_Arm->IsCameraLockedToTarget())
-		{
-			// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
-			vLocVelocity.X = fSpeedRate;
-		}
-		else
-		{
-			if (vInput.X != 0.0f)
-			{
-				vLocVelocity.X = ( vInput.X > 0.f ) ? fSpeedRate : -fSpeedRate;
-			}
-			if (vInput.Y != 0.0f)
-			{
-				vLocVelocity.Y = ( vInput.Y > 0.f ) ? fSpeedRate : -fSpeedRate;
-			}
-		}
-
-		m_AnimInst->SetLocalVelocityXY(vLocVelocity);
+		return;
 	}
+
+	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
+
+	m_AnimInst->StopAllMontages(0.25f);
+
+	float fSpeedRate = 1.f;
+	if ( bSprintToggle )
+	{
+		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
+		fSpeedRate = 2.f;
+	}
+
+	if ( vInput.X != 0.0f )
+	{
+		// get forward vector
+		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, vInput.X);
+	}
+	if ( vInput.Y != 0.0f )
+	{
+		// get right vector 
+		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(Direction, vInput.Y);
+	}
+
+	FVector2D vLocVelocity;
+	if ( !m_Arm->IsCameraLockedToTarget() )
+	{
+		// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
+		vLocVelocity.X = fSpeedRate;
+	}
+	else
+	{
+		if ( vInput.X != 0.0f )
+		{
+			vLocVelocity.X = ( vInput.X > 0.f ) ? fSpeedRate : -fSpeedRate;
+		}
+		if ( vInput.Y != 0.0f )
+		{
+			vLocVelocity.Y = ( vInput.Y > 0.f ) ? fSpeedRate : -fSpeedRate;
+		}
+	}
+
+	m_AnimInst->SetLocalVelocityXY(vLocVelocity);
 }
 
 void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
@@ -352,21 +352,26 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && bEnableMove)
+	if (!CheckMontagePlaying() && !GetCharacterMovement()->IsFalling() && bEnableMove && !m_AnimInst->GetbIsGuard() && !bImmovableInAtk)
 	{
+		if (bSprintToggle)
+		{
+			bSprintToggle = false;
+			GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		}
+		m_AnimInst->StopAllMontages(0.25f);
 		ACharacter::Jump();
 	}
 }
 
 void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instance)
 {
-	bSprintToggle = _Instance.GetValue().Get<bool>();
-
 	if (m_AnimInst->GetbIsGuard() || !bEnableMove)
 	{
-		bSprintToggle = false;
 		return;
 	}
+
+	bSprintToggle = _Instance.GetValue().Get<bool>();
 
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 	// 스테미너가 0일 경우 달리기 불가
@@ -388,23 +393,24 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	if (CheckMontagePlaying() || bSprintToggle)
+	if (CheckMontagePlaying() || GetCharacterMovement()->IsFalling() || bImmovableInAtk)
 	{
 		return;
 	}
 
 	bool bGuard = _Instance.GetValue().Get<bool>();
-	m_AnimInst->SetbIsGaurd(bGuard);
-	if (bGuard)
+
+	if (bSprintToggle)
 	{
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		pState->SetbSTRecovSlowly(true);
+		bSprintToggle = false;
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
-	else
+
+	m_AnimInst->SetbIsGuard(bGuard);
+
+	if(!bGuard)
 	{
-		bToggleGuard = false;
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		pState->SetbSTRecovSlowly(false);
+		SetbToggleGuard(false);
 	}
 }
 
@@ -426,41 +432,60 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
-	if (GetCharacterMovement()->IsFalling() && 
-		GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 50.f && 
-		!bJumpAtk)
+	if ( bSprintToggle )
 	{
-		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-		ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
-		bAttackToggle = false;
-		GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
-		bJumpAtk = true;
+		bSprintToggle = false;
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
+
+	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
+	{
+		if (bNextAtkCheckOn)
+		{
+			NextAttackCheck();
+			bNextAtkCheckOn = false;
+			bAttackToggle = false;
+		}
 		return;
 	}
 
-	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && 
-		!m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK)) &&
-		!m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
+	if ( GetCharacterMovement()->IsFalling() )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Attack"));
-		if (bHeavyToggle)
+		if ( GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 50.f &&
+			!m_AnimInst->Montage_IsPlaying((m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK))) )
 		{
-			// 강공격
-			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-			bHeavyAtk = true;
-			CurrentCombo = 1;
-			ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
+			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+			ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
+			bAttackToggle = false;
+			GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
+			return;
 		}
-		else
+	}
+	else
+	{
+		if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && !bImmovableInAtk)
 		{
-			// 약공격
-			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
-			bHeavyAtk = false;
+			UE_LOG(LogTemp, Warning, TEXT("Attack"));
+
 			CurrentCombo = 1;
-			ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
+			if (bHeavyToggle)
+			{
+				// 강공격
+				bHeavyAtk = true;
+				m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
+				ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
+			}
+			else
+			{
+				// 약공격
+				bHeavyAtk = false;
+				m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
+				ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
+			}
+			bAttackToggle = false;
+			bNextAtkCheckOn = false;
 		}
-		bAttackToggle = false;
-		bNextAtkCheckOn = false;
 	}
 }
 
@@ -471,33 +496,34 @@ void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instanc
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
-	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard())
+	if (CheckMontagePlaying() || m_AnimInst->GetbIsGuard() || GetMovementComponent()->IsFalling() || bImmovableInAtk)
 	{
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-
-		// 스테미너가 0일 경우 회피 불가
-		if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
-		{
-			return;
-		}
-
-		if(GetCharacterMovement()->GetLastInputVector().IsZero())
-		{
-			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
-			vDodgeVector = GetActorForwardVector();
-			rDodgeRotation = GetActorRotation();
-			ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
-		}
-		else
-		{
-			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW));
-			vDodgeVector = GetCharacterMovement()->GetLastInputVector();
-			rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
-			ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
-		}
-		bDodging = true;
-		UE_LOG(LogTemp, Warning, TEXT("dodge start"));
+		UE_LOG(LogTemp, Warning, TEXT("회피 불가"));
+		return;
 	}
+
+	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	// 스테미너가 0일 경우 회피 불가
+	if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+	{
+		return;
+	}
+
+	if ( GetCharacterMovement()->GetLastInputVector().IsZero() )
+	{
+		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
+		vDodgeVector = GetActorForwardVector();
+		rDodgeRotation = GetActorRotation();
+		ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
+	}
+	else
+	{
+		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW));
+		vDodgeVector = GetCharacterMovement()->GetLastInputVector();
+		rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
+		ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
+	}
+	bDodging = true;
 }
 
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
@@ -507,13 +533,14 @@ void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
 {
-	bLockOn = _Instance.GetValue().Get<bool>();
-	bool bTargetLocked = m_Arm->ToggleCameraLockOn(bLockOn);
+	bool bTargetLocked = m_Arm->ToggleCameraLockOn(_Instance.GetValue().Get<bool>());
+
 	if (bTargetLocked)
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
 		m_Marker->SetVisibility(ESlateVisibility::Visible);
+		bLockOn = true;
 	}
 	else
 	{
@@ -651,6 +678,11 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 		return;
 	}
 
+	if (CheckMontagePlaying() || m_AnimInst->GetbIsGuard() || GetCharacterMovement()->IsFalling() || bImmovableInAtk)
+	{
+		return;
+	}
+
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 	// 스테미너가 0일 경우 공격 불가
 	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
@@ -664,13 +696,10 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && bEnableMove)
-	{
-		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
-		ConsumeStaminaForMontage(EPlayerMontage::SLASH_CUTTER);
-		pState->SetPlayerCurrentMP(pState->GetPlayerBasePower().CurMP - 20.f);
-		// ShotProjectile로
-	}
+	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
+	ConsumeStaminaForMontage(EPlayerMontage::SLASH_CUTTER);
+	pState->SetPlayerCurrentMP(pState->GetPlayerBasePower().CurMP - 20.f);
+	// ShotProjectile로
 }
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
@@ -684,9 +713,8 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
 		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM))		||
-		GetCharacterMovement()->IsFalling() ||
-		bInvalidInput						||
-		bDodging
+		bDodging || 
+		bImmovableInAtk	// 공격 몽타주 플레이중으로 조건 걸면 몽타주 재생이 끝날때까지 움직일 수 없기때문에 공격 모션 끝난 후 바로 움직일 수 있도록
 		)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("몽타주를 재생 불가능한 상태입니다."));
@@ -707,11 +735,13 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 void APlayer_Base_Knight::NextAttackCheck()
 {
 	// 강공격 중에 강공격 토글을 해제할 경우 다음공격 재생안함
-	if ( bHeavyAtk && !bHeavyToggle)
+	if (bHeavyAtk != bHeavyToggle)
 	{
 		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("ComboAttack"));
 
+	EPlayerMontage AtkMontage = bHeavyAtk ? EPlayerMontage::HEAVYATTACK : EPlayerMontage::ATTACK;
 	int32 MaxCombo = bHeavyAtk ? 2 : 3;
 	if (CurrentCombo == MaxCombo)
 	{
@@ -724,19 +754,8 @@ void APlayer_Base_Knight::NextAttackCheck()
 
 	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
 
-	if ( bHeavyAtk )
-	{
-		m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-		ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
-	}
-	else
-	{
-		m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
-		ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
-	}
-
-	bNextAtkCheckOn = false;
-	bAttackToggle = false;
+	m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(AtkMontage));
+	ConsumeStaminaForMontage(AtkMontage);
 }
 
 // 공격 트레이스 함수
@@ -864,17 +883,15 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	}
 
 	// 방어 상태 해제
-	m_AnimInst->SetbIsGaurd(false);
-	bToggleGuard = false;
-	pState->SetbSTRecovSlowly(false);
+	m_AnimInst->SetbIsGuard(false);
+	SetbToggleGuard(false);
 
 	// 현재 행동상태 해제
-	bJumpAtk = false;
 	bAtkTrace = false;
 	bAtkMove = false;
 	bNextAtkCheckOn = false;
 	bAttackToggle = false;
-	bInvalidInput = false;
+	bImmovableInAtk = false;
 	bDodging = false;
 	bDodgeMove = false;
 	bSprintToggle = false;
@@ -886,7 +903,10 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	LaunchCharacter(LaunchForce, false, false);
 
 	// 피격 애니메이션 재생
-	if ( CheckMontagePlaying() )
+	if ( CheckMontagePlaying() || GetCharacterMovement()->IsFalling() ||
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) 
+		)
 	{
 		m_AnimInst->Montage_Stop(1.f);
 	}
@@ -937,9 +957,8 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 	if (pState->GetPlayerBasePower().CurStamina < 0.f)
 	{
 		// 방어 풀리고 경직상태 되도록
-		m_AnimInst->SetbIsGaurd(false);
-		bToggleGuard = false;
-		pState->SetbSTRecovSlowly(false);
+		m_AnimInst->SetbIsGuard(false);
+		SetbToggleGuard(false);
 		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
 	}
 	else
@@ -984,7 +1003,6 @@ void APlayer_Base_Knight::JumpAttack()
 	if (!GetCharacterMovement()->IsFalling())
 	{
 		m_AnimInst->Montage_Resume(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-		bJumpAtk = false;
 		return;
 	}
 	GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
@@ -992,7 +1010,7 @@ void APlayer_Base_Knight::JumpAttack()
 
 void APlayer_Base_Knight::TargetLockOn()
 {
-	// 록온 상태일 때 카메라가 록온대상에게 고정되도록
+	// 록온 상태일 때 캐릭터 정면이 록온대상에게 고정되도록
 	if ( m_Arm->IsCameraLockedToTarget() )
 	{
 		// 플레이어에서 타겟으로의 벡터
@@ -1000,7 +1018,7 @@ void APlayer_Base_Knight::TargetLockOn()
 		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
 		FRotator CurrentRot = GetControlRotation();
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, GetWorld()->GetDeltaSeconds(), LockonControlRotationRate);
-
+		
 		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
 		// 락온 타겟 컴포넌트의 위치를 스크린 좌표로 변환해서 해당 좌표에 락온 마커를 표시

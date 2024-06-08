@@ -126,8 +126,7 @@ void ABoss_Base::StopBoneHitReaction(FName _BoneName)
 	}
 }
 
-void ABoss_Base::SetbLockedOn(const bool& _LockedOn)
+void ABoss_Base::SetBossLockedOn(const bool& _LockedOn)
 {
-	bLockedOn = _LockedOn;
 	GetMesh()->SetRenderCustomDepth(_LockedOn);
 }
