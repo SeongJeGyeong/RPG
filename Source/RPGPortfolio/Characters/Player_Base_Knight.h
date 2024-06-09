@@ -48,12 +48,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "MenuSound", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_MenuSound> m_MenuSound;
 
-	// 락온 표시용
-	UPROPERTY()
-	TSubclassOf<class UUserWidget> m_MarkerClass;
-	UPROPERTY()
-	class UUserWidget* m_Marker;
-
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 	UPROPERTY()
@@ -149,7 +143,7 @@ public:
 	const UCameraComponent* GetCamera() { return m_Camera; }
 
 	void GainMonsterSoul(int32 _GainedSoul);
-
+	// 공격 트레이스에 피격된 대상 목록 초기화
 	void EmptyHitActorArr() { HitActorArr.Empty(); }
 
 protected:
@@ -163,23 +157,26 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-public:
+private:
+	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
 	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
 	void NextAttackCheck();	// 다음 공격 발동 체크
-	void CloseMenuUI();	
 	void DodgeTimeCheck(bool _Dodge); // 회피 무적시간 체크
 	void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
-	bool BlockEnemyAttack(float _Damage, FVector _MonDir); // 적 공격 방어
-	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	void ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	void StopBlockPhysics(); // 적 공격 방어시 피직스 효과
 	void JumpAttack();
 
 	UFUNCTION()
 	void TargetLockOn();
+
+public:	
+	void CloseMenuUI();	
+	bool BlockEnemyAttack(float _Damage, FVector _MonDir); // 적 공격 방어
+	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
+
 	UFUNCTION()
 	void ItemDelaytime(float _DelayPercent);
 

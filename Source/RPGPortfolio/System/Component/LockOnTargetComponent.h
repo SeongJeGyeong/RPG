@@ -14,6 +14,10 @@ class RPGPORTFOLIO_API ULockOnTargetComponent : public USphereComponent
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = "true" ))
+	class UWidgetComponent* m_LockOnMark;
+
 public:
 	ULockOnTargetComponent();
 

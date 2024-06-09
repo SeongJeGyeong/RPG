@@ -152,32 +152,40 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 	}
 
 	float ClosestDotToCenter = 0.f;
-	float ClosestAngleToCenter = 90.f;
 	ULockOnTargetComponent* TargetComponent = nullptr;
 
 	for ( int32 i = 0; i < AvailableTargets.Num(); ++i )
 	{
 		// 카메라 컴포넌트의 정면 방향벡터와 카메라암 컴포넌트에서 타겟으로의 방향벡터의 내적을 구한다.
 		// 내적 구하기 : A . B = Ax * Bx + Ay * By + Az * Bz
-		// 1 : 평행, -1 : 정반대, 0 : 수직
-		float Dot = FVector::DotProduct(m_Player->GetCamera()->GetForwardVector(), ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal());
+		// 1 : 정면, -1 : 정반대, 0 : 정면에서 수직
+		float Dot = FVector::DotProduct(m_Player->GetCamera()->GetForwardVector(), (AvailableTargets[i]->GetComponentLocation() - GetComponentLocation()).GetSafeNormal());
+		if (TargetComponent == nullptr)
+		{
+			ClosestDotToCenter = Dot;
+			TargetComponent = AvailableTargets[i];
+			continue;
+		}
 
-		if (TargetComponent != nullptr  && Dot > 0.9f)
+		if ( Dot > 0.9f )
 		{
 			float ex_distance = (TargetComponent->GetComponentLocation() - GetComponentLocation()).Size();
 			float new_distance = (AvailableTargets[i]->GetComponentLocation() - GetComponentLocation()).Size();
-			if (new_distance < ex_distance)
+			// 기존 타겟보다 내적값이 낮아도, 다음 타겟의 내적값이 0.9보다 크고 거리도 더 가까우면 다음타겟을 우선한다.
+			if (ex_distance > new_distance)
+			{
+				ClosestDotToCenter = Dot;
+				TargetComponent = AvailableTargets[i];
+				continue;
+			}
+		}
+		else
+		{
+			if (Dot > ClosestDotToCenter)
 			{
 				ClosestDotToCenter = Dot;
 				TargetComponent = AvailableTargets[i];
 			}
-			continue;
-		}
-
-		if (Dot > ClosestDotToCenter)
-		{
-			ClosestDotToCenter = Dot;
-			TargetComponent = AvailableTargets[ i ];
 		}
 
 		/*float DotX = m_Player->GetCamera()->GetForwardVector().X * ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal().X;
@@ -220,9 +228,11 @@ void UPlayer_CameraArm::SwitchTarget(ELockOnDirection SwitchDirection)
 
 		FVector TargetDir = ( Target->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal();
 		FVector Cross = FVector::CrossProduct(CurrentTargetDir, TargetDir);
-
+		// 언리얼은 왼손 좌표계를 사용하기 때문에 기존 타겟의 방향을 X, 교체할 타겟의 방향을 Y라고 했을 때
+		// 교체할 타겟이 기존 타겟의 왼쪽에 있으면 외적의 Z는 아래를 가리키고, 오른쪽에 있으면 위를 가리킨다.
 		if ( ( SwitchDirection == ELockOnDirection::Left && Cross.Z < 0.f ) || ( SwitchDirection == ELockOnDirection::Right && Cross.Z > 0.f ) )
 		{
+			// 타겟이 중복되어 들어가지 않도록 AddUnique로 추가함
 			ViableTargets.AddUnique(Target);
 		}
 	}
@@ -232,20 +242,20 @@ void UPlayer_CameraArm::SwitchTarget(ELockOnDirection SwitchDirection)
 		return;
 	}
 
-	int32 BestDotIdx = 0;
-	for ( int32 i = 1; i < ViableTargets.Num(); ++i )
+	float ClosestDot = 0.f;
+	ULockOnTargetComponent* TargetComponent = nullptr;
+	for ( int32 i = 0; i < ViableTargets.Num(); ++i )
 	{
-		float BestDot = FVector::DotProduct(CurrentTargetDir, ( ViableTargets[ BestDotIdx ]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal());
-		float TestDot = FVector::DotProduct(CurrentTargetDir, ( ViableTargets[ i ]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal());
-
-		if ( TestDot > BestDot )
+		float TargetDot = FVector::DotProduct(CurrentTargetDir, ( ViableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal());
+		if ( TargetDot > ClosestDot )
 		{
-			BestDotIdx = i;
+			ClosestDot = TargetDot;
+			TargetComponent = ViableTargets[i];
 		}
 	}
 	m_Target->SetLockOn(false);
 	m_Target = nullptr;
-	LockOnTarget(ViableTargets[ BestDotIdx ]);
+	LockOnTarget(TargetComponent);
 }
 
 TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
@@ -261,7 +271,12 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 	TArray<ULockOnTargetComponent*> TargetComps;
 	for ( UPrimitiveComponent* Comp : TargetPrimitive )
 	{
-		TargetComps.Add(Cast<ULockOnTargetComponent>(Comp));
+		// 플레이어의 정면 반경 180도 내에 존재하는 락온 컴포넌트만 추가함
+		float Dot = FVector::DotProduct(m_Player->GetCamera()->GetForwardVector(), (Comp->GetComponentLocation() - GetComponentLocation()).GetSafeNormal());
+		if (Dot > 0.f)
+		{
+			TargetComps.Add(Cast<ULockOnTargetComponent>(Comp));
+		}
 	}
 
 	return TargetComps;

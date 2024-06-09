@@ -304,13 +304,26 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
 	}
 
+	TArray<TObjectPtr<USceneComponent>> AttachCompArr = GetMesh()->GetAttachChildren();
+	if ( AttachCompArr.IsEmpty() )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("부착된 락온 컴포넌트 없음"));
+	}
+	else
+	{
+		for ( TObjectPtr<USceneComponent> AttachComp : AttachCompArr )
+		{
+			AttachComp->DestroyComponent();
+		}
+	}
+
 	// 5초 뒤 사망 이펙트 처리
 	GetWorld()->GetTimerManager().SetTimer(DeadTimer, [this]()
 	{
 
 		fDeadEffectRatio += 0.05f;
 		TArray<USceneComponent*> ChildMeshArr;
-		GetMesh()->GetChildrenComponents(true, ChildMeshArr);
+		/*GetMesh()->GetChildrenComponents(true, ChildMeshArr);
 		if ( !ChildMeshArr.IsEmpty() )
 		{
 			for (USceneComponent* ChildMesh : ChildMeshArr)
@@ -318,7 +331,7 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 				USkeletalMeshComponent* ChildSkelMesh = Cast<USkeletalMeshComponent>(ChildMesh);
 				ChildSkelMesh->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
 			}
-		}
+		}*/
 		GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
 		if ( fDeadEffectRatio > 1.f )
 		{
@@ -391,7 +404,7 @@ void AMonster_Base::SetMonLockedOn(bool _LockedOn)
 	else
 	{
 		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
-		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(true); }, 0.1f, false, 2.f);
+		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(false); }, 0.1f, false, 2.f);
 	}
 }
 

@@ -70,12 +70,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
 	LockonControlRotationRate = 10.f;	// 락온 시 캐릭터 회전 보간 속도
-
-	ConstructorHelpers::FClassFinder<UUserWidget> MarkerUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
-	if (MarkerUI.Succeeded())
-	{
-		m_MarkerClass = MarkerUI.Class;
-	}
 }
 
 // Called when the game starts or when spawned
@@ -129,22 +123,6 @@ void APlayer_Base_Knight::BeginPlay()
 	if ( !IsValid(m_MenuSound.LoadSynchronous()) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
-	}
-
-	if (IsValid(m_MarkerClass))
-	{
-		m_Marker = CreateWidget(GetWorld(), m_MarkerClass);
-
-		if (IsValid(m_Marker))
-		{
-			m_Marker->AddToViewport();
-			m_Marker->SetPositionInViewport(FVector2D(0.f, 0.f));
-			m_Marker->SetVisibility(ESlateVisibility::Hidden);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("락온 마커 생성 실패"));
-		}
 	}
 
 	LockOnDelegate.BindUObject(this, &APlayer_Base_Knight::TargetLockOn);
@@ -539,13 +517,11 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
-		m_Marker->SetVisibility(ESlateVisibility::Visible);
 		bLockOn = true;
 	}
 	else
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-		m_Marker->SetVisibility(ESlateVisibility::Hidden);
 		bLockOn = false;
 	}
 }
@@ -1021,33 +997,16 @@ void APlayer_Base_Knight::TargetLockOn()
 		
 		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
-		// 락온 타겟 컴포넌트의 위치를 스크린 좌표로 변환해서 해당 좌표에 락온 마커를 표시
-		APlayerController* pController = Cast<APlayerController>(GetController());
-		FVector2D ScreenPos;
-		bool bConverted = UGameplayStatics::ProjectWorldToScreen(pController, m_Arm->m_Target->GetComponentLocation(), ScreenPos);
-		if (bConverted)
-		{
-			m_Marker->SetPositionInViewport(ScreenPos);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("락온 스크린 좌표 계산 실패"));
-		}
 
 		if (bLockOn)
 		{
 			GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
 		}
 	}
-	else
-	{
-		m_Marker->SetVisibility(ESlateVisibility::Hidden);
-	}
 }
 
 void APlayer_Base_Knight::BreakLockOn()
 {
-	m_Marker->SetVisibility(ESlateVisibility::Hidden);
 	m_Arm->BreakLockOnTarget();
 }
 
