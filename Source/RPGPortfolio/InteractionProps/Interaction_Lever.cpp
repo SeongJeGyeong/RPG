@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
+#include "../System/FadeViewportClient.h"
 
 // Sets default values
 AInteraction_Lever::AInteraction_Lever()
@@ -24,12 +25,6 @@ AInteraction_Lever::AInteraction_Lever()
 
 	m_Trigger->SetCollisionProfileName(TEXT("InteractionTrigger"));
 	m_Mesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-
-	//static ConstructorHelpers::FObjectFinder<ULevelSequence> LevelSequence (TEXT("/Script/LevelSequence.LevelSequence'/Game/Blueprint/Sequence/LS_Interaction.LS_Interaction'"));
-	//if (LevelSequence.Succeeded())
-	//{
-	//	m_LevelSeq = LevelSequence.Object;
-	//}
 }
 
 void AInteraction_Lever::OnConstruction(const FTransform& _Transform)
@@ -69,7 +64,6 @@ void AInteraction_Lever::Interaction()
 
 			// 레벨시퀀스 종료시 호출할 Delegate 등록
 			m_SeqPlayer->OnFinished.AddDynamic(this, &AInteraction_Lever::EndLevelSequence);
-
 			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 			if (IsValid(GameMode))
 			{
@@ -93,6 +87,16 @@ void AInteraction_Lever::EndLevelSequence()
 	{
 		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
 		GameMode->GetMainHUD()->ShowMainMessageUI(false);
+
+		const UWorld* World = GetWorld();
+		if ( World )
+		{
+			UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(World->GetGameViewport());
+			if ( GameViewportClient )
+			{
+				GameViewportClient->Fade(1.f, false);
+			}
+		}
 	}
 }
 

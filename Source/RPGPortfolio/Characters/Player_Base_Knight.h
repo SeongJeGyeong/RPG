@@ -116,6 +116,8 @@ private:
 	// 방어 표현 타이머
 	FTimerHandle BlockReactTimer;
 
+	bool btoggle;
+
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }

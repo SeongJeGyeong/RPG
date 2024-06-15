@@ -71,6 +71,6 @@ void AItem_Dropped_Base::Interaction()
 	pMainUI->ShowItemMessageUI(true);
 	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, m_Stack);
 	pMainUI->ShowMainMessageUI(true);
-	
+
 	Destroy();
 }

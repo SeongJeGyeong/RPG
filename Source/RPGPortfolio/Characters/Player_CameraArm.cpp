@@ -24,7 +24,7 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	// 록온 범위
 	fMaxTargetLockDistance = 1500.f;
 
-	bDrawDebug = true;
+	bDrawDebug = false;
 	bToggleLockOn = false;
 
 	//UCameraComponent* m_Camera = Cast<UCameraComponent>(GetChildComponent(0));

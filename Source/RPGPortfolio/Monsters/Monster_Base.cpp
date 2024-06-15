@@ -99,7 +99,11 @@ void AMonster_Base::BeginPlay()
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
 	
-	m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
+	if (!IsValid(m_WidgetComponent))
+	{
+		m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
+	}
+
 	if (!IsValid(m_MonsterWidget))
 	{
 		UE_LOG(LogTemp, Error, TEXT("MonsterWidget Casting Failed"));

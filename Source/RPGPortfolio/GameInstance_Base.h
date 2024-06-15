@@ -15,12 +15,24 @@ class RPGPORTFOLIO_API UGameInstance_Base : public UGameInstance
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY()
 	UInventory_Mgr*		m_InvenMgr;
+	UPROPERTY()
 	UEquip_Mgr*			m_EquipMgr;
+	UPROPERTY()
+	TSubclassOf<class UUserWidget>	m_LoadingScreenClass;
 
 public:
 	UGameInstance_Base();
 	~UGameInstance_Base();
+
+	virtual void Init() override;
+
+	UFUNCTION()
+	virtual void BeginLoadingScreen(const FString& MapName);
+	UFUNCTION()
+	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+
 
 	// Inventory_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음
 	friend class UInventory_Mgr;

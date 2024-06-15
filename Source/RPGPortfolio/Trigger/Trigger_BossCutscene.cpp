@@ -12,6 +12,7 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "../System/FadeViewportClient.h"
 
 void ATrigger_BossCutscene::BeginPlay()
 {
@@ -53,6 +54,16 @@ void ATrigger_BossCutscene::EndLevelSequence()
 		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
 		GameMode->PlayBGM(true);
 	}
+	const UWorld* World = GetWorld();
+	if ( World )
+	{
+		UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(World->GetGameViewport());
+		if ( GameViewportClient )
+		{
+			GameViewportClient->Fade(1.f, false);
+		}
+	}
+
 	TArray<AActor*> OutActorsArr;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoss_Base::StaticClass(), OutActorsArr);
 	if (OutActorsArr.Num() > 0)

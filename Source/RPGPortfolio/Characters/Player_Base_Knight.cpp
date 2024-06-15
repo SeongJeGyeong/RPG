@@ -1106,7 +1106,7 @@ void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
 
 void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 {
-	float fConsumption;
+	float fConsumption = 0.f;
 	switch (_Montage)
 	{
 	case EPlayerMontage::DODGE_FW:
