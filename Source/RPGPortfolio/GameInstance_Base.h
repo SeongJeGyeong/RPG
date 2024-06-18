@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "GameInstance_Base.generated.h"
@@ -22,6 +23,17 @@ private:
 	UPROPERTY()
 	TSubclassOf<class UUserWidget>	m_LoadingScreenClass;
 
+	UPROPERTY()
+	FCharacterStatSheet PlayerStat;
+	UPROPERTY()
+	FCharacterBasePower PlayerBasePower;
+
+	UPROPERTY()
+	FEquipmentStat EquipmentStat;
+
+	UPROPERTY()
+	uint32 PlayTime;
+
 public:
 	UGameInstance_Base();
 	~UGameInstance_Base();
@@ -32,6 +44,18 @@ public:
 	virtual void BeginLoadingScreen(const FString& MapName);
 	UFUNCTION()
 	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
+
+	FCharacterStatSheet GetPlayerStatus() const { return PlayerStat; }
+	void SetPlayerStatus(const FCharacterStatSheet& _PlayerStat) { PlayerStat = _PlayerStat; }
+
+	FCharacterBasePower GetPlayerBasePower() const { return PlayerBasePower; }
+	void SetPlayerBasePower(const FCharacterBasePower& _PlayerBasePower) { PlayerBasePower = _PlayerBasePower; }
+
+	FEquipmentStat GetEquipmentStatInfo() const { return EquipmentStat; }
+	void SetEquipmentStatInfo(const FEquipmentStat& _EquipmentStat) { EquipmentStat = _EquipmentStat; }
+
+	uint32 GetPlayTime() const { return PlayTime; }
+	void SetPlayTime(const uint32& _PlayTime) { PlayTime = _PlayTime; }
 
 
 	// Inventory_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음

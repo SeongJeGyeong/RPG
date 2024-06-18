@@ -18,6 +18,7 @@
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 
+// 스태틱 멤버 초기화
 UWorld* UInventory_Mgr::m_World = nullptr;
 
 UInventory_Mgr* UInventory_Mgr::GetInst(UWorld* _World)
@@ -36,21 +37,19 @@ UInventory_Mgr* UInventory_Mgr::GetInst(UGameInstance* _GameInst)
 		pGameInst->m_InvenMgr = NewObject<UInventory_Mgr>();
 		
 		// AddToRoot : 객체를 루트에 추가함
-		// 루트에 존재하는 객체는 가비지컬렉터가 자동으로 삭제하지 않기 때문에
+		// 루트에 존재하는 객체는 참조되고 있지 않을 때도 가비지컬렉터가 자동으로 삭제하지 않기 때문에
 		// 대신 사용하지 않을 때는 수동으로 삭제해줘야함
 		pGameInst->m_InvenMgr->AddToRoot();
 	}
 
+	// 게임 인스턴스 멤버인 인벤토리 매니저 객체를 반환
 	return pGameInst->m_InvenMgr;
 }
 
 void UInventory_Mgr::SetItemDataTable(UDataTable* _ItemDataTable)
 {
-	//AddReferencedObjects(m_InvenStorage[
-	// ::ARM_CHEST], Collec);
-
 	m_ItemDataTable = _ItemDataTable;
-
+	
 	//데이터 테이블의 정보를 TArray에 넣는다
 	FString str;
 	TArray<FGameItemInfo*> arrTableData;
@@ -136,7 +135,7 @@ void UInventory_Mgr::ShowInventoryUI()
 
 	if (!IsValid(GameMode))
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("ShowInventoryUI 게임모드 캐스팅 실패"));
 		return;
 	}
 
@@ -154,7 +153,7 @@ void UInventory_Mgr::CloseInventoryUI()
 
 	if (!IsValid(GameMode))
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("CloseInventoryUI 게임모드 캐스팅 실패"));
 		return;
 	}
 
@@ -168,7 +167,7 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewInventoryUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
@@ -240,11 +239,17 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 
 void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
 {
+	if ( !IsValid(m_World) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("인벤토리 World 객체 null"));
+		return;
+	}
+
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewItemListUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
@@ -283,7 +288,7 @@ bool UInventory_Mgr::CheckInventoryOpened()
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("CheckInventoryOpened 게임모드 캐스팅 실패"));
 		return false;
 	}
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
@@ -361,7 +366,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
 			
 			pPlayerState->SetEquipFigure(pItemRow->ItemInfo, false);
-			pPlayerState->SetPlayerBasePower();
+			pPlayerState->SetAtkAndDef();
 		}
 
 		return;
@@ -416,7 +421,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
 		pPlayerState->SetEquipFigure(pItemRow->ItemInfo, true);
-		pPlayerState->SetPlayerBasePower();
+		pPlayerState->SetAtkAndDef();
 	}
 
 }
@@ -427,7 +432,7 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewEquipConsumeUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
@@ -493,7 +498,7 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 
 	if (!IsValid(GameMode))
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewEquipItemUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();

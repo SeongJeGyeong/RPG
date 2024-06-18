@@ -11,13 +11,14 @@
 #include "../UI/UI_StatusMain.h"
 #include "../UI/UI_EquipMain.h"
 #include "Inventory_Mgr.h"
+#include "../Item/Item_InvenData.h"
 
 UWorld* UEquip_Mgr::m_World = nullptr;
 
 UEquip_Mgr* UEquip_Mgr::GetInst(UWorld* _World)
 {
     m_World = _World;
-
+	
     return GetInst(m_World->GetGameInstance());
 }
 
@@ -125,7 +126,7 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 			if ( !IsValid(GameMode) )
 			{
-				UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+				UE_LOG(LogTemp, Error, TEXT("DecreaseLowerSlotItem 게임모드 캐스팅 실패"));
 				return;
 			}
 			UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
@@ -141,7 +142,7 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("SetEquipSlotMap 게임모드 캐스팅 실패"));
 		return;
 	}
 
@@ -151,26 +152,43 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 	}
 	else
 	{
-		FGameItemInfo* pItemInfo = _InvenItem->ItemInfo;
-		m_EquipItemMap.Emplace(_Slot, *pItemInfo);
+		m_EquipItemMap.Emplace(_Slot, *_InvenItem);
 	}
 
 	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
 	StatusUI->RenewStatusUI();
+}
 
-	//FGameItemInfo* pItemInfo = m_EquipItemMap.Find(_Slot);
+UItem_InvenData* UEquip_Mgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
+{
+	FInvenItemRow* pItemInfo = m_EquipItemMap.Find(_Slot);
+	if (pItemInfo == nullptr)
+	{
+		//UE_LOG(LogTemp, Error, TEXT("조회할 슬롯에 아이템이 장비되어있지 않음"));
+		return nullptr;
+	}
 
-	//if (pItemInfo == nullptr)
-	//{
-	//	m_EquipItemMap.Emplace(_Slot, _InvenItem);
-	//}
-	//else
-	//{
-	//	if (_InvenItem == nullptr)
-	//	{
-	//		m_EquipItemMap.Emplace(_Slot, _InvenItem);
-	//	}
-	//}
+	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
+
+	pItemData->SetItemImgPath(pItemInfo->ItemInfo->IconImgPath);
+	pItemData->SetItemName(pItemInfo->ItemInfo->ItemName);
+	pItemData->SetItemDesc(pItemInfo->ItemInfo->Description);
+	pItemData->SetItemQnt(pItemInfo->Stack);
+	pItemData->SetPhysicAtkVal(pItemInfo->ItemInfo->PhysicAtk);
+	pItemData->SetPhysicDefVal(pItemInfo->ItemInfo->PhysicDef);
+	pItemData->SetMagicAtkVal(pItemInfo->ItemInfo->MagicAtk);
+	pItemData->SetMagicDefVal(pItemInfo->ItemInfo->MagicDef);
+	pItemData->SetRestoreHP(pItemInfo->ItemInfo->Restore_HP);
+	pItemData->SetRestoreMP(pItemInfo->ItemInfo->Restore_MP);
+	pItemData->SetRequireStr(pItemInfo->ItemInfo->Require_Str);
+	pItemData->SetRequireDex(pItemInfo->ItemInfo->Require_Dex);
+	pItemData->SetRequireInt(pItemInfo->ItemInfo->Require_Int);
+	pItemData->SetMaximumStack(pItemInfo->ItemInfo->Maximum_Stack);
+	pItemData->SetItemType(pItemInfo->ItemInfo->Type);
+	pItemData->SetEquiped(pItemInfo->EquipedSlot);
+	pItemData->SetItemID(pItemInfo->ItemInfo->ID);
+
+	return pItemData;
 }
 
 void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _Unequip)
@@ -228,7 +246,7 @@ void UEquip_Mgr::RenewQuickSlotUI(int32 _Idx)
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewQuickSlotUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_Base* MainUI = GameMode->GetMainHUD();
@@ -241,7 +259,7 @@ void UEquip_Mgr::RenewNextQuickSlotUI(int32 _Idx)
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewNextQuickSlotUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_Base* MainUI = GameMode->GetMainHUD();

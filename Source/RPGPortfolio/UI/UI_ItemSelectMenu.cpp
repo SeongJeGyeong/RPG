@@ -55,7 +55,7 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		
-		UInventory_Mgr::GetInst(GetWorld())->CloseInventoryUI();
+		UInventory_Mgr::GetInst(GetGameInstance())->CloseInventoryUI();
 		pPlayer->CloseMenuUI();
 
 		pPlayer->UseItem(m_SelectedItemData->GetItemID(), m_SelectedItemData->GetEquiped());

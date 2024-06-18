@@ -25,6 +25,7 @@ private:
 	TMap<EITEM_ID, FInvenItemRow> m_InvenStorage[ (int32)EITEM_TYPE::END ];
 
 public:
+	// 스태틱 함수로 선언하여 객체가 생성되지 않았어도 함수 호출 가능
 	static UInventory_Mgr* GetInst(UWorld* _World);
 	static UInventory_Mgr* GetInst(UGameInstance* _GameInst);
 

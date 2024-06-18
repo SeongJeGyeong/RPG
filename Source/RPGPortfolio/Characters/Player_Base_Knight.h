@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Player_StatComponent.h"
 #include "GenericTeamAgentInterface.h"
 #include "../System/DataAsset/DA_MenuSound.h"
 #include "../System/DataAsset/DA_PlayerSound.h"
@@ -32,6 +33,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UPlayer_CameraArm* m_Arm;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	//UPlayer_StatComponent* m_StatComp;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UInputMappingContext> m_IMC;

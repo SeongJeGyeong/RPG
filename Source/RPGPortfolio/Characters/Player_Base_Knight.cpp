@@ -2,16 +2,10 @@
 
 
 #include "Player_Base_Knight.h"
-
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
-#include "../CharacterAnim/AnimInstance_Knight.h"
-#include "../System/Component/LockOnTargetComponent.h"
 #include "../Header/Enum.h"
-#include "Player_CameraArm.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
+#include "../CharacterAnim/AnimInstance_Knight.h"
+#include "Player_CameraArm.h"
 #include "../UI/UI_Base.h"
 #include "../UI/UI_Player_Main.h"
 #include "../UI/UI_Message_Main.h"
@@ -20,20 +14,25 @@
 #include "../UI/UI_EquipItemList.h"
 #include "../UI/UI_Player_QuickSlot.h"
 #include "../UI/UI_Player_Soul.h"
-#include "Components/CapsuleComponent.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
-#include "../System/PlayerState_Base.h"
-#include "../Monsters/Monster_Base.h"
 #include "../Manager/Equip_Mgr.h"
+#include "../System/PlayerState_Base.h"
+#include "../System/Component/LockOnTargetComponent.h"
+#include "../System/DamageType_Base.h"
+#include "../Monsters/Monster_Base.h"
+#include "../Projectiles/Proj_Player_Cutter.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "../System/DamageType_Base.h"
-#include "Engine/DamageEvents.h"
-#include "Components/WidgetComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "NiagaraFunctionLibrary.h"
-#include "../Projectiles/Proj_Player_Cutter.h"
+#include "Engine/DamageEvents.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -70,6 +69,8 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Camera->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
 	LockonControlRotationRate = 10.f;	// 락온 시 캐릭터 회전 보간 속도
+
+	//m_StatComp = CreateDefaultSubobject<UPlayer_StatComponent>(TEXT("StatComponent"));
 }
 
 // Called when the game starts or when spawned

@@ -8,33 +8,6 @@
 #include "GameFramework/PlayerState.h"
 #include "PlayerState_Base.generated.h"
 
-
-USTRUCT(Atomic)
-struct FEquipmentStat
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	float Helm_PhyDef = 0.f;
-	UPROPERTY()
-	float Helm_MagDef = 0.f;
-	UPROPERTY()
-	float Chest_PhyDef = 0.f;
-	UPROPERTY()
-	float Chest_MagDef = 0.f;
-	UPROPERTY()
-	float Gaunt_PhyDef = 0.f;
-	UPROPERTY()
-	float Gaunt_MagDef = 0.f;
-	UPROPERTY()
-	float Leg_PhyDef = 0.f;
-	UPROPERTY()
-	float Leg_MagDef = 0.f;
-	UPROPERTY()
-	float Wea_PhyAtk = 0.f;
-	UPROPERTY()
-	float Wea_MagAtk = 0.f;
-};
 /**
  * 
  */
@@ -58,7 +31,8 @@ private:
 	bool bSTRecovery = false;
 	bool bSTRecovSlowly = false;
 
-	FEquipmentStat EquipmentStat;
+	UPROPERTY()
+	FEquipmentStat m_EquipmentStat;
 
 	UPROPERTY()
 	uint32 PlayTime;
@@ -75,8 +49,8 @@ public:
 	FCharacterStatSheet GetPlayerStatus() const { return m_PlayerStat; }
 	FCharacterBasePower GetPlayerBasePower() const { return m_PlayerBasePower; }
 
-	void SetPlayerStat(FCharacterStatSheet _PlayerStat);
-	void SetPlayerBasePower();
+	void SavePlayerStat(const FString& MapName);
+	void SetAtkAndDef();
 	void InitPlayerData(FCharacterBasePower _PlayerBasePower);
 	void SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped);
 	void SetPlayerCurrentHP(float _CurHP);
@@ -84,7 +58,7 @@ public:
 	void SetPlayerCurrentStamina(float _CurStamina);
 	void PlayerGainSoul(int32 _Soul);
 
-	const FEquipmentStat& GetEquipmentStat() { return EquipmentStat; }
+	const FEquipmentStat& GetEquipmentStatus() { return m_EquipmentStat; }
 
 	bool GetbSTRecovery() const { return bSTRecovery; }
 	void SetbSTRecovery(const bool& _STRecovery) { bSTRecovery = _STRecovery; }
@@ -93,5 +67,4 @@ public:
 
 	uint32 GetPlayTime() const { return PlayTime; }
 	void SetPlayTime(const uint32& _PlayTime) { PlayTime = _PlayTime; }
-
 };

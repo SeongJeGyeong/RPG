@@ -102,6 +102,11 @@ void UUI_PlayerStat::RenewBasePower()
 	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
 
+	UE_LOG(LogTemp, Warning, TEXT("physicAtk : %f"), PlayerBasePower.PhysicAtk);
+	UE_LOG(LogTemp, Warning, TEXT("physicDef : %f"), PlayerBasePower.PhysicDef);
+	UE_LOG(LogTemp, Warning, TEXT("MagicAtk : %f"), PlayerBasePower.MagicAtk);
+	UE_LOG(LogTemp, Warning, TEXT("MagicDef : %f"), PlayerBasePower.MagicDef);
+
 	m_PhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicAtk)));
 	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicAtk)));
 	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));
@@ -184,7 +189,7 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		// 현재 장착중인 무기의 공격을 빼고 장착할 무기의 공격력을 더한 값을 표시한다.
 		if ( _InvenData->GetPhysicAtkVal() > 0 )
 		{
-			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.PhysicAtk - pPlayerState->GetEquipmentStat().Wea_PhyAtk + _InvenData->GetPhysicAtkVal()))));
+			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.PhysicAtk - pPlayerState->GetEquipmentStatus().Wea_PhyAtk + _InvenData->GetPhysicAtkVal()))));
 		}
 		else
 		{
@@ -193,7 +198,7 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 
 		if ( _InvenData->GetMagicAtkVal() > 0 )
 		{
-			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.MagicAtk - pPlayerState->GetEquipmentStat().Wea_MagAtk + _InvenData->GetMagicAtkVal()))));
+			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.MagicAtk - pPlayerState->GetEquipmentStatus().Wea_MagAtk + _InvenData->GetMagicAtkVal()))));
 		}
 		else
 		{
@@ -207,20 +212,20 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		switch (_InvenData->GetItemType())
 		{
 		case EITEM_TYPE::ARM_HELM:
-			fEquipItemPhyDef = pPlayerState->GetEquipmentStat().Helm_PhyDef;
-			fEquipItemMagDef = pPlayerState->GetEquipmentStat().Helm_MagDef;
+			fEquipItemPhyDef = pPlayerState->GetEquipmentStatus().Helm_PhyDef;
+			fEquipItemMagDef = pPlayerState->GetEquipmentStatus().Helm_MagDef;
 			break;
 		case EITEM_TYPE::ARM_CHEST:
-			fEquipItemPhyDef = pPlayerState->GetEquipmentStat().Chest_PhyDef;
-			fEquipItemMagDef = pPlayerState->GetEquipmentStat().Chest_MagDef;
+			fEquipItemPhyDef = pPlayerState->GetEquipmentStatus().Chest_PhyDef;
+			fEquipItemMagDef = pPlayerState->GetEquipmentStatus().Chest_MagDef;
 			break;
 		case EITEM_TYPE::ARM_GAUNTLET:
-			fEquipItemPhyDef = pPlayerState->GetEquipmentStat().Gaunt_PhyDef;
-			fEquipItemMagDef = pPlayerState->GetEquipmentStat().Gaunt_MagDef;
+			fEquipItemPhyDef = pPlayerState->GetEquipmentStatus().Gaunt_PhyDef;
+			fEquipItemMagDef = pPlayerState->GetEquipmentStatus().Gaunt_MagDef;
 			break;
 		case EITEM_TYPE::ARM_LEGGINGS:
-			fEquipItemPhyDef = pPlayerState->GetEquipmentStat().Leg_PhyDef;
-			fEquipItemMagDef = pPlayerState->GetEquipmentStat().Leg_MagDef;
+			fEquipItemPhyDef = pPlayerState->GetEquipmentStatus().Leg_PhyDef;
+			fEquipItemMagDef = pPlayerState->GetEquipmentStatus().Leg_MagDef;
 			break;
 		default:
 			break;

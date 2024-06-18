@@ -26,15 +26,6 @@ void UUI_EquipMain::NativeConstruct()
 	else
 	{
 		m_ItemTooltipUI->SetVisibility(ESlateVisibility::Hidden);
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		if ( !IsValid(pPlayerState) )
-		{
-			UE_LOG(LogTemp, Error, TEXT("플레이어스테이트 획득 실패"));
-		}
-		else
-		{
-			m_Equip_StatUI->SetPlayerStatUI(Cast<APlayerState_Base>(pPlayerState));
-		}
 	}
 
 	if ( !IsValid(m_Equip_ItemListUI) )
@@ -60,6 +51,20 @@ void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 	if (_Visibility == ESlateVisibility::Hidden)
 	{
 		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
+		UE_LOG(LogTemp, Warning, TEXT("장비창 메인 안보임"));
+	}
+	else
+	{
+		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+		if ( !IsValid(pPlayerState) )
+		{
+			UE_LOG(LogTemp, Error, TEXT("플레이어스테이트 획득 실패"));
+		}
+		else
+		{
+			m_Equip_StatUI->SetPlayerStatUI(Cast<APlayerState_Base>(pPlayerState));
+		}
+		UE_LOG(LogTemp, Warning, TEXT("장비창 메인 보임"));
 	}
 }
 

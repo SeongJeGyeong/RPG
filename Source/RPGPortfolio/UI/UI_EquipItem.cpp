@@ -9,6 +9,7 @@
 #include "UI_ItemTooltip.h"
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Inventory_Mgr.h"
+#include "../Manager/Equip_Mgr.h"
 #include "../System/DataAsset/DA_MenuSound.h"
 
 void UUI_EquipItem::NativeConstruct()
@@ -19,8 +20,22 @@ void UUI_EquipItem::NativeConstruct()
 	}
 	else
 	{
-		m_EquipItemImg->SetVisibility(ESlateVisibility::Hidden);
-		m_EquipDishImg->SetVisibility(ESlateVisibility::Hidden);
+		UItem_InvenData* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(eSlotType);
+		if (pItemInfo != nullptr)
+		{
+			m_ItemData = pItemInfo;
+			FString ItemImgPath = pItemInfo->GetItemImgPath();
+			UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+			m_EquipItemImg->SetBrushFromTexture(pTex2D);
+			m_EquipItemImg->SetVisibility(ESlateVisibility::Visible);
+			m_EquipDishImg->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			m_EquipItemImg->SetVisibility(ESlateVisibility::Hidden);
+			m_EquipDishImg->SetVisibility(ESlateVisibility::Hidden);
+		}
+
 		m_EquipItemBtn->OnClicked.AddDynamic(this, &UUI_EquipItem::ItemBtnClicked);
 		m_EquipItemBtn->OnHovered.AddDynamic(this, &UUI_EquipItem::ItemBtnHovered);
 		m_EquipItemBtn->OnUnhovered.AddDynamic(this, &UUI_EquipItem::ItemBtnUnHovered);
@@ -32,12 +47,26 @@ void UUI_EquipItem::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
 	}
 
+	OnNativeVisibilityChanged.AddUObject(this, &UUI_EquipItem::SlotVisibilityChanged);
+
 	Super::NativeConstruct();
 }
 
 void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
 {
 	Super::NativeTick(_Geo, _DeltaTime);
+}
+
+void UUI_EquipItem::SlotVisibilityChanged(ESlateVisibility _Visibility)
+{
+	if ( _Visibility == ESlateVisibility::Visible )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("장비슬롯 보임"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("장비슬롯 안보임"));
+	}
 }
 
 void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)

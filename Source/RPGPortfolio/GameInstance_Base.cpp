@@ -26,6 +26,31 @@ UGameInstance_Base::UGameInstance_Base()
 	{
 		m_LoadingScreenClass = loadingscreen.Class;
 	}
+
+	ConstructorHelpers::FObjectFinder<UDataTable> CharacterSheet(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_CharacterSheet.DT_CharacterSheet'"));
+	if ( CharacterSheet.Succeeded() || CharacterSheet.Object->GetRowStruct()->IsChildOf(FCharacterStatSheet::StaticStruct()) )
+	{
+		FCharacterStatSheet* pCharacterStat;
+		pCharacterStat = CharacterSheet.Object->FindRow<FCharacterStatSheet>(FName("Knight"), TEXT(""));
+		PlayerStat = *pCharacterStat;
+	}
+
+	ConstructorHelpers::FObjectFinder<UDataTable> CharacterSoul(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_PlayerAmountOfSoul.DT_PlayerAmountOfSoul'"));
+	if ( CharacterSoul.Succeeded() )
+	{
+		PlayerBasePower.AmountOfSoul = CharacterSoul.Object->FindRow<FPlayerAmountOfSoul>(FName("Knight"), TEXT(""))->AmountOfSoul;
+	}
+
+	PlayerBasePower.MaxHP = PlayerStat.Vigor * 100.f;
+	PlayerBasePower.CurHP = PlayerBasePower.MaxHP;
+	PlayerBasePower.MaxMP = PlayerStat.Attunement * 10.f;
+	PlayerBasePower.CurMP = PlayerBasePower.MaxMP;
+	PlayerBasePower.MaxStamina = PlayerStat.Endurance * 10.f;
+	PlayerBasePower.CurStamina = PlayerBasePower.MaxStamina;
+	PlayerBasePower.PhysicAtk = ( ( PlayerStat.Strength + PlayerStat.Dexterity ) / 2 ) * 20.f;
+	PlayerBasePower.PhysicDef = ( ( PlayerStat.Strength + PlayerStat.Dexterity ) / 2 ) * 10.f;
+	PlayerBasePower.MagicAtk = PlayerStat.Intelligence * 20.f;
+	PlayerBasePower.MagicDef = ( ( PlayerStat.Attunement + PlayerStat.Intelligence ) / 2 ) * 10.f;
 }
 
 UGameInstance_Base::~UGameInstance_Base()

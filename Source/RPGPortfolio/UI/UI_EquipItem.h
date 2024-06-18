@@ -44,6 +44,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+	void SlotVisibilityChanged(ESlateVisibility _Visibility);
 
 	void SetItemSlotUI(class UTextBlock* _SlotText) { ItemSlotText = _SlotText; }
 	void SetItemNameUI(class UTextBlock* _NameText) { ItemNameText = _NameText; }

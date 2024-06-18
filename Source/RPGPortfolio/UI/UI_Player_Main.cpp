@@ -3,8 +3,6 @@
 
 #include "UI_Player_Main.h"
 #include "Components/ProgressBar.h"
-#include "../System/PlayerState_Base.h"
-#include "Kismet/GameplayStatics.h"
 
 void UUI_Player_Main::NativeConstruct()
 {

@@ -98,13 +98,18 @@ void AMonster_Base::BeginPlay()
 		m_AnimInst = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
-	
-	if (!IsValid(m_WidgetComponent))
+
+	if ( IsValid(m_WidgetComponent) )
 	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 위젯 캐스팅"));
 		m_MonsterWidget = Cast<UUI_Monster>(m_WidgetComponent->GetWidget());
 	}
 
-	if (!IsValid(m_MonsterWidget))
+	m_MonsterWidget->SetName(m_Info.Name);
+	m_MonsterWidget->SetHPRatio(1.f);
+	m_Info.CurHP = m_Info.MaxHP;
+
+	if ( !IsValid(m_MonsterWidget) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("MonsterWidget Casting Failed"));
 	}
@@ -367,7 +372,7 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 					}
 				}
 			},
-			0.5f, false);
+			1.f, false);
 
 			return;
 		}

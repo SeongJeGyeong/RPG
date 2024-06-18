@@ -143,6 +143,33 @@ struct FCharacterBasePower
 	int32 AmountOfSoul;
 };
 
+USTRUCT(Atomic)
+struct FEquipmentStat
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	float Helm_PhyDef = 0.f;
+	UPROPERTY()
+	float Helm_MagDef = 0.f;
+	UPROPERTY()
+	float Chest_PhyDef = 0.f;
+	UPROPERTY()
+	float Chest_MagDef = 0.f;
+	UPROPERTY()
+	float Gaunt_PhyDef = 0.f;
+	UPROPERTY()
+	float Gaunt_MagDef = 0.f;
+	UPROPERTY()
+	float Leg_PhyDef = 0.f;
+	UPROPERTY()
+	float Leg_MagDef = 0.f;
+	UPROPERTY()
+	float Wea_PhyAtk = 0.f;
+	UPROPERTY()
+	float Wea_MagAtk = 0.f;
+};
+
 USTRUCT(Atomic, BlueprintType)
 struct FPlayerAmountOfSoul
 	: public FTableRowBase
