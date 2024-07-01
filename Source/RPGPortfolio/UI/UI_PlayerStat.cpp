@@ -12,29 +12,6 @@ void UUI_PlayerStat::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	m_Level = Cast<UTextBlock>(GetWidgetFromName(TEXT("Level")));
-	m_Vigor = Cast<UTextBlock>(GetWidgetFromName(TEXT("Vigor")));
-	m_Attunement = Cast<UTextBlock>(GetWidgetFromName(TEXT("Attunement")));
-	m_Endurance = Cast<UTextBlock>(GetWidgetFromName(TEXT("Endurance")));
-	m_Strength = Cast<UTextBlock>(GetWidgetFromName(TEXT("Strength")));
-	m_Dexterity = Cast<UTextBlock>(GetWidgetFromName(TEXT("Dexterity")));
-	m_Intelligence = Cast<UTextBlock>(GetWidgetFromName(TEXT("Intelligence")));
-
-	m_MaxHP = Cast<UTextBlock>(GetWidgetFromName(TEXT("MaximumHP")));
-	m_MaxMP = Cast<UTextBlock>(GetWidgetFromName(TEXT("MaximumMP")));
-	m_MaxStamina = Cast<UTextBlock>(GetWidgetFromName(TEXT("MaximumST")));
-	m_CurHP = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentHP")));
-	m_CurMP = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentMP")));
-	m_CurStamina = Cast<UTextBlock>(GetWidgetFromName(TEXT("CurrentST")));
-
-	m_PhysicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("PhysicAtk")));
-	m_PhysicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("PhysicDef")));
-	m_MagicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("MagicAtk")));
-	m_MagicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("MagicDef")));
-	m_AltPhysicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_PhysicAtk")));
-	m_AltPhysicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_PhysicDef")));
-	m_AltMagicAtk = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_MagicAtk")));
-	m_AltMagicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("Alt_MagicDef")));
 	m_PhyAtk_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow1")));
 	m_PhyDef_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow3")));
 	m_MagAtk_Arrow = Cast<UTextBlock>(GetWidgetFromName(TEXT("Arrow2")));
@@ -63,11 +40,6 @@ void UUI_PlayerStat::NativeConstruct()
 		m_MagDef_Arrow->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-}
-
-void UUI_PlayerStat::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
 }
 
 void UUI_PlayerStat::SetPlayerStatUI(APlayerState_Base* _PlayerState)
@@ -150,6 +122,7 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetPhysicAtkVal() > 0 )
 		{
 			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.PhysicAtk - _InvenData->GetPhysicAtkVal()))));
+			m_AltPhysicAtk->SetColorAndOpacity(FLinearColor::FLinearColor(0.f, 0.f, 1.f, 1.f));
 		}
 		else
 		{
@@ -159,6 +132,7 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetMagicAtkVal() > 0 )
 		{
 			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.MagicAtk - _InvenData->GetMagicAtkVal()))));
+			m_AltMagicAtk->SetColorAndOpacity(FLinearColor::FLinearColor(0.f, 0.f, 1.f, 1.f));
 		}
 		else
 		{
@@ -168,6 +142,7 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetPhysicDefVal() > 0 )
 		{
 			m_AltPhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.PhysicDef - _InvenData->GetPhysicDefVal()))));
+			m_AltPhysicDef->SetColorAndOpacity(FLinearColor::FLinearColor(0.f, 0.f, 1.f, 1.f));
 		}
 		else
 		{
@@ -177,6 +152,7 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetMagicDefVal() > 0 )
 		{
 			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.MagicDef - _InvenData->GetMagicDefVal()))));
+			m_AltMagicDef->SetColorAndOpacity(FLinearColor::FLinearColor(0.f, 0.f, 1.f, 1.f));
 		}
 		else
 		{
@@ -190,6 +166,9 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetPhysicAtkVal() > 0 )
 		{
 			m_AltPhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.PhysicAtk - pPlayerState->GetEquipmentStatus().Wea_PhyAtk + _InvenData->GetPhysicAtkVal()))));
+			float exPower = PlayerBasePower.PhysicAtk + pPlayerState->GetEquipmentStatus().Wea_PhyAtk;
+			float newPower = PlayerBasePower.PhysicAtk + _InvenData->GetPhysicAtkVal();
+			m_AltPhysicAtk->SetColorAndOpacity(SetRenewPowerTxtsColor(exPower, newPower));
 		}
 		else
 		{
@@ -199,6 +178,9 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetMagicAtkVal() > 0 )
 		{
 			m_AltMagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)(PlayerBasePower.MagicAtk - pPlayerState->GetEquipmentStatus().Wea_MagAtk + _InvenData->GetMagicAtkVal()))));
+			float exPower = PlayerBasePower.MagicAtk + pPlayerState->GetEquipmentStatus().Wea_MagAtk;
+			float newPower = PlayerBasePower.MagicAtk + _InvenData->GetMagicAtkVal();
+			m_AltPhysicAtk->SetColorAndOpacity(SetRenewPowerTxtsColor(exPower, newPower));
 		}
 		else
 		{
@@ -233,8 +215,10 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 
 		if ( _InvenData->GetPhysicDefVal() > 0 )
 		{
-			
 			m_AltPhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.PhysicDef - fEquipItemPhyDef + _InvenData->GetPhysicDefVal() ))));
+			float exPower = PlayerBasePower.PhysicDef + fEquipItemPhyDef;
+			float newPower = PlayerBasePower.PhysicDef + _InvenData->GetPhysicDefVal();
+			m_AltPhysicDef->SetColorAndOpacity(SetRenewPowerTxtsColor(exPower, newPower));
 		}
 		else
 		{
@@ -244,10 +228,32 @@ void UUI_PlayerStat::AlterRenewBasePower(UItem_InvenData* _InvenData, bool _bEqu
 		if ( _InvenData->GetMagicDefVal() > 0 )
 		{
 			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( PlayerBasePower.MagicDef - fEquipItemMagDef + _InvenData->GetMagicDefVal() ))));
+			float exPower = PlayerBasePower.MagicDef + fEquipItemMagDef;
+			float newPower = PlayerBasePower.MagicDef + _InvenData->GetMagicDefVal();
+			m_AltMagicDef->SetColorAndOpacity(SetRenewPowerTxtsColor(exPower, newPower));
 		}
 		else
 		{
 			m_AltMagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicDef)));
 		}
 	}
+}
+
+FLinearColor UUI_PlayerStat::SetRenewPowerTxtsColor(float _ExPower, float _NewPower)
+{
+	FLinearColor Color;
+	if ( _ExPower > _NewPower )
+	{
+		Color = FLinearColor::FLinearColor(0.1f, 0.1f, 1.f, 1.f);
+	}
+	else if ( _ExPower < _NewPower )
+	{
+		Color = FLinearColor::FLinearColor(1.f, 0.f, 0.f, 1.f);
+	}
+	else
+	{
+		Color = FLinearColor::FLinearColor(1.f, 1.f, 1.f, 1.f);
+	}
+
+	return Color;
 }

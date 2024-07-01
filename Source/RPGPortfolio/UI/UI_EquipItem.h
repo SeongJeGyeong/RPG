@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_EquipItem : public UUserWidget
 {
 	GENERATED_BODY()
@@ -43,7 +43,7 @@ private:
 
 public:
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
+
 	void SlotVisibilityChanged(ESlateVisibility _Visibility);
 
 	void SetItemSlotUI(class UTextBlock* _SlotText) { ItemSlotText = _SlotText; }

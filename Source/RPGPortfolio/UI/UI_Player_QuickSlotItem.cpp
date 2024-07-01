@@ -21,11 +21,6 @@ void UUI_Player_QuickSlotItem::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Player_QuickSlotItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Player_QuickSlotItem::RenewQuickSlotItem(FInvenItemRow* _InvenItem)
 {
 	if (_InvenItem == nullptr)

@@ -34,11 +34,6 @@ void UUI_Monster::NativeDestruct()
 	fTakedDMG = 0.f;
 }
 
-void UUI_Monster::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Monster::SetHPRatio(float _Ratio)
 {
 	// ui 생성 전에 비율 저장

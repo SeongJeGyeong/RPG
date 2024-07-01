@@ -38,6 +38,7 @@ void UAnim_GreaterSpider::AnimNotify_RushEnd()
 void UAnim_GreaterSpider::AnimNotify_AttackStart()
 {
 	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
+	pSpider->SetActorTickEnabled(true);
 	pSpider->SetbAtkTrace(true);
 }
 
@@ -46,6 +47,7 @@ void UAnim_GreaterSpider::AnimNotify_AttackEnd()
 	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
 	pSpider->SetbAtkTrace(false);
 	pSpider->EmptyHitArr();
+	pSpider->SetActorTickEnabled(false);
 }
 
 void UAnim_GreaterSpider::AnimNotify_ShotProj()

@@ -14,11 +14,6 @@ void UUI_Message_Main::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Message_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Message_Main::SetMessageText(FText _Command, FText _Message)
 {
 	m_CommandText->SetText(_Command);

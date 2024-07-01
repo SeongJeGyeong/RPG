@@ -14,11 +14,6 @@ void UUI_Player_Main::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Player_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Player_Main::SetPlayerHPRatio(float _HPRatio)
 {
 	m_PlayerHP->SetPercent(_HPRatio);

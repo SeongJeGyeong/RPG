@@ -19,11 +19,6 @@ void UUI_Boss::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Boss::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Boss::SetHPRatio(float _Ratio)
 {
 	m_BossHP->SetPercent(_Ratio);

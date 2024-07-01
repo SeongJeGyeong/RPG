@@ -91,13 +91,16 @@ public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void MeleeAttackHitCheck();
 	void MonsterAttackNormal();
+
+private:
+	void MeleeAttackHitCheck();
+
+protected:
 	void MonsterDead(AController* EventInstigator);
 
 	UFUNCTION()
 	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
 	UFUNCTION()
 	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };

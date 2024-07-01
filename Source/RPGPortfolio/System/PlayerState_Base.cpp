@@ -61,10 +61,6 @@ void APlayerState_Base::BeginPlay()
 		m_PlayerStat = pGameInst->GetPlayerStatus();
 		m_PlayerBasePower = pGameInst->GetPlayerBasePower();
 		m_EquipmentStat = pGameInst->GetEquipmentStatInfo();
-		UE_LOG(LogTemp, Warning, TEXT("physicAtk : %f"), m_PlayerBasePower.PhysicAtk);
-		UE_LOG(LogTemp, Warning, TEXT("physicDef : %f"), m_PlayerBasePower.PhysicDef);
-		UE_LOG(LogTemp, Warning, TEXT("MagicAtk : %f"), m_PlayerBasePower.MagicAtk);
-		UE_LOG(LogTemp, Warning, TEXT("MagicDef : %f"), m_PlayerBasePower.MagicDef);
 		SetPlayerCurrentHP(m_PlayerBasePower.CurHP);
 		SetPlayerCurrentMP(m_PlayerBasePower.CurMP);
 		SetPlayerCurrentStamina(m_PlayerBasePower.CurStamina);

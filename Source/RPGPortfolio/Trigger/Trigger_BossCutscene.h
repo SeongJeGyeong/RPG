@@ -23,14 +23,11 @@ private:
 public:
 	virtual void BeginPlay() override;
 
-public:
+private:
 	// OverlapDelegate
 	UFUNCTION()
 	void BeginOverlap(AActor* _TriggerActor, AActor* _OtherActor);
 
-public:
 	UFUNCTION()
 	void EndLevelSequence();
-
-
 };

@@ -70,11 +70,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void MonsterDead();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-public:
-	void MonsterDead();
 	void StopBoneHitReaction(FName _BoneName);
 };

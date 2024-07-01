@@ -87,6 +87,7 @@ void ABoss_GreaterSpider::PlayGSMontage(EGreaterSpider_STATE _State)
 
 void ABoss_GreaterSpider::RushAttack(bool _Rush)
 {
+	SetActorTickEnabled(_Rush);
 	bRushMove = _Rush;
 	if ( _Rush )
 	{
@@ -377,7 +378,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 
-		// 피격 부위가 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
+		// 피격 부위가 메쉬나 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
 		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Pelvis")) && !PointDamageEvent->HitInfo.BoneName.IsEqual(FName("None")))
 		{
 			// 본 흔들림 표현

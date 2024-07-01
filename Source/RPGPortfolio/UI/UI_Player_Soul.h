@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_Player_Soul : public UUserWidget
 {
 	GENERATED_BODY()
@@ -25,17 +25,18 @@ private:
 	
 	int32 iDisplayedSoul;
 	int32 iGainedSoul;
-	bool bSoulGained = false;
-	bool bFadeOutGainedSoul = false;
 
 	float fOpacity = 0.f;
 
 	FTimerHandle SoulGainTimer;
+	FTimerHandle RenewSoulTimer;
+	FTimerHandle FadeOutSoulTimer;
 
 public:
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void RenewAmountOfSoul(int32 _GainedSoul);
 	void StartSoulGain();
+	void SoulGain();
+	void FadeOutSoul();
 };

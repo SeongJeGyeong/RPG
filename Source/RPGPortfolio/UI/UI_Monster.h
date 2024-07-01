@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_Monster : public UUserWidget
 {
 	GENERATED_BODY()
@@ -39,7 +39,4 @@ public:
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
-
 };

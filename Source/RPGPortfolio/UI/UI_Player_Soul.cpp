@@ -30,41 +30,6 @@ void UUI_Player_Soul::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Player_Soul::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-
-	// 획득한 소울 점진적으로 증가하는 것처럼 보이게
-	if (bSoulGained)
-	{
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
-
-		if (iDisplayedSoul < PlayerBasePower.AmountOfSoul)
-		{
-			iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 3.f * _DeltaTime, iDisplayedSoul, PlayerBasePower.AmountOfSoul);
-			m_Soul->SetText(FText::FromString(FString::Printf(TEXT("%d"), iDisplayedSoul)));
-		}
-		else
-		{
-			bSoulGained = false;
-			iDisplayedSoul = PlayerBasePower.AmountOfSoul;
-		}
-	}
-
-	// 획득한 소울 표시 페이드아웃
-	if (bFadeOutGainedSoul)
-	{
-		fOpacity = FMath::Clamp(fOpacity - _DeltaTime, 0.f, 1.f);
-		m_GainSoul->SetOpacity(fOpacity);
-		if (fOpacity <= 0.f)
-		{
-			m_GainSoul->SetVisibility(ESlateVisibility::Hidden);
-			bFadeOutGainedSoul = false;
-		}
-	}
-}
-
 void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)
 {
 	iGainedSoul = _GainedSoul;
@@ -79,6 +44,38 @@ void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)
 void UUI_Player_Soul::StartSoulGain()
 {
 	PlaySound(m_Sound->GetMenuSound(EMenuSound::SOUL_SUCK));
-	bFadeOutGainedSoul = true;
-	bSoulGained = true;
+
+	GetWorld()->GetTimerManager().ClearTimer(SoulGainTimer);
+	GetWorld()->GetTimerManager().SetTimer(RenewSoulTimer, this, &UUI_Player_Soul::SoulGain, 0.01f, true);
+	GetWorld()->GetTimerManager().SetTimer(FadeOutSoulTimer, this, &UUI_Player_Soul::FadeOutSoul, 0.01f, true);
+}
+
+// 획득한 소울 점진적으로 증가하는 것처럼 보이게
+void UUI_Player_Soul::SoulGain()
+{
+	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
+
+	if ( iDisplayedSoul < PlayerBasePower.AmountOfSoul )
+	{
+		iDisplayedSoul = FMath::Clamp(iDisplayedSoul + iGainedSoul * 3 * GetWorld()->GetDeltaSeconds(), iDisplayedSoul, PlayerBasePower.AmountOfSoul);
+		m_Soul->SetText(FText::FromString(FString::Printf(TEXT("%d"), iDisplayedSoul)));
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RenewSoulTimer);
+		iDisplayedSoul = PlayerBasePower.AmountOfSoul;
+	}
+}
+
+// 획득한 소울 표시 페이드아웃
+void UUI_Player_Soul::FadeOutSoul()
+{
+	fOpacity = FMath::Clamp(fOpacity - 0.01f, 0.f, 1.f);
+	m_GainSoul->SetOpacity(fOpacity);
+	if ( fOpacity <= 0.f )
+	{
+		m_GainSoul->SetVisibility(ESlateVisibility::Hidden);
+		GetWorld()->GetTimerManager().ClearTimer(FadeOutSoulTimer);
+	}
 }

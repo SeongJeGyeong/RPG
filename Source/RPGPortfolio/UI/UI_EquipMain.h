@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_EquipMain : public UUserWidget
 {
 	GENERATED_BODY()
@@ -29,7 +29,6 @@ private:
 
 public:
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void ListVisibilityChanged(ESlateVisibility _Visibility);
 

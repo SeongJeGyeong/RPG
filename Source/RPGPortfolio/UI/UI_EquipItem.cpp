@@ -52,11 +52,6 @@ void UUI_EquipItem::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_EquipItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_EquipItem::SlotVisibilityChanged(ESlateVisibility _Visibility)
 {
 	if ( _Visibility == ESlateVisibility::Visible )

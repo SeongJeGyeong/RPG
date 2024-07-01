@@ -34,12 +34,6 @@ void UUI_StatusMain::NativeConstruct()
 	RenewStatusUI();
 }
 
-void UUI_StatusMain::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-
-}
-
 void UUI_StatusMain::RenewStatusUI()
 {
 	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));

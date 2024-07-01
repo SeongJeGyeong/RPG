@@ -43,11 +43,6 @@ void UUI_InvenItem::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_InvenItem::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_InvenItem::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);

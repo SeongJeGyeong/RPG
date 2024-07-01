@@ -19,31 +19,33 @@ class RPGPORTFOLIO_API UPlayer_CameraArm : public USpringArmComponent
 public:
 	UPlayer_CameraArm();
 
-public:
+private:
 	// 록온 가능 거리
-	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera")
+	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
 	float fMaxTargetLockDistance;
 
 	// 디버그 온오프
-	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera")
+	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
 	bool bDrawDebug;
 
-	// 록온 토글
 	UPROPERTY()
+	class APlayer_Base_Knight* m_Player;
+
+	// 락온 실패시 시점 초기화 타이머
+	FTimerDelegate LockOnFailedDelegate;
+
+public:
+	// 록온 토글
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bToggleLockOn;
 
 	// 록온 실패시 카메라 정면 회전값
 	FRotator rForwardRotation;
 
-	UPROPERTY()
-	class APlayer_Base_Knight* m_Player;
-
 	// 록온 타겟 컴포넌트
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY()
 	class ULockOnTargetComponent* m_Target;
 
-	// 락온 실패시 시점 초기화 타이머
-	FTimerDelegate LockOnFailedDelegate;	
 protected:
 	virtual void BeginPlay() override;
 
@@ -51,16 +53,16 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	bool ToggleCameraLockOn(const bool& _ToggleLockOn);
-	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
 	void BreakLockOnTarget();
-	class ULockOnTargetComponent* GetLockTarget();
 	void SwitchTarget(ELockOnDirection SwitchDirection);
-	TArray<class ULockOnTargetComponent*> GetTargetComponents();
 
-	void ResetCamera();
-
-	/* True if the camera is currently locked to a target */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Lock On Camera")
+	//UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Lock On Camera")
 	bool IsCameraLockedToTarget();
 
+private:
+	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
+	TArray<class ULockOnTargetComponent*> GetTargetComponents();
+	class ULockOnTargetComponent* GetLockTarget();
+
+	void ResetCamera();
 };

@@ -11,7 +11,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_InvenItem : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()
@@ -53,7 +53,6 @@ public:
 	void SetStatUI(UUI_PlayerStat* _StatUI) { m_StatUI = _StatUI; }
 public:
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
 	UFUNCTION()

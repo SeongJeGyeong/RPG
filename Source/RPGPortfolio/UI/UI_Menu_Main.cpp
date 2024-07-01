@@ -56,11 +56,6 @@ void UUI_Menu_Main::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Menu_Main::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Menu_Main::EquipBtnClicked()
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));

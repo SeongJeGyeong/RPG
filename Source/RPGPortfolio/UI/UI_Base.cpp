@@ -48,11 +48,6 @@ void UUI_Base::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Base::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Base::ShowMenu(bool _bShow)
 {
 	if (_bShow)

@@ -21,7 +21,8 @@
 AMonster_Base::AMonster_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;	// false일 경우 TickFunction 자체가 레벨에 등록되지 않기 때문에 true로 처리
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AAIC_Monster_Base::StaticClass();
@@ -331,16 +332,6 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 	{
 
 		fDeadEffectRatio += 0.05f;
-		TArray<USceneComponent*> ChildMeshArr;
-		/*GetMesh()->GetChildrenComponents(true, ChildMeshArr);
-		if ( !ChildMeshArr.IsEmpty() )
-		{
-			for (USceneComponent* ChildMesh : ChildMeshArr)
-			{
-				USkeletalMeshComponent* ChildSkelMesh = Cast<USkeletalMeshComponent>(ChildMesh);
-				ChildSkelMesh->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
-			}
-		}*/
 		GetMesh()->SetScalarParameterValueOnMaterials(TEXT("EffectRatio"), fDeadEffectRatio);
 		if ( fDeadEffectRatio > 1.f )
 		{

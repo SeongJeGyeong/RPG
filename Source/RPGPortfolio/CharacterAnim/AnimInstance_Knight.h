@@ -125,6 +125,7 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _DT) override;
 	
+private:
 	// Foot IK용 함수들
 	void FootIK(float _DeltaTime);
 	TTuple<bool, float> CapsuleDistance(FName _SocketName, ACharacter* _Char);

@@ -31,7 +31,8 @@ public:
 
     // 페이드 인/아웃 설정
     virtual void Fade(const float _Duration, const bool _ToBlack);
-    
+
+private:
     // 스크린에 페이드 효과 적용
     void DrawScreenFade(UCanvas* Canvas);
 };

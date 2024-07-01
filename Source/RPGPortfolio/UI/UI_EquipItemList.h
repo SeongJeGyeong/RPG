@@ -12,7 +12,7 @@ struct FInvenItemRow;
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_EquipItemList : public UUserWidget
 {
 	GENERATED_BODY()
@@ -40,7 +40,6 @@ public:
 	void SetSlotCategory(EEQUIP_SLOT _EquipSlot) { eEquipSlot = _EquipSlot; }
 	void SetCategoryText(FText _Text);
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void AddEquipItemList(UObject* _ItemData);
 	void ClearTileView();

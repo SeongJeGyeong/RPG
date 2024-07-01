@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "../RPGPortfolio.h"
 #include "FadeViewportClient.h"
+//#include "../RPGPortfolio.h"
 #include "Engine/Canvas.h"
 
 void UFadeViewportClient::PostRender(UCanvas* Canvas)

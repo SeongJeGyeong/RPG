@@ -167,7 +167,7 @@ public:
 
 private:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
-	void AttackHitCheck(EATTACK_TYPE _AtkType);	// 어택 트레이스용
+	void AttackHitCheck();	// 어택 트레이스용
 	void NextAttackCheck();	// 다음 공격 발동 체크
 	void DodgeTimeCheck(bool _Dodge); // 회피 무적시간 체크
 	void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
@@ -217,6 +217,4 @@ private:
 
 	UFUNCTION()
 	void ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index);
-
-
 };

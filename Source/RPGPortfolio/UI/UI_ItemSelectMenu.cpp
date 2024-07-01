@@ -44,11 +44,6 @@ void UUI_ItemSelectMenu::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_ItemSelectMenu::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_ItemSelectMenu::UseBtnClicked()
 {
 	if (IsValid(m_SelectedItemData))

@@ -55,16 +55,20 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+private:
+	void MeleeAttackHitCheck();
+	void SweepAtkTrace(FName _Start, FName _End, float _Radius);
+	void RushAttack(bool _Rush);
+	void RushAttackHitCheck(float _Radius);
+
+	void MonsterDead(AController* EventInstigator);
+
 public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EGreaterSpider_STATE _AtkState);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	void MeleeAttackHitCheck();
-	void SweepAtkTrace(FName _Start, FName _End, float _Radius);
-	void RushAttackHitCheck(float _Radius);
+
+	void RangedAttack();
 	void PlayGSMontage(EGreaterSpider_STATE _State);
-	void MonsterDead(AController* EventInstigator);
 	void DeadCollisionSetting();
 
-	void RushAttack(bool _Rush);
-	void RangedAttack();
 };

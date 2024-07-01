@@ -161,7 +161,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	// 공격 판정 트레이스
 	if (bAtkTrace)
 	{
-		AttackHitCheck(EATTACK_TYPE::PHYSIC_MELEE);
+		AttackHitCheck();
 	}
 
 	if (bSprintToggle)
@@ -736,11 +736,10 @@ void APlayer_Base_Knight::NextAttackCheck()
 }
 
 // 공격 트레이스 함수
-void APlayer_Base_Knight::AttackHitCheck(EATTACK_TYPE _AtkType)
+void APlayer_Base_Knight::AttackHitCheck()
 {
 	float AtkRadius = 10.f;
 	TArray<FHitResult> OutHits;
-	//FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	FVector vSwordBottom = GetMesh()->GetSocketLocation("FX_Sword_Bottom");
 	FVector vSwordTop = GetMesh()->GetSocketLocation("FX_Sword_Top");

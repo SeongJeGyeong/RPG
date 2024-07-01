@@ -20,11 +20,6 @@ void UUI_Player_QuickSlot::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Player_QuickSlot::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 {
 	// 퀵슬롯에 등록된 아이템이 없을 때

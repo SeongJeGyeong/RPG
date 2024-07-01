@@ -43,6 +43,8 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
 	{
 		bIsMove = true;
+		//UE_LOG(LogTemp, Warning, TEXT("vel x : %f"), vLocalVelocity.X);
+		//UE_LOG(LogTemp, Warning, TEXT("vel y : %f"), vLocalVelocity.Y);
 	}
 	else
 	{

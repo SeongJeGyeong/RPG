@@ -33,11 +33,6 @@ void UUI_TitleScreen::NativeConstruct()
 	}
 }
 
-void UUI_TitleScreen::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_TitleScreen::NewBtnClicked()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainMap_WP"));

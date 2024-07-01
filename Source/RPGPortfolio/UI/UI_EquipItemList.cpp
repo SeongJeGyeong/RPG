@@ -32,11 +32,6 @@ void UUI_EquipItemList::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_EquipItemList::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_EquipItemList::SetCategoryText(FText _Text)
 {
 	m_SlotName->SetText(_Text);

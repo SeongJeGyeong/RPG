@@ -53,12 +53,14 @@ void UAnimInstance_Monster_Base::NativeUpdateAnimation(float _fDeltaTime)
 
 void UAnimInstance_Monster_Base::AnimNotify_HitCheckStart()
 {
+	m_Monster->SetActorTickEnabled(true);
 	m_Monster->SetbAtkTrace(true);
 }
 
 void UAnimInstance_Monster_Base::AnimNotify_HitCheckEnd()
 {
 	m_Monster->SetbAtkTrace(false);
+	m_Monster->SetActorTickEnabled(false);
 }
 
 void UAnimInstance_Monster_Base::AnimNotify_NextAtkCheck()

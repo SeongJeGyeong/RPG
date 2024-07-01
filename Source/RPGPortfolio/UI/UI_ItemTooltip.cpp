@@ -20,11 +20,6 @@ void UUI_ItemTooltip::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_ItemTooltip::NativeTick(const FGeometry& _Geo, float _DeltaTime)
-{
-	Super::NativeTick(_Geo, _DeltaTime);
-}
-
 void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 {
 	switch ( _InvenData->GetItemType() )

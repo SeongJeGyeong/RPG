@@ -30,9 +30,6 @@ public:
 	UFUNCTION()
 	void AnimNotify_DeadAnimEnd();
 
-	//UFUNCTION()
-	//void AnimNotify_BodySlamed();
-
 	UFUNCTION()
 	void AnimNotify_RushStart();
 

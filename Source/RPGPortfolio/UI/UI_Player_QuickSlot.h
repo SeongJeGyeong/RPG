@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_Player_QuickSlot : public UUserWidget
 {
 	GENERATED_BODY()
@@ -28,11 +28,9 @@ private:
 
 public:
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& _Geo, float _DeltaTime) override;
 
 	void RenewLowerQuickSlot(int32 _Idx);
 	void RenewNextQuickSlot(int32 _Idx);
-	
 	
 	/*	false면 아래쪽 슬롯 투명도 세팅
 		true면 위쪽 슬롯의 투명도 세팅	*/
