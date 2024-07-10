@@ -146,7 +146,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
-	float fMonsterDef;
+	float fMonsterDef = 0.f;
 	switch ( pDamageType->GetAtkType())
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
@@ -191,7 +191,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
 		// 락온되지 않은 상태에서 3초 동안 맞지 않았을 경우 위젯 사라지도록
-		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(true); }, 0.1f, false, 3.f);
+		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(false); }, 0.1f, false, 3.f);
 	}
 
 	// 비헤이비어 트리 피격 상태로 전환
@@ -217,20 +217,18 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
-	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor;
-	if (IsValid(HitMontage.LoadSynchronous()))
+	if (IsValid(m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor))
 	{
-		pAnimInst->Montage_Play(HitMontage.LoadSynchronous());
+		pAnimInst->Montage_Play(m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
 	}
 
-	USoundBase* HitSound = m_DataAssetInfo->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous();
-	if (IsValid(HitSound))
+	if (IsValid(m_DataAssetInfo->GetMonSoundData(m_Type)->HitSound_Normal))
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo->GetMonSoundData(m_Type)->HitSound_Normal, GetActorLocation());
 	}
 	else
 	{
@@ -304,10 +302,9 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 	pDropItem->SetDropItemID(eId);
 	pDropItem->SetDropItemStack(iStack);
 
-	USoundBase* DeadSound = m_DataAssetInfo->GetMonSoundData(m_Type)->DeadSound.LoadSynchronous();
-	if ( IsValid(DeadSound) )
+	if ( IsValid(m_DataAssetInfo->GetMonSoundData(m_Type)->DeadSound) )
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo->GetMonSoundData(m_Type)->DeadSound, GetActorLocation());
 	}
 	else
 	{
@@ -345,9 +342,9 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 // 경직상태가 되는 몽타주들 재생 종료시
 void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	TSoftObjectPtr<UAnimMontage> HitMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor;
-	if (IsValid(HitMontage.LoadSynchronous()))
+	if (IsValid(m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor))
 	{
+		UAnimMontage* HitMontage = m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor;
 		if (HitMontage == Montage)
 		{
 			// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
@@ -377,10 +374,9 @@ void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 void AMonster_Base::MonsterAttackNormal()
 {
 	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	TSoftObjectPtr<UAnimMontage> AtkMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor;
-	if (IsValid(AtkMontage.LoadSynchronous()))
+	if (IsValid(m_DataAssetInfo->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor))
 	{
-		pAnimInst->Montage_Play(AtkMontage.LoadSynchronous());
+		pAnimInst->Montage_Play(m_DataAssetInfo->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor);
 	}
 	else
 	{
@@ -469,7 +465,7 @@ void AMonster_Base::MeleeAttackHitCheck()
 
 void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType)
 {
-	float iDamage;
+	float iDamage = 0.f;
 
 	switch (_AtkType)
 	{

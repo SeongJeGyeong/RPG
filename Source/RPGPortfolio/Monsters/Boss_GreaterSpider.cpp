@@ -17,6 +17,9 @@
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+
 	m_PSC = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleComponent"));
 
 	m_PSC->SetupAttachment(GetRootComponent());
@@ -132,7 +135,6 @@ void ABoss_GreaterSpider::RangedAttack()
 	TSubclassOf<AProj_GS_Spiderling> ProjClass = LoadClass<AProj_GS_Spiderling>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_ShotSpiderling.BPC_ShotSpiderling_C'"));
 	AProj_GS_Spiderling* pProjectile = GetWorld()->SpawnActor<AProj_GS_Spiderling>(ProjClass, ProjectileLocation, GetActorRotation(), param);
 	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, m_Info.MagicAtk);
-	pProjectile->SetShotInstigator(this);
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
@@ -158,8 +160,6 @@ void ABoss_GreaterSpider::MeleeAttackHitCheck()
 		break;
 	case EGreaterSpider_STATE::RUSHATTACK:
 		RushAttackHitCheck(250.f);
-		break;
-	case EGreaterSpider_STATE::BODYSLAM:
 		break;
 	default:
 		break;
@@ -277,7 +277,7 @@ void ABoss_GreaterSpider::RushAttackHitCheck(float _Radius)
 
 void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EGreaterSpider_STATE _AtkState)
 {
-	float iDamage;
+	float iDamage = 0.f;
 
 	switch ( _AtkType )
 	{
@@ -326,7 +326,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
-	float fMonsterDef;
+	float fMonsterDef = 0.f;
 	switch ( pDamageType->GetAtkType() )
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:

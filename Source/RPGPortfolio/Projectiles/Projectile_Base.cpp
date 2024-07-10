@@ -2,11 +2,13 @@
 
 
 #include "Projectile_Base.h"
+#include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AProjectile_Base::AProjectile_Base()
 {
-
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 // Called when the game starts or when spawned
@@ -15,9 +17,24 @@ void AProjectile_Base::BeginPlay()
 	Super::BeginPlay();
 }
 
-// Called every frame
-void AProjectile_Base::Tick(float DeltaTime)
+void AProjectile_Base::PlayHitEffect(bool _HittedActor, FVector _HitLocation, FRotator _EffrecRotation)
 {
-	Super::Tick(DeltaTime);
-}
+	UFXSystemAsset* _EffectSystem = _HittedActor ? m_HitEffect_Actor : m_HitEffect_Wall;
+	//m_DA_Projectile->GetProjectileData(m_ProjType).ProjectileEffect_Hit_Actor : m_DA_Projectile->GetProjectileData(m_ProjType).ProjectileEffect_Hit_Wall;
 
+	if (!IsValid(_EffectSystem) || !IsValid(m_HitSound))
+	{
+		return;
+	}
+
+	if ( (_EffectSystem)->IsA(UNiagaraSystem::StaticClass()) )
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<UNiagaraSystem>(_EffectSystem), _HitLocation, _EffrecRotation);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_HitSound, GetActorLocation());
+	}
+	else if ( (_EffectSystem)->IsA(UParticleSystem::StaticClass()) )
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Cast<UParticleSystem>(_EffectSystem), _HitLocation);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_HitSound, GetActorLocation());
+	}
+}

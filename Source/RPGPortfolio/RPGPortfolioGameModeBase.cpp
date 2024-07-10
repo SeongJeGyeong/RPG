@@ -10,6 +10,7 @@
 #include "UI/UI_Manual.h"
 #include "UI/UI_Settings.h"
 #include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
@@ -105,7 +106,6 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 	if (IsValid(m_WidgetClassArr[3]))
 	{
 		m_EquipUI = Cast<UUI_EquipMain>(CreateWidget(GetWorld(), m_WidgetClassArr[3]));
-
 		if (IsValid(m_EquipUI))
 		{
 			m_EquipUI->AddToViewport(5);

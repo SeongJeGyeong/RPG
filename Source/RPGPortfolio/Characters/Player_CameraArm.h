@@ -33,9 +33,10 @@ private:
 
 	// 락온 실패시 시점 초기화 타이머
 	FTimerDelegate LockOnFailedDelegate;
+	FTimerHandle LockOnFailedTimer;
 
 public:
-	// 록온 토글
+	// 록온 토글 (캐릭터 애님 블루프린트에서 사용)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bToggleLockOn;
 
@@ -50,13 +51,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	bool ToggleCameraLockOn(const bool& _ToggleLockOn);
 	void BreakLockOnTarget();
 	void SwitchTarget(ELockOnDirection SwitchDirection);
 
-	//UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Lock On Camera")
 	bool IsCameraLockedToTarget();
 
 private:

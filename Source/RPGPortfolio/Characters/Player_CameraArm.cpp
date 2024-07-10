@@ -12,6 +12,8 @@
 
 UPlayer_CameraArm::UPlayer_CameraArm()
 {
+	PrimaryComponentTick.bCanEverTick = false;
+
 	// 스프링 암 내장 설정
 	TargetArmLength = 400.0f;			// 스프링암 길이
 	bUsePawnControlRotation = true;		// 스프링암이 플레이어의 회전을 따라가도록 설정
@@ -26,8 +28,6 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 
 	bDrawDebug = false;
 	bToggleLockOn = false;
-
-	//UCameraComponent* m_Camera = Cast<UCameraComponent>(GetChildComponent(0));
 }
 
 void UPlayer_CameraArm::BeginPlay()
@@ -39,50 +39,27 @@ void UPlayer_CameraArm::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("스프링 암의 루트 액터 찾지 못함"));
 	}
-
-	LockOnFailedDelegate.BindUObject(this, &UPlayer_CameraArm::ResetCamera);
 }
-
-void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+/*if ( bDrawDebug )
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if ( IsCameraLockedToTarget() )
+	DrawDebugSphere(GetWorld(), m_Target->GetComponentLocation(), 5.f, 16, FColor::Red);
+	for ( ULockOnTargetComponent* Target : GetTargetComponents() )
 	{
-		if ( bDrawDebug )
-		{
-			DrawDebugSphere(GetWorld(), m_Target->GetComponentLocation(), 5.f, 16, FColor::Red);
-		}
-
-		if ( ( m_Target->GetComponentLocation() - GetComponentLocation() ).Size() > fMaxTargetLockDistance + m_Target->GetScaledSphereRadius() )
-		{
-			BreakLockOnTarget();
-		}
+		DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
 	}
-
-	if ( bDrawDebug )
-	{
-		for ( ULockOnTargetComponent* Target : GetTargetComponents() )
-		{
-			DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
-		}
-
-		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
-	}
-
-	if ( IsValid(m_Target) )
-	{
-		if ( m_Target->IsOwnerDead() )
-		{
-			BreakLockOnTarget();
-		}
-	}
-}
+	
+}*/
 
 // Toggle Lock On
 bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 {
-	bool bLockTarget = (IsCameraLockedToTarget() != _ToggleLockOn);
+	bool bLockTarget = ((m_Target != nullptr) != _ToggleLockOn);
+
+	if (bDrawDebug)
+	{
+		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxTargetLockDistance, 32, FColor::Cyan, false, 1.f);
+	}
+
 	if (bLockTarget)
 	{
 		ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
@@ -97,13 +74,14 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 		{
 			rForwardRotation = m_Player->GetActorRotation();
 			// 록온 대상 찾기 실패 시 캐릭터 정면 방향으로 카메라 회전
-			ResetCamera();
+			GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+			GetWorld()->GetTimerManager().SetTimer(LockOnFailedTimer, this, &UPlayer_CameraArm::ResetCamera, 0.01f, true);
 			bToggleLockOn = false;
 		}
 	}
 	else
 	{
-		if ( IsCameraLockedToTarget() )
+		if (m_Target != nullptr)
 		{
 			BreakLockOnTarget();
 		}
@@ -121,7 +99,7 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 		{
 			return;
 		}
-
+		// 타겟 컴포넌트에 록온 효과를 활성화
 		m_Target->SetLockOn(true);
 	}
 	bEnableCameraRotationLag = true;
@@ -130,7 +108,7 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 
 void UPlayer_CameraArm::BreakLockOnTarget()
 {
-	if ( IsCameraLockedToTarget() )
+	if ( m_Target != nullptr )
 	{
 		m_Target->SetLockOn(false);
 		m_Target = nullptr;
@@ -207,7 +185,7 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 
 void UPlayer_CameraArm::SwitchTarget(ELockOnDirection SwitchDirection)
 {
-	if ( !IsCameraLockedToTarget() )
+	if (m_Target == nullptr)
 	{
 		return;
 	}
@@ -288,7 +266,7 @@ void UPlayer_CameraArm::ResetCamera()
 	m_Player->GetController()->SetControlRotation(NewRot);
 	if (!m_Player->GetControlRotation().Equals(rForwardRotation, 1))
 	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnFailedDelegate);
+		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
 	}
 }
 

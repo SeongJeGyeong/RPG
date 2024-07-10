@@ -72,9 +72,6 @@ protected:
 
 	void MonsterDead();
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+public:
 	void StopBoneHitReaction(FName _BoneName);
 };

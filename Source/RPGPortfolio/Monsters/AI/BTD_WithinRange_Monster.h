@@ -15,9 +15,6 @@ class RPGPORTFOLIO_API UBTD_WithinRange_Monster : public UBTDecorator
 	GENERATED_BODY()
 	
 private:
-	/*UPROPERTY(EditAnywhere, Category = "Data", meta = (AllowPrivateAccess = true))
-	float m_Range;*/
-
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = true))
 	FBlackboardKeySelector m_TargetKey;
 

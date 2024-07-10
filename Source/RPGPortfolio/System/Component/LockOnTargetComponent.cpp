@@ -35,6 +35,7 @@ void ULockOnTargetComponent::SetLockOn(bool _LockOn)
 	if (GetOwner()->IsA(AMonster_Base::StaticClass()))
 	{
 		AMonster_Base* pMonster = Cast<AMonster_Base>(GetOwner());
+		// 몬스터 액터에 록온 효과를 활성화
 		pMonster->SetMonLockedOn(_LockOn);
 	}
 	else if (GetOwner()->IsA(ABoss_Base::StaticClass()))

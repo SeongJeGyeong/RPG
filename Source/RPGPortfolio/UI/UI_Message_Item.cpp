@@ -24,3 +24,10 @@ void UUI_Message_Item::SetItemMessage(FString _ItemName, FString _ItemImgPath, i
 	m_ItemName->SetText(FText::FromString(_ItemName));
 	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), _Stack)));
 }
+
+void UUI_Message_Item::SetItemMessage(FString _ItemName, UTexture2D* _Texture, int32 _Stack)
+{
+	m_ItemImg->SetBrushFromTexture(_Texture);
+	m_ItemName->SetText(FText::FromString(_ItemName));
+	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), _Stack)));
+}

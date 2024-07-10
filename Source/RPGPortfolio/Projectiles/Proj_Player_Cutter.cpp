@@ -32,11 +32,14 @@ void AProj_Player_Cutter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UE_LOG(LogTemp, Warning, TEXT("spawnprojectile"));
+
 	m_Hitbox->OnComponentHit.AddDynamic(this, &AProj_Player_Cutter::OnHitProj);
-	if (!IsValid(m_BaseNiagara))
+	/*if (!IsValid(m_BaseNiagara->GetAsset()))
 	{
 		m_BaseNiagara->SetAsset(GetProjBaseNiagara());
-	}
+		m_BaseNiagara->bAutoActivate = true;
+	}*/
 }
 
 // Called every frame
@@ -59,8 +62,8 @@ void AProj_Player_Cutter::LaunchMotion(FVector _LaunchVec)
 
 void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), GetProjHitNiagara(), Hit.ImpactPoint);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
+	PlayHitEffect(true, Hit.ImpactPoint);
+
 	if (GetOwner() == nullptr)
 	{
 		return;

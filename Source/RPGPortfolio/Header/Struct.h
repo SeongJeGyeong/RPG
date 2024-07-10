@@ -275,25 +275,25 @@ struct FMonsterSoundData
 
 	// 공격 타격 성공시 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> DmgSound_Normal;
+	USoundBase* DmgSound_Normal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> DmgSound_Alt;
+	USoundBase* DmgSound_Alt;
 
 	// 피격 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> HitSound_Normal;
+	USoundBase* HitSound_Normal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> HitSound_Alt;
+	USoundBase* HitSound_Alt;
 
 	// 공격 방어에 막힐 경우 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> BlockSound;
+	USoundBase* BlockSound;
 
 	// 사망 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> DeadSound;
+	USoundBase* DeadSound;
 
 };
 
@@ -304,34 +304,34 @@ struct FMonsterAnimData
 
 	// 근접공격 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Nor;
+	UAnimMontage* AtkAnim_Melee_Nor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Alt1;
+	UAnimMontage* AtkAnim_Melee_Alt1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Alt2;
+	UAnimMontage* AtkAnim_Melee_Alt2;
 
 	// 원거리공격 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Nor;
+	UAnimMontage* AtkAnim_Range_Nor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Alt1;
+	UAnimMontage* AtkAnim_Range_Alt1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Alt2;
+	UAnimMontage* AtkAnim_Range_Alt2;
 
 	// 피격 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> HitAnim_Nor;
+	UAnimMontage* HitAnim_Nor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> HitAnim_Alt;
+	UAnimMontage* HitAnim_Alt;
 
 	// 공격 방어에 막힐 경우 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UAnimMontage> BlockAnim;
+	UAnimMontage* BlockAnim;
 };
 
 USTRUCT(Atomic, BlueprintType)
@@ -360,6 +360,15 @@ USTRUCT(Atomic, BlueprintType)
 struct FProjectileAssets
 {
 	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UFXSystemAsset* ProjectileEffect_Shot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UFXSystemAsset* ProjectileEffect_Hit_Actor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UFXSystemAsset* ProjectileEffect_Hit_Wall;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNiagaraSystem*		ProjectileEffect;

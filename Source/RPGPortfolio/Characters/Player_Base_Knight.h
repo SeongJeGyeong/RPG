@@ -44,13 +44,16 @@ private:
 	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
 	UPROPERTY(EditAnywhere, Category = "Animation", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_PlayerMontage> m_PlayerMontage;
+	UDA_PlayerMontage* m_PlayerMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_PlayerSound> m_PlayerSound;
+	UDA_PlayerSound* m_PlayerSound;
 
-	UPROPERTY(EditAnywhere, Category = "MenuSound", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_MenuSound> m_MenuSound;
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
+	UDA_MenuSound* m_MenuSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile", meta = ( AllowPrivateAccess = "true" ))
+	TSubclassOf<class AProjectile_Base> m_Proj;
 
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
@@ -69,7 +72,6 @@ private:
 	// Lock On
 	float LockonControlRotationRate;
 	bool bLockOn;
-	FTimerDelegate LockOnDelegate;
 
 	// 이동 가능한 상태인지 체크용
 	bool bEnableMove;
@@ -119,8 +121,7 @@ private:
 	FTimerDelegate JumpAtkDelegate;
 	// 방어 표현 타이머
 	FTimerHandle BlockReactTimer;
-
-	bool btoggle;
+	FTimerHandle LockOnTimer;
 
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
@@ -171,7 +172,7 @@ private:
 	void NextAttackCheck();	// 다음 공격 발동 체크
 	void DodgeTimeCheck(bool _Dodge); // 회피 무적시간 체크
 	void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
-	void ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
+	bool ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	void StopBlockPhysics(); // 적 공격 방어시 피직스 효과
 	void JumpAttack();
 

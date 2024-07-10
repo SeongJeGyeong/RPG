@@ -298,7 +298,7 @@ bool UInventory_Mgr::CheckInventoryOpened()
 
 void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
-	EITEM_TYPE _Type;
+	EITEM_TYPE _Type = EITEM_TYPE::ALL;
 	switch ( _Slot )
 	{
 	case EEQUIP_SLOT::WEAPON_1:

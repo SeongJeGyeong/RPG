@@ -26,4 +26,5 @@ public:
 	virtual void NativeConstruct() override;
 
 	void SetItemMessage(FString _ItemName, FString _ItemImgPath, int32 _Stack);
+	void SetItemMessage(FString _ItemName, UTexture2D* _Texture, int32 _Stack);
 };

@@ -19,8 +19,8 @@
 ABoss_Base::ABoss_Base()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bCanEverTick = false;
+	//PrimaryActorTick.bStartWithTickEnabled = false;
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AAIC_Boss_Base::StaticClass();
@@ -79,12 +79,6 @@ void ABoss_Base::BeginPlay()
 	m_BossWidget->SetName(m_Info.Name);
 	m_BossWidget->SetHPRatio(1.f);
 	m_BossWidget->SetVisibility(ESlateVisibility::Visible);
-}
-
-// Called every frame
-void ABoss_Base::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ABoss_Base::MonsterDead()

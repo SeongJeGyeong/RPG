@@ -14,7 +14,7 @@
 AItem_Dropped_Base::AItem_Dropped_Base()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	m_Trigger = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger"));
 	m_Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -33,6 +33,12 @@ AItem_Dropped_Base::AItem_Dropped_Base()
 		m_Niagara->SetAsset(niagara.Object);
 		m_Niagara->Activate(true);
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> Sound(TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_GetItem.SC_Player_GetItem'"));
+	if (Sound.Succeeded())
+	{
+		m_ObtainedSound = Sound.Object;
+	}
 }
 
 void AItem_Dropped_Base::OnConstruction(const FTransform& _Transform)
@@ -47,12 +53,6 @@ void AItem_Dropped_Base::BeginPlay()
 	Super::BeginPlay();
 }
 
-// Called every frame
-void AItem_Dropped_Base::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void AItem_Dropped_Base::Interaction()
 {
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -64,9 +64,7 @@ void AItem_Dropped_Base::Interaction()
 
 	UInventory_Mgr::GetInst(GetWorld())->AddGameItem(m_IID, m_Stack);
 	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
-	USoundBase* pSound = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_GetItem.SC_Player_GetItem'"));
-
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pSound, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_ObtainedSound, GetActorLocation());
 	UUI_Base* pMainUI = pGameMode->GetMainHUD();
 	pMainUI->ShowItemMessageUI(true);
 	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, m_Stack);

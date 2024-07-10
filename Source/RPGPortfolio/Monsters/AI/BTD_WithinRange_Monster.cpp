@@ -30,8 +30,7 @@ bool UBTD_WithinRange_Monster::CalculateRawConditionValue(UBehaviorTreeComponent
 
 	AActor* pTarget = Cast<AActor>(pObject);
 
-	//float fRange = m_Range;
-	float fRange;
+	float fRange = 0.f;
 	if (!m_RangeKey.IsNone())
 	{
 		fRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(m_RangeKey.SelectedKeyName);

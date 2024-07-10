@@ -11,7 +11,7 @@
 
 AProj_GS_Spiderling::AProj_GS_Spiderling()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	m_Hitbox = CreateDefaultSubobject<USphereComponent>(TEXT("HitBox"));
 	m_Hitbox->SetCollisionProfileName("MonsterRangeAtk");
@@ -30,15 +30,10 @@ void AProj_GS_Spiderling::BeginPlay()
 	Super::BeginPlay();
 
 	m_Hitbox->OnComponentHit.AddDynamic(this, &AProj_GS_Spiderling::OnHitProj);
-	if (!IsValid(m_Particle))
+	/*if (!IsValid(m_Particle->Template))
 	{
 		m_Particle->SetTemplate(GetProjBaseParticle());
-	}
-}
-
-void AProj_GS_Spiderling::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	}*/
 }
 
 void AProj_GS_Spiderling::LaunchMotion(FVector _TargetVec)
@@ -57,8 +52,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 	if (!IsValid(pTarget))
 	{
 		FRotator HitRot = UKismetMathLibrary::MakeRotFromZ(Hit.ImpactNormal);
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GetProjHitGroundParticle(), Hit.ImpactPoint, HitRot);
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
+		PlayHitEffect(false, Hit.ImpactPoint, HitRot);
 
 		FHitResult HitResult;
 		FCollisionQueryParams Params(NAME_None, false, this);
@@ -98,8 +92,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 		Destroy();
 		return;
 	}
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), GetProjHitParticle(), Hit.Location);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GetProjHitSound(), GetActorLocation());
+	PlayHitEffect(true, Hit.Location);
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);

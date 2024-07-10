@@ -36,7 +36,7 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 
 	UE_LOG(LogTemp, Warning, TEXT(""));
 
-	EGreaterSpider_STATE AtkState;
+	EGreaterSpider_STATE AtkState = EGreaterSpider_STATE::DEFAULT;
 
 	if ( _OwnComp.GetBlackboardComponent()->GetValueAsBool(FName("Phase2")) )
 	{

@@ -111,22 +111,21 @@ void APlayer_Base_Knight::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
 
-	if ( !IsValid(m_PlayerMontage.LoadSynchronous()) )
+	if ( !IsValid(m_PlayerMontage) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
 	}
 
-	if ( !IsValid(m_PlayerSound.LoadSynchronous()) )
+	if ( !IsValid(m_PlayerSound) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
 	}
 	
-	if ( !IsValid(m_MenuSound.LoadSynchronous()) )
+	if ( !IsValid(m_MenuSound) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
 	}
 
-	LockOnDelegate.BindUObject(this, &APlayer_Base_Knight::TargetLockOn);
 	JumpAtkDelegate.BindUObject(this, &APlayer_Base_Knight::JumpAttack);
 }
 
@@ -140,11 +139,11 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	{
 		if (bDodgeMove)
 		{
-			if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)) )
+			if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW)) )
 			{
 				GetCharacterMovement()->AddInputVector(vDodgeVector * -1.f);
 			}
-			else if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW)) )
+			else if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_FW)) )
 			{
 				AddMovementInput(vDodgeVector, 1.f);
 			}
@@ -322,8 +321,9 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (!m_Arm->bToggleLockOn)
+	if (!m_Arm->IsCameraLockedToTarget())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Rotate"));
 		AddControllerYawInput(vInput.X);
 		AddControllerPitchInput(-vInput.Y);
 	}
@@ -411,14 +411,14 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	
 	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
-	if ( bSprintToggle )
+	if (bSprintToggle)
 	{
 		bSprintToggle = false;
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 
-	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
-		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
+	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
 	{
 		if (bNextAtkCheckOn)
 		{
@@ -432,12 +432,15 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	if ( GetCharacterMovement()->IsFalling() )
 	{
 		if ( GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 50.f &&
-			!m_AnimInst->Montage_IsPlaying((m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK))) )
+			!m_AnimInst->Montage_IsPlaying((m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK))) )
 		{
-			m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-			ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
+			if (ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK))
+			{
+				m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+				GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
+			}
+
 			bAttackToggle = false;
-			GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
 			return;
 		}
 	}
@@ -450,17 +453,21 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 			CurrentCombo = 1;
 			if (bHeavyToggle)
 			{
-				// 강공격
-				bHeavyAtk = true;
-				m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-				ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
+				if (ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK))
+				{
+					// 강공격
+					bHeavyAtk = true;
+					m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
+				}
 			}
 			else
 			{
-				// 약공격
-				bHeavyAtk = false;
-				m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK));
-				ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
+				if (ConsumeStaminaForMontage(EPlayerMontage::ATTACK))
+				{
+					// 약공격
+					bHeavyAtk = false;
+					m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK));
+				}
 			}
 			bAttackToggle = false;
 			bNextAtkCheckOn = false;
@@ -490,24 +497,31 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 
 	if ( GetCharacterMovement()->GetLastInputVector().IsZero() )
 	{
-		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW));
+		
+		if ( !ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW) )
+		{
+			return;
+		}
+		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW));
 		vDodgeVector = GetActorForwardVector();
 		rDodgeRotation = GetActorRotation();
-		ConsumeStaminaForMontage(EPlayerMontage::DODGE_BW);
 	}
 	else
 	{
-		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_FW));
+		if ( !ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW) )
+		{
+			return;
+		}
+		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_FW));
 		vDodgeVector = GetCharacterMovement()->GetLastInputVector();
 		rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
-		ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
 	}
 	bDodging = true;
 }
 
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 {
-	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::PARRY));
+	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::PARRY));
 }
 
 void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
@@ -517,13 +531,15 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	if (bTargetLocked)
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
 		bLockOn = true;
+		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+		GetWorld()->GetTimerManager().SetTimer(LockOnTimer, this, &APlayer_Base_Knight::TargetLockOn, 0.01f, true);
 	}
 	else
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-		bLockOn = false;
+		bLockOn = true;
+		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
 
@@ -556,9 +572,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	USoundBase* pCloseSound = m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_CLOSE);
-	USoundBase* pOpenSound = m_MenuSound.LoadSynchronous()->GetMenuSound(EMenuSound::MENU_OPEN);
-	if (!IsValid(pCloseSound) || !IsValid(pOpenSound))
+	if (!IsValid(m_MenuSound->GetMenuSound(EMenuSound::MENU_CLOSE)) || !IsValid(m_MenuSound->GetMenuSound(EMenuSound::MENU_OPEN)))
 	{
 		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
 		return;
@@ -568,7 +582,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 	if (pGameMode->IsSubMenuUIOpened())
 	{
 		pGameMode->CloseSubMenu();
-		UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_CLOSE));
 		return;
 	}
 
@@ -581,14 +595,14 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		GAU.SetHideCursorDuringCapture(false);
 		pController->SetInputMode(GAU);
 
-		UGameplayStatics::PlaySound2D(GetWorld(), pOpenSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_OPEN));
 	}
 	else
 	{
 		FInputModeGameOnly GameOnly;
 		pController->SetInputMode(GameOnly);
 
-		UGameplayStatics::PlaySound2D(GetWorld(), pCloseSound);
+		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_CLOSE));
 	}
 		
 	pController->bShowMouseCursor = bShowMenu;
@@ -661,20 +675,20 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 	}
 
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	// 스테미너가 0일 경우 공격 불가
-	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
+
+	// 마나가 부족할 경우 공격 불가
+	if (pState->GetPlayerBasePower().CurMP < 20.f)
 	{
 		return;
 	}
 
-	// 마나가 0일 경우 공격 불가
-	if (pState->GetPlayerBasePower().CurMP <= 0.f)
+	// 스태미나가 부족할 경우 공격 불가
+	if ( !ConsumeStaminaForMontage(EPlayerMontage::SLASH_CUTTER) )
 	{
 		return;
 	}
 
-	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
-	ConsumeStaminaForMontage(EPlayerMontage::SLASH_CUTTER);
+	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
 	pState->SetPlayerCurrentMP(pState->GetPlayerBasePower().CurMP - 20.f);
 	// ShotProjectile로
 }
@@ -685,11 +699,11 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 bool APlayer_Base_Knight::CheckMontagePlaying()
 {
 	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
-	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT))			||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM))		||
+	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT))			||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))||
+		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::USEITEM))		||
 		bDodging || 
 		bImmovableInAtk	// 공격 몽타주 플레이중으로 조건 걸면 몽타주 재생이 끝날때까지 움직일 수 없기때문에 공격 모션 끝난 후 바로 움직일 수 있도록
 		)
@@ -699,7 +713,7 @@ bool APlayer_Base_Knight::CheckMontagePlaying()
 	}
 	else
 	{
-		if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
+		if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
 		{
 			m_AnimInst->Montage_Stop(1.f);
 		}
@@ -719,6 +733,12 @@ void APlayer_Base_Knight::NextAttackCheck()
 	UE_LOG(LogTemp, Warning, TEXT("ComboAttack"));
 
 	EPlayerMontage AtkMontage = bHeavyAtk ? EPlayerMontage::HEAVYATTACK : EPlayerMontage::ATTACK;
+
+	if (!ConsumeStaminaForMontage(AtkMontage))
+	{
+		return;
+	}
+
 	int32 MaxCombo = bHeavyAtk ? 2 : 3;
 	if (CurrentCombo == MaxCombo)
 	{
@@ -730,9 +750,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 	}
 
 	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
-
-	m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(AtkMontage));
-	ConsumeStaminaForMontage(AtkMontage);
+	m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage->GetPlayerMontage(AtkMontage));	
 }
 
 // 공격 트레이스 함수
@@ -880,21 +898,21 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	// 피격 애니메이션 재생
 	if ( CheckMontagePlaying() || GetCharacterMovement()->IsFalling() ||
-		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
-		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) 
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) 
 		)
 	{
 		m_AnimInst->Montage_Stop(1.f);
 	}
-	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::HIT));
+	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT));
+	
 	// 피격 사운드 재생
-	USoundBase* pHitSound = m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::HIT);
-	if (!IsValid(pHitSound))
+	if (!IsValid(m_PlayerSound->GetPlayerSound(EPlayerSound::HIT)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("플레이어 피격사운드 로드 실패"));
 		return 0.0f;
 	}
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), pHitSound, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::HIT), GetActorLocation());
 
 	return 0.0f;
 }
@@ -935,18 +953,17 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 		// 방어 풀리고 경직상태 되도록
 		m_AnimInst->SetbIsGuard(false);
 		SetbToggleGuard(false);
-		m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
+		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
 	}
 	else
 	{
-		USoundBase* pBlockSound = m_PlayerSound.LoadSynchronous()->GetPlayerSound(EPlayerSound::GUARDBLOCK);
-		if (!IsValid(pBlockSound))
+		if (!IsValid(m_PlayerSound->GetPlayerSound(EPlayerSound::GUARDBLOCK)))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("블록 사운드 로드 실패"));
 		}
 		else
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), pBlockSound, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::GUARDBLOCK), GetActorLocation());
 		}
 
 		GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), true);
@@ -967,18 +984,18 @@ void APlayer_Base_Knight::StopBlockPhysics()
 
 void APlayer_Base_Knight::JumpAttack()
 {
-	float CurTime = m_AnimInst->Montage_GetPosition(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+	float CurTime = m_AnimInst->Montage_GetPosition(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 
 	// 바닥에 착지하기 전까지는 공격 준비 자세에서 정지한다.
 	if (CurTime > 0.2f)
 	{
-		m_AnimInst->Montage_Pause(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+		m_AnimInst->Montage_Pause(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 	}
 
 	// 바닥에 착지하면 애니메이션을 다시 재생
 	if (!GetCharacterMovement()->IsFalling())
 	{
-		m_AnimInst->Montage_Resume(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+		m_AnimInst->Montage_Resume(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 		return;
 	}
 	GetWorld()->GetTimerManager().SetTimerForNextTick(JumpAtkDelegate);
@@ -997,11 +1014,10 @@ void APlayer_Base_Knight::TargetLockOn()
 		
 		// 타겟을 바라보도록 로테이션 수정
 		GetController()->SetControlRotation(NewRot);
-
-		if (bLockOn)
-		{
-			GetWorld()->GetTimerManager().SetTimerForNextTick(LockOnDelegate);
-		}
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
 
@@ -1024,11 +1040,9 @@ void APlayer_Base_Knight::ShotProjectile()
 	// 투사체 발사 방향
 	FVector vDir = GetActorForwardVector() * 1000.f;
 
-	TSubclassOf<AProj_Player_Cutter> ProjClass = LoadClass<AProj_Player_Cutter>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_SlashCutter.BPC_SlashCutter_C'"));
-	AProj_Player_Cutter* pProjectile = GetWorld()->SpawnActor<AProj_Player_Cutter>(ProjClass, ProjectileLocation, GetActorRotation(), param);
+	AProj_Player_Cutter* pProjectile = GetWorld()->SpawnActor<AProj_Player_Cutter>(m_Proj, ProjectileLocation, GetActorRotation(), param);
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, pState->GetPlayerBasePower().MagicAtk);
-	pProjectile->SetShotInstigator(this);
 	pProjectile->LaunchMotion(vDir);
 }
 
@@ -1058,16 +1072,15 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItemInfo->NiagaraPath);
 	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	
-	USoundBase* pItemSound = m_PlayerSound.LoadSynchronous()->GetPlayerSound(SoundEnum);
-	if(!IsValid(pItemSound))
+	if(!IsValid(m_PlayerSound->GetPlayerSound(SoundEnum)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 사운드 로드 실패"));
 	}
 	else
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), pItemSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(SoundEnum), GetActorLocation());
 	}
-	m_AnimInst->Montage_Play(m_PlayerMontage.LoadSynchronous()->GetPlayerMontage(EPlayerMontage::USEITEM));
+	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::USEITEM));
 
 	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
 	if ( _Slot == EEQUIP_SLOT::EMPTY )
@@ -1104,7 +1117,7 @@ void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
 	}
 }
 
-void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
+bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 {
 	float fConsumption = 0.f;
 	switch (_Montage)
@@ -1132,7 +1145,14 @@ void APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 	}
 
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+
+	if (pState->GetPlayerBasePower().CurStamina < fConsumption)
+	{
+		return false;
+	}
 	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - fConsumption);
+
+	return true;
 }
 
 void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)

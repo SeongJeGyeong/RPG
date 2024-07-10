@@ -8,6 +8,7 @@
 #include "Projectile_Base.h"
 #include "Proj_GS_Spiderling.generated.h"
 
+
 /**
  * 
  */
@@ -36,10 +37,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 public:
 	virtual void LaunchMotion(FVector _TargetVec) override;

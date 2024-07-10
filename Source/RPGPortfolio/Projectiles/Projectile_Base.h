@@ -22,11 +22,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	EProjectileType	m_ProjType;
 
-	UPROPERTY(EditAnywhere, Category = "Assets", meta = ( AllowPrivateAccess = "true" ))
-	UDA_ProjectileAsset* m_DA_Projectile;
+	UPROPERTY(EditAnywhere, Category = "Effect", meta = ( AllowPrivateAccess = "true" ))
+	UFXSystemAsset* m_HitEffect_Actor;
 
-	UPROPERTY()
-	AActor* ShotInstigator;
+	UPROPERTY(EditAnywhere, Category = "Effect", meta = ( AllowPrivateAccess = "true" ))
+	UFXSystemAsset* m_HitEffect_Wall;
+
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
+	USoundBase* m_HitSound;
+
+	//UPROPERTY(EditAnywhere, Category = "Assets", meta = ( AllowPrivateAccess = "true" ))
+	//UDA_ProjectileAsset* m_DA_Projectile;
 
 public:	
 	// Sets default values for this actor's properties
@@ -36,23 +42,23 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	AActor* GetShotInstigator() const { return ShotInstigator; }
-	void SetShotInstigator(AActor* _Instigator) { ShotInstigator = _Instigator; }
-
+public:
 	EATTACK_TYPE GetAtkType() const { return m_AtkType; }
 	void SetAtkType(EATTACK_TYPE _AtkType) { m_AtkType = _AtkType; }
 	EProjectileType GetProjType() const { return m_ProjType; }
 	void SetProjType(EProjectileType _ProjType) { m_ProjType = _ProjType; }
-	UDA_ProjectileAsset* GetProjDA() const { return m_DA_Projectile; }
+
+	/*UDA_ProjectileAsset* GetProjDA() const { return m_DA_Projectile; }
+
+	UFXSystemAsset* GetHitEffect_Wall() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjectileEffect_Hit_Wall; }
 	UNiagaraSystem* GetProjBaseNiagara() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjectileEffect; }
 	UNiagaraSystem* GetProjHitNiagara() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitEffect; }
 	UParticleSystem* GetProjBaseParticle() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjectileEffect_Legacy; }
 	UParticleSystem* GetProjHitParticle() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitEffect_Legacy; }
 	UParticleSystem* GetProjHitGroundParticle() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitEffect_Ground_Legacy; }
-	USoundBase* GetProjHitSound() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitSound; }
+	USoundBase* GetProjHitSound() const { return m_DA_Projectile->GetProjectileData(m_ProjType).ProjHitSound; }*/
+
+public:
+	void PlayHitEffect(bool _HittedActor, FVector _HitLocation, FRotator _EffrecRotation = FRotator::ZeroRotator);
 
 };

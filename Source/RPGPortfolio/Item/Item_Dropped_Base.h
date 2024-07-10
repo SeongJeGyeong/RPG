@@ -18,18 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	AItem_Dropped_Base();
 
-protected:
-	virtual void OnConstruction(const FTransform& _Transform) override;
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class USphereComponent* m_Trigger;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
@@ -37,6 +27,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UNiagaraComponent* m_Niagara;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
+	USoundBase* m_ObtainedSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	EITEM_ID	m_IID;
@@ -48,6 +41,12 @@ private:
 	FText tCommand_Key;
 	UPROPERTY()
 	FText tCommand_Name;
+
+protected:
+	virtual void OnConstruction(const FTransform& _Transform) override;
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 public:
 	const EITEM_ID GetDropItemID() { return m_IID; }
