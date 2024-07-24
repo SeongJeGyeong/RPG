@@ -318,7 +318,7 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 
 float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if ( GetbIsDead() )
+	if (GetbBossDead())
 	{
 		return 0.f;
 	}

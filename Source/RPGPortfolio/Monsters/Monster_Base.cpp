@@ -96,7 +96,7 @@ void AMonster_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_Info.DetectRange);
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("PerceiveRange"), m_Info.BOSS_PerceiveRange);
 		}
-		m_AnimInst = Cast<UAnimInstance>(GetMesh()->GetAnimInstance());
+		m_AnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
 
@@ -136,7 +136,7 @@ void AMonster_Base::Tick(float DeltaTime)
 
 float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (m_State == EMONSTER_STATE::DEAD)
+	if (bMonDead)
 	{
 		return 0.0f;
 	}
@@ -200,7 +200,6 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		if ( pAIController->GetBlackboardComponent() )
 		{
-			m_State = EMONSTER_STATE::IDLE;
 			pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
 			if (!IsValid(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target"))))
 			{
@@ -217,18 +216,18 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
-	if (IsValid(m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor))
+	if (IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous()) )
 	{
-		pAnimInst->Montage_Play(m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor);
+		pAnimInst->Montage_Play(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
 	}
 
-	if (IsValid(m_DataAssetInfo->GetMonSoundData(m_Type)->HitSound_Normal))
+	if (IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous()))
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo->GetMonSoundData(m_Type)->HitSound_Normal, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous(), GetActorLocation());
 	}
 	else
 	{
@@ -245,8 +244,8 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
 
-	m_State = EMONSTER_STATE::DEAD;
-	bIsDead = true;
+	bMonDead = true;
+	m_AnimInst->SetDeadAnim();
 	m_WidgetComponent->DestroyComponent();
 	GetController()->UnPossess();
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
@@ -302,9 +301,9 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 	pDropItem->SetDropItemID(eId);
 	pDropItem->SetDropItemStack(iStack);
 
-	if ( IsValid(m_DataAssetInfo->GetMonSoundData(m_Type)->DeadSound) )
+	if ( IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DeadSound.LoadSynchronous()) )
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo->GetMonSoundData(m_Type)->DeadSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->DeadSound.LoadSynchronous(), GetActorLocation());
 	}
 	else
 	{
@@ -342,9 +341,9 @@ void AMonster_Base::MonsterDead(AController* EventInstigator)
 // 경직상태가 되는 몽타주들 재생 종료시
 void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (IsValid(m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor))
+	if (IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous()))
 	{
-		UAnimMontage* HitMontage = m_DataAssetInfo->GetMonAnimData(m_Type)->HitAnim_Nor;
+		UAnimMontage* HitMontage = m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous();
 		if (HitMontage == Montage)
 		{
 			// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
@@ -374,16 +373,14 @@ void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 void AMonster_Base::MonsterAttackNormal()
 {
 	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	if (IsValid(m_DataAssetInfo->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor))
+	if (IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor.LoadSynchronous()))
 	{
-		pAnimInst->Montage_Play(m_DataAssetInfo->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor);
+		pAnimInst->Montage_Play(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor.LoadSynchronous());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격애니메이션 로드 실패"));
 	}
-
-	m_State = EMONSTER_STATE::IDLE;
 }
 
 void AMonster_Base::SetMonLockedOn(bool _LockedOn)

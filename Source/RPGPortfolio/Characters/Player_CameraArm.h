@@ -45,12 +45,14 @@ public:
 
 	// 록온 타겟 컴포넌트
 	UPROPERTY()
-	class ULockOnTargetComponent* m_Target;
+	class ULockOnTargetComponent* m_Target = nullptr;
 
 protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	bool ToggleCameraLockOn(const bool& _ToggleLockOn);
 	void BreakLockOnTarget();
 	void SwitchTarget(ELockOnDirection SwitchDirection);

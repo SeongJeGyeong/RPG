@@ -50,7 +50,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 카메라와 컨트롤러의 회전 분리
+	// 캐릭터에게 컨트롤러의 회전 적용안함
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -60,17 +60,22 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	GetCharacterMovement()->JumpZVelocity = 500.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
-	m_Arm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("LockOnSpringArm"));
-	m_Arm->SetupAttachment(GetRootComponent());
-	m_Arm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
+	m_SArm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SArm"));
+	m_SArm->SetupAttachment(RootComponent);
+	m_SArm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
+	//m_LockArm->SetUsingAbsoluteRotation(false);
 
-	m_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	m_Camera->SetupAttachment(m_Arm);
-	m_Camera->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
+	m_Cam = CreateDefaultSubobject<UCameraComponent>(TEXT("Cam"));
+	m_Cam->SetupAttachment(m_SArm);
+	m_Cam->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
 	LockonControlRotationRate = 10.f;	// 락온 시 캐릭터 회전 보간 속도
 
-	//m_StatComp = CreateDefaultSubobject<UPlayer_StatComponent>(TEXT("StatComponent"));
+	static ConstructorHelpers::FClassFinder<AProjectile_Base> SkillProj(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_SlashCutter.BPC_SlashCutter_C'"));
+	if ( SkillProj.Succeeded() )
+	{
+		m_Proj = SkillProj.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -135,7 +140,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 회피 애니메이션 재생중일 때
-	if (bDodging)
+	if ( bDodging )
 	{
 		if (bDodgeMove)
 		{
@@ -270,11 +275,11 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	}
 
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
-
+	// 일부 모션의 경우 후딜레이 모션을 캔슬하고 바로 이동모션으로 전환한다.
 	m_AnimInst->StopAllMontages(0.25f);
 
 	float fSpeedRate = 1.f;
-	if ( bSprintToggle )
+	if (bSprintToggle)
 	{
 		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
@@ -297,7 +302,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	}
 
 	FVector2D vLocVelocity;
-	if ( !m_Arm->IsCameraLockedToTarget() )
+	if (!m_SArm->IsCameraLockedToTarget())
 	{
 		// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
 		vLocVelocity.X = fSpeedRate;
@@ -321,9 +326,8 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 {
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 
-	if (!m_Arm->IsCameraLockedToTarget())
+	if (!m_SArm->IsCameraLockedToTarget())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Rotate"));
 		AddControllerYawInput(vInput.X);
 		AddControllerPitchInput(-vInput.Y);
 	}
@@ -521,13 +525,13 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 {
-	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::PARRY));
+	// 미구현
+	//m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::PARRY));
 }
 
 void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
 {
-	bool bTargetLocked = m_Arm->ToggleCameraLockOn(_Instance.GetValue().Get<bool>());
-
+	bool bTargetLocked = m_SArm->ToggleCameraLockOn(_Instance.GetValue().Get<bool>());
 	if (bTargetLocked)
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -538,7 +542,7 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	else
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-		bLockOn = true;
+		bLockOn = false;
 		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
@@ -549,11 +553,11 @@ void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instan
 
 	if (SwitchDirection > 0.f)
 	{
-		m_Arm->SwitchTarget(ELockOnDirection::Left);
+		m_SArm->SwitchTarget(ELockOnDirection::Left);
 	}
 	else if (SwitchDirection < 0.f)
 	{
-		m_Arm->SwitchTarget(ELockOnDirection::Right);
+		m_SArm->SwitchTarget(ELockOnDirection::Right);
 	}
 }
 
@@ -750,7 +754,7 @@ void APlayer_Base_Knight::NextAttackCheck()
 	}
 
 	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
-	m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage->GetPlayerMontage(AtkMontage));	
+	m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage->GetPlayerMontage(AtkMontage));
 }
 
 // 공격 트레이스 함수
@@ -807,7 +811,7 @@ void APlayer_Base_Knight::AttackHitCheck()
 
 void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage)
 {
-	float iDamage;
+	float iDamage = 0.f;
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 
 	switch ( _AtkType )
@@ -842,7 +846,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
 
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
-	float fPlayerDef;
+	float fPlayerDef = 0.f;
 	switch (pDamageType->GetAtkType())
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
@@ -899,7 +903,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	// 피격 애니메이션 재생
 	if ( CheckMontagePlaying() || GetCharacterMovement()->IsFalling() ||
 		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK)) ||
-		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) 
+		 m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK))
 		)
 	{
 		m_AnimInst->Montage_Stop(1.f);
@@ -1004,10 +1008,10 @@ void APlayer_Base_Knight::JumpAttack()
 void APlayer_Base_Knight::TargetLockOn()
 {
 	// 록온 상태일 때 캐릭터 정면이 록온대상에게 고정되도록
-	if ( m_Arm->IsCameraLockedToTarget() )
+	if (m_SArm->IsCameraLockedToTarget())
 	{
 		// 플레이어에서 타겟으로의 벡터
-		FVector TargetVect = m_Arm->m_Target->GetComponentLocation() - ( m_Arm->GetComponentLocation() + FVector(0.f, 0.f, 100.f) );
+		FVector TargetVect = m_SArm->m_Target->GetComponentLocation() - ( m_SArm->GetComponentLocation() + FVector(0.f, 0.f, 100.f) );
 		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
 		FRotator CurrentRot = GetControlRotation();
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, GetWorld()->GetDeltaSeconds(), LockonControlRotationRate);
@@ -1023,7 +1027,7 @@ void APlayer_Base_Knight::TargetLockOn()
 
 void APlayer_Base_Knight::BreakLockOn()
 {
-	m_Arm->BreakLockOnTarget();
+	m_SArm->BreakLockOnTarget();
 }
 
 void APlayer_Base_Knight::ShotProjectile()

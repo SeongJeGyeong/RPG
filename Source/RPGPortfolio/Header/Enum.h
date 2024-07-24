@@ -18,7 +18,6 @@ enum class EInputActionType : uint8
 	DODGE,
 	ATTACK,
 	HEAVYTOGGLE,
-	HEAVYATTACK,
 	PARRY,
 	LOCKON,
 	SWITCHLOCKON,

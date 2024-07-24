@@ -43,7 +43,7 @@ protected:
 	float fDeadEffectRatio;
 
 private:
-	bool bIsDead;
+	bool bBossDead;
 	UPROPERTY()
 	int32 iTurnDir;	// 포즈 블렌딩용 변수
 
@@ -55,7 +55,7 @@ public:
 
 	void SetBossLockedOn(const bool& _LockedOn);
 
-	bool GetbIsDead() const {return bIsDead;}
+	bool GetbBossDead() const {return bBossDead;}
 
 	int32 GetiTurnDir() const { return iTurnDir; }
 	void SetiTurnDir(const int32& _TurnDir) { iTurnDir = _TurnDir; }

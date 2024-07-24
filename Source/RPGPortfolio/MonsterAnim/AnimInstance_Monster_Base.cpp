@@ -47,8 +47,6 @@ void UAnimInstance_Monster_Base::NativeUpdateAnimation(float _fDeltaTime)
 	{
 		bIsMove = false;
 	}
-
-	m_State = m_Monster->GetState();
 }
 
 void UAnimInstance_Monster_Base::AnimNotify_HitCheckStart()

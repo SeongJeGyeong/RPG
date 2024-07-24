@@ -275,25 +275,25 @@ struct FMonsterSoundData
 
 	// 공격 타격 성공시 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* DmgSound_Normal;
+	TSoftObjectPtr<USoundBase> DmgSound_Normal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* DmgSound_Alt;
+	TSoftObjectPtr<USoundBase> DmgSound_Alt;
 
 	// 피격 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* HitSound_Normal;
+	TSoftObjectPtr<USoundBase> HitSound_Normal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* HitSound_Alt;
+	TSoftObjectPtr<USoundBase> HitSound_Alt;
 
 	// 공격 방어에 막힐 경우 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* BlockSound;
+	TSoftObjectPtr<USoundBase> BlockSound;
 
 	// 사망 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase* DeadSound;
+	TSoftObjectPtr<USoundBase> DeadSound;
 
 };
 
@@ -304,34 +304,34 @@ struct FMonsterAnimData
 
 	// 근접공격 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* AtkAnim_Melee_Nor;
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Nor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* AtkAnim_Melee_Alt1;
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Alt1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* AtkAnim_Melee_Alt2;
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Melee_Alt2;
 
 	// 원거리공격 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* AtkAnim_Range_Nor;
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Nor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* AtkAnim_Range_Alt1;
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Alt1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* AtkAnim_Range_Alt2;
+	TSoftObjectPtr<UAnimMontage> AtkAnim_Range_Alt2;
 
 	// 피격 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* HitAnim_Nor;
+	TSoftObjectPtr<UAnimMontage> HitAnim_Nor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* HitAnim_Alt;
+	TSoftObjectPtr<UAnimMontage> HitAnim_Alt;
 
 	// 공격 방어에 막힐 경우 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimMontage* BlockAnim;
+	TSoftObjectPtr<UAnimMontage> BlockAnim;
 };
 
 USTRUCT(Atomic, BlueprintType)

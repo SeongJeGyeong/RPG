@@ -28,7 +28,6 @@ EBTNodeResult::Type UBTT_AroundTarget::ExecuteTask(UBehaviorTreeComponent& _OwnC
 	}
 
 	pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	pMonster->ChangeState(EMONSTER_STATE::WALK);
 
 	int32 iRand = FMath::RandRange(0, 1);
 	if ( iRand )

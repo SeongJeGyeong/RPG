@@ -12,11 +12,16 @@
 
 UPlayer_CameraArm::UPlayer_CameraArm()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	// 스프링 암 내장 설정
 	TargetArmLength = 400.0f;			// 스프링암 길이
 	bUsePawnControlRotation = true;		// 스프링암이 플레이어의 회전을 따라가도록 설정
+	bInheritPitch = true;
+	bInheritYaw = true;
+	bInheritRoll = true;
+	bDoCollisionTest = true;
+
 	bEnableCameraLag = true;			// 카메라 위치가 조금 지연되서 따라오도록 설정
 	bEnableCameraRotationLag = false;	// 카메라 회전 지연(록온 상태일때만 활성화)
 	CameraLagSpeed = 3.f;				// 위치 지연 속도
@@ -40,15 +45,21 @@ void UPlayer_CameraArm::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("스프링 암의 루트 액터 찾지 못함"));
 	}
 }
-/*if ( bDrawDebug )
+
+void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	DrawDebugSphere(GetWorld(), m_Target->GetComponentLocation(), 5.f, 16, FColor::Red);
-	for ( ULockOnTargetComponent* Target : GetTargetComponents() )
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bDrawDebug)
 	{
-		DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
+		for ( ULockOnTargetComponent* Target : GetTargetComponents() )
+		{
+			DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
+		}
+
+		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
 	}
-	
-}*/
+}
 
 // Toggle Lock On
 bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
@@ -76,7 +87,6 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 			// 록온 대상 찾기 실패 시 캐릭터 정면 방향으로 카메라 회전
 			GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
 			GetWorld()->GetTimerManager().SetTimer(LockOnFailedTimer, this, &UPlayer_CameraArm::ResetCamera, 0.01f, true);
-			bToggleLockOn = false;
 		}
 	}
 	else
@@ -87,6 +97,7 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 		}
 	}
 
+	bToggleLockOn = false;
 	return false;
 }
 
@@ -137,6 +148,7 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 		// 카메라 컴포넌트의 정면 방향벡터와 카메라암 컴포넌트에서 타겟으로의 방향벡터의 내적을 구한다.
 		// 내적 구하기 : A . B = Ax * Bx + Ay * By + Az * Bz
 		// 1 : 정면, -1 : 정반대, 0 : 정면에서 수직
+		
 		float Dot = FVector::DotProduct(m_Player->GetCamera()->GetForwardVector(), (AvailableTargets[i]->GetComponentLocation() - GetComponentLocation()).GetSafeNormal());
 		if (TargetComponent == nullptr)
 		{
@@ -262,6 +274,7 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 
 void UPlayer_CameraArm::ResetCamera()
 {
+	UE_LOG(LogTemp, Warning, TEXT("resetcamera"));
 	FRotator NewRot = FMath::RInterpTo(m_Player->GetControlRotation(), rForwardRotation, GetWorld()->GetDeltaSeconds(), 10.f);
 	m_Player->GetController()->SetControlRotation(NewRot);
 	if (!m_Player->GetControlRotation().Equals(rForwardRotation, 1))

@@ -43,7 +43,6 @@ EBTNodeResult::Type UBTT_NextPos_Monster::ExecuteTask(UBehaviorTreeComponent& _O
 	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if (IsValid(pMonster))
 	{
-		pMonster->ChangeState(EMONSTER_STATE::WALK);
 		pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	}
 

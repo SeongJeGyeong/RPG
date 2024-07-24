@@ -51,6 +51,7 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 	}
 
 	m_BGMComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	m_BGMComp->SetupAttachment(GetRootComponent());
 	m_BGMComp->bAutoActivate = false;
 }
 

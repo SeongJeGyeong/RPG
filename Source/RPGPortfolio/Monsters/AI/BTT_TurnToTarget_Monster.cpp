@@ -22,7 +22,7 @@ EBTNodeResult::Type UBTT_TurnToTarget_Monster::ExecuteTask(UBehaviorTreeComponen
 	{
 		return EBTNodeResult::Failed;
 	}
-	pMonster->ChangeState(EMONSTER_STATE::IDLE);
+
 	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	if (nullptr == pPlayer)
 	{

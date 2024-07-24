@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	bool bIsMove;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	bool bIsDead;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	FVector	vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
 
@@ -48,9 +51,6 @@ protected:
 	FQuat qOldOrientation;	// 현재 방향과 비교해서 캐릭터가 회전중인지 파악하기 위해 사용
 
 public:
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
-	bool bIsDead;
-
 	float GetfMoveSpeed() const { return fMoveSpeed; }
 	void SetfMoveSpeed(const float& _MoveSpeed) { fMoveSpeed = _MoveSpeed; }
 	bool GetbIsMove() const { return bIsMove; }

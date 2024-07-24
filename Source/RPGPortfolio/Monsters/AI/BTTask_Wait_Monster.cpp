@@ -13,7 +13,6 @@ EBTNodeResult::Type UBTTask_Wait_Monster::ExecuteTask(UBehaviorTreeComponent& _O
 
 	if (IsValid(pMonster))
 	{
-		pMonster->ChangeState(EMONSTER_STATE::IDLE);
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("RecentPosSet"), false);
 	}
 

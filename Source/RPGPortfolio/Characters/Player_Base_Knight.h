@@ -29,10 +29,10 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* m_Camera;
+	UCameraComponent* m_Cam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UPlayer_CameraArm* m_Arm;
+	UPlayer_CameraArm* m_SArm;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	//UPlayer_StatComponent* m_StatComp;
@@ -52,7 +52,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
 	UDA_MenuSound* m_MenuSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Projectile", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY()
 	TSubclassOf<class AProjectile_Base> m_Proj;
 
 	UPROPERTY()
@@ -71,7 +71,6 @@ private:
 private:
 	// Lock On
 	float LockonControlRotationRate;
-	bool bLockOn;
 
 	// 이동 가능한 상태인지 체크용
 	bool bEnableMove;
@@ -142,16 +141,21 @@ public:
 
 	// 락온 중 플레이어가 적을 바라보고 있도록 설정
 	void SetOrientRotation(const bool& _Val);
-	// 락온 토글 상태 확인
-	bool GetbToggleLockOn() const { return bLockOn; }
+
 	// 회피 애니메이션 종료 설정
 	void SetbDodging(const bool& _Dodging) { bDodging = _Dodging; }
 
-	const UCameraComponent* GetCamera() { return m_Camera; }
+	const UCameraComponent* GetCamera() { return m_Cam; }
 
 	void GainMonsterSoul(int32 _GainedSoul);
 	// 공격 트레이스에 피격된 대상 목록 초기화
 	void EmptyHitActorArr() { HitActorArr.Empty(); }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bLockOn;
+
+	// 락온 토글 상태 확인
+	bool GetbToggleLockOn() const { return bLockOn; }
 
 protected:
 	// Called when the game starts or when spawned

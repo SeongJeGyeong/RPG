@@ -36,17 +36,15 @@ private:
 	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
 
 	UPROPERTY()
-	UAnimInstance* m_AnimInst;
+	class UAnimInstance_Monster_Base* m_AnimInst;
 
 	UPROPERTY()
 	class UUI_Monster* m_MonsterWidget;
-	
-	EMONSTER_STATE	m_State;
 
 	float fDeadEffectRatio;
 	bool bMonLockedOn;
 	bool bAtkTrace;
-	bool bIsDead;
+	bool bMonDead;
 
 	FTimerHandle DeadTimer;
 	FTimerHandle HitEndTimer;
@@ -63,15 +61,10 @@ public:
 	UBehaviorTree* GetBehaviorTree() const { return m_BehaviroTree; }
 	UBlackboardData* GetBlackboard() const { return m_Blackboard; }
 	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
-	EMONSTER_STATE GetState() { return m_State; }
 
 	void SetMonLockedOn(bool _LockedOn);
-
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
-
-	bool GetbIsDead() const { return bIsDead; }
-
-	void ChangeState(EMONSTER_STATE _State) { m_State = _State; }
+	bool GetbMonDead() const { return bMonDead; }
 
 public:
 	// Sets default values for this character's properties

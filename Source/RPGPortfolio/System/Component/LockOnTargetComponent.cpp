@@ -12,13 +12,13 @@ ULockOnTargetComponent::ULockOnTargetComponent()
 
 	m_LockOnMark = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnWidget"));
 
-	m_LockOnMark->AttachToComponent(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
-
 	ConstructorHelpers::FClassFinder<UUserWidget> LockOnUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
 	if ( LockOnUI.Succeeded() )
 	{
 		m_LockOnMark->SetWidgetClass(LockOnUI.Class);
 	}
+
+	m_LockOnMark->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	m_LockOnMark->SetDrawSize(FVector2D(25.f, 25.f));
 	m_LockOnMark->SetWidgetSpace(EWidgetSpace::Screen);
@@ -51,7 +51,7 @@ bool ULockOnTargetComponent::IsOwnerDead()
 	if (GetOwner()->IsA(AMonster_Base::StaticClass()))
 	{
 		AMonster_Base* pMonster = Cast<AMonster_Base>(GetOwner());
-		if (pMonster->GetbIsDead())
+		if (pMonster->GetbMonDead())
 		{
 			return true;
 		}
@@ -59,7 +59,7 @@ bool ULockOnTargetComponent::IsOwnerDead()
 	else if (GetOwner()->IsA(ABoss_Base::StaticClass()))
 	{
 		ABoss_Base* pBoss = Cast<ABoss_Base>(GetOwner());
-		if (pBoss->GetbIsDead())
+		if (pBoss->GetbBossDead())
 		{
 			return true;
 		}

@@ -83,7 +83,7 @@ void ABoss_Base::BeginPlay()
 
 void ABoss_Base::MonsterDead()
 {
-	bIsDead = true;
+	bBossDead = true;
 
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (IsValid(GameMode))
