@@ -33,6 +33,11 @@ private:
 	UPROPERTY()
 	bool bDoOnce;
 
+	UPROPERTY()
+	float fFadeRate = 1.f;
+
+	FTimerHandle FadeTimer;
+
 public:	
 	// Sets default values for this actor's properties
 	AInteraction_Lever();
@@ -54,4 +59,7 @@ public:
 
 	UFUNCTION()
 	void EndLevelSequence();
+
+	//UFUNCTION(BlueprintCallable)
+	//void FadeInOutWidget(bool _InOut);
 };

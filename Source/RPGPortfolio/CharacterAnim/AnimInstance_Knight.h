@@ -11,7 +11,8 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam (FOnDodgeTimeCheckDelegate, bool); // 무적시간 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam (FOnAttackMoveDelegate, bool);	// 공격 중 이동 델리게이트
+//DECLARE_MULTICAST_DELEGATE_OneParam (FOnAttackMoveDelegate, bool);	// 공격 중 이동 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate); // 점프공격 델리게이트
 
 /**
  * 
@@ -38,50 +39,28 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	FVector	vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
-	FVector	vCameraLookAt;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	bool bIsGuard;			// 가드액션 여부
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
 
-	// IK용 변수
-	UPROPERTY()
-	TArray<AActor*> IgnoreActorArr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	float fRootDisplacement;		// 루트 본의 높이 위치
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	float fLineOutCapsule = 50.f;	// 캡슐 밖으로 뻗어나온 라인트레이스 길이
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	float fIKInterpSpeed = 5.f;	// IK가 적용되는 속도
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	FRotator rRRot;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	FRotator rLRot;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	float fRIK;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = ( AllowPrivateAccess = "true" ))
-	float fLIK;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
+	bool bIsSprint;			// 달리기 토글 여부
 
 public:
 	bool GetbIsGuard() { return bIsGuard; }
 	void SetbIsGuard(bool _IsGuard) { bIsGuard = _IsGuard; }
 
+	bool GetbIsSprint() { return bIsSprint; }
+	void SetbIsSprint(bool _IsSprint) { bIsSprint = _IsSprint; }
 	void SetLocalVelocityXY(FVector2D _Velocity) { vLocalVelocity.X = _Velocity.X; vLocalVelocity.Y = _Velocity.Y; }
 
 public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnDodgeTimeCheckDelegate OnDodgeTimeCheck;
-	FOnAttackMoveDelegate	OnAttackMove;
+	//FOnAttackMoveDelegate	OnAttackMove;
+	FOnJumpAtkDelegate		OnJumpAtk;
 
 	UFUNCTION()
 	void AnimNotify_AtkSectionStart();
@@ -99,8 +78,8 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_MoveStart();
-	UFUNCTION()
-	void AnimNotify_MoveEnd();
+	/*UFUNCTION()
+	void AnimNotify_MoveEnd();*/
 
 	UFUNCTION()
 	void AnimNotify_DodgeStart();
@@ -114,7 +93,10 @@ public:
 	UFUNCTION()
 	void AnimNotify_JumpEnd();
 	UFUNCTION()
-	void AnimNotify_FallEnd();	// 점프 없이 그냥 떨어졌을 때
+	void AnimNotify_FallStart();	// 점프 없이 그냥 떨어졌을 때
+
+	UFUNCTION()
+	void AnimNotify_Pause_JumpAtk();
 
 	// 원거리공격 발사
 	UFUNCTION()
@@ -127,8 +109,8 @@ public:
 	
 private:
 	// Foot IK용 함수들
-	void FootIK(float _DeltaTime);
+	/*void FootIK(float _DeltaTime);
 	TTuple<bool, float> CapsuleDistance(FName _SocketName, ACharacter* _Char);
-	TTuple<bool, float, FVector> FootLineTrace(FName _SocketName, ACharacter* _Char);
+	TTuple<bool, float, FVector> FootLineTrace(FName _SocketName, ACharacter* _Char);*/
 
 };

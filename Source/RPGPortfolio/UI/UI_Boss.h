@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Boss.generated.h"
 
+class UTextBlock;
+class UProgressBar;
+
 /**
  * 
  */
@@ -16,11 +19,11 @@ class RPGPORTFOLIO_API UUI_Boss : public UUserWidget
 
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_BossName;
+	UTextBlock* m_BossName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_BossDMGFigure;
+	UTextBlock* m_BossDMGFigure;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UProgressBar* m_BossHP;
+	UProgressBar* m_BossHP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	float fTakedDMG = 0.f;
 

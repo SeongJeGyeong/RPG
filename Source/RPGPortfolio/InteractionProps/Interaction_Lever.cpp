@@ -50,7 +50,6 @@ void AInteraction_Lever::Tick(float DeltaTime)
 void AInteraction_Lever::Interaction()
 {
 	UE_LOG(LogTemp, Warning, TEXT("레버 돌리기"));
-
 	if (IsValid(m_LevelSeq))
 	{
 		FMovieSceneSequencePlaybackSettings Settings = {};
@@ -61,11 +60,10 @@ void AInteraction_Lever::Interaction()
 		if (!IsValid(m_SeqPlayer))
 		{
 			m_SeqPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), m_LevelSeq, Settings, pSequenceActor);
-
 			// 레벨시퀀스 종료시 호출할 Delegate 등록
 			m_SeqPlayer->OnFinished.AddDynamic(this, &AInteraction_Lever::EndLevelSequence);
 			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-			if (IsValid(GameMode))
+			if ( IsValid(GameMode) )
 			{
 				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
 			}
@@ -82,6 +80,7 @@ void AInteraction_Lever::Interaction()
 void AInteraction_Lever::EndLevelSequence()
 {
 	m_Trigger->DestroyComponent();
+	
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (IsValid(GameMode))
 	{
@@ -100,3 +99,41 @@ void AInteraction_Lever::EndLevelSequence()
 	}
 }
 
+//void AInteraction_Lever::FadeInOutWidget(bool _InOut)
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("faded"));
+//	UE_LOG(LogTemp, Warning, TEXT("FadeRate : %f"), fFadeRate);
+//	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+//	if ( IsValid(GameMode) )
+//	{
+//		if (_InOut)
+//		{
+//			GetWorld()->GetTimerManager().SetTimer(FadeTimer, [this, GameMode]
+//			{
+//				fFadeRate = FMath::Clamp(fFadeRate - 0.01f, 0.f, 1.f);
+//				UE_LOG(LogTemp, Warning, TEXT("FadeRate : %f"), fFadeRate);
+//				GameMode->GetMainHUD()->SetRenderOpacity(fFadeRate);
+//				if ( fFadeRate <= 0.f )
+//				{
+//					GetWorld()->GetTimerManager().ClearTimer(FadeTimer);
+//				}
+//			}
+//			, 0.01f, true);
+//		}
+//		else
+//		{
+//			GameMode->GetMainHUD()->FadeScreen(1.f);
+//			GetWorld()->GetTimerManager().SetTimer(FadeTimer, [this, GameMode]
+//			{
+//			fFadeRate = FMath::Clamp(fFadeRate + 0.01f, 0.f, 1.f);
+//			GameMode->GetMainHUD()->SetRenderOpacity(fFadeRate);
+//			if ( fFadeRate >= 1.f )
+//			{
+//				GetWorld()->GetTimerManager().ClearTimer(FadeTimer);
+//			}
+//			}
+//			, 0.01f, true);
+//		}
+//	}
+//
+//}

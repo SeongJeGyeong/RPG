@@ -9,7 +9,6 @@
 
 class RPGPORTFOLIO_API Struct
 {
-
 };
 
 USTRUCT(Atomic, BlueprintType)

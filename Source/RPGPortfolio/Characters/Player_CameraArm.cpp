@@ -15,7 +15,7 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// 스프링 암 내장 설정
-	TargetArmLength = 400.0f;			// 스프링암 길이
+	TargetArmLength = 500.0f;			// 스프링암 길이
 	bUsePawnControlRotation = true;		// 스프링암이 플레이어의 회전을 따라가도록 설정
 	bInheritPitch = true;
 	bInheritYaw = true;
@@ -32,7 +32,6 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	fMaxTargetLockDistance = 1500.f;
 
 	bDrawDebug = false;
-	bToggleLockOn = false;
 }
 
 void UPlayer_CameraArm::BeginPlay()
@@ -78,7 +77,6 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 		if ( NewLockOnTarget != nullptr )
 		{
 			LockOnTarget(NewLockOnTarget);
-			bToggleLockOn = true;
 			return true;
 		}
 		else
@@ -97,7 +95,6 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 		}
 	}
 
-	bToggleLockOn = false;
 	return false;
 }
 
@@ -114,7 +111,7 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 		m_Target->SetLockOn(true);
 	}
 	bEnableCameraRotationLag = true;
-	m_Player->SetOrientRotation(false);
+	m_Player->GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 void UPlayer_CameraArm::BreakLockOnTarget()
@@ -125,10 +122,7 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 		m_Target = nullptr;
 
 		bEnableCameraRotationLag = false;
-		UE_LOG(LogTemp, Warning, TEXT("LockOn : False"));
-		m_Player->SetOrientRotation(true);
-
-		bToggleLockOn = false;
+		m_Player->GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
 }
 

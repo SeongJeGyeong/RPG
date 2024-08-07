@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Settings.generated.h"
 
+class UButton;
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,19 +19,19 @@ class RPGPORTFOLIO_API UUI_Settings : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	class UButton*		m_Btn_Quit;
+	UButton*		m_Btn_Quit;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	class UTextBlock* m_PlayerName;
+	UTextBlock* m_PlayerName;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	class UTextBlock* m_Level;
+	UTextBlock* m_Level;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	class UTextBlock* m_Playtime;
+	UTextBlock* m_Playtime;
 
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true"))
-	class UTextBlock* m_MapName;
+	UTextBlock* m_MapName;
 
 	UPROPERTY()
 	class UDA_MenuSound* m_Sound;

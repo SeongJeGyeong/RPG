@@ -72,7 +72,7 @@ void AMonster_Base::OnConstruction(const FTransform& _Transform)
 
 	for (int32 i = 0; i < DropTableArr.Num(); ++i)
 	{
-		if (DropTableArr[ i ]->Monster == m_Type)
+		if (DropTableArr[i]->Monster == m_Type)
 		{
 			m_DropItemArr.Add(*DropTableArr[i]);
 		}
@@ -179,6 +179,40 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		return 0.f;
 	}
 
+	// 비헤이비어 트리 피격 상태로 전환
+	AAIController* pAIController = Cast<AAIController>(GetController());
+	if ( IsValid(pAIController) )
+	{
+		if ( pAIController->GetBlackboardComponent() )
+		{
+			pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
+			if ( !IsValid(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target"))) )
+			{
+				// 공격한 대상 타겟으로 설정
+				pAIController->GetBlackboardComponent()->SetValueAsObject(FName("Target"), EventInstigator->GetPawn());
+			}
+		}
+	}
+
+	if ( IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous()) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 재생"));
+		pAnimInst->Montage_Play(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
+	}
+
+	if ( IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous()) )
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous(), GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
+	}
+
 	// 피격 이펙트 스폰
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -193,21 +227,6 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		// 락온되지 않은 상태에서 3초 동안 맞지 않았을 경우 위젯 사라지도록
 		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(false); }, 0.1f, false, 3.f);
 	}
-
-	// 비헤이비어 트리 피격 상태로 전환
-	AAIController* pAIController = Cast<AAIController>(GetController());
-	if (IsValid(pAIController))
-	{
-		if ( pAIController->GetBlackboardComponent() )
-		{
-			pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), true);
-			if (!IsValid(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target"))))
-			{
-				// 공격한 대상 타겟으로 설정
-				pAIController->GetBlackboardComponent()->SetValueAsObject(FName("Target"), EventInstigator->GetPawn());
-			}
-		}
-	}
 	
 	// 공격한 대상(투사체 포함)의 반대방향으로 밀려남
 	const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
@@ -216,33 +235,15 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
-	if (IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous()) )
-	{
-		pAnimInst->Montage_Play(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
-	}
-
-	if (IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous()))
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous(), GetActorLocation());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
-	}
-
 	return 0.0f;
 }
 
-void AMonster_Base::MonsterDead(AController* EventInstigator)
+void AMonster_Base::MonsterDead(AController* _EventInstigator)
 {
 	AAIController* pAIController = Cast<AAIController>(GetController());
 	pAIController->GetBrainComponent()->StopLogic(TEXT("Dead"));
 
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(_EventInstigator->GetPawn());
 
 	bMonDead = true;
 	m_AnimInst->SetDeadAnim();
@@ -434,7 +435,10 @@ void AMonster_Base::MeleeAttackHitCheck()
 	bResult ? color = FColor::Red : color = FColor::Green;
 
 	FVector vMidpoint = FMath::Lerp(vHitEnd, vHitStart, 0.5f);
-	DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat(), color, false, 0.5f);
+	if (bDebug)
+	{
+		DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat(), color, false, 0.5f);
+	}
 
 	if (bResult)
 	{
@@ -502,6 +506,15 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 			return;
 		}
 	}
+
+	// 공격 적중 시 잠시 경직
+	m_AnimInst->Montage_Pause();
+	GetWorld()->GetTimerManager().SetTimer(MonHitStiffTimer, [this]()
+	{
+		m_AnimInst->Montage_Resume(NULL);
+		GetWorld()->GetTimerManager().ClearTimer(MonHitStiffTimer);
+	},
+	0.05f, false);
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);

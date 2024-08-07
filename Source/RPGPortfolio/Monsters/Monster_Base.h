@@ -47,6 +47,7 @@ private:
 	bool bMonDead;
 
 	FTimerHandle DeadTimer;
+	FTimerHandle MonHitStiffTimer;
 	FTimerHandle HitEndTimer;
 	FTimerHandle WidgetDisplayTimer;
 
@@ -56,6 +57,10 @@ protected:
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBlackboardData* m_Blackboard;
+
+public:
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "variable")
+	bool bDebug;
 
 public:
 	UBehaviorTree* GetBehaviorTree() const { return m_BehaviroTree; }

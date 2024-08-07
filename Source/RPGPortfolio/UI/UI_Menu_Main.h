@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Menu_Main.generated.h"
 
+class UButton;
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,17 +19,17 @@ class RPGPORTFOLIO_API UUI_Menu_Main : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Equip;
+	UButton* m_Btn_Equip;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Inventory;
+	UButton* m_Btn_Inventory;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Status;
+	UButton* m_Btn_Status;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Manual;
+	UButton* m_Btn_Manual;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Settings;
+	UButton* m_Btn_Settings;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MenuName;
+	UTextBlock* m_MenuName;
 
 	UPROPERTY() 
 	class UDA_MenuSound* m_Sound;

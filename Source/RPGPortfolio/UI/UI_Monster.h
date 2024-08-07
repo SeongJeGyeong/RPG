@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Monster.generated.h"
 
+class UTextBlock;
+class UProgressBar;
+
 /**
  * 
  */
@@ -16,11 +19,11 @@ class RPGPORTFOLIO_API UUI_Monster : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MonsterName;
+	UTextBlock* m_MonsterName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MonDMGFigure;
+	UTextBlock* m_MonDMGFigure;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UProgressBar* m_MonsterHP;
+	UProgressBar* m_MonsterHP;
 
 	FText m_Name;
 	float m_Ratio;

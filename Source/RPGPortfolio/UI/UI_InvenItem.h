@@ -8,6 +8,10 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "UI_InvenItem.generated.h"
 
+class UTextBlock;
+class UImage;
+class UButton;
+
 /**
  * 
  */
@@ -18,13 +22,13 @@ class RPGPORTFOLIO_API UUI_InvenItem : public UUserWidget, public IUserObjectLis
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_ItemQnt;
+	UTextBlock*	m_ItemQnt;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UImage*		m_ItemImg;
+	UImage*		m_ItemImg;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UImage*		m_EquipMark;
+	UImage*		m_EquipMark;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton*		m_ItemBtn;
+	UButton*	m_ItemBtn;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UMenuAnchor* m_ItemMenuAnchor;
 

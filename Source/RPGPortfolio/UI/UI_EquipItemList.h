@@ -7,7 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_EquipItemList.generated.h"
 
-
+class UTextBlock;
 struct FInvenItemRow;
 /**
  * 
@@ -25,15 +25,13 @@ private:
 	class UUI_PlayerStat* m_Stat;
 
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_SlotName;
+	UTextBlock*	m_SlotName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_List_ItemName;
+	UTextBlock*	m_List_ItemName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UTileView*	m_EquipItemTileView;
 
-
 	EEQUIP_SLOT		eEquipSlot;
-
 	class UDA_MenuSound* m_Sound;
 
 public:

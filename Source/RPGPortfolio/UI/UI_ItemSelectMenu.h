@@ -6,6 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_ItemSelectMenu.generated.h"
 
+class UTextBlock;
+class UButton;
+class UItem_InvenData;
+
 /**
  * 
  */
@@ -16,20 +20,20 @@ class RPGPORTFOLIO_API UUI_ItemSelectMenu : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Txt_Use;
+	UTextBlock*		m_Txt_Use;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Use;
+	UButton*		m_Btn_Use;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Drop;
+	UButton*		m_Btn_Drop;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_Discard;
+	UButton*		m_Btn_Discard;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_DropAll;
+	UButton*		m_Btn_DropAll;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton* m_Btn_DiscardAll;
+	UButton*		m_Btn_DiscardAll;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
-	class UItem_InvenData* m_SelectedItemData;
+	UItem_InvenData* m_SelectedItemData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	bool bItemUseDelay;
@@ -38,7 +42,7 @@ public:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetSelectedItemData(class UItem_InvenData* _ItemData) { m_SelectedItemData = _ItemData; }
+	void SetSelectedItemData(UItem_InvenData* _ItemData) { m_SelectedItemData = _ItemData; }
 	void SetbItemUseDelay(const bool& _ItemUseDelay) { bItemUseDelay = _ItemUseDelay; }
 
 	UFUNCTION()

@@ -72,8 +72,8 @@ private:
 	// Lock On
 	float LockonControlRotationRate;
 
-	// 이동 가능한 상태인지 체크용
-	bool bEnableMove;
+	// 점프모션중인지 체크용
+	bool bIsJumped;
 
 	// 공격 체크용 토글
 	bool bAttackToggle;
@@ -85,7 +85,7 @@ private:
 	bool bHeavyAtk;
 
 	// 공격 모션 도중 움직이지 못하는 상태 체크
-	bool bImmovableInAtk;	// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
+	bool bNoInputInAtk;	// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
 
 	bool bAtkTrace;
 	bool bSprintToggle;
@@ -93,10 +93,8 @@ private:
 	// 아이템 사용 딜레이 체크용
 	bool bItemDelay;
 
-	// 공격 중 이동 체크용
-	bool bAtkMove;
-	FVector vAtkMoveVec;
-	FRotator rAtkMoveRot;
+	// 공격 중 회전 체크용
+	bool bAtkRotate;
 
 	// 구르기 관련
 	bool bDodging;
@@ -115,44 +113,47 @@ private:
 	int32 CurrentCombo;
 
 	bool bShowMenu;
-	
+
 	// 점프공격 타이머
-	FTimerDelegate JumpAtkDelegate;
+	FTimerHandle JumpAtkTimer;
+	// 공격 중 이동 타이머
+	FTimerHandle AtkMoveTimer;
 	// 방어 표현 타이머
 	FTimerHandle BlockReactTimer;
+	// 락온 타이머
 	FTimerHandle LockOnTimer;
+	// 공격 적중시 모션 경직 타이머
+	FTimerHandle HitStiffTimer;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bLockOn;	// 애님 블루프린트 블렌드 스페이스 전환용
 
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
 	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
 	// 조작 불가 상태
-	void SetbImmovableInAtk(const bool& _ImmovableInAtk) { bImmovableInAtk = _ImmovableInAtk; }
+	void SetbNoInputInAtk(const bool& _NoInputInAtk) { bNoInputInAtk = _NoInputInAtk; }
+	void SetbAtkRotate(const bool& _AtkRotate) { bAtkRotate = _AtkRotate; }
 	// 이동 가능 상태
-	void SetbEnableMove(const bool& _EnableMove) { bEnableMove = _EnableMove; }
+	void SetbIsJumped(const bool& _IsJumped) { bIsJumped = _IsJumped; }
 	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
 	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
 	// 무적상태
 	bool GetbInvincible() const { return bToggleInvinc; }
-	// 가드상태
+	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard);
 
 	// 락온 중 플레이어가 적을 바라보고 있도록 설정
-	void SetOrientRotation(const bool& _Val);
+	//void SetOrientRotation(const bool& _Val);
 
 	// 회피 애니메이션 종료 설정
 	void SetbDodging(const bool& _Dodging) { bDodging = _Dodging; }
 
 	const UCameraComponent* GetCamera() { return m_Cam; }
-
-	void GainMonsterSoul(int32 _GainedSoul);
-	// 공격 트레이스에 피격된 대상 목록 초기화
-	void EmptyHitActorArr() { HitActorArr.Empty(); }
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bLockOn;
 
 	// 락온 토글 상태 확인
 	bool GetbToggleLockOn() const { return bLockOn; }
@@ -175,7 +176,7 @@ private:
 	void AttackHitCheck();	// 어택 트레이스용
 	void NextAttackCheck();	// 다음 공격 발동 체크
 	void DodgeTimeCheck(bool _Dodge); // 회피 무적시간 체크
-	void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
+	// void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
 	bool ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	void StopBlockPhysics(); // 적 공격 방어시 피직스 효과
 	void JumpAttack();
@@ -184,6 +185,9 @@ private:
 	void TargetLockOn();
 
 public:	
+	void GainMonsterSoul(int32 _GainedSoul);
+	// 공격 트레이스에 피격된 대상 목록 초기화
+	void EmptyHitActorArr() { HitActorArr.Empty(); }
 	void CloseMenuUI();	
 	bool BlockEnemyAttack(float _Damage, FVector _MonDir); // 적 공격 방어
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
@@ -193,6 +197,7 @@ public:
 
 	void BreakLockOn();
 	void ShotProjectile();
+	void StopSprint();
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(0); };	// 플레이어 팀 설정(0)
 

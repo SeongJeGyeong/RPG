@@ -6,8 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_PlayerStat.generated.h"
 
+class UTextBlock;
+
 /**
- * 인벤토리, 장비 창의 스테이터스
+ * 인벤토리, 장비창의 스테이터스 UI
  */
 UCLASS(Meta = ( DisableNativeTick ))
 class RPGPORTFOLIO_API UUI_PlayerStat : public UUserWidget
@@ -16,52 +18,52 @@ class RPGPORTFOLIO_API UUI_PlayerStat : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Level;
+	UTextBlock* m_Level;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Vigor;
+	UTextBlock* m_Vigor;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Attunement;
+	UTextBlock* m_Attunement;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Endurance;
+	UTextBlock* m_Endurance;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Strength;
+	UTextBlock* m_Strength;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Dexterity;
+	UTextBlock* m_Dexterity;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Intelligence;
+	UTextBlock* m_Intelligence;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MaxHP;
+	UTextBlock* m_MaxHP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MaxMP;
+	UTextBlock* m_MaxMP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MaxStamina;
+	UTextBlock* m_MaxStamina;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_CurHP;
+	UTextBlock* m_CurHP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_CurMP;
+	UTextBlock* m_CurMP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_CurStamina;
+	UTextBlock* m_CurStamina;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_PhysicAtk;
+	UTextBlock* m_PhysicAtk;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_PhysicDef;
+	UTextBlock* m_PhysicDef;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MagicAtk;
+	UTextBlock* m_MagicAtk;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_MagicDef;
+	UTextBlock* m_MagicDef;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_AltPhysicAtk;
+	UTextBlock* m_AltPhysicAtk;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_AltPhysicDef;
+	UTextBlock* m_AltPhysicDef;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_AltMagicAtk;
+	UTextBlock* m_AltMagicAtk;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_AltMagicDef;
+	UTextBlock* m_AltMagicDef;
 
-	class UTextBlock* m_PhyAtk_Arrow;
-	class UTextBlock* m_PhyDef_Arrow;
-	class UTextBlock* m_MagAtk_Arrow;
-	class UTextBlock* m_MagDef_Arrow;
+	UTextBlock* m_PhyAtk_Arrow;
+	UTextBlock* m_PhyDef_Arrow;
+	UTextBlock* m_MagAtk_Arrow;
+	UTextBlock* m_MagDef_Arrow;
 
 public:
 	virtual void NativeConstruct() override;

@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_TitleScreen.generated.h"
 
+class UButton;
+
 /**
  * 
  */
@@ -15,9 +17,9 @@ class RPGPORTFOLIO_API UUI_TitleScreen : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	class UButton* m_NewBtn;
-	class UButton* m_LoadBtn;
-	class UButton* m_QuitBtn;
+	UButton* m_NewBtn;
+	UButton* m_LoadBtn;
+	UButton* m_QuitBtn;
 
 public:
 	virtual void NativeConstruct() override;

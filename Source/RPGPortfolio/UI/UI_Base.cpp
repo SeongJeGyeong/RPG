@@ -9,6 +9,7 @@
 #include "UI_Boss.h"
 #include "UI_Message_Main.h"
 #include "UI_Message_Item.h"
+#include "Components/Image.h"
 
 void UUI_Base::NativeConstruct()
 {

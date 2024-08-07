@@ -11,6 +11,7 @@
 #include "UI/UI_Settings.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameUserSettings.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
@@ -63,6 +64,17 @@ ARPGPortfolioGameModeBase::~ARPGPortfolioGameModeBase()
 void ARPGPortfolioGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GEngine->GetGameUserSettings()->SetViewDistanceQuality(1);
+	GEngine->GetGameUserSettings()->SetAntiAliasingQuality(1);
+	GEngine->GetGameUserSettings()->SetPostProcessingQuality(1);
+	GEngine->GetGameUserSettings()->SetShadowQuality(1);
+	GEngine->GetGameUserSettings()->SetGlobalIlluminationQuality(1);
+	GEngine->GetGameUserSettings()->SetReflectionQuality(1);
+	GEngine->GetGameUserSettings()->SetTextureQuality(1);
+	GEngine->GetGameUserSettings()->SetVisualEffectQuality(1);
+	GEngine->GetGameUserSettings()->SetFoliageQuality(1);
+	GEngine->GetGameUserSettings()->SetShadingQuality(1);
 
 	if (IsValid(m_WidgetClassArr[0]))
 	{

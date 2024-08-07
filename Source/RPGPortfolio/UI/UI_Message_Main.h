@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Message_Main.generated.h"
 
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,9 +18,9 @@ class RPGPORTFOLIO_API UUI_Message_Main : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_ActionText;
+	UTextBlock* m_ActionText;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_CommandText;
+	UTextBlock* m_CommandText;
 
 public:
 	virtual void NativeConstruct() override;

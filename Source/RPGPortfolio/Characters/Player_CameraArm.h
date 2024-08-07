@@ -36,10 +36,6 @@ private:
 	FTimerHandle LockOnFailedTimer;
 
 public:
-	// 록온 토글 (캐릭터 애님 블루프린트에서 사용)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bToggleLockOn;
-
 	// 록온 실패시 카메라 정면 회전값
 	FRotator rForwardRotation;
 

@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Message_Item.generated.h"
 
+class UImage;
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,11 +19,11 @@ class RPGPORTFOLIO_API UUI_Message_Item : public UUserWidget
 
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UImage*		m_ItemImg;
+	UImage*		m_ItemImg;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_ItemName;
+	UTextBlock*	m_ItemName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_ItemQnt;
+	UTextBlock*	m_ItemQnt;
 
 public:
 	virtual void NativeConstruct() override;

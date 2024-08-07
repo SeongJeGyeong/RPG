@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Player_Soul.generated.h"
 
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,9 +18,9 @@ class RPGPORTFOLIO_API UUI_Player_Soul : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_Soul;
+	UTextBlock* m_Soul;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock* m_GainSoul;
+	UTextBlock* m_GainSoul;
 
 	UPROPERTY()
 	class UDA_MenuSound* m_Sound;

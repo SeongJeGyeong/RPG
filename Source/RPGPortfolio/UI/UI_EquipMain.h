@@ -7,6 +7,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_EquipMain.generated.h"
 
+class UTextBlock;
+
 /**
  * 
  */
@@ -17,9 +19,9 @@ class RPGPORTFOLIO_API UUI_EquipMain : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*		m_Sel_ItemName;
+	UTextBlock*		m_Sel_ItemName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*		m_Sel_ItemSlot;
+	UTextBlock*		m_Sel_ItemSlot;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UUI_ItemTooltip*	m_ItemTooltipUI;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))

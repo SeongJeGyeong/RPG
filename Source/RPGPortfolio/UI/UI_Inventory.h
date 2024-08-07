@@ -7,6 +7,10 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Inventory.generated.h"
 
+class UTextBlock;
+class UButton;
+class UImage;
+
 /**
  * 
  */
@@ -21,17 +25,17 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UUI_ItemTooltip*	m_ItemTooltipUI;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*		m_CategoryText;
+	UTextBlock*				m_CategoryText;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*		m_ItemName;
+	UTextBlock*				m_ItemName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UUI_PlayerStat*	m_PlayerStatUI;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton*			m_Btn_Cat_Left;
+	UButton*				m_Btn_Cat_Left;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UButton*			m_Btn_Cat_Right;
+	UButton*				m_Btn_Cat_Right;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UImage*			m_Category_Img;
+	UImage*					m_Category_Img;
 
 	EITEM_TYPE			eCategory;
 	UPROPERTY()

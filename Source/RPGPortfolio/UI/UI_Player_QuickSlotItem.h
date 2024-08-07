@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Player_QuickSlotItem.generated.h"
 
+class UImage;
+class UTextBlock;
+
 /**
  * 
  */
@@ -16,13 +19,13 @@ class RPGPORTFOLIO_API UUI_Player_QuickSlotItem : public UUserWidget
 
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UImage*		m_Dish;
+	UImage*		m_Dish;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UImage*		m_ItemImg;
+	UImage*		m_ItemImg;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_ItemName;
+	UTextBlock*	m_ItemName;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UTextBlock*	m_Amount;
+	UTextBlock*	m_Amount;
 
 public:
 	virtual void NativeConstruct() override;

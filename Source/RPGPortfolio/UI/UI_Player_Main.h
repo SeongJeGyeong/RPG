@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Player_Main.generated.h"
 
+class UProgressBar;
+
 /**
  * 
  */
@@ -16,11 +18,11 @@ class RPGPORTFOLIO_API UUI_Player_Main : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UProgressBar* m_PlayerHP;
+	UProgressBar* m_PlayerHP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UProgressBar* m_PlayerMP;
+	UProgressBar* m_PlayerMP;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	class UProgressBar* m_PlayerStamina;
+	UProgressBar* m_PlayerStamina;
 
 public:
 	virtual void NativeConstruct() override;
