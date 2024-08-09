@@ -5,7 +5,10 @@
 #include "Manager/Inventory_Mgr.h"
 #include "MoviePlayer.h"
 #include "Blueprint/UserWidget.h"
-#include "System/FadeViewportClient.h"
+#include "RPGPortfolioGameModeBase.h"
+#include "UI/UI_FadeScreen.h"
+#include "Kismet/GameplayStatics.h"
+//#include "System/FadeViewportClient.h"
 
 UGameInstance_Base::UGameInstance_Base()
 	: m_InvenMgr(nullptr)
@@ -77,7 +80,13 @@ void UGameInstance_Base::BeginLoadingScreen(const FString& MapName)
 
 void UGameInstance_Base::EndLoadingScreen(UWorld* InLoadedWorld)
 {
-	const UWorld* World = GetWorld();
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( IsValid(GameMode) )
+	{
+		GameMode->GetFadeUI()->FadeIn(2.f);
+	}
+
+	/*const UWorld* World = GetWorld();
 	if ( World )
 	{
 		UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(World->GetGameViewport());
@@ -85,5 +94,5 @@ void UGameInstance_Base::EndLoadingScreen(UWorld* InLoadedWorld)
 		{
 			GameViewportClient->Fade(1.f, false);
 		}
-	}
+	}*/
 }

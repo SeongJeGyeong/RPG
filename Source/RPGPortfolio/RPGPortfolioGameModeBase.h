@@ -6,6 +6,15 @@
 #include "GameFramework/GameModeBase.h"
 #include "RPGPortfolioGameModeBase.generated.h"
 
+class UUI_Base;
+class UUI_Inventory;
+class UUI_StatusMain;
+class UUI_EquipMain;
+class UUI_Manual;
+class UUI_Settings;
+class UUI_FadeScreen;
+
+
 /**
  * 
  */
@@ -23,22 +32,25 @@ private:
 	TArray<TSubclassOf<UUserWidget>> m_WidgetClassArr;
 
 	UPROPERTY()
-	class UUI_Base* m_MainHUD;
+	UUI_Base* m_MainHUD;
 
 	UPROPERTY()
-	class UUI_Inventory* m_InventoryUI;
+	UUI_Inventory* m_InventoryUI;
 
 	UPROPERTY()
-	class UUI_StatusMain* m_StatusUI;
+	UUI_StatusMain* m_StatusUI;
 
 	UPROPERTY()
-	class UUI_EquipMain* m_EquipUI;
+	UUI_EquipMain* m_EquipUI;
 
 	UPROPERTY()
-	class UUI_Manual* m_ManualUI;
+	UUI_Manual* m_ManualUI;
 
 	UPROPERTY()
-	class UUI_Settings* m_SettingsUI;
+	UUI_Settings* m_SettingsUI;
+
+	UPROPERTY()
+	UUI_FadeScreen* m_FadeScreenUI;
 
 	UPROPERTY()
 	class UAudioComponent* m_BGMComp;
@@ -47,12 +59,13 @@ private:
 	class USoundBase* m_BGM;
 
 public:
-	class UUI_Base* GetMainHUD() { return m_MainHUD; }
-	class UUI_Inventory* GetInventoryUI() { return m_InventoryUI; }
-	class UUI_StatusMain* GetStatusUI() { return m_StatusUI; }
-	class UUI_EquipMain* GetEquipUI() { return m_EquipUI; }
-	class UUI_Manual* GetManualUI() { return m_ManualUI; }
-	class UUI_Settings* GetSettingsUI() { return m_SettingsUI; }
+	UUI_Base* GetMainHUD() { return m_MainHUD; }
+	UUI_Inventory* GetInventoryUI() { return m_InventoryUI; }
+	UUI_StatusMain* GetStatusUI() { return m_StatusUI; }
+	UUI_EquipMain* GetEquipUI() { return m_EquipUI; }
+	UUI_Manual* GetManualUI() { return m_ManualUI; }
+	UUI_Settings* GetSettingsUI() { return m_SettingsUI; }
+	UUI_FadeScreen* GetFadeUI() { return m_FadeScreenUI; }
 	bool IsSubMenuUIOpened();
 	void CloseSubMenu();
 

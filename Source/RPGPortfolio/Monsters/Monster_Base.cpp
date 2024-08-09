@@ -397,8 +397,16 @@ void AMonster_Base::SetMonLockedOn(bool _LockedOn)
 	}
 	else
 	{
-		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
-		GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() {m_WidgetComponent->SetVisibility(false); }, 0.1f, false, 2.f);
+		if (!bMonDead)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
+			GetWorld()->GetTimerManager().SetTimer(WidgetDisplayTimer, [this]() 
+				{
+					m_WidgetComponent->SetVisibility(false);
+					GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
+				},
+			0.1f, false, 2.f);
+		}
 	}
 }
 
@@ -453,7 +461,7 @@ void AMonster_Base::MeleeAttackHitCheck()
 			}
 
 			// 무적 상태일 경우
-			if (pPlayer->GetbInvincible())
+			if (!pPlayer->CanBeDamaged())
 			{
 				return;
 			}

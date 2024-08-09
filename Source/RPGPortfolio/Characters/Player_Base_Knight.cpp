@@ -42,8 +42,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	, bNextAtkCheckOn(false)
 	, bNoInputInAtk(false)
 	, bItemDelay(false)
-	, bToggleInvinc(false)
-	, fInvincTime(0.f)
 	, CurrentCombo(1)
 	, bShowMenu(false)
 {
@@ -252,7 +250,8 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
 	// 공격 중 이동 입력으로 공격방향 회전하도록
-	if (bAtkRotate)
+	// 락온 중에는 공격방향 적으로 고정해야하므로 불가능하게
+	if (bAtkRotate && !m_SArm->IsCameraLockedToTarget())
 	{
 		FVector vAtkDir = _Instance.GetValue().Get<FVector>();
 		FRotator TarRot = UKismetMathLibrary::MakeRotFromX(vAtkDir);
@@ -1247,8 +1246,6 @@ void APlayer_Base_Knight::CloseMenuUI()
 // 무적시간 동안 데미지 안받도록 설정
 void APlayer_Base_Knight::DodgeTimeCheck(bool _Dodge)
 {
-	bToggleInvinc = _Dodge;
-
 	if (_Dodge)
 	{
 		SetCanBeDamaged(false);

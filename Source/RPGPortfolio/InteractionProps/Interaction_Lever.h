@@ -59,7 +59,4 @@ public:
 
 	UFUNCTION()
 	void EndLevelSequence();
-
-	//UFUNCTION(BlueprintCallable)
-	//void FadeInOutWidget(bool _InOut);
 };

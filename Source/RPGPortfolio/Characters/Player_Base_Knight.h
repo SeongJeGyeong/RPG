@@ -102,10 +102,6 @@ private:
 	FVector vDodgeVector;
 	FRotator rDodgeRotation;
 
-	// 무적시간
-	bool bToggleInvinc;
-	float fInvincTime;
-
 	// 방패 방어 상태
 	bool bToggleGuard;
 
@@ -141,8 +137,7 @@ public:
 	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
 	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
-	// 무적상태
-	bool GetbInvincible() const { return bToggleInvinc; }
+
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard);

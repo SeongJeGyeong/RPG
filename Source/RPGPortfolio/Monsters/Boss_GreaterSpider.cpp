@@ -204,7 +204,7 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 				return;
 			}
 			// 무적 상태일 경우
-			if ( pPlayer->GetbInvincible() )
+			if (!pPlayer->CanBeDamaged())
 			{
 				return;
 			}
@@ -256,7 +256,7 @@ void ABoss_GreaterSpider::RushAttackHitCheck(float _Radius)
 				return;
 			}
 			// 무적 상태일 경우
-			if ( pPlayer->GetbInvincible() )
+			if (!pPlayer->CanBeDamaged())
 			{
 				return;
 			}

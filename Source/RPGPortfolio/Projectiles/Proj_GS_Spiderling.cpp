@@ -80,7 +80,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 				APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
 
 				// 무적 상태가 아닐 경우
-				if (IsValid(pPlayer) && !pPlayer->GetbInvincible())
+				if (IsValid(pPlayer) && pPlayer->CanBeDamaged())
 				{
 					TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 					DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);

@@ -9,6 +9,7 @@
 #include "UI/UI_EquipMain.h"
 #include "UI/UI_Manual.h"
 #include "UI/UI_Settings.h"
+#include "UI/UI_FadeScreen.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameUserSettings.h"
@@ -51,9 +52,16 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 		m_WidgetClassArr.Add(Settings.Class);
 	}
 
+	ConstructorHelpers::FClassFinder<UUserWidget> FadeScreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/BPC_UI_FadeScreen.BPC_UI_FadeScreen_C'"));
+	if ( FadeScreen.Succeeded() )
+	{
+		m_WidgetClassArr.Add(FadeScreen.Class);
+	}
+
 	m_BGMComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	m_BGMComp->SetupAttachment(GetRootComponent());
 	m_BGMComp->bAutoActivate = false;
+	m_BGMComp->SetUISound(true);
 }
 
 ARPGPortfolioGameModeBase::~ARPGPortfolioGameModeBase()
@@ -145,6 +153,17 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		{
 			m_SettingsUI->AddToViewport(5);
 			m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	if ( IsValid(m_WidgetClassArr[6]) )
+	{
+		m_FadeScreenUI = Cast<UUI_FadeScreen>(CreateWidget(GetWorld(), m_WidgetClassArr[6]));
+
+		if ( IsValid(m_FadeScreenUI) )
+		{
+			m_FadeScreenUI->AddToViewport(6);
+			m_FadeScreenUI->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 
