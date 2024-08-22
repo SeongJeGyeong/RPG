@@ -9,10 +9,10 @@
 
 
 
-DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate); // 다음콤보 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam (FOnDodgeTimeCheckDelegate, bool); // 무적시간 체크 델리게이트
-//DECLARE_MULTICAST_DELEGATE_OneParam (FOnAttackMoveDelegate, bool);	// 공격 중 이동 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate); // 점프공격 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);					// 다음콤보 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam (FOnDodgeTimeCheckDelegate, bool);	// 무적시간 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnAttackMoveDelegate);						// 공격 중 이동 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate);							// 점프공격 델리게이트
 
 /**
  * 
@@ -57,13 +57,13 @@ public:
 	void SetLocalVelocityXY(FVector2D _Velocity) { vLocalVelocity.X = _Velocity.X; vLocalVelocity.Y = _Velocity.Y; }
 
 public:
-	FOnNextAttackCheckDelegate OnNextAttackCheck;
-	FOnDodgeTimeCheckDelegate OnDodgeTimeCheck;
-	//FOnAttackMoveDelegate	OnAttackMove;
-	FOnJumpAtkDelegate		OnJumpAtk;
+	FOnNextAttackCheckDelegate	OnNextAttackCheck;
+	FOnDodgeTimeCheckDelegate	OnDodgeTimeCheck;
+	FOnAttackMoveDelegate		OnAttackMove;
+	FOnJumpAtkDelegate			OnJumpAtk;
 
-	UFUNCTION()
-	void AnimNotify_AtkSectionStart();
+	/*UFUNCTION()
+	void AnimNotify_AtkSectionStart();*/
 
 	// 다음콤보 체크
 	UFUNCTION()
@@ -78,8 +78,6 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_MoveStart();
-	/*UFUNCTION()
-	void AnimNotify_MoveEnd();*/
 
 	UFUNCTION()
 	void AnimNotify_DodgeStart();
@@ -106,11 +104,5 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _DT) override;
-	
-private:
-	// Foot IK용 함수들
-	/*void FootIK(float _DeltaTime);
-	TTuple<bool, float> CapsuleDistance(FName _SocketName, ACharacter* _Char);
-	TTuple<bool, float, FVector> FootLineTrace(FName _SocketName, ACharacter* _Char);*/
 
 };

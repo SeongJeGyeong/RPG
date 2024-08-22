@@ -69,32 +69,22 @@ private:
 	TArray<AActor*> HitActorArr;
 
 private:
-	// Lock On
-	float LockonControlRotationRate;
+	float LockonControlRotationRate;		// 락온 중 타겟 방향으로의 회전보간 속도
 
-	// 점프모션중인지 체크용
-	bool bIsJumped;
-
-	// 공격 체크용 토글
-	bool bAttackToggle;
-	// 강공격 체크용 토글
-	bool bHeavyToggle;
-	// 다음 공격 입력 체크용
-	bool bNextAtkCheckOn;
-	// 약공격인지 강공격인지 판별(true = 강, false = 약)
-	bool bHeavyAtk;
+	bool bIsJumped;			// 점프모션중인지 체크용
+	bool bAttackToggle;		// 공격 체크용 토글
+	bool bHeavyToggle;		// 강공격 체크용 토글
+	bool bNextAtkCheckOn;	// 다음 공격 입력 체크용
+	bool bHeavyAtk;			// 약공격인지 강공격인지 판별(true = 강, false = 약)
+	bool bAtkTrace;			// 공격 판정 체크
 
 	// 공격 모션 도중 움직이지 못하는 상태 체크
 	bool bNoInputInAtk;	// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
 
-	bool bAtkTrace;
-	bool bSprintToggle;
-
-	// 아이템 사용 딜레이 체크용
-	bool bItemDelay;
-
-	// 공격 중 회전 체크용
-	bool bAtkRotate;
+	bool bSprintToggle;		// 달리기 체크용 토글
+	bool bItemDelay;		// 아이템 사용 딜레이 체크용
+	bool bAtkRotate;		// 공격 중 회전 체크용
+	FVector vAtkDir = FVector(1.f, 0.f, 0.f);	// 공격 중 회전 방향
 
 	// 구르기 관련
 	bool bDodging;
@@ -110,16 +100,10 @@ private:
 
 	bool bShowMenu;
 
-	// 점프공격 타이머
-	FTimerHandle JumpAtkTimer;
-	// 공격 중 이동 타이머
-	FTimerHandle AtkMoveTimer;
-	// 방어 표현 타이머
-	FTimerHandle BlockReactTimer;
-	// 락온 타이머
-	FTimerHandle LockOnTimer;
-	// 공격 적중시 모션 경직 타이머
-	FTimerHandle HitStiffTimer;
+	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
+	FTimerHandle BlockReactTimer;	// 방어 표현 타이머
+	FTimerHandle LockOnTimer;		// 락온 타이머
+	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -153,6 +137,9 @@ public:
 	// 락온 토글 상태 확인
 	bool GetbToggleLockOn() const { return bLockOn; }
 
+	FVector GetvAtkDir() const { return vAtkDir; }
+	void SetvAtkDirZero()  { vAtkDir = FVector::ZeroVector; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -168,12 +155,11 @@ public:
 
 private:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
-	void AttackHitCheck();	// 어택 트레이스용
-	void NextAttackCheck();	// 다음 공격 발동 체크
-	void DodgeTimeCheck(bool _Dodge); // 회피 무적시간 체크
-	// void AttackMoveStart(bool _AtkMove); // 공격 모션 중 이동
+	void AttackHitCheck();				// 어택 트레이스용
+	void NextAttackCheck();				// 다음 공격 발동 체크
+	void DodgeTimeCheck(bool _Dodge);	// 회피 무적시간 체크
+	void AttackMove();				// 공격 모션 중 이동
 	bool ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
-	void StopBlockPhysics(); // 적 공격 방어시 피직스 효과
 	void JumpAttack();
 
 	UFUNCTION()

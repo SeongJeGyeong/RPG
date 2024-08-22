@@ -35,7 +35,6 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	}
 	vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
 
-	//vLocalVelocity = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
 	// bIsMove = Idle->Move Trigger
 	fMoveSpeed = m_Movement->Velocity.Size2D();
 	if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
@@ -66,16 +65,18 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 }
 
 // 공격 몽타주 시작
-void UAnimInstance_Knight::AnimNotify_AtkSectionStart()
-{
-	m_Player->SetbNoInputInAtk(true);
-	m_Player->SetbAtkRotate(true);
-}
+//void UAnimInstance_Knight::AnimNotify_AtkSectionStart()
+//{
+//	m_Player->SetbNoInputInAtk(true);
+//	m_Player->SetbAtkRotate(false);
+//	OnAttackRotate.Broadcast();
+//}
 
 // 다음 공격 입력 시작
 void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 {
 	m_Player->SetbNextAtkCheck(true);
+	m_Player->SetbAtkRotate(true);
 }
 
 // 다음 공격 입력 끝
@@ -83,6 +84,8 @@ void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
 	m_Player->SetbNextAtkCheck(false);
 	m_Player->SetbNoInputInAtk(false);
+	m_Player->SetbAtkRotate(false);
+	m_Player->SetvAtkDirZero();
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
@@ -102,15 +105,8 @@ void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 
 void UAnimInstance_Knight::AnimNotify_MoveStart()
 {
-	m_Player->SetbAtkRotate(false);
-	m_Movement->AddImpulse(m_Player->GetActorForwardVector() * 500.f, true);
-	//OnAttackMove.Broadcast(true);
+	OnAttackMove.Broadcast();
 }
-
-//void UAnimInstance_Knight::AnimNotify_MoveEnd()
-//{
-//	OnAttackMove.Broadcast(false);
-//}
 
 // 무적 프레임 시작
 void UAnimInstance_Knight::AnimNotify_DodgeStart()

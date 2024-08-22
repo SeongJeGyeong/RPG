@@ -36,14 +36,7 @@
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
-	: bIsJumped(false)
-	, bAttackToggle(false)
-	, bHeavyToggle(false)
-	, bNextAtkCheckOn(false)
-	, bNoInputInAtk(false)
-	, bItemDelay(false)
-	, CurrentCombo(1)
-	, bShowMenu(false)
+	: CurrentCombo(1)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -102,7 +95,7 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
 		m_AnimInst->OnDodgeTimeCheck.AddUObject(this, &APlayer_Base_Knight::DodgeTimeCheck);
-		//m_AnimInst->OnAttackMove.AddUObject(this, &APlayer_Base_Knight::AttackMoveStart);
+		m_AnimInst->OnAttackMove.AddUObject(this, &APlayer_Base_Knight::AttackMove);
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
 	}
 
@@ -253,12 +246,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	// 락온 중에는 공격방향 적으로 고정해야하므로 불가능하게
 	if (bAtkRotate && !m_SArm->IsCameraLockedToTarget())
 	{
-		FVector vAtkDir = _Instance.GetValue().Get<FVector>();
-		FRotator TarRot = UKismetMathLibrary::MakeRotFromX(vAtkDir);
-		FRotator CurRot(0, Controller->GetControlRotation().Yaw, 0);
-		CurRot.Yaw += TarRot.Yaw;
-		SetActorRotation(CurRot);
-
+		vAtkDir = _Instance.GetValue().Get<FVector>();
 		return;
 	}
 
@@ -886,7 +874,6 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	SetbToggleGuard(false);
 
 	// 현재 행동상태 해제
-	GetWorld()->GetTimerManager().ClearTimer(AtkMoveTimer);
 	bAtkTrace = false;
 	bNextAtkCheckOn = false;
 	bAttackToggle = false;
@@ -925,13 +912,25 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 }
 
 // 공격 모션 중 이동
-/*void APlayer_Base_Knight::AttackMoveStart(bool _AtkMove)
+void APlayer_Base_Knight::AttackMove()
 {
-	if (_AtkMove)
+	if (m_SArm->IsCameraLockedToTarget())
+	{
+		m_SArm->m_Target->GetComponentLocation();
+		float fDist = ( GetActorLocation() - m_SArm->m_Target->GetComponentLocation() ).Size();
+		UE_LOG(LogTemp, Warning, TEXT("Enemy Distance : %f"), fDist);
+		float fImpulsePower = 500.f;
+		if (fDist <= 200.f)
+		{
+			fImpulsePower = FMath::Clamp(fDist, 1.f, 200.f);
+		}
+		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * fImpulsePower, true);
+	}
+	else
 	{
 		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * 500.f, true);
 	}
-}*/
+}
 
 bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 {
@@ -978,19 +977,13 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 
 		GetWorld()->GetTimerManager().SetTimer(BlockReactTimer, [this]
 			{
-				GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
+				GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 			}, 
 			0.1f, false);
 	}
 
 	return true;
-}
-
-void APlayer_Base_Knight::StopBlockPhysics()
-{
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
-	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 }
 
 void APlayer_Base_Knight::JumpAttack()
@@ -1034,11 +1027,6 @@ void APlayer_Base_Knight::TargetLockOn()
 		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 	}
 }
-
-//void APlayer_Base_Knight::SetOrientRotation(const bool& _Val)
-//{
-//	GetCharacterMovement()->bOrientRotationToMovement = _Val;
-//}
 
 void APlayer_Base_Knight::BreakLockOn()
 {
