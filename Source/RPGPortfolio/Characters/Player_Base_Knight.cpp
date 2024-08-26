@@ -287,6 +287,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	{
 		// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
 		vLocVelocity.X = fSpeedRate;
+		vLocVelocity.Y = 0.f;
 	}
 	else
 	{
@@ -309,6 +310,10 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 	if (!m_SArm->IsCameraLockedToTarget())
 	{
+		if (LockOnFailedTimer.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+		}
 		AddControllerYawInput(vInput.X);
 		AddControllerPitchInput(-vInput.Y);
 	}
@@ -517,15 +522,15 @@ void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instan
 	if (bTargetLocked)
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
-		bLockOn = true;
 		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
 		GetWorld()->GetTimerManager().SetTimer(LockOnTimer, this, &APlayer_Base_Knight::TargetLockOn, 0.01f, true);
 	}
 	else
 	{
 		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-		bLockOn = false;
 		GetWorld()->GetTimerManager().ClearTimer(LockOnTimer);
+		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+		GetWorld()->GetTimerManager().SetTimer(LockOnFailedTimer, FTimerDelegate::CreateUObject(this, &APlayer_Base_Knight::ResetCamera, GetActorRotation()), 0.01f, true);
 	}
 }
 
@@ -793,12 +798,14 @@ void APlayer_Base_Knight::AttackHitCheck()
 void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage)
 {
 	m_AnimInst->Montage_Pause();
-	GetWorld()->GetTimerManager().SetTimer(HitStiffTimer, [this]()
+	//m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 0.1f);
+	GetWorld()->GetTimerManager().SetTimer(HitStiffTimer, [this, _AtkMontage]()
 	{
 		m_AnimInst->Montage_Resume(NULL);
+		//m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.2f);
 		GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
 	},
-	0.05f, false);
+	0.1f, false);
 
 	float iDamage = 0.f;
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
@@ -980,7 +987,7 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
 				GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 			}, 
-			0.1f, false);
+		0.1f, false);
 	}
 
 	return true;
@@ -1255,4 +1262,19 @@ void APlayer_Base_Knight::StopSprint()
 	bSprintToggle = false;
 	m_AnimInst->SetbIsSprint(false);
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+}
+
+void APlayer_Base_Knight::ResetCamera(FRotator _Rotate)
+{
+	FRotator NewRot = FMath::RInterpTo(GetControlRotation(), _Rotate, GetWorld()->GetDeltaSeconds(), 10.f);
+	GetController()->SetControlRotation(NewRot);
+	if ( GetControlRotation().Equals(_Rotate, 1.f) )
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+	}
+}
+
+bool APlayer_Base_Knight::GetbToggleLockOn() const
+{
+	return m_SArm->IsCameraLockedToTarget();
 }

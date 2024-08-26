@@ -79,13 +79,6 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 			LockOnTarget(NewLockOnTarget);
 			return true;
 		}
-		else
-		{
-			rForwardRotation = m_Player->GetActorRotation();
-			// 록온 대상 찾기 실패 시 캐릭터 정면 방향으로 카메라 회전
-			GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
-			GetWorld()->GetTimerManager().SetTimer(LockOnFailedTimer, this, &UPlayer_CameraArm::ResetCamera, 0.01f, true);
-		}
 	}
 	else
 	{
@@ -264,17 +257,6 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 	}
 
 	return TargetComps;
-}
-
-void UPlayer_CameraArm::ResetCamera()
-{
-	UE_LOG(LogTemp, Warning, TEXT("resetcamera"));
-	FRotator NewRot = FMath::RInterpTo(m_Player->GetControlRotation(), rForwardRotation, GetWorld()->GetDeltaSeconds(), 10.f);
-	m_Player->GetController()->SetControlRotation(NewRot);
-	if (!m_Player->GetControlRotation().Equals(rForwardRotation, 1))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
-	}
 }
 
 bool UPlayer_CameraArm::IsCameraLockedToTarget()

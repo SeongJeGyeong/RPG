@@ -31,14 +31,7 @@ private:
 	UPROPERTY()
 	class APlayer_Base_Knight* m_Player;
 
-	// 락온 실패시 시점 초기화 타이머
-	FTimerDelegate LockOnFailedDelegate;
-	FTimerHandle LockOnFailedTimer;
-
 public:
-	// 록온 실패시 카메라 정면 회전값
-	FRotator rForwardRotation;
-
 	// 록온 타겟 컴포넌트
 	UPROPERTY()
 	class ULockOnTargetComponent* m_Target = nullptr;
@@ -59,6 +52,4 @@ private:
 	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
 	TArray<class ULockOnTargetComponent*> GetTargetComponents();
 	class ULockOnTargetComponent* GetLockTarget();
-
-	void ResetCamera();
 };

@@ -21,7 +21,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ref", meta = ( AllowPrivateAccess = "true" ))
 	class APlayer_Base_Knight* m_Player;
 
-	FRotator rCurRot;
 	FRotator rAtkRot;
 	float fTotalDuration;
 	float fElapsedDuration;

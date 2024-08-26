@@ -235,6 +235,14 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
+	/*m_AnimInst->Montage_Pause();
+	GetWorld()->GetTimerManager().SetTimer(MonHitStiffTimer, [this]()
+	{
+		m_AnimInst->Montage_Resume(NULL);
+		GetWorld()->GetTimerManager().ClearTimer(MonHitStiffTimer);
+	},
+	0.1f, false);*/
+
 	return 0.0f;
 }
 

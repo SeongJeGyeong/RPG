@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Player_StatComponent.h"
 #include "GenericTeamAgentInterface.h"
 #include "../System/DataAsset/DA_MenuSound.h"
 #include "../System/DataAsset/DA_PlayerSound.h"
@@ -33,9 +32,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UPlayer_CameraArm* m_SArm;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
-	//UPlayer_StatComponent* m_StatComp;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UInputMappingContext> m_IMC;
@@ -103,11 +99,8 @@ private:
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
 	FTimerHandle BlockReactTimer;	// 방어 표현 타이머
 	FTimerHandle LockOnTimer;		// 락온 타이머
+	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bLockOn;	// 애님 블루프린트 블렌드 스페이스 전환용
 
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
@@ -135,7 +128,7 @@ public:
 	const UCameraComponent* GetCamera() { return m_Cam; }
 
 	// 락온 토글 상태 확인
-	bool GetbToggleLockOn() const { return bLockOn; }
+	bool GetbToggleLockOn() const;
 
 	FVector GetvAtkDir() const { return vAtkDir; }
 	void SetvAtkDirZero()  { vAtkDir = FVector::ZeroVector; }
@@ -179,6 +172,7 @@ public:
 	void BreakLockOn();
 	void ShotProjectile();
 	void StopSprint();
+	void ResetCamera(FRotator _Rotate);
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(0); };	// 플레이어 팀 설정(0)
 

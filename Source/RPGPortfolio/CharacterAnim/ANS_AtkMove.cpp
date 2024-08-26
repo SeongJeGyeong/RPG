@@ -16,11 +16,11 @@ void UANS_AtkMove::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 
 	if (IsValid(m_Player))
 	{
-		if ( !m_Player->GetvAtkDir().IsZero() )
+		if (!m_Player->GetvAtkDir().IsZero())
 		{
 			fElapsedDuration += FrameDeltaTime;
-			float fAlpha = FMath::Clamp(fElapsedDuration / fTotalDuration, 0.f, 1.f);
-			FRotator rLerpRot = FMath::Lerp(rCurRot, rAtkRot, fAlpha);
+			float fAlpha = exp2(FMath::Clamp(fElapsedDuration / fTotalDuration, 0.f, 1.f)) - 1;
+			FRotator rLerpRot = FMath::Lerp(m_Player->GetActorRotation(), rAtkRot, fAlpha * fAlpha);
 			m_Player->SetActorRotation(rLerpRot);
 		}
 	}
@@ -45,8 +45,11 @@ void UANS_AtkMove::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			if (!m_Player->GetvAtkDir().IsZero())
 			{
 				FRotator InpRot = UKismetMathLibrary::MakeRotFromX(m_Player->GetvAtkDir());
-				rCurRot = FRotator(0.f, m_Player->GetActorRotation().Yaw, 0.f);
 				rAtkRot = FRotator(0.f, m_Player->GetControlRotation().Yaw + InpRot.Yaw, 0.f);
+			}
+			else
+			{
+				rAtkRot = FRotator(0.f, m_Player->GetActorRotation().Yaw, 0.f);
 			}
 		}
 	}
@@ -56,10 +59,8 @@ void UANS_AtkMove::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 {
 	Super::NotifyEnd(MeshComp, Animation);
 
-	rCurRot = FRotator::ZeroRotator;
 	rAtkRot = FRotator::ZeroRotator;
 	fElapsedDuration = 0.f;
-
 	if (!IsValid(m_Player))
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 로드 실패"));
