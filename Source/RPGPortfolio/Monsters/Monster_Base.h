@@ -2,7 +2,9 @@
 
 #pragma once
 
+
 #include "../Header/Struct.h"
+#include "Components/TimelineComponent.h"
 #include "../System/DataAsset/DA_MonsterInfo.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -40,6 +42,15 @@ private:
 
 	UPROPERTY()
 	class UUI_Monster* m_MonsterWidget;
+	
+	UPROPERTY()
+	UTimelineComponent* m_HitTimeline;
+
+	UPROPERTY()
+	class UCurveVector* m_HitCurve;
+
+	FOnTimelineVector HitTimelineCallback;
+	FOnTimelineEvent HitTimelineFinish;
 
 	float fDeadEffectRatio;
 	bool bMonLockedOn;
@@ -101,4 +112,7 @@ protected:
 	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void TimelineStep(FVector _Value);
 };

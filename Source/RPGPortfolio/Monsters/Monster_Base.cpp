@@ -16,11 +16,12 @@
 #include "../Item/Item_Dropped_Base.h"
 #include "../System/DamageType_Base.h"
 #include "Engine/DamageEvents.h"
+#include "Curves/CurveVector.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;	// false일 경우 TickFunction 자체가 레벨에 등록되지 않기 때문에 true로 처리
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
@@ -29,7 +30,7 @@ AMonster_Base::AMonster_Base()
 
 	// widgetComponent
 	m_WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
-	if (!IsValid(m_WidgetComponent))
+	if ( !IsValid(m_WidgetComponent) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("WidgetComponent Create Failed"));
 	}
@@ -44,10 +45,27 @@ AMonster_Base::AMonster_Base()
 	}
 
 	ConstructorHelpers::FObjectFinder<UDataTable> ItemDropTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_MonsterDropTable.DT_MonsterDropTable'"));
-	if (ItemDropTable.Succeeded())
+	if ( ItemDropTable.Succeeded() )
 	{
 		m_ItemTable = ItemDropTable.Object;
 	}
+
+	ConstructorHelpers::FObjectFinder<UCurveVector> TLCurve(TEXT("/Script/Engine.CurveVector'/Game/Blueprint/Timeline/Curve/HitTimelineCurve.HitTimelineCurve'"));
+	if (TLCurve.Succeeded())
+	{
+		m_HitCurve = TLCurve.Object;
+	}
+
+	m_HitTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("HitTimelineComponent"));
+	if ( m_HitTimeline ) {
+
+		HitTimelineCallback.BindUFunction(this, TEXT("TimelineStep"));
+		m_HitTimeline->AddInterpVector(m_HitCurve, HitTimelineCallback);
+
+		m_HitTimeline->SetTimelineLength(0.4f);
+		m_HitTimeline->SetLooping(false);
+	}
+
 }
 
 void AMonster_Base::OnConstruction(const FTransform& _Transform)
@@ -172,6 +190,16 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 	pAnimInst->Montage_Stop(1.f);
 
+	// 피격 사운드 재생
+	if ( IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous()) )
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous(), GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
+	}
+
 	// 사망 시
 	if ( m_Info.CurHP <= 0.f && GetController() )
 	{
@@ -193,24 +221,16 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 			}
 		}
 	}
+	// 피격 시 몸체 진동
+	m_HitTimeline->PlayFromStart();
 
 	if ( IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous()) )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 재생"));
 		pAnimInst->Montage_Play(m_DataAssetInfo.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor.LoadSynchronous());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 로드 실패"));
-	}
-
-	if ( IsValid(m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous()) )
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAssetInfo.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal.LoadSynchronous(), GetActorLocation());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
 	}
 
 	// 피격 이펙트 스폰
@@ -364,6 +384,7 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 				{
 					if ( pAIController->GetBlackboardComponent() )
 					{
+						UE_LOG(LogTemp, Warning, TEXT("Hit State End"));
 						pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), false);
 					}
 				}
@@ -538,4 +559,9 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 
 	bAtkTrace = false;
+}
+
+void AMonster_Base::TimelineStep(FVector _Value)
+{
+	GetMesh()->SetRelativeLocation(FVector(GetMesh()->GetRelativeLocation().X + (_Value.X * 5.f), GetMesh()->GetRelativeLocation().Y + (_Value.Y * 5.f), GetMesh()->GetRelativeLocation().Z));
 }

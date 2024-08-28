@@ -439,8 +439,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	{
 		if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && !bNoInputInAtk)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Attack"));
-
 			CurrentCombo = 1;
 			if (bHeavyToggle)
 			{
@@ -475,7 +473,15 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
 	if (CheckMontagePlaying() || m_AnimInst->GetbIsGuard() || bIsJumped || bNoInputInAtk)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("회피 불가"));
+		if (bNoInputInAtk)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("bNoInputInAtk"));
+		}
+		else if ( bIsJumped )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("bIsJumped"));
+		}
+
 		return;
 	}
 
@@ -720,7 +726,6 @@ void APlayer_Base_Knight::NextAttackCheck()
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("ComboAttack"));
 
 	EPlayerMontage AtkMontage = bHeavyAtk ? EPlayerMontage::HEAVYATTACK : EPlayerMontage::ATTACK;
 
@@ -797,13 +802,13 @@ void APlayer_Base_Knight::AttackHitCheck()
 
 void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage)
 {
-	m_AnimInst->Montage_Pause();
-	//m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 0.1f);
+	//m_AnimInst->Montage_Pause();
+	m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 0.1f);
 	GetWorld()->GetTimerManager().SetTimer(HitStiffTimer, [this, _AtkMontage]()
 	{
 		m_AnimInst->Montage_Resume(NULL);
-		//m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.2f);
-		GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
+		m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.f);
+		//GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
 	},
 	0.1f, false);
 
@@ -869,6 +874,8 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	//	return 0.f;
 	//}
 	// 피격 이펙트 스폰
+
+	m_AnimInst->Montage_SetPlayRate(NULL, 1.f);
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
@@ -925,7 +932,6 @@ void APlayer_Base_Knight::AttackMove()
 	{
 		m_SArm->m_Target->GetComponentLocation();
 		float fDist = ( GetActorLocation() - m_SArm->m_Target->GetComponentLocation() ).Size();
-		UE_LOG(LogTemp, Warning, TEXT("Enemy Distance : %f"), fDist);
 		float fImpulsePower = 500.f;
 		if (fDist <= 200.f)
 		{
@@ -978,24 +984,33 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::GUARDBLOCK), GetActorLocation());
 		}
 
+		fGuardPhysicsWeight = 0.5f;
 		GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), true);
-		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.2f);
+		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), fGuardPhysicsWeight);
 		GetMesh()->AddImpulseToAllBodiesBelow(_MonDir * 500.f, FName(TEXT("clavicle_l")), true);
 
 		GetWorld()->GetTimerManager().SetTimer(BlockReactTimer, [this]
 			{
-				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), 0.0f);
-				GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
+				fGuardPhysicsWeight -= 0.1f;
+				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), fGuardPhysicsWeight);
+				if (fGuardPhysicsWeight <= 0.f)
+				{
+					GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
+					fGuardPhysicsWeight = 0.5f;
+					GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
+				}
 			}, 
-		0.1f, false);
+		0.02f, true);
 	}
+
+	GetCharacterMovement()->AddImpulse(GetActorForwardVector() * -100.f, true);
 
 	return true;
 }
 
 void APlayer_Base_Knight::JumpAttack()
 {
-	m_AnimInst->Montage_Pause(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+	//m_AnimInst->Montage_Pause(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 	GetWorld()->GetTimerManager().SetTimer(JumpAtkTimer, [this]
 		{
 			// 바닥에 착지하면 애니메이션을 다시 재생

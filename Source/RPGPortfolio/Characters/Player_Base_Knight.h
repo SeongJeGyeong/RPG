@@ -102,6 +102,8 @@ private:
 	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
 
+	float fGuardPhysicsWeight;
+
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
 	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
