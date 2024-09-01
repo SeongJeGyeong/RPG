@@ -286,10 +286,6 @@ struct FMonsterSoundData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<USoundBase> HitSound_Alt;
 
-	// 공격 방어에 막힐 경우 사운드
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<USoundBase> BlockSound;
-
 	// 사망 사운드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<USoundBase> DeadSound;
@@ -386,4 +382,66 @@ struct FProjectileAssets
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase*			ProjHitSound;
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FMonsterSoundAsset
+{
+	GENERATED_USTRUCT_BODY()
+
+	// 공격 타격 성공시 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* DmgSound_Normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* DmgSound_Alt;
+
+	// 피격 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* HitSound_Normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* HitSound_Alt;
+
+	// 사망 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* DeadSound;
+
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FMonsterAnimAsset
+{
+	GENERATED_USTRUCT_BODY()
+
+	// 근접공격 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AtkAnim_Melee_Nor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AtkAnim_Melee_Alt1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AtkAnim_Melee_Alt2;
+
+	// 원거리공격 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AtkAnim_Range_Nor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AtkAnim_Range_Alt1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* AtkAnim_Range_Alt2;
+
+	// 피격 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* HitAnim_Nor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* HitAnim_Alt;
+
+	// 공격 방어에 막힐 경우 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* BlockAnim;
 };

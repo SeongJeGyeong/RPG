@@ -65,12 +65,7 @@ void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 
 bool UUI_EquipMain::GetItemListVisibility()
 {
-	if ( m_Equip_ItemListUI->GetVisibility() == ESlateVisibility::Visible)
-	{
-		return true;
-	}
-
-	return false;
+	return m_Equip_ItemListUI->GetVisibility() == ESlateVisibility::Visible;
 }
 
 void UUI_EquipMain::CloseItemList()

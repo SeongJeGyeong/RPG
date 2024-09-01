@@ -10,6 +10,7 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
 #include "../UI/UI_FadeScreen.h"
+#include "../System/FadeViewportClient.h"
 
 // Sets default values
 AInteraction_Lever::AInteraction_Lever()
@@ -66,6 +67,7 @@ void AInteraction_Lever::Interaction()
 			if ( IsValid(GameMode) )
 			{
 				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
+				GameMode->GetMainHUD()->ShowMainMessageUI(false);
 			}
 			m_SeqPlayer->Play();
 		}
@@ -85,8 +87,16 @@ void AInteraction_Lever::EndLevelSequence()
 	if (IsValid(GameMode))
 	{
 		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
-		GameMode->GetMainHUD()->ShowMainMessageUI(false);
+		// GameMode->GetFadeUI()->FadeIn(1.f);
+	}
 
-		GameMode->GetFadeUI()->FadeIn(1.f);
+	const UWorld* World = GetWorld();
+	if ( World )
+	{
+		UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(World->GetGameViewport());
+		if ( GameViewportClient )
+		{
+			GameViewportClient->Fade(1.f, false);
+		}
 	}
 }

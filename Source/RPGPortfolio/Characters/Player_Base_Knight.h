@@ -80,7 +80,7 @@ private:
 	bool bSprintToggle;		// 달리기 체크용 토글
 	bool bItemDelay;		// 아이템 사용 딜레이 체크용
 	bool bAtkRotate;		// 공격 중 회전 체크용
-	FVector vAtkDir = FVector(1.f, 0.f, 0.f);	// 공격 중 회전 방향
+	FVector vAtkDir = FVector::ZeroVector;	// 공격 중 회전 방향
 
 	// 구르기 관련
 	bool bDodging;
@@ -103,6 +103,7 @@ private:
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
 
 	float fGuardPhysicsWeight;
+	float fAttackPlayRate;
 
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}

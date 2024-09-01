@@ -8,6 +8,7 @@
 
 class UButton;
 class UTextBlock;
+class UCanvasPanel;
 
 /**
  * 
@@ -19,8 +20,11 @@ class RPGPORTFOLIO_API UUI_Settings : public UUserWidget
 	
 private:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	UButton*		m_Btn_Quit;
+	UButton*	m_Btn_Quit;
 	
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	UButton*	m_Btn_GSettings;
+
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	UTextBlock* m_PlayerName;
 
@@ -33,6 +37,12 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true"))
 	UTextBlock* m_MapName;
 
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	UCanvasPanel* GSettingsPannel;
+
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	UButton* m_Btn_Apply;
+
 	UPROPERTY()
 	class UDA_MenuSound* m_Sound;
 
@@ -40,6 +50,9 @@ public:
 	virtual void NativeConstruct() override;
 
 public:
+	bool GetGameSettingPannelVisibility();
+	void CloseGameSettingPannel();
+
 	UFUNCTION()
 	void SettingsVisibilityChanged(ESlateVisibility _Visibility);
 
@@ -49,4 +62,18 @@ public:
 	void QuitBtnHovered();
 	UFUNCTION()
 	void QuitBtnUnHovered();
+
+	UFUNCTION()
+	void GSettingBtnClicked();
+	UFUNCTION()
+	void GSettingBtnHovered();
+	UFUNCTION()
+	void GSettingBtnUnHovered();
+
+	UFUNCTION()
+	void ApplyBtnClicked();
+	UFUNCTION()
+	void ApplyBtnHovered();
+	UFUNCTION()
+	void ApplyBtnUnHovered();
 };

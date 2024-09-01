@@ -591,7 +591,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
 		GAU.SetHideCursorDuringCapture(false);
 		pController->SetInputMode(GAU);
-
+		UE_LOG(LogTemp, Warning, TEXT("menu open"));
 		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_OPEN));
 	}
 	else
@@ -803,14 +803,22 @@ void APlayer_Base_Knight::AttackHitCheck()
 void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage)
 {
 	//m_AnimInst->Montage_Pause();
+	//fAttackPlayRate = 0.1f;
 	m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 0.1f);
 	GetWorld()->GetTimerManager().SetTimer(HitStiffTimer, [this, _AtkMontage]()
 	{
-		m_AnimInst->Montage_Resume(NULL);
 		m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.f);
-		//GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
+		GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
+		//m_AnimInst->Montage_Resume(NULL);
+		/*fAttackPlayRate += 0.1f;
+		m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), fAttackPlayRate);
+		if ( fAttackPlayRate >= 1.f )
+		{
+			m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.f);
+			GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
+		}*/
 	},
-	0.1f, false);
+	0.2f, false);
 
 	float iDamage = 0.f;
 	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());

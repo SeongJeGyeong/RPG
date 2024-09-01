@@ -8,7 +8,8 @@
 #include "RPGPortfolioGameModeBase.h"
 #include "UI/UI_FadeScreen.h"
 #include "Kismet/GameplayStatics.h"
-//#include "System/FadeViewportClient.h"
+#include "System/FadeViewportClient.h"
+#include "GameFramework/GameUserSettings.h"
 
 UGameInstance_Base::UGameInstance_Base()
 	: m_InvenMgr(nullptr)
@@ -28,6 +29,12 @@ UGameInstance_Base::UGameInstance_Base()
 	if ( loadingscreen.Succeeded() )
 	{
 		m_LoadingScreenClass = loadingscreen.Class;
+	}
+
+	ConstructorHelpers::FObjectFinder<USoundClass> soundclass(TEXT("/Script/Engine.SoundClass'/Game/Audio/Classes/Overall.Overall'"));
+	if ( loadingscreen.Succeeded() )
+	{
+		m_MasterVolume = soundclass.Object;
 	}
 
 	ConstructorHelpers::FObjectFinder<UDataTable> CharacterSheet(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_CharacterSheet.DT_CharacterSheet'"));
@@ -66,6 +73,32 @@ void UGameInstance_Base::Init()
 
 	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGameInstance_Base::BeginLoadingScreen);
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UGameInstance_Base::EndLoadingScreen);
+	
+	fTempVolume = m_MasterVolume->Properties.Volume;
+	FIntPoint res = UGameUserSettings::GetGameUserSettings()->GetScreenResolution();
+	sResolution = FString::Printf(TEXT("%dx%d"), res.X, res.Y);
+}
+
+float UGameInstance_Base::GetMasterVolume() const
+{
+	return fTempVolume;
+}
+
+void UGameInstance_Base::SetMasterVolume(const float& _Volume)
+{
+	fTempVolume = _Volume;
+}
+
+void UGameInstance_Base::ApplyMasterVolume()
+{
+	m_MasterVolume->Properties.Volume = fTempVolume;
+}
+
+void UGameInstance_Base::ExecuteResoltionCommand()
+{
+	FString SetCommand = L"r.SetRes " + sResolution;
+	UE_LOG(LogTemp, Warning, TEXT("Command : %s"), *SetCommand);
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->ConsoleCommand(*SetCommand);
 }
 
 void UGameInstance_Base::BeginLoadingScreen(const FString& MapName)
@@ -80,13 +113,13 @@ void UGameInstance_Base::BeginLoadingScreen(const FString& MapName)
 
 void UGameInstance_Base::EndLoadingScreen(UWorld* InLoadedWorld)
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( IsValid(GameMode) )
-	{
-		GameMode->GetFadeUI()->FadeIn(2.f);
-	}
+	//ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	//if ( IsValid(GameMode) )
+	//{
+	//	GameMode->GetFadeUI()->FadeIn(2.f);
+	//}
 
-	/*const UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if ( World )
 	{
 		UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(World->GetGameViewport());
@@ -94,5 +127,30 @@ void UGameInstance_Base::EndLoadingScreen(UWorld* InLoadedWorld)
 		{
 			GameViewportClient->Fade(1.f, false);
 		}
-	}*/
+	}
+}
+
+void UGameInstance_Base::ASyncLoadDataAsset(FSoftObjectPath _AssetPath)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DataAsset Load Start : %s"), *_AssetPath.GetAssetName());
+
+	TSharedPtr<FStreamableHandle> StreamHandle = AssetStreamManager.RequestAsyncLoad(_AssetPath, FStreamableDelegate::CreateUObject(this, &UGameInstance_Base::AssetLoaded, _AssetPath.GetAssetName()));
+	GetWorld()->GetTimerManager().SetTimer(StreamTimer, [this, StreamHandle, _AssetPath]
+		{
+			if ( AssetStreamManager.IsAsyncLoadComplete(_AssetPath) )
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AsyncLoadComplete"));
+				GetWorld()->GetTimerManager().ClearTimer(StreamTimer);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AsyncLoading"));
+			}
+		}
+	, 0.1f, true);
+}
+
+void UGameInstance_Base::AssetLoaded(FString _AssetName)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DataAsset Loaded : %s"), *_AssetName);
 }

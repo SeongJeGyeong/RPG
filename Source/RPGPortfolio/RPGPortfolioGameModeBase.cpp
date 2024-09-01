@@ -52,11 +52,11 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 		m_WidgetClassArr.Add(Settings.Class);
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> FadeScreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/BPC_UI_FadeScreen.BPC_UI_FadeScreen_C'"));
+	/*ConstructorHelpers::FClassFinder<UUserWidget> FadeScreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/BPC_UI_FadeScreen.BPC_UI_FadeScreen_C'"));
 	if ( FadeScreen.Succeeded() )
 	{
 		m_WidgetClassArr.Add(FadeScreen.Class);
-	}
+	}*/
 
 	m_BGMComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	m_BGMComp->SetupAttachment(GetRootComponent());
@@ -73,16 +73,23 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GEngine->GetGameUserSettings()->SetViewDistanceQuality(1);
-	GEngine->GetGameUserSettings()->SetAntiAliasingQuality(1);
-	GEngine->GetGameUserSettings()->SetPostProcessingQuality(1);
-	GEngine->GetGameUserSettings()->SetShadowQuality(1);
-	GEngine->GetGameUserSettings()->SetGlobalIlluminationQuality(1);
-	GEngine->GetGameUserSettings()->SetReflectionQuality(1);
-	GEngine->GetGameUserSettings()->SetTextureQuality(1);
-	GEngine->GetGameUserSettings()->SetVisualEffectQuality(1);
-	GEngine->GetGameUserSettings()->SetFoliageQuality(1);
-	GEngine->GetGameUserSettings()->SetShadingQuality(1);
+	// 스탠드얼론으로 플레이할 때
+	if (GetWorld()->WorldType == EWorldType::Game)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Play Standalone"));
+		UGameUserSettings::GetGameUserSettings()->SetScreenResolution(FIntPoint(1280, 720));
+		UGameUserSettings::GetGameUserSettings()->SetViewDistanceQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetAntiAliasingQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetPostProcessingQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetShadowQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetGlobalIlluminationQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetReflectionQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetTextureQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetVisualEffectQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetFoliageQuality(1);
+		UGameUserSettings::GetGameUserSettings()->SetShadingQuality(1);
+		UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
+	}
 
 	if (IsValid(m_WidgetClassArr[0]))
 	{
@@ -156,7 +163,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		}
 	}
 
-	if ( IsValid(m_WidgetClassArr[6]) )
+	/*if ( IsValid(m_WidgetClassArr[6]) )
 	{
 		m_FadeScreenUI = Cast<UUI_FadeScreen>(CreateWidget(GetWorld(), m_WidgetClassArr[6]));
 
@@ -165,7 +172,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 			m_FadeScreenUI->AddToViewport(6);
 			m_FadeScreenUI->SetVisibility(ESlateVisibility::Hidden);
 		}
-	}
+	}*/
 
 	APlayerController* pController = GetWorld()->GetFirstPlayerController();
 
@@ -191,9 +198,6 @@ bool ARPGPortfolioGameModeBase::IsSubMenuUIOpened()
 
 void ARPGPortfolioGameModeBase::CloseSubMenu()
 {
-	m_InventoryUI->SetVisibility(ESlateVisibility::Hidden);
-	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
-
 	if (m_EquipUI->GetVisibility() == ESlateVisibility::Visible)
 	{
 		if (m_EquipUI->GetItemListVisibility())
@@ -205,9 +209,20 @@ void ARPGPortfolioGameModeBase::CloseSubMenu()
 			m_EquipUI->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
-
+	if (m_SettingsUI->GetVisibility() == ESlateVisibility::Visible)
+	{
+		if ( m_SettingsUI->GetGameSettingPannelVisibility() )
+		{
+			m_SettingsUI->CloseGameSettingPannel();
+		}
+		else
+		{
+			m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+	m_InventoryUI->SetVisibility(ESlateVisibility::Hidden);
+	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
 	m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
-	m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ARPGPortfolioGameModeBase::PlayBGM(bool _Play)

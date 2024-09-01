@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Engine/StreamableManager.h"
 #include "Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
@@ -34,6 +35,14 @@ private:
 	UPROPERTY()
 	uint32 PlayTime;
 
+	UPROPERTY()
+	USoundClass* m_MasterVolume;
+
+	float fTempVolume;
+	FString sResolution;
+
+	FStreamableManager AssetStreamManager;
+	FTimerHandle StreamTimer;
 public:
 	UGameInstance_Base();
 	~UGameInstance_Base();
@@ -57,6 +66,18 @@ public:
 	uint32 GetPlayTime() const { return PlayTime; }
 	void SetPlayTime(const uint32& _PlayTime) { PlayTime = _PlayTime; }
 
+	UFUNCTION()
+	void ASyncLoadDataAsset(FSoftObjectPath _AssetPath);
+
+	float GetMasterVolume() const;
+	void SetMasterVolume(const float& _Volume);
+	void ApplyMasterVolume();
+	void SetTempVolume(const float& _Volume) { fTempVolume = _Volume; }
+	void SetTempResolution(const FString& _Res) { sResolution = _Res; }
+	void ExecuteResoltionCommand();
+
+private:
+	void AssetLoaded(FString _AssetName);
 
 	// Inventory_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음
 	friend class UInventory_Mgr;

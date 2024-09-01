@@ -106,6 +106,7 @@ enum class EMONSTER_TYPE : uint8
 UENUM(BlueprintType)
 enum class EMONSTER_STATE : uint8
 {
+	DEFAULT,
 	IDLE,
 	LOOKAROUND,
 	WALK,
@@ -115,6 +116,7 @@ enum class EMONSTER_STATE : uint8
 	ATTACK_HEAVY,
 	DIVE,
 	HIT,
+	HITEND,
 	DEAD,
 };
 

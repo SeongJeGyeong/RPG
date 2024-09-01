@@ -5,6 +5,7 @@
 
 #include "../Header/Struct.h"
 #include "Components/TimelineComponent.h"
+#include "../System/DataAsset/PDA_MonsterAssets.h"
 #include "../System/DataAsset/DA_MonsterInfo.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -36,6 +37,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
+
+	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	TSoftObjectPtr<UPDA_MonsterAssets>	m_DataAsset;
 
 	UPROPERTY()
 	class UAnimInstance_Monster_Base* m_AnimInst;
@@ -109,7 +113,7 @@ protected:
 	void MonsterDead(AController* EventInstigator);
 
 	UFUNCTION()
-	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void OnHitMontageEnded();
 	UFUNCTION()
 	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
