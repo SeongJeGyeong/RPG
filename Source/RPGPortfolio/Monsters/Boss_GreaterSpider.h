@@ -19,7 +19,7 @@ private:
 	class UParticleSystemComponent* m_PSC;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
-	UDA_GreaterSpider*	m_DataAsset;
+	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
 
 	UPROPERTY()
 	class UAnim_GreaterSpider* m_AnimInst;

@@ -11,7 +11,7 @@
 #include "UI_EquipMain.h"
 #include "UI_Manual.h"
 #include "UI_Settings.h"
-#include "../System/DataAsset/DA_MenuSound.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_Menu_Main::NativeConstruct()
 {
@@ -47,12 +47,6 @@ void UUI_Menu_Main::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("Menu Text Load Failed"));
 	}
 
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
-	}
-
 	Super::NativeConstruct();
 }
 
@@ -68,14 +62,14 @@ void UUI_Menu_Main::EquipBtnClicked()
 
 	UUI_EquipMain* EquipUI = GameMode->GetEquipUI();
 	EquipUI->SetVisibility(ESlateVisibility::Visible);
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Menu_Main::EquipBtnHovered()
 {
 	// 문자열 앞에 L을 붙여야 유니코드로 인식함
 	m_MenuName->SetText(FText::FromString(L"장비"));
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Menu_Main::EquipBtnUnHovered()
@@ -86,13 +80,13 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 void UUI_Menu_Main::InventoryBtnClicked()
 {
 	UInventory_Mgr::GetInst(GetWorld())->ShowInventoryUI();
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Menu_Main::InventoryBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"인벤토리"));
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Menu_Main::InventoryBtnUnHovered()
@@ -113,13 +107,13 @@ void UUI_Menu_Main::StatusBtnClicked()
 	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
 	StatusUI->SetVisibility(ESlateVisibility::Visible);
 	StatusUI->RenewStatusUI();
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Menu_Main::StatusBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"스테이터스"));
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Menu_Main::StatusBtnUnHovered()
@@ -139,14 +133,13 @@ void UUI_Menu_Main::ManualBtnClicked()
 
 	UUI_Manual* ManualUI = GameMode->GetManualUI();
 	ManualUI->SetVisibility(ESlateVisibility::Visible);
-
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Menu_Main::ManualBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"조작법"));
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Menu_Main::ManualBtnUnHovered()
@@ -167,13 +160,13 @@ void UUI_Menu_Main::SettingsBtnClicked()
 	UUI_Settings* SettingsUI = GameMode->GetSettingsUI();
 	SettingsUI->SetVisibility(ESlateVisibility::Visible);
 
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Menu_Main::SettingsBtnHovered()
 {
 	m_MenuName->SetText(FText::FromString(L"설정"));
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Menu_Main::SettingsBtnUnHovered()

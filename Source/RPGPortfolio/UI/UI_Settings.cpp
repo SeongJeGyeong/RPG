@@ -5,13 +5,13 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/CanvasPanel.h"
-#include "../System/DataAsset/DA_MenuSound.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetTextLibrary.h"
 #include "../System/PlayerState_Base.h"
 #include "GameFramework/GameUserSettings.h"
 #include "../GameInstance_Base.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_Settings::NativeConstruct()
 {
@@ -46,12 +46,6 @@ void UUI_Settings::NativeConstruct()
 		m_Btn_Apply->OnClicked.AddDynamic(this, &UUI_Settings::ApplyBtnClicked);
 		m_Btn_Apply->OnHovered.AddDynamic(this, &UUI_Settings::ApplyBtnHovered);
 		m_Btn_Apply->OnUnhovered.AddDynamic(this, &UUI_Settings::ApplyBtnUnHovered);
-	}
-
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if (!IsValid(m_Sound))
-	{
-		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
 	}
 
 	OnNativeVisibilityChanged.AddUObject(this, &UUI_Settings::SettingsVisibilityChanged);
@@ -120,13 +114,13 @@ void UUI_Settings::SettingsVisibilityChanged(ESlateVisibility _Visibility)
 
 void UUI_Settings::QuitBtnClicked()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 	UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit, true);
 }
 
 void UUI_Settings::QuitBtnHovered()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Settings::QuitBtnUnHovered()
@@ -136,12 +130,15 @@ void UUI_Settings::QuitBtnUnHovered()
 void UUI_Settings::GSettingBtnClicked()
 {
 	GSettingsPannel->SetVisibility(ESlateVisibility::Visible);
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+
+	UGISubsystem_SoundMgr* SoundMgr = GetGameInstance()->GetSubsystem<UGISubsystem_SoundMgr>();
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Settings::GSettingBtnHovered()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	UGISubsystem_SoundMgr* SoundMgr = GetGameInstance()->GetSubsystem<UGISubsystem_SoundMgr>();
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Settings::GSettingBtnUnHovered()
@@ -150,20 +147,26 @@ void UUI_Settings::GSettingBtnUnHovered()
 
 void UUI_Settings::ApplyBtnClicked()
 {
+	FString sini = GIsEditor ? GEditorSettingsIni : GGameUserSettingsIni;
+	UE_LOG(LogTemp, Warning, TEXT("EditorSettings Path : %s"), *GEditorSettingsIni);
+	FString IniFileLocation = FPaths::GeneratedConfigDir() + UGameplayStatics::GetPlatformName() + "/" + GGameUserSettingsIni + ".ini";
+	UE_LOG(LogTemp, Warning, TEXT("GameUserSettings Path : %s"), *IniFileLocation);
+	UE_LOG(LogTemp, Warning, TEXT("apply ini file : %s"), *sini);
 	UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	if (GetWorld()->WorldType == EWorldType::Game)
 	{
-		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 		pGameInst->ExecuteResoltionCommand();
 	}
-	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	pGameInst->ApplyMasterVolume();
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	UGameUserSettings::GetGameUserSettings()->SaveConfig();
+
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_Settings::ApplyBtnHovered()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_Settings::ApplyBtnUnHovered()

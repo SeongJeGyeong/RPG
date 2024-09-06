@@ -75,8 +75,6 @@ void UGameInstance_Base::Init()
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UGameInstance_Base::EndLoadingScreen);
 	
 	fTempVolume = m_MasterVolume->Properties.Volume;
-	FIntPoint res = UGameUserSettings::GetGameUserSettings()->GetScreenResolution();
-	sResolution = FString::Printf(TEXT("%dx%d"), res.X, res.Y);
 }
 
 float UGameInstance_Base::GetMasterVolume() const
@@ -96,9 +94,24 @@ void UGameInstance_Base::ApplyMasterVolume()
 
 void UGameInstance_Base::ExecuteResoltionCommand()
 {
-	FString SetCommand = L"r.SetRes " + sResolution;
+	FString SetCommand;
+	
+	switch (UGameUserSettings::GetGameUserSettings()->GetFullscreenMode())
+	{
+	case EWindowMode::Fullscreen:
+		SetCommand = L"r.SetRes " + FString::Printf(TEXT("%dx%d"), TempResolution.X, TempResolution.Y) + L"f";
+		break;
+	case EWindowMode::WindowedFullscreen:
+		SetCommand = L"r.SetRes " + FString::Printf(TEXT("%dx%d"), TempResolution.X, TempResolution.Y) + L"wf";
+		break;
+	case EWindowMode::Windowed:
+		SetCommand = L"r.SetRes " + FString::Printf(TEXT("%dx%d"), TempResolution.X, TempResolution.Y) + L"w";
+		break;
+	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Command : %s"), *SetCommand);
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->ConsoleCommand(*SetCommand);
+	GEngine->Exec(GetWorld(), *SetCommand);
+	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->ConsoleCommand(*SetCommand);
 }
 
 void UGameInstance_Base::BeginLoadingScreen(const FString& MapName)
@@ -132,6 +145,7 @@ void UGameInstance_Base::EndLoadingScreen(UWorld* InLoadedWorld)
 
 void UGameInstance_Base::ASyncLoadDataAsset(FSoftObjectPath _AssetPath)
 {
+	UE_LOG(LogTemp, Warning, TEXT("DataAsset Path : %s"), *_AssetPath.ToString());
 	UE_LOG(LogTemp, Warning, TEXT("DataAsset Load Start : %s"), *_AssetPath.GetAssetName());
 
 	TSharedPtr<FStreamableHandle> StreamHandle = AssetStreamManager.RequestAsyncLoad(_AssetPath, FStreamableDelegate::CreateUObject(this, &UGameInstance_Base::AssetLoaded, _AssetPath.GetAssetName()));

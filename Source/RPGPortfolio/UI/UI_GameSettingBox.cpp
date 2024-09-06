@@ -5,9 +5,9 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/GameUserSettings.h"
-#include "../System/DataAsset/DA_MenuSound.h"
 #include "Kismet/GameplayStatics.h"
 #include "../GameInstance_Base.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_GameSettingBox::NativeConstruct()
 {
@@ -79,12 +79,6 @@ void UUI_GameSettingBox::NativeConstruct()
 	Btn_Up->OnClicked.AddDynamic(this, &UUI_GameSettingBox::UpBtnClicked);
 	Btn_Up->OnHovered.AddDynamic(this, &UUI_GameSettingBox::UpBtnHovered);
 
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
-	}
-
 	Super::NativeConstruct();
 }
 
@@ -140,12 +134,15 @@ void UUI_GameSettingBox::SetUserSettingValText(EWindowMode::Type _Val)
 	switch ( _Val )
 	{
 	case EWindowMode::Fullscreen:
+		UE_LOG(LogTemp, Warning, TEXT("EWindowMode::전체화면"));
 		PropertyVal = L"전체화면";
 		break;
 	case EWindowMode::Windowed:
+		UE_LOG(LogTemp, Warning, TEXT("EWindowMode::창 모드"));
 		PropertyVal = L"창 모드";
 		break;
 	case EWindowMode::WindowedFullscreen:
+		UE_LOG(LogTemp, Warning, TEXT("EWindowMode::전체 창 모드"));
 		PropertyVal = L"전체 창 모드";
 		break;
 	}
@@ -170,50 +167,63 @@ EWindowMode::Type UUI_GameSettingBox::ChangeScreenMode(EWindowMode::Type _Type, 
 		break;
 	}
 
+	if ( GetWorld()->WorldType == EWorldType::Game )
+	{
+		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+	}
+
 	return Mode;
 }
 
 FIntPoint UUI_GameSettingBox::ChangeScreenResolution(FIntPoint _Res, bool _UpDown)
 {
-	int32 ResX;
-	int32 ResY;
+	FIntPoint ChangeRes;
+
+	if ( GetWorld()->WorldType == EWorldType::Game )
+	{
+		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+		ChangeRes = pGameInst->GetTempResolution();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("current resolution : %d x %d"), _Res.X, _Res.Y);
 	switch ( _Res.X )
 	{
 	case 1280:
-		ResX = _UpDown ? 1600 : 1280;
-		ResY = _UpDown ? 900  : 720;
+		ChangeRes.X = _UpDown ? 1600 : 1280;
+		ChangeRes.Y = _UpDown ? 900  : 720;
 		break;
 	case 1600:
-		ResX = _UpDown ? 1920 : 1280;
-		ResY = _UpDown ? 1080 : 720;
+		ChangeRes.X = _UpDown ? 1920 : 1280;
+		ChangeRes.Y = _UpDown ? 1080 : 720;
 		break;
 	case 1920:
-		ResX = _UpDown ? 2560 : 1600;
-		ResY = _UpDown ? 1440 : 900;
+		ChangeRes.X = _UpDown ? 2560 : 1600;
+		ChangeRes.Y = _UpDown ? 1440 : 900;
 		break;
 	case 2560:
-		ResX = _UpDown ? 2560 : 1920;
-		ResY = _UpDown ? 1440 : 1080;
+		ChangeRes.X = _UpDown ? 2560 : 1920;
+		ChangeRes.Y = _UpDown ? 1440 : 1080;
 		break;
 	}
 
 	if (GetWorld()->WorldType == EWorldType::Game)
 	{
 		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
-		pGameInst->SetTempResolution(FString::Printf(TEXT("%dx%d"), ResX, ResY));
+		pGameInst->SetTempResolution(FIntPoint(ChangeRes.X, ChangeRes.Y));
 	}
 
-	return FIntPoint(ResX, ResY);
+	return FIntPoint(ChangeRes.X, ChangeRes.Y);
 }
 
 void UUI_GameSettingBox::DownBtnClicked()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 
 	switch ( Setting_Property )
 	{
 	case ESETTING_PROPERTY::SCREEN_MODE:
 		{
+		GEngine->GetGameUserSettings();
 			EWindowMode::Type ScreenMode = ChangeScreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode(), false);
 			SetUserSettingValText(ScreenMode);
 			UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(ScreenMode);
@@ -316,12 +326,12 @@ void UUI_GameSettingBox::DownBtnClicked()
 
 void UUI_GameSettingBox::DownBtnHovered()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 }
 
 void UUI_GameSettingBox::UpBtnClicked()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 
 	switch ( Setting_Property )
 	{
@@ -429,5 +439,5 @@ void UUI_GameSettingBox::UpBtnClicked()
 
 void UUI_GameSettingBox::UpBtnHovered()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 }

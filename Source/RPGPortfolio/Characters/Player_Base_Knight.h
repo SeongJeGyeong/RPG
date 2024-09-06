@@ -3,7 +3,6 @@
 #pragma once
 
 #include "GenericTeamAgentInterface.h"
-#include "../System/DataAsset/DA_MenuSound.h"
 #include "../System/DataAsset/DA_PlayerSound.h"
 #include "../System/DataAsset/DA_PlayerMontage.h"
 #include "../System/DataAsset/DA_InputAction.h"
@@ -44,9 +43,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
 	UDA_PlayerSound* m_PlayerSound;
-
-	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
-	UDA_MenuSound* m_MenuSound;
 
 	UPROPERTY()
 	TSubclassOf<class AProjectile_Base> m_Proj;

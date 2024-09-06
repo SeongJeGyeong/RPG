@@ -10,6 +10,7 @@
 #include "UI_Message_Main.h"
 #include "UI_Message_Item.h"
 #include "Components/Image.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_Base::NativeConstruct()
 {

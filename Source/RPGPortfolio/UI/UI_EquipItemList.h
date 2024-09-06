@@ -32,7 +32,6 @@ private:
 	class UTileView*	m_EquipItemTileView;
 
 	EEQUIP_SLOT		eEquipSlot;
-	class UDA_MenuSound* m_Sound;
 
 public:
 	void SetSlotCategory(EEQUIP_SLOT _EquipSlot) { eEquipSlot = _EquipSlot; }

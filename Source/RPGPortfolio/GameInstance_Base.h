@@ -39,7 +39,7 @@ private:
 	USoundClass* m_MasterVolume;
 
 	float fTempVolume;
-	FString sResolution;
+	FIntPoint TempResolution;
 
 	FStreamableManager AssetStreamManager;
 	FTimerHandle StreamTimer;
@@ -73,7 +73,8 @@ public:
 	void SetMasterVolume(const float& _Volume);
 	void ApplyMasterVolume();
 	void SetTempVolume(const float& _Volume) { fTempVolume = _Volume; }
-	void SetTempResolution(const FString& _Res) { sResolution = _Res; }
+	FIntPoint GetTempResolution() const { return TempResolution; }
+	void SetTempResolution(const FIntPoint& _Res) { TempResolution = _Res; }
 	void ExecuteResoltionCommand();
 
 private:

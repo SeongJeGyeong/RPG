@@ -12,8 +12,8 @@
 #include "UI_PlayerStat.h"
 #include "UI_ItemSelectMenu.h"
 #include "../Characters/Player_Base_Knight.h"
-#include "../System/DataAsset/DA_MenuSound.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_InvenItem::NativeConstruct()
 {	
@@ -31,12 +31,6 @@ void UUI_InvenItem::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("아이템 버튼 위젯을 찾지 못함"));
 	}
 	m_ItemBtn->OnClicked.AddDynamic(this, &UUI_InvenItem::ItemBtnClicked);
-
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
-	}
 
 	m_ItemMenuAnchor->OnGetUserMenuContentEvent.BindUFunction(this, FName("MenuAnchorDataSetting"));
 
@@ -84,18 +78,18 @@ void UUI_InvenItem::ItemBtnClicked()
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		bItemUseDelay = pPlayer->GetbItemDelay();
 		m_ItemMenuAnchor->Open(true);
-		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 	}
 	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
 		if (m_ItemData->GetEquiped() == eSelectedSlot)
 		{
-			PlaySound(m_Sound->GetMenuSound(EMenuSound::ITEM_UNEQUIP));
+			PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
 		}
 		else
 		{
-			PlaySound(m_Sound->GetMenuSound(EMenuSound::ITEM_EQUIP));
+			PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
 		}
 
 		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);

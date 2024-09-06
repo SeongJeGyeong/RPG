@@ -5,7 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "../System/PlayerState_Base.h"
-#include "../System/DataAsset/DA_MenuSound.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_Player_Soul::NativeConstruct()
 {
@@ -19,12 +19,6 @@ void UUI_Player_Soul::NativeConstruct()
 		FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
 		iDisplayedSoul = PlayerBasePower.AmountOfSoul;
 		m_Soul->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerBasePower.AmountOfSoul)));
-	}
-
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("소울 UI 사운드 로드 실패"));
 	}
 
 	Super::NativeConstruct();
@@ -43,7 +37,7 @@ void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)
 
 void UUI_Player_Soul::StartSoulGain()
 {
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::SOUL_SUCK));
+	PlaySound(GETMENUSOUND(EMenuSound::SOUL_SUCK));
 
 	GetWorld()->GetTimerManager().ClearTimer(SoulGainTimer);
 	GetWorld()->GetTimerManager().SetTimer(RenewSoulTimer, this, &UUI_Player_Soul::SoulGain, 0.01f, true);

@@ -10,7 +10,7 @@
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../Manager/Equip_Mgr.h"
-#include "../System/DataAsset/DA_MenuSound.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
@@ -39,12 +39,6 @@ void UUI_EquipItem::NativeConstruct()
 		m_EquipItemBtn->OnClicked.AddDynamic(this, &UUI_EquipItem::ItemBtnClicked);
 		m_EquipItemBtn->OnHovered.AddDynamic(this, &UUI_EquipItem::ItemBtnHovered);
 		m_EquipItemBtn->OnUnhovered.AddDynamic(this, &UUI_EquipItem::ItemBtnUnHovered);
-	}
-
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
 	}
 
 	OnNativeVisibilityChanged.AddUObject(this, &UUI_EquipItem::SlotVisibilityChanged);
@@ -181,7 +175,7 @@ void UUI_EquipItem::ItemBtnClicked()
 	}
 
 	ItemList->SetVisibility(ESlateVisibility::Visible);
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_OPEN));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_EquipItem::ItemBtnHovered()
@@ -266,8 +260,8 @@ void UUI_EquipItem::ItemBtnHovered()
 		m_Tooltip->SetTooltipUI(m_ItemData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 	}
-
-	PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+	
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
 void UUI_EquipItem::ItemBtnUnHovered()

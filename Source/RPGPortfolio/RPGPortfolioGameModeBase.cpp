@@ -13,6 +13,8 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameUserSettings.h"
+#include "GameInstance_Base.h"
+#include "Manager/GISubsystem_SoundMgr.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
@@ -74,21 +76,26 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	// 스탠드얼론으로 플레이할 때
-	if (GetWorld()->WorldType == EWorldType::Game)
+	if ( GetWorld()->WorldType == EWorldType::Game )
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Play Standalone"));
-		UGameUserSettings::GetGameUserSettings()->SetScreenResolution(FIntPoint(1280, 720));
-		UGameUserSettings::GetGameUserSettings()->SetViewDistanceQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetAntiAliasingQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetPostProcessingQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetShadowQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetGlobalIlluminationQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetReflectionQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetTextureQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetVisualEffectQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetFoliageQuality(1);
-		UGameUserSettings::GetGameUserSettings()->SetShadingQuality(1);
-		UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
+
+		// 스탠드얼론 상태에서는 해상도 적용이 이상하게 되므로 시작 시에 명시한다.
+		//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(FIntPoint(1280, 720));
+		//UGameUserSettings::GetGameUserSettings()->SetViewDistanceQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetAntiAliasingQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetPostProcessingQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetShadowQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetGlobalIlluminationQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetReflectionQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetTextureQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetVisualEffectQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetFoliageQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->SetShadingQuality(1);
+		//UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
+
+		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+		pGameInst->SetTempResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
 	}
 
 	if (IsValid(m_WidgetClassArr[0]))
@@ -223,14 +230,15 @@ void ARPGPortfolioGameModeBase::CloseSubMenu()
 	m_InventoryUI->SetVisibility(ESlateVisibility::Hidden);
 	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
 	m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+
+	UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
 }
 
 void ARPGPortfolioGameModeBase::PlayBGM(bool _Play)
 {
 	if (_Play)
 	{
-		USoundBase* pBGM = LoadObject<USoundBase>(nullptr, TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/GreaterSpider/SC_GS_BGM.SC_GS_BGM'"));
-		m_BGMComp->SetSound(pBGM);
+		m_BGMComp->SetSound(GETBGM);
 		m_BGMComp->Play();
 	}
 	else

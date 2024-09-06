@@ -33,6 +33,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -118,11 +119,6 @@ void APlayer_Base_Knight::BeginPlay()
 	if ( !IsValid(m_PlayerSound) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
-	}
-	
-	if ( !IsValid(m_MenuSound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("플레이어 메뉴사운드 데이터에셋 로드 실패"));
 	}
 }
 
@@ -569,17 +565,10 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (!IsValid(m_MenuSound->GetMenuSound(EMenuSound::MENU_CLOSE)) || !IsValid(m_MenuSound->GetMenuSound(EMenuSound::MENU_OPEN)))
-	{
-		UE_LOG(LogTemp, Error, TEXT("메뉴 사운드 로드 실패"));
-		return;
-	}
-
 	// 세부메뉴가 열려있을 경우
 	if (pGameMode->IsSubMenuUIOpened())
 	{
 		pGameMode->CloseSubMenu();
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_CLOSE));
 		return;
 	}
 
@@ -591,15 +580,15 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
 		GAU.SetHideCursorDuringCapture(false);
 		pController->SetInputMode(GAU);
-		UE_LOG(LogTemp, Warning, TEXT("menu open"));
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_OPEN));
+
+		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_OPEN));
 	}
 	else
 	{
 		FInputModeGameOnly GameOnly;
 		pController->SetInputMode(GameOnly);
 
-		UGameplayStatics::PlaySound2D(GetWorld(), m_MenuSound->GetMenuSound(EMenuSound::MENU_CLOSE));
+		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
 	}
 		
 	pController->bShowMouseCursor = bShowMenu;
@@ -612,6 +601,11 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 {
 	if (!OverlapInteractionArr.IsEmpty())
 	{
+		if ( OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->_getUObject()->IsA(AItem_Dropped_Base::StaticClass()) )
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::GETITEM), GetActorLocation());
+		}
+
 		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction();
 	}
 	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때

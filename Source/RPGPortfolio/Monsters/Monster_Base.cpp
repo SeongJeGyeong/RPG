@@ -18,6 +18,9 @@
 #include "Engine/DamageEvents.h"
 #include "Curves/CurveVector.h"
 #include "../GameInstance_Base.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/Inventory_Mgr.h"
+#include "../Manager/GISubsystem_EffectMgr.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -141,8 +144,24 @@ void AMonster_Base::BeginPlay()
 	m_WidgetComponent->SetVisibility(false);
 
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
-	//pGameInst->ASyncLoadDataAsset(m_DataAssetInfo.ToSoftObjectPath());
 	pGameInst->ASyncLoadDataAsset(m_DataAsset.ToSoftObjectPath());
+
+	// 랜덤으로 드롭아이템 지정
+	float fRandNum = FMath::RandRange(1.f, 100.f);
+	for ( int32 i = 0; i < m_DropItemArr.Num(); ++i )
+	{
+		if ( m_DropItemArr[i].ProbabilityBottom < fRandNum && fRandNum < m_DropItemArr[i].ProbabilityTop )
+		{
+			FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_DropItemArr[i].Item);
+			m_DropItemInfo.ID = m_DropItemArr[i].Item;
+			m_DropItemInfo.Stack = m_DropItemArr[i].Stack;
+			m_DropItemInfo.ItemImg = FSoftObjectPath(pItemInfo->IconImgPath);
+			m_DropItemInfo.ItemImg.ToSoftObjectPath().PostLoadPath(nullptr);
+			pGameInst->ASyncLoadDataAsset(m_DropItemInfo.ItemImg.ToSoftObjectPath());
+			break;
+		}
+	}
+	m_DropItemArr.Empty();
 }
 
 // Called every frame
@@ -195,15 +214,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	pAnimInst->Montage_Stop(1.f);
 
 	// 피격 사운드 재생
-	if (m_DataAsset.IsPending())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 비동기 로드 실패"));
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAsset.LoadSynchronous()->GetMonSoundData(m_Type)->HitSound_Normal, GetActorLocation());
-	}
-	else
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAsset.Get()->GetMonSoundData(m_Type)->HitSound_Normal, GetActorLocation());
-	}
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Type)->HitSound_Normal, GetActorLocation());
 
 	// 사망 시
 	if ( m_Info.CurHP <= 0.f && GetController() )
@@ -244,8 +255,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
-		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
+		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 	}
 
 	if (!bMonLockedOn)
@@ -303,20 +313,6 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 
 	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 
-	EITEM_ID eId;
-	int32 iStack;
-	// 랜덤으로 드롭아이템 지정
-	float fRandNum = FMath::RandRange(1.f, 100.f);
-	for (int32 i = 0; i < m_DropItemArr.Num(); ++i)
-	{
-		if (m_DropItemArr[i].ProbabilityBottom < fRandNum && fRandNum < m_DropItemArr[i].ProbabilityTop)
-		{
-			eId = m_DropItemArr[i].Item;
-			iStack = m_DropItemArr[i].Stack;
-			break;
-		}
-	}
-
 	FActorSpawnParameters SpawnParams;
 	// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
 	// 스폰할 위치를 찾지 못하면 충돌 상관없이 원래 위치에 스폰
@@ -326,18 +322,11 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 	FVector vDropLoc = GetActorLocation();
 	vDropLoc.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 20.f;
 	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
-	pDropItem->SetDropItemID(eId);
-	pDropItem->SetDropItemStack(iStack);
+	pDropItem->SetDropItemID(m_DropItemInfo.ID);
+	pDropItem->SetDropItemImg(m_DropItemInfo.ItemImg);
+	pDropItem->SetDropItemStack(m_DropItemInfo.Stack);
 
-	if ( m_DataAsset.IsPending() )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 비동기 로드 실패"));
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAsset.LoadSynchronous()->GetMonSoundData(m_Type)->DeadSound, GetActorLocation());
-	}
-	else
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_DataAsset.Get()->GetMonSoundData(m_Type)->DeadSound, GetActorLocation());
-	}
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Type)->DeadSound, GetActorLocation());
 
 	TArray<TObjectPtr<USceneComponent>> AttachCompArr = GetMesh()->GetAttachChildren();
 	if ( AttachCompArr.IsEmpty() )
@@ -386,7 +375,7 @@ void AMonster_Base::OnHitMontageEnded()
 			}
 		}
 	},
-	1.f, false);
+	0.8f, false);
 
 	return;
 }

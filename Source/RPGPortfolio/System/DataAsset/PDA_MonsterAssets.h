@@ -16,14 +16,10 @@ class RPGPORTFOLIO_API UPDA_MonsterAssets : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Sound", Meta = ( DisplayName = "SoundData" ))
-	TMap<EMONSTER_TYPE, FMonsterSoundAsset> m_MonsterSound;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Animation", Meta = ( DisplayName = "AnimMontage" ))
 	TMap<EMONSTER_TYPE, FMonsterAnimAsset> m_MonsterAnim;
 
 public:
-	FMonsterSoundAsset* GetMonSoundData(EMONSTER_TYPE _MonType) { return m_MonsterSound.Find(_MonType); }
 	FMonsterAnimAsset* GetMonAnimData(EMONSTER_TYPE _MonType) { return m_MonsterAnim.Find(_MonType); }
 
 };

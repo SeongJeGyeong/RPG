@@ -9,7 +9,7 @@
 #include "UI_ItemTooltip.h"
 #include "UI_InvenItem.h"
 #include "UI_PlayerStat.h"
-#include "../System/DataAsset/DA_MenuSound.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_EquipItemList::NativeConstruct()
 {
@@ -21,12 +21,6 @@ void UUI_EquipItemList::NativeConstruct()
 	else
 	{
 		m_EquipItemTileView->OnItemIsHoveredChanged().AddUObject(this, &UUI_EquipItemList::OnTileHovered);
-	}
-
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("장비아이템리스트 사운드 로드 실패"));
 	}
 
 	Super::NativeConstruct();
@@ -85,7 +79,8 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		m_Tooltip->SetTooltipUI(pData);
 		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
 
-		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+		
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 	}
 	else
 	{

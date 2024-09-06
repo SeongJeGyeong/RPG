@@ -33,7 +33,6 @@ class RPGPORTFOLIO_API UUI_GameSettingBox : public UUserWidget
 	GENERATED_BODY()
 	
 private:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = "true" ))
 	ESETTING_PROPERTY Setting_Property;
 
@@ -45,9 +44,6 @@ private:
 	UButton* Btn_Down;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UButton* Btn_Up;
-
-	UPROPERTY()
-	class UDA_MenuSound* m_Sound;
 
 public:
 	virtual void NativeConstruct() override;

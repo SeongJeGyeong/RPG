@@ -45,8 +45,6 @@ private:
 
 	// 아이템 장착시 변경될 능력치 표시용
 	class UUI_PlayerStat* m_StatUI;
-	UPROPERTY()
-	class UDA_MenuSound* m_Sound;
 
 public:
 	UFUNCTION()

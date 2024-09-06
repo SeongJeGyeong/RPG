@@ -3,11 +3,11 @@
 #pragma once
 
 #include "../System/Interface/PlayerInteraction.h"
-#include "../Header/Struct.h"
-#include "../System/DataAsset/DA_ItemData.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Item_Dropped_Base.generated.h"
+
+enum class EITEM_ID : uint8;
 
 UCLASS()
 class RPGPORTFOLIO_API AItem_Dropped_Base : public AActor, public IPlayerInteraction
@@ -28,14 +28,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UNiagaraComponent* m_Niagara;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
-	USoundBase* m_ObtainedSound;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	EITEM_ID	m_IID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	int32		m_Stack = 1;
+
+	UPROPERTY()
+	TObjectPtr<UTexture2D>	m_Img;
 
 	UPROPERTY()
 	FText tCommand_Key;
@@ -53,6 +53,9 @@ public:
 	void SetDropItemID(const EITEM_ID& _ItemID) { m_IID = _ItemID; }
 	const int32 GetDropItemStack() { return m_Stack; }
 	void SetDropItemStack(const int32& _Stack) { m_Stack = _Stack; }
+
+	void SetDropItemImg(const TObjectPtr<UTexture2D> _Img) { m_Img = _Img; }
+	void SetDropItemImg(const TSoftObjectPtr<UTexture2D> _Img) { m_Img = _Img.IsPending() ? _Img.LoadSynchronous() : _Img.Get(); }
 
 	virtual FText GetCommand_Key() const override { return tCommand_Key; }
 	virtual FText GetCommand_Name() const override { return tCommand_Name; }

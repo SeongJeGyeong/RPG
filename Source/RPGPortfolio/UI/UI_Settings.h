@@ -43,9 +43,6 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UButton* m_Btn_Apply;
 
-	UPROPERTY()
-	class UDA_MenuSound* m_Sound;
-
 public:
 	virtual void NativeConstruct() override;
 

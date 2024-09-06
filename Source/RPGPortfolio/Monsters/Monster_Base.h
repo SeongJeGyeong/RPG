@@ -36,9 +36,6 @@ private:
 	class UWidgetComponent* m_WidgetComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_MonsterInfo>	m_DataAssetInfo;
-
-	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UPDA_MonsterAssets>	m_DataAsset;
 
 	UPROPERTY()
@@ -52,6 +49,9 @@ private:
 
 	UPROPERTY()
 	class UCurveVector* m_HitCurve;
+
+	UPROPERTY()
+	struct FDroppedItemData	m_DropItemInfo;
 
 	FOnTimelineVector HitTimelineCallback;
 	FOnTimelineEvent HitTimelineFinish;

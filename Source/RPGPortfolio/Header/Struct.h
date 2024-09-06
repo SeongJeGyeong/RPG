@@ -251,20 +251,14 @@ struct FInvenItemRow
 	EEQUIP_SLOT	EquipedSlot;
 };
 
-USTRUCT(Atomic, BlueprintType)
+USTRUCT()
 struct FDroppedItemData
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EITEM_TYPE	Type;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UStaticMesh> Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UNiagaraSystem> Niagara;
-
+	EITEM_ID	ID;
+	TSoftObjectPtr<UTexture2D> ItemImg;
+	uint32		Stack;
 };
 
 USTRUCT(Atomic, BlueprintType)
@@ -364,21 +358,6 @@ struct FProjectileAssets
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UFXSystemAsset* ProjectileEffect_Hit_Wall;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem*		ProjectileEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UParticleSystem*	ProjectileEffect_Legacy;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNiagaraSystem*		ProjHitEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UParticleSystem*	ProjHitEffect_Legacy;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UParticleSystem*	ProjHitEffect_Ground_Legacy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase*			ProjHitSound;

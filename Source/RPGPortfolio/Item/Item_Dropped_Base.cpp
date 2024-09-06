@@ -9,6 +9,7 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../UI/UI_Message_Item.h"
+#include "../Header/Struct.h"
 
 // Sets default values
 AItem_Dropped_Base::AItem_Dropped_Base()
@@ -32,12 +33,6 @@ AItem_Dropped_Base::AItem_Dropped_Base()
 	{
 		m_Niagara->SetAsset(niagara.Object);
 		m_Niagara->Activate(true);
-	}
-
-	static ConstructorHelpers::FObjectFinder<USoundBase> Sound(TEXT("/Script/Engine.SoundCue'/Game/Blueprint/Player/Sound/SC_Player_GetItem.SC_Player_GetItem'"));
-	if (Sound.Succeeded())
-	{
-		m_ObtainedSound = Sound.Object;
 	}
 }
 
@@ -64,10 +59,9 @@ void AItem_Dropped_Base::Interaction()
 
 	UInventory_Mgr::GetInst(GetWorld())->AddGameItem(m_IID, m_Stack);
 	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_ObtainedSound, GetActorLocation());
 	UUI_Base* pMainUI = pGameMode->GetMainHUD();
 	pMainUI->ShowItemMessageUI(true);
-	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, pItemInfo->IconImgPath, m_Stack);
+	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, m_Img, m_Stack);
 	pMainUI->ShowMainMessageUI(true);
 
 	Destroy();

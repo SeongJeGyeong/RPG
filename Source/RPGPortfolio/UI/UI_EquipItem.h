@@ -42,8 +42,6 @@ private:
 	class UUI_EquipItemList*	ItemList;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	class UUI_ItemTooltip* m_Tooltip;	// 장비창 메인화면 블루프린트에서 참조
-	UPROPERTY()
-	class UDA_MenuSound* m_Sound;
 
 public:
 	virtual void NativeConstruct() override;

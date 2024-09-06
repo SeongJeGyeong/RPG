@@ -14,7 +14,7 @@
 #include "UI_ItemTooltip.h"
 #include "UI_PlayerStat.h"
 #include "UI_InvenItem.h"
-#include "../System/DataAsset/DA_MenuSound.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -76,12 +76,6 @@ void UUI_Inventory::NativeConstruct()
 	eCategory = EITEM_TYPE::ALL;
 	SetCategoryUI(eCategory);
 
-	m_Sound = LoadObject<UDA_MenuSound>(nullptr, TEXT("/Script/RPGPortfolio.DA_MenuSound'/Game/Blueprint/DataAsset/BPC_DA_MenuSound.BPC_DA_MenuSound'"));
-	if ( !IsValid(m_Sound) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("인벤토리 사운드 로드 실패"));
-	}
-
 	Super::NativeConstruct();
 }
 
@@ -101,7 +95,7 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		m_ItemTooltipUI->SetTooltipUI(pData);
 		m_ItemTooltipUI->SetVisibility(ESlateVisibility::Visible);
 
-		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_SELECT));
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 	}
 	else
 	{
@@ -124,7 +118,7 @@ void UUI_Inventory::LeftBtnClicked()
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
 
-		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 	}
 }
 
@@ -141,7 +135,7 @@ void UUI_Inventory::RightBtnClicked()
 		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
 
-		PlaySound(m_Sound->GetMenuSound(EMenuSound::MENU_CHANGE));
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 	}
 }
 
@@ -248,6 +242,4 @@ void UUI_Inventory::SetCategoryUI(const EITEM_TYPE _Type)
 	Brush.ImageSize = FVector2D(80, 100);
 
 	m_Category_Img->SetBrush(Brush);
-	
-	//m_Category_Img->SetBrushFromTexture(Category_2DTex);
 }

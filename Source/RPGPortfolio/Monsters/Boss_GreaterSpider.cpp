@@ -14,6 +14,8 @@
 #include "Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "../Projectiles/Proj_GS_Spiderling.h"
+#include "../GameInstance_Base.h"
+#include "../Manager/GISubsystem_EffectMgr.h"
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
@@ -57,6 +59,9 @@ void ABoss_GreaterSpider::BeginPlay()
 	{
 		m_AnimInst->OnRushAttack.AddUObject(this, &ABoss_GreaterSpider::RushAttack);
 	}
+
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+	pGameInst->ASyncLoadDataAsset(m_DataAsset.ToSoftObjectPath());
 }
 
 void ABoss_GreaterSpider::Tick(float DeltaTime)
@@ -79,13 +84,14 @@ void ABoss_GreaterSpider::PlayGSMontage(EGreaterSpider_STATE _State)
 {
 	m_State = _State;
 
-	UAnimMontage* pMontage = m_DataAsset->GetAnimGSpider(_State).LoadSynchronous();
-	if ( !IsValid(pMontage) )
+	UAnimMontage* pAtkMontage = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetAnimGSpider(_State) : m_DataAsset.Get()->GetAnimGSpider(_State);
+
+	if (!IsValid(pAtkMontage))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("거미여왕 공격몽타주 로드 실패"));
 		return;
 	}
-	m_AnimInst->Montage_Play(pMontage);
+	m_AnimInst->Montage_Play(pAtkMontage);
 }
 
 void ABoss_GreaterSpider::RushAttack(bool _Rush)
@@ -95,8 +101,8 @@ void ABoss_GreaterSpider::RushAttack(bool _Rush)
 	if ( _Rush )
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 1200.f;
-		USoundBase* RushSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::RUSHATTACK).LoadSynchronous();
-		if ( IsValid(RushSound) )
+		USoundBase* RushSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::RUSHATTACK) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::RUSHATTACK);
+		if (IsValid(RushSound))
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, GetActorLocation());
 		}
@@ -106,7 +112,7 @@ void ABoss_GreaterSpider::RushAttack(bool _Rush)
 	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-		USoundBase* BodySlamSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::BODYSLAM).LoadSynchronous();
+		USoundBase* BodySlamSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::BODYSLAM) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::BODYSLAM);
 		if ( IsValid(BodySlamSound) )
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BodySlamSound, GetActorLocation());
@@ -375,8 +381,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		fPhysicsWeight = 1.f;
 
 		// 피격 이펙트 스폰
-		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
-		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
+		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 
 		// 피격 부위가 메쉬나 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
 		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Pelvis")) && !PointDamageEvent->HitInfo.BoneName.IsEqual(FName("None")))
@@ -391,21 +396,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		}
 	}
 
-	// 경직 수치 최대로 채우면 스턴 상태에 빠트리고 행동트리 일시적으로 중지
-	//if (StaggerGauge >= 100.f)
-	//{
-	//	AAIController* pAIController = Cast<AAIController>(GetController());
-	//	if (IsValid(pAIController))
-	//	{
-	//		if (pAIController->GetBlackboardComponent())
-	//		{
-	//			// 경직 상태
-	//		}
-	//	}
-	//	StaggerGauge = 0.f;
-	//}
-
-	USoundBase* HitSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::HIT).LoadSynchronous();
+	USoundBase* HitSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::HIT) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::HIT);
 	if (IsValid(HitSound))
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
@@ -425,7 +416,7 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 	m_AnimInst->StopAllMontages(1.f);
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
 
-	USoundBase* DeadSound = m_DataAsset->GetSoundGSpider(EGreaterSpider_STATE::DEAD).LoadSynchronous();
+	USoundBase* DeadSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::DEAD) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::DEAD);
 	if (!IsValid(DeadSound))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));

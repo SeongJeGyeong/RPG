@@ -38,8 +38,6 @@ private:
 	UImage*					m_Category_Img;
 
 	EITEM_TYPE			eCategory;
-	UPROPERTY()
-	class UDA_MenuSound* m_Sound;
 
 public:
 	void AddInventoryItem(UObject* _ItemData);

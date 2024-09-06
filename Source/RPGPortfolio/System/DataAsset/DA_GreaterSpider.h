@@ -17,13 +17,13 @@ class RPGPORTFOLIO_API UDA_GreaterSpider : public UDataAsset
 	
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation", Meta = (DisplayName = "AnimMontage"))
-	TMap<EGreaterSpider_STATE, TSoftObjectPtr<UAnimMontage>> m_AnimMap;
+	TMap<EGreaterSpider_STATE, UAnimMontage*> m_Anim;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound", Meta = (DisplayName = "SoundBase"))
-	TMap<EGreaterSpider_STATE, TSoftObjectPtr<USoundBase>> m_SoundMap;
+	TMap<EGreaterSpider_STATE, USoundBase*> m_Sound;
 
 public:
-	TSoftObjectPtr<UAnimMontage> GetAnimGSpider(EGreaterSpider_STATE _State) const { return m_AnimMap.Find(_State)->LoadSynchronous(); }
-	TSoftObjectPtr<USoundBase> GetSoundGSpider(EGreaterSpider_STATE _State) const { return m_SoundMap.Find(_State)->LoadSynchronous(); }
+	UAnimMontage* GetAnimGSpider(EGreaterSpider_STATE _State) const { return *m_Anim.Find(_State); }
+	USoundBase* GetSoundGSpider(EGreaterSpider_STATE _State) const { return *m_Sound.Find(_State); }
 
 };

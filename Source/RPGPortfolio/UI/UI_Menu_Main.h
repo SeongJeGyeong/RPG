@@ -31,9 +31,6 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UTextBlock* m_MenuName;
 
-	UPROPERTY() 
-	class UDA_MenuSound* m_Sound;
-
 public:
 	virtual void NativeConstruct() override;
 

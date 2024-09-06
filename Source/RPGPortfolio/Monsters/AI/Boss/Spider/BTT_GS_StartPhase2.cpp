@@ -27,7 +27,7 @@ EBTNodeResult::Type UBTT_GS_StartPhase2::ExecuteTask(UBehaviorTreeComponent& _Ow
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 
 	TSubclassOf<UCameraShakeBase> CameraShake = LoadClass<UCameraShakeBase>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Sequence/CameraShake/BPC_CamShake_GS_Phase2.BPC_CamShake_GS_Phase2_C'"));
-	PlayerController->ClientPlayCameraShake(CameraShake);
+	PlayerController->ClientStartCameraShake(CameraShake);
 
 	return EBTNodeResult::InProgress;
 }

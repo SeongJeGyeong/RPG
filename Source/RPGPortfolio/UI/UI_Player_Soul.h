@@ -21,9 +21,6 @@ private:
 	UTextBlock* m_Soul;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UTextBlock* m_GainSoul;
-
-	UPROPERTY()
-	class UDA_MenuSound* m_Sound;
 	
 	int32 iDisplayedSoul;
 	int32 iGainedSoul;
