@@ -7,7 +7,6 @@
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
-#include "../System/PlayerState_Base.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "PaperSprite.h"
 #include "Styling/SlateBrush.h"
@@ -15,6 +14,7 @@
 #include "UI_PlayerStat.h"
 #include "UI_InvenItem.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -166,7 +166,7 @@ bool UUI_Inventory::IsInventoryOpened()
 
 void UUI_Inventory::SetStatUI(APlayerState* _PlayerState)
 {
-	m_PlayerStatUI->SetPlayerStatUI(Cast<APlayerState_Base>(_PlayerState));
+	m_PlayerStatUI->SetPlayerStatUI();
 }
 
 void UUI_Inventory::SetCategoryUI(const EITEM_TYPE _Type)

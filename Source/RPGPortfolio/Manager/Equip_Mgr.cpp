@@ -3,7 +3,6 @@
 
 #include "Equip_Mgr.h"
 #include "../RPGPortfolioGameModeBase.h"
-#include "../System/PlayerState_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "../GameInstance_Base.h"
 #include "../UI/UI_Player_QuickSlot.h"

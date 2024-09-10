@@ -23,14 +23,13 @@ ABoss_GreaterSpider::ABoss_GreaterSpider()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	m_PSC = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleComponent"));
-
 	m_PSC->SetupAttachment(GetRootComponent());
 	m_PSC->bAutoActivate = false;
 
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> RushParticle (TEXT("/Script/Engine.ParticleSystem'/Game/Blueprint/Monster/Effect/GreaterSpider/P_HeldCharge_Fire_Rush_2.P_HeldCharge_Fire_Rush_2'"));
-	if (RushParticle.Succeeded())
+	ConstructorHelpers::FClassFinder<AProj_GS_Spiderling> projectile(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_ShotSpiderling.BPC_ShotSpiderling_C'"));
+	if ( projectile.Succeeded() )
 	{
-		m_PSC->SetTemplate(RushParticle.Object);
+		m_GSProj = projectile.Class;
 	}
 }
 
@@ -117,8 +116,12 @@ void ABoss_GreaterSpider::RushAttack(bool _Rush)
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BodySlamSound, GetActorLocation());
 		}
-		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Blueprint/Monster/Effect/GreaterSpider/P_HeldCharge_Fire_01_BodySlam.P_HeldCharge_Fire_01_BodySlam'"));
-		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), FName("Root"), FVector(0.f, 0.f, 100.f), FRotator(0.f, 90.f, 0.f), FVector(2.f, 2.f, 2.f));
+		UFXSystemAsset* BodySlamEffect = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetEffectGSpider(EGreaterSpider_STATE::BODYSLAM) : m_DataAsset.Get()->GetEffectGSpider(EGreaterSpider_STATE::BODYSLAM);
+		if ( IsValid(BodySlamEffect) )
+		{
+			UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Cast<UParticleSystem>(BodySlamEffect), GetMesh(), FName("Root"), FVector(0.f, 0.f, 100.f), FRotator(0.f, 90.f, 0.f), FVector(2.f, 2.f, 2.f));
+		}
+
 		RushAttackHitCheck(400.f);
 		m_PSC->ToggleActive();
 		bAtkTrace = false;
@@ -138,8 +141,7 @@ void ABoss_GreaterSpider::RangedAttack()
 	// 투사체 생성위치	
 	FVector ProjectileLocation = GetMesh()->GetSocketLocation(FName("HeadAttack_End"));
 
-	TSubclassOf<AProj_GS_Spiderling> ProjClass = LoadClass<AProj_GS_Spiderling>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_ShotSpiderling.BPC_ShotSpiderling_C'"));
-	AProj_GS_Spiderling* pProjectile = GetWorld()->SpawnActor<AProj_GS_Spiderling>(ProjClass, ProjectileLocation, GetActorRotation(), param);
+	AProj_GS_Spiderling* pProjectile = GetWorld()->SpawnActor<AProj_GS_Spiderling>(m_GSProj, ProjectileLocation, GetActorRotation(), param);
 	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, m_Info.MagicAtk);
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
@@ -372,6 +374,9 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 				bPhase2 = true;
 			}
 		}
+		// 페이즈2 기술 이펙트 세팅
+		UFXSystemAsset* Particle = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetEffectGSpider(EGreaterSpider_STATE::RUSHATTACK) : m_DataAsset.Get()->GetEffectGSpider(EGreaterSpider_STATE::RUSHATTACK);
+		m_PSC->SetTemplate(Cast<UParticleSystem>(Particle));
 	}
 
 	// 공격 모션중이 아닐 때도 조건에 추가해야함

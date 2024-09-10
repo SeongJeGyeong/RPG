@@ -49,6 +49,7 @@ public:
 	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
 
 	void ShowMenu(bool _bShow);
+	bool IsOpendMenu();
 
 	void ShowMainMessageUI(bool _bShow);
 	void ShowItemMessageUI(bool _bShow);

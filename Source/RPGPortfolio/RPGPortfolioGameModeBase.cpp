@@ -15,6 +15,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "GameInstance_Base.h"
 #include "Manager/GISubsystem_SoundMgr.h"
+#include "Manager/GISubsystem_StatMgr.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
@@ -75,6 +76,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	// 스탠드얼론으로 플레이할 때
 	if ( GetWorld()->WorldType == EWorldType::Game )
 	{
@@ -94,7 +96,6 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		//UGameUserSettings::GetGameUserSettings()->SetShadingQuality(1);
 		//UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
 
-		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 		pGameInst->SetTempResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
 	}
 
@@ -105,6 +106,9 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if (IsValid(m_MainHUD))
 		{
 			m_MainHUD->AddToViewport(1);
+
+			UGISubsystem_StatMgr* StatMgr = pGameInst->GetSubsystem<UGISubsystem_StatMgr>();
+			StatMgr->SetUIInManager();
 		}
 		else
 		{

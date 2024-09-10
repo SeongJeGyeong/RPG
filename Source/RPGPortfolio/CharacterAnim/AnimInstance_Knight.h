@@ -100,6 +100,11 @@ public:
 	UFUNCTION()
 	void AnimNotify_ShotProjectile();
 
+	UFUNCTION()
+	void AnimNotify_InvalidInput();
+	UFUNCTION()
+	void AnimNotify_ValidInput();
+
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;

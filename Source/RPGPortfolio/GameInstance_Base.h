@@ -25,11 +25,6 @@ private:
 	TSubclassOf<class UUserWidget>	m_LoadingScreenClass;
 
 	UPROPERTY()
-	FCharacterStatSheet PlayerStat;
-	UPROPERTY()
-	FCharacterBasePower PlayerBasePower;
-
-	UPROPERTY()
 	FEquipmentStat EquipmentStat;
 
 	UPROPERTY()
@@ -53,12 +48,6 @@ public:
 	virtual void BeginLoadingScreen(const FString& MapName);
 	UFUNCTION()
 	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
-
-	FCharacterStatSheet GetPlayerStatus() const { return PlayerStat; }
-	void SetPlayerStatus(const FCharacterStatSheet& _PlayerStat) { PlayerStat = _PlayerStat; }
-
-	FCharacterBasePower GetPlayerBasePower() const { return PlayerBasePower; }
-	void SetPlayerBasePower(const FCharacterBasePower& _PlayerBasePower) { PlayerBasePower = _PlayerBasePower; }
 
 	FEquipmentStat GetEquipmentStatInfo() const { return EquipmentStat; }
 	void SetEquipmentStatInfo(const FEquipmentStat& _EquipmentStat) { EquipmentStat = _EquipmentStat; }

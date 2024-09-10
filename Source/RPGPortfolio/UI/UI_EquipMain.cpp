@@ -8,7 +8,6 @@
 #include "UI_PlayerStat.h"
 #include "UI_EquipItem.h"
 #include "UI_EquipItemList.h"
-#include "../System/PlayerState_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Item/Item_InvenData.h"
 
@@ -50,15 +49,7 @@ void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 	}
 	else
 	{
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		if ( !IsValid(pPlayerState) )
-		{
-			UE_LOG(LogTemp, Error, TEXT("플레이어스테이트 획득 실패"));
-		}
-		else
-		{
-			m_Equip_StatUI->SetPlayerStatUI(Cast<APlayerState_Base>(pPlayerState));
-		}
+		m_Equip_StatUI->SetPlayerStatUI();
 		UE_LOG(LogTemp, Warning, TEXT("장비창 메인 보임"));
 	}
 }

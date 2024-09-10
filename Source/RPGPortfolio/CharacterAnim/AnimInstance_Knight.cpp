@@ -83,7 +83,7 @@ void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
 	m_Player->SetbNextAtkCheck(false);
-	m_Player->SetbNoInputInAtk(false);
+	m_Player->SetbInvalidInput(false);
 	m_Player->SetbAtkRotate(false);
 	m_Player->SetvAtkDirZero();
 }
@@ -99,7 +99,7 @@ void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 	// 공격 대상 배열 초기화
 	m_Player->EmptyHitActorArr();
 	// 공격 판정 끝난 뒤에 공격 입력이 들어와야만 다음 콤보로 넘어가도록
-	m_Player->SetbAtkToggle(false);
+	//m_Player->SetbAtkToggle(false);
 
 }
 
@@ -122,6 +122,7 @@ void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
 	m_Player->SetbDodging(false);
+	m_Player->SetbInvalidInput(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpStart()
@@ -148,4 +149,16 @@ void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 {
 	m_Player->ShotProjectile();
+}
+
+void UAnimInstance_Knight::AnimNotify_InvalidInput()
+{
+	UE_LOG(LogTemp, Warning, TEXT("InvalidInput"));
+	m_Player->SetbInvalidInput(true);
+}
+
+void UAnimInstance_Knight::AnimNotify_ValidInput()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ValidInput"));
+	m_Player->SetbInvalidInput(false);
 }

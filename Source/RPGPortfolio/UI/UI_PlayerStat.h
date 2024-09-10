@@ -68,7 +68,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void SetPlayerStatUI(class APlayerState_Base* _PlayerState);
+	void SetPlayerStatUI();
 	void RenewBasePower();
 	void SetVisibilityAlterBasePower(bool _bVisibility);
 	void AlterRenewBasePower(class UItem_InvenData* _InvenData, bool _bEquiped);

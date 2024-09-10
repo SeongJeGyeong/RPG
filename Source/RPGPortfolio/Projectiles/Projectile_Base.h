@@ -3,12 +3,12 @@
 #pragma once
 
 #include "../System/DataAsset/DA_ProjectileAsset.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "NiagaraComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Projectile_Base.generated.h"
+
+class UFXSystemAsset;
 
 UCLASS()
 class RPGPORTFOLIO_API AProjectile_Base : public AActor

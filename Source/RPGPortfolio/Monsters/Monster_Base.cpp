@@ -155,9 +155,6 @@ void AMonster_Base::BeginPlay()
 			FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_DropItemArr[i].Item);
 			m_DropItemInfo.ID = m_DropItemArr[i].Item;
 			m_DropItemInfo.Stack = m_DropItemArr[i].Stack;
-			m_DropItemInfo.ItemImg = FSoftObjectPath(pItemInfo->IconImgPath);
-			m_DropItemInfo.ItemImg.ToSoftObjectPath().PostLoadPath(nullptr);
-			pGameInst->ASyncLoadDataAsset(m_DropItemInfo.ItemImg.ToSoftObjectPath());
 			break;
 		}
 	}
@@ -323,7 +320,6 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 	vDropLoc.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 20.f;
 	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
 	pDropItem->SetDropItemID(m_DropItemInfo.ID);
-	pDropItem->SetDropItemImg(m_DropItemInfo.ItemImg);
 	pDropItem->SetDropItemStack(m_DropItemInfo.Stack);
 
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Type)->DeadSound, GetActorLocation());

@@ -20,9 +20,9 @@ private:
 	UPROPERTY()
 	UDataTable* m_ItemDataTable;
 	UPROPERTY()
-	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;
+	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;	// 게임의 모든 아이템 정보가 담긴 맵
 
-	TMap<EITEM_ID, FInvenItemRow> m_InvenStorage[ (int32)EITEM_TYPE::END ];
+	TMap<EITEM_ID, FInvenItemRow> m_InvenStorage[ (int32)EITEM_TYPE::END ];		// 플레이어가 인벤토리에 소지 중인 아이템 맵
 
 public:
 	// 스태틱 함수로 선언하여 객체가 생성되지 않았어도 함수 호출 가능

@@ -34,8 +34,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	int32		m_Stack = 1;
 
-	UPROPERTY()
-	TObjectPtr<UTexture2D>	m_Img;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	TSoftObjectPtr<UTexture2D>	m_Img;
 
 	UPROPERTY()
 	FText tCommand_Key;

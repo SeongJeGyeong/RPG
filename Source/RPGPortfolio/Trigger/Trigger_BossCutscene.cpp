@@ -14,6 +14,7 @@
 #include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "../System/FadeViewportClient.h"
+#include "../Manager/GISubsystem_SoundMgr.h"
 
 void ATrigger_BossCutscene::BeginPlay()
 {
@@ -45,6 +46,8 @@ void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherAc
 			m_SeqPlayer->Play();
 		}
 	}
+
+	GetGameInstance()->GetSubsystem<UGISubsystem_SoundMgr>()->BGMLoadAsync();
 }
 
 void ATrigger_BossCutscene::EndLevelSequence()

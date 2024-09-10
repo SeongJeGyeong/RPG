@@ -238,7 +238,7 @@ struct FGameItemInfo
 	int32			Require_Int;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString			NiagaraPath;
+	EEffectType		EffectType;
 };
 
 USTRUCT()

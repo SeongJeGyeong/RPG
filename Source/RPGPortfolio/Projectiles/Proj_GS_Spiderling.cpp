@@ -3,11 +3,11 @@
 
 #include "Proj_GS_Spiderling.h"
 #include "Components/SphereComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../System/DamageType_Base.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Engine/Classes/Particles/ParticleSystemComponent.h"
 
 AProj_GS_Spiderling::AProj_GS_Spiderling()
 {

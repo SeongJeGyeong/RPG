@@ -17,7 +17,6 @@
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../Manager/Equip_Mgr.h"
-#include "../System/PlayerState_Base.h"
 #include "../System/Component/LockOnTargetComponent.h"
 #include "../System/DamageType_Base.h"
 #include "../Monsters/Monster_Base.h"
@@ -34,6 +33,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_EffectMgr.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -62,12 +63,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Cam->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
 	LockonControlRotationRate = 10.f;	// 락온 시 캐릭터 회전 보간 속도
-
-	static ConstructorHelpers::FClassFinder<AProjectile_Base> SkillProj(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_SlashCutter.BPC_SlashCutter_C'"));
-	if ( SkillProj.Succeeded() )
-	{
-		m_Proj = SkillProj.Class;
-	}
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +74,7 @@ void APlayer_Base_Knight::BeginPlay()
 
 	if (pController)
 	{
+		// 카메라 상하 범위 제한
 		pController->PlayerCameraManager->ViewPitchMin = -40.f;
 		pController->PlayerCameraManager->ViewPitchMax = 40.f;
 		ULocalPlayer* pLocalPlayer = pController->GetLocalPlayer();
@@ -91,6 +87,9 @@ void APlayer_Base_Knight::BeginPlay()
 		}
 	}
 
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
+
 	m_AnimInst = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
 	if (IsValid(m_AnimInst))
 	{
@@ -98,6 +97,7 @@ void APlayer_Base_Knight::BeginPlay()
 		m_AnimInst->OnDodgeTimeCheck.AddUObject(this, &APlayer_Base_Knight::DodgeTimeCheck);
 		m_AnimInst->OnAttackMove.AddUObject(this, &APlayer_Base_Knight::AttackMove);
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
+		m_AnimInst->OnMontageEnded.AddDynamic(this, &APlayer_Base_Knight::MontageEnded);
 	}
 
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -107,9 +107,6 @@ void APlayer_Base_Knight::BeginPlay()
 		return;
 	}
 	m_MainUI = pGameMode->GetMainHUD();
-	m_PlayerUI = m_MainUI->GetMainUIWidget();
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
-	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
 
 	if ( !IsValid(m_PlayerMontage) )
 	{
@@ -120,6 +117,9 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
 	}
+
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->DefaultMouseCursor = EMouseCursor::Default;
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->CurrentMouseCursor = EMouseCursor::Default;
 }
 
 // Called every frame
@@ -153,8 +153,8 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	if (bSprintToggle)
 	{
 		// 스테미너가 0일 경우 달리기 불가
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+		UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+		if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
 		{
 			StopSprint();
 		}
@@ -246,20 +246,24 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (CheckMontagePlaying() || bIsJumped || bNoInputInAtk || Controller == NULL)
+	if (bIsJumped || bInvalidInput || Controller == NULL )
 	{
 		return;
 	}
 
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 	// 일부 모션의 경우 후딜레이 모션을 캔슬하고 바로 이동모션으로 전환한다.
-	m_AnimInst->StopAllMontages(0.25f);
+	//m_AnimInst->StopAllMontages(0.25f);
+	FAlphaBlendArgs BlendArgs;
+	BlendArgs.BlendTime = 0.25f;
+	BlendArgs.BlendOption = EAlphaBlendOption::ExpOut;
+	m_AnimInst->Montage_StopWithBlendOut(BlendArgs);
 
 	float fSpeedRate = 1.f;
 	if (bSprintToggle)
 	{
-		APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-		pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
+		UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+		StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
 		fSpeedRate = 2.f;
 	}
 
@@ -317,7 +321,7 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (CheckMontagePlaying() || bIsJumped || m_AnimInst->GetbIsGuard() || bNoInputInAtk )
+	if (bIsJumped || m_AnimInst->GetbIsGuard() || bInvalidInput )
 	{
 		return;
 	}
@@ -339,9 +343,9 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 	bSprintToggle = _Instance.GetValue().Get<bool>();
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 스테미너가 0일 경우 달리기 불가
-	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
+	if (StatMgr->GetPlayerBasePower().CurStamina <= 0.f)
 	{
 		bSprintToggle = false;
 		return;
@@ -361,7 +365,7 @@ void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instan
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	if (CheckMontagePlaying() || bIsJumped || bNoInputInAtk)
+	if (bIsJumped || bInvalidInput )
 	{
 		return;
 	}
@@ -389,15 +393,12 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 스테미너가 0일 경우 공격 불가
-	if (pState->GetPlayerBasePower().CurStamina <= 0.f)
+	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f)
 	{
 		return;
 	}
-	
-	bAttackToggle = _Instance.GetValue().Get<bool>();
 	
 	if (bSprintToggle)
 	{
@@ -411,7 +412,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		{
 			NextAttackCheck();
 			bNextAtkCheckOn = false;
-			bAttackToggle = false;
 		}
 		return;
 	}
@@ -427,13 +427,12 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 				m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
 			}
 
-			bAttackToggle = false;
 			return;
 		}
 	}
 	else
 	{
-		if (!CheckMontagePlaying() && !m_AnimInst->GetbIsGuard() && !bNoInputInAtk)
+		if (!m_AnimInst->GetbIsGuard() && !bInvalidInput )
 		{
 			CurrentCombo = 1;
 			if (bHeavyToggle)
@@ -441,7 +440,6 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 				if (ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK))
 				{
 					// 강공격
-					bHeavyAtk = true;
 					m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
 				}
 			}
@@ -450,11 +448,9 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 				if (ConsumeStaminaForMontage(EPlayerMontage::ATTACK))
 				{
 					// 약공격
-					bHeavyAtk = false;
 					m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK));
 				}
 			}
-			bAttackToggle = false;
 			bNextAtkCheckOn = false;
 		}
 	}
@@ -467,23 +463,14 @@ void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instanc
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
-	if (CheckMontagePlaying() || m_AnimInst->GetbIsGuard() || bIsJumped || bNoInputInAtk)
+	if (m_AnimInst->GetbIsGuard() || bIsJumped || bInvalidInput )
 	{
-		if (bNoInputInAtk)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("bNoInputInAtk"));
-		}
-		else if ( bIsJumped )
-		{
-			UE_LOG(LogTemp, Warning, TEXT("bIsJumped"));
-		}
-
 		return;
 	}
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 스테미너가 0일 경우 회피 불가
-	if ( pState->GetPlayerBasePower().CurStamina <= 0.f )
+	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
 	{
 		return;
 	}
@@ -510,6 +497,7 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
 	}
 	bDodging = true;
+	bInvalidInput = true;
 }
 
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
@@ -572,9 +560,14 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	bShowMenu = (bShowMenu != _Instance.GetValue().Get<bool>());
+	if (m_MainUI->IsOpendMenu())
+	{
+		FInputModeGameOnly GameOnly;
+		pController->SetInputMode(GameOnly);
 
-	if (bShowMenu)
+		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
+	}
+	else
 	{
 		FInputModeGameAndUI GAU;
 		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
@@ -583,18 +576,10 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 
 		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_OPEN));
 	}
-	else
-	{
-		FInputModeGameOnly GameOnly;
-		pController->SetInputMode(GameOnly);
 
-		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
-	}
-		
-	pController->bShowMouseCursor = bShowMenu;
-	pController->SetPause(bShowMenu);
-
-	m_MainUI->ShowMenu(bShowMenu);
+	pController->bShowMouseCursor = !m_MainUI->IsOpendMenu();
+	pController->SetPause(!m_MainUI->IsOpendMenu());
+	m_MainUI->ShowMenu(!m_MainUI->IsOpendMenu());
 }
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
@@ -660,15 +645,14 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (CheckMontagePlaying() || m_AnimInst->GetbIsGuard() || bIsJumped || bNoInputInAtk)
+	if (m_AnimInst->GetbIsGuard() || bIsJumped || bInvalidInput )
 	{
 		return;
 	}
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 마나가 부족할 경우 공격 불가
-	if (pState->GetPlayerBasePower().CurMP < 20.f)
+	if (StatMgr->GetPlayerBasePower().CurMP < 20.f)
 	{
 		return;
 	}
@@ -680,62 +664,49 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 	}
 
 	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
-	pState->SetPlayerCurrentMP(pState->GetPlayerBasePower().CurMP - 20.f);
+	StatMgr->SetPlayerCurrentMP(StatMgr->GetPlayerBasePower().CurMP - 20.f);
 	// ShotProjectile로
 }
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
 
-// 재생중일 때 이동입력안되는 몽타주 목록
-bool APlayer_Base_Knight::CheckMontagePlaying()
-{
-	// true일 경우 이동 입력이 되지않도록 판단하기 위한 함수
-	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT))			||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::GUARDBREAK))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER))	||
-		m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::USEITEM))		||
-		bDodging
-		)
-	{
-		//UE_LOG(LogTemp, Display, TEXT("몽타주를 재생 불가능한 상태입니다."));
-		return true;
-	}
-	else
-	{
-		if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW)))
-		{
-			m_AnimInst->Montage_Stop(1.f);
-		}
-	}
-
-	return false;
-}
-
 // 연속공격 다음 모션 체크함수
 void APlayer_Base_Knight::NextAttackCheck()
 {
+	EPlayerMontage AtkMontage = EPlayerMontage::ATTACK;
+	int32 MaxCombo = 3;
 	// 강공격 중에 강공격 토글을 해제할 경우 다음공격 재생안함
-	if (bHeavyAtk != bHeavyToggle)
+	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
 	{
-		return;
+		if ( !bHeavyToggle )
+		{
+			return;
+		}
+		AtkMontage = EPlayerMontage::HEAVYATTACK;
+		MaxCombo = 2;
+		CurrentCombo = ( CurrentCombo == MaxCombo ) ? 1 : 2;
 	}
+	else
+	{
+		// 약공격일 때 강공격 토글 on하면 재생 안함
+		if ( bHeavyToggle )
+		{
+			return;
+		}
 
-	EPlayerMontage AtkMontage = bHeavyAtk ? EPlayerMontage::HEAVYATTACK : EPlayerMontage::ATTACK;
+		if ( CurrentCombo == MaxCombo )
+		{
+			CurrentCombo = 2;
+		}
+		else
+		{
+			CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+		}
+	}
 
 	if (!ConsumeStaminaForMontage(AtkMontage))
 	{
 		return;
-	}
-
-	int32 MaxCombo = bHeavyAtk ? 2 : 3;
-	if (CurrentCombo == MaxCombo)
-	{
-		CurrentCombo = bHeavyAtk ? 1 : 2;
-	}
-	else
-	{
-		CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
 	}
 
 	FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), CurrentCombo));
@@ -779,7 +750,7 @@ void APlayer_Base_Knight::AttackHitCheck()
 					}
 				}
 
-				if (bHeavyAtk)
+				if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
 				{
 					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
 				}
@@ -796,32 +767,22 @@ void APlayer_Base_Knight::AttackHitCheck()
 
 void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage)
 {
-	//m_AnimInst->Montage_Pause();
-	//fAttackPlayRate = 0.1f;
 	m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 0.1f);
 	GetWorld()->GetTimerManager().SetTimer(HitStiffTimer, [this, _AtkMontage]()
 	{
 		m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.f);
 		GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
-		//m_AnimInst->Montage_Resume(NULL);
-		/*fAttackPlayRate += 0.1f;
-		m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), fAttackPlayRate);
-		if ( fAttackPlayRate >= 1.f )
-		{
-			m_AnimInst->Montage_SetPlayRate(m_PlayerMontage->GetPlayerMontage(_AtkMontage), 1.f);
-			GetWorld()->GetTimerManager().ClearTimer(HitStiffTimer);
-		}*/
 	},
 	0.2f, false);
 
 	float iDamage = 0.f;
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 
 	switch (_AtkType)
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
 	case EATTACK_TYPE::PHYSIC_RANGE:
-		iDamage = pState->GetPlayerBasePower().PhysicAtk;
+		iDamage = StatMgr->GetPlayerBasePower().PhysicAtk;
 		if (_AtkMontage == EPlayerMontage::HEAVYATTACK)
 		{
 			iDamage = iDamage * 1.5f;
@@ -829,7 +790,7 @@ void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 		break;
 	case EATTACK_TYPE::MAGIC_MELEE:
 	case EATTACK_TYPE::MAGIC_RANGE:
-		iDamage = pState->GetPlayerBasePower().MagicAtk;
+		iDamage = StatMgr->GetPlayerBasePower().MagicAtk;
 		break;
 	default:
 		break;
@@ -846,7 +807,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
 	float fPlayerDef = 0.f;
@@ -854,34 +815,36 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
 	case EATTACK_TYPE::PHYSIC_RANGE:
-		fPlayerDef = pState->GetPlayerBasePower().PhysicDef;
+		fPlayerDef = StatMgr->GetPlayerBasePower().PhysicDef;
 		break;
 	case EATTACK_TYPE::MAGIC_MELEE:
 	case EATTACK_TYPE::MAGIC_RANGE:
-		fPlayerDef = pState->GetPlayerBasePower().MagicDef;
+		fPlayerDef = StatMgr->GetPlayerBasePower().MagicDef;
 		break;
 	default:
 		break;
 	}
 
 	FinalDamage = FMath::Clamp(FinalDamage - fPlayerDef, 0.f, FinalDamage);
-	int32 iCurHP = pState->GetPlayerBasePower().CurHP;
-	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, pState->GetPlayerBasePower().MaxHP);
+	int32 iCurHP = StatMgr->GetPlayerBasePower().CurHP;
+	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, StatMgr->GetPlayerBasePower().MaxHP);
 
-	pState->SetPlayerCurrentHP(iCurHP);
+	StatMgr->SetPlayerCurrentHP(iCurHP);
 
-	//if ( iCurHP <= 0.f && GetController() )
-	//{
-	//	// 사망처리
-	//	return 0.f;
-	//}
-	// 피격 이펙트 스폰
+	if ( iCurHP <= 0.f && GetController() )
+	{
+		// 사망처리
+		return 0.f;
+	}
 
 	m_AnimInst->Montage_SetPlayRate(NULL, 1.f);
+	// 피격 이펙트 스폰
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-		UParticleSystem* Particle = LoadObject<UParticleSystem>(nullptr, TEXT("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'"));
+		UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
+		
+		UParticleSystem* Particle = EffectMgr->GetHitEffect();
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 	}
 
@@ -892,10 +855,9 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	// 현재 행동상태 해제
 	bAtkTrace = false;
 	bNextAtkCheckOn = false;
-	bAttackToggle = false;
 	bAtkRotate = false;
 	bIsJumped = false;
-	bNoInputInAtk = false;
+	bInvalidInput = false;
 	bDodging = false;
 	bDodgeMove = false;
 	StopSprint();
@@ -965,10 +927,10 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 		return false;
 	}
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 몬스터의 공격력의 10분의 1 만큼 스태미나 감소
-	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - _Damage * 0.1f);
-	if (pState->GetPlayerBasePower().CurStamina < 0.f)
+	StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - _Damage * 0.1f);
+	if (StatMgr->GetPlayerBasePower().CurStamina < 0.f)
 	{
 		// 방어 풀리고 경직상태 되도록
 		m_AnimInst->SetbIsGuard(false);
@@ -1028,8 +990,8 @@ void APlayer_Base_Knight::JumpAttack()
 void APlayer_Base_Knight::SetbToggleGuard(const bool& _ToggleGuard)
 {
 	bToggleGuard = _ToggleGuard;
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	pState->SetbSTRecovSlowly(bToggleGuard);
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	StatMgr->SetbSTRecovSlowly(bToggleGuard);
 }
 
 void APlayer_Base_Knight::TargetLockOn()
@@ -1071,38 +1033,40 @@ void APlayer_Base_Knight::ShotProjectile()
 	// 투사체 발사 방향
 	FVector vDir = GetActorForwardVector() * 1000.f;
 
-	AProj_Player_Cutter* pProjectile = GetWorld()->SpawnActor<AProj_Player_Cutter>(m_Proj, ProjectileLocation, GetActorRotation(), param);
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, pState->GetPlayerBasePower().MagicAtk);
+	TSubclassOf<AProjectile_Base> proj = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>()->GetProjectile();
+	AProj_Player_Cutter* pProjectile = GetWorld()->SpawnActor<AProj_Player_Cutter>(proj, ProjectileLocation, GetActorRotation(), param);
+
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+
+	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, StatMgr->GetPlayerBasePower().MagicAtk);
 	pProjectile->LaunchMotion(vDir);
 }
 
 void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
 
 	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_ID);
 	if ( pItemInfo->Restore_HP >= 0 )
 	{
-		pState->SetPlayerCurrentHP(FMath::Clamp(pState->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, pState->GetPlayerBasePower().MaxHP));
+		StatMgr->SetPlayerCurrentHP(FMath::Clamp(StatMgr->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, StatMgr->GetPlayerBasePower().MaxHP));
 		SoundEnum = EPlayerSound::USERESTORE;
 	}
 	if ( pItemInfo->Restore_MP >= 0 )
 	{
-		pState->SetPlayerCurrentMP(FMath::Clamp(pState->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, pState->GetPlayerBasePower().MaxMP));
+		StatMgr->SetPlayerCurrentMP(FMath::Clamp(StatMgr->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, StatMgr->GetPlayerBasePower().MaxMP));
 		SoundEnum = EPlayerSound::USERESTORE;
 	}
 	if ( pItemInfo->Gained_Soul >= 0 )
 	{
-		pState->PlayerGainSoul(pItemInfo->Gained_Soul);
+		StatMgr->PlayerGainSoul(pItemInfo->Gained_Soul);
 		m_MainUI->GetSoulUI()->RenewAmountOfSoul(pItemInfo->Gained_Soul);
 		SoundEnum = EPlayerSound::USESOUL;
 	}
 
-	UNiagaraSystem* pSystem = LoadObject<UNiagaraSystem>(nullptr, *pItemInfo->NiagaraPath);
-	UNiagaraComponent* EffectComp = UNiagaraFunctionLibrary::SpawnSystemAttached(pSystem, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
-	
+	UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
+	EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	if(!IsValid(m_PlayerSound->GetPlayerSound(SoundEnum)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("아이템 사운드 로드 실패"));
@@ -1175,13 +1139,17 @@ bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 		break;
 	}
 
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-
-	if (pState->GetPlayerBasePower().CurStamina < fConsumption)
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if (!IsValid(StatMgr))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스탯 매니저 가져오기 실패"));
+		return false;
+	}
+	if ( StatMgr->GetPlayerBasePower().CurStamina < fConsumption)
 	{
 		return false;
 	}
-	pState->SetPlayerCurrentStamina(pState->GetPlayerBasePower().CurStamina - fConsumption);
+	StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - fConsumption);
 
 	return true;
 }
@@ -1232,8 +1200,8 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 
 void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
 {
-	APlayerState_Base* pState = Cast<APlayerState_Base>(GetPlayerState());
-	pState->PlayerGainSoul(_GainedSoul);
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	StatMgr->PlayerGainSoul(_GainedSoul);
 	m_MainUI->GetSoulUI()->RenewAmountOfSoul(_GainedSoul);
 }
 
@@ -1252,7 +1220,6 @@ void APlayer_Base_Knight::CloseMenuUI()
 	pController->SetPause(false);
 
 	m_MainUI->ShowMenu(false);
-	bShowMenu = false;
 }
 
 // 무적시간 동안 데미지 안받도록 설정
@@ -1294,4 +1261,9 @@ void APlayer_Base_Knight::ResetCamera(FRotator _Rotate)
 bool APlayer_Base_Knight::GetbToggleLockOn() const
 {
 	return m_SArm->IsCameraLockedToTarget();
+}
+
+void APlayer_Base_Knight::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bInvalidInput = false;
 }

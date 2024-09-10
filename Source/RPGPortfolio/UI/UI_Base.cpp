@@ -62,6 +62,16 @@ void UUI_Base::ShowMenu(bool _bShow)
 	}
 }
 
+bool UUI_Base::IsOpendMenu()
+{
+	if (m_UI_MenuMain->GetVisibility() == ESlateVisibility::Visible)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void UUI_Base::ShowMainMessageUI(bool _bShow)
 {
 	if (_bShow)

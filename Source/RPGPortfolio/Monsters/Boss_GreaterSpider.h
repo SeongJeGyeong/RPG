@@ -27,6 +27,9 @@ private:
 	UPROPERTY()
 	TArray<AActor*> HitActorArr;
 
+	UPROPERTY()
+	TSubclassOf<class AProj_GS_Spiderling> m_GSProj;
+
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	float RangedAtkRange; // 원거리 공격 거리
 
@@ -36,7 +39,7 @@ private:
 
 	UPROPERTY()
 	bool bPhase2;
-	FTimerHandle Phase2timer;
+
 public:
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
 	void EmptyHitArr() { HitActorArr.Empty(); }

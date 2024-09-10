@@ -268,3 +268,20 @@ enum class EProjectileType : uint8
 	SLASH_CUTTER,
 	SummonSpiderling,
 };
+
+UENUM(BlueprintType)
+enum class EEffectType : uint8
+{
+	NONE,
+	RESTORE,
+	GAIN,
+	EXPLODE,
+};
+
+UENUM()
+enum class ERecoveryType : uint8
+{
+	NONE,
+	DEFAULT,
+	SLOW,
+};

@@ -2,12 +2,12 @@
 
 #pragma once
 
+
 #include "../Header/Enum.h"
 #include "../System/Interface/ProjectileInterface.h"
 #include "CoreMinimal.h"
 #include "Projectile_Base.h"
 #include "Proj_GS_Spiderling.generated.h"
-
 
 /**
  * 
@@ -22,7 +22,7 @@ private:
 	class USphereComponent* m_Hitbox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
-	class UProjectileMovementComponent* m_ProjectileMovement;
+	UProjectileMovementComponent* m_ProjectileMovement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UParticleSystemComponent* m_Particle;

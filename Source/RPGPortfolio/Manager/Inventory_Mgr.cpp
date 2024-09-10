@@ -13,10 +13,10 @@
 #include "../UI/UI_Player_Soul.h"
 #include "../Item/Item_InvenData.h"
 #include "../Manager/Equip_Mgr.h"
-#include "../System/PlayerState_Base.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 // 스태틱 멤버 초기화
 UWorld* UInventory_Mgr::m_World = nullptr;
@@ -362,11 +362,11 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		{
 			RenewEquipItemUI(_Slot, nullptr);
 			UEquip_Mgr::GetInst(m_World)->SetEquipSlotMap(nullptr, _Slot);
+
+			UGISubsystem_StatMgr* StatMgr = m_World->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 			
-			APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
-			
-			pPlayerState->SetEquipFigure(pItemRow->ItemInfo, false);
-			pPlayerState->SetAtkAndDef();
+			StatMgr->SetEquipFigure(pItemRow->ItemInfo, false);
+			StatMgr->SetAtkAndDef();
 		}
 
 		return;
@@ -419,9 +419,10 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		RenewEquipItemUI(_Slot, pItemRow);
 		UEquip_Mgr::GetInst(m_World)->SetEquipSlotMap(pItemRow, _Slot);
 
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(m_World, 0));
-		pPlayerState->SetEquipFigure(pItemRow->ItemInfo, true);
-		pPlayerState->SetAtkAndDef();
+		UGISubsystem_StatMgr* StatMgr = m_World->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+
+		StatMgr->SetEquipFigure(pItemRow->ItemInfo, true);
+		StatMgr->SetAtkAndDef();
 	}
 
 }

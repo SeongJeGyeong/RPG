@@ -45,17 +45,13 @@ private:
 	UDA_PlayerSound* m_PlayerSound;
 
 	UPROPERTY()
-	TSubclassOf<class AProjectile_Base> m_Proj;
+	UAnimInstance_Knight* m_AnimInst;
 
 	UPROPERTY()
-	UAnimInstance_Knight* m_AnimInst;
-	UPROPERTY()
-	TArray<TScriptInterface<class IPlayerInteraction>> OverlapInteractionArr;
+	TArray<TScriptInterface<class IPlayerInteraction>> OverlapInteractionArr;	// 오버랩된 상호작용 오브젝트 목록
 
 	UPROPERTY()
 	class UUI_Base* m_MainUI;
-	UPROPERTY()
-	class UUI_Player_Main* m_PlayerUI;
 
 	UPROPERTY()
 	TArray<AActor*> HitActorArr;
@@ -64,17 +60,16 @@ private:
 	float LockonControlRotationRate;		// 락온 중 타겟 방향으로의 회전보간 속도
 
 	bool bIsJumped;			// 점프모션중인지 체크용
-	bool bAttackToggle;		// 공격 체크용 토글
 	bool bHeavyToggle;		// 강공격 체크용 토글
 	bool bNextAtkCheckOn;	// 다음 공격 입력 체크용
-	bool bHeavyAtk;			// 약공격인지 강공격인지 판별(true = 강, false = 약)
 	bool bAtkTrace;			// 공격 판정 체크
 
-	// 공격 모션 도중 움직이지 못하는 상태 체크
-	bool bNoInputInAtk;	// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
+	// 몽타주 재생 도중 입력받지 못하는 상태 체크
+	bool bInvalidInput;		// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
 
 	bool bSprintToggle;		// 달리기 체크용 토글
 	bool bItemDelay;		// 아이템 사용 딜레이 체크용
+
 	bool bAtkRotate;		// 공격 중 회전 체크용
 	FVector vAtkDir = FVector::ZeroVector;	// 공격 중 회전 방향
 
@@ -90,8 +85,6 @@ private:
 	// 공격 관련
 	int32 CurrentCombo;
 
-	bool bShowMenu;
-
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
 	FTimerHandle BlockReactTimer;	// 방어 표현 타이머
 	FTimerHandle LockOnTimer;		// 락온 타이머
@@ -103,10 +96,9 @@ private:
 
 public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
-	void SetbAtkToggle(const bool& _AtkToggle) { bAttackToggle = _AtkToggle; }
 	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
 	// 조작 불가 상태
-	void SetbNoInputInAtk(const bool& _NoInputInAtk) { bNoInputInAtk = _NoInputInAtk; }
+	void SetbInvalidInput(const bool& _InvalidInput) { bInvalidInput = _InvalidInput; }
 	void SetbAtkRotate(const bool& _AtkRotate) { bAtkRotate = _AtkRotate; }
 	// 이동 가능 상태
 	void SetbIsJumped(const bool& _IsJumped) { bIsJumped = _IsJumped; }
@@ -117,9 +109,6 @@ public:
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
 	bool GetbToggleGuard() const { return bToggleGuard; }
 	void SetbToggleGuard(const bool& _ToggleGuard);
-
-	// 락온 중 플레이어가 적을 바라보고 있도록 설정
-	//void SetOrientRotation(const bool& _Val);
 
 	// 회피 애니메이션 종료 설정
 	void SetbDodging(const bool& _Dodging) { bDodging = _Dodging; }
@@ -157,6 +146,9 @@ private:
 	UFUNCTION()
 	void TargetLockOn();
 
+	UFUNCTION()
+	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
 public:	
 	void GainMonsterSoul(int32 _GainedSoul);
 	// 공격 트레이스에 피격된 대상 목록 초기화
@@ -192,8 +184,6 @@ private:
 	void QuickSlotChange(const FInputActionInstance& _Instance);
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 	void UseSkill_1(const FInputActionInstance& _Instance);
-
-	bool CheckMontagePlaying();
 
 private:
 	UFUNCTION()

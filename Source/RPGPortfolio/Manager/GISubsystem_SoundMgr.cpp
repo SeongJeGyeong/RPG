@@ -7,6 +7,10 @@
 #include "../GameInstance_Base.h"
 #include "../Header/Enum.h"
 
+UGISubsystem_SoundMgr::UGISubsystem_SoundMgr()
+{
+}
+
 void UGISubsystem_SoundMgr::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -20,10 +24,12 @@ void UGISubsystem_SoundMgr::Initialize(FSubsystemCollectionBase& Collection)
 	m_BGM = FSoftObjectPath("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/GreaterSpider/SC_GS_BGM.SC_GS_BGM'");
 	m_BGM.ToSoftObjectPath().PostLoadPath(nullptr);
 
+	m_BossDefeat = FSoftObjectPath("/Script/Engine.SoundCue'/Game/Blueprint/Monster/Sound/SC_Boss_Defeat.SC_Boss_Defeat'");
+	m_BossDefeat.ToSoftObjectPath().PostLoadPath(nullptr);
+
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	pGameInst->ASyncLoadDataAsset(m_MenuSound.ToSoftObjectPath());
 	pGameInst->ASyncLoadDataAsset(m_MonsterSound.ToSoftObjectPath());
-	pGameInst->ASyncLoadDataAsset(m_BGM.ToSoftObjectPath());
 }
 
 void UGISubsystem_SoundMgr::Deinitialize()
@@ -39,6 +45,12 @@ USoundBase* UGISubsystem_SoundMgr::GetMenuSoundForMgr(EMenuSound _SoundType) con
 	}
 
 	return m_MenuSound.Get()->GetMenuSound(_SoundType);
+}
+
+void UGISubsystem_SoundMgr::BGMLoadAsync()
+{
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+	pGameInst->ASyncLoadDataAsset(m_BGM.ToSoftObjectPath());
 }
 
 USoundBase* UGISubsystem_SoundMgr::GetBGMForMgr() const

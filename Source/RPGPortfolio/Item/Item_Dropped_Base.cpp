@@ -10,6 +10,7 @@
 #include "../Manager/Inventory_Mgr.h"
 #include "../UI/UI_Message_Item.h"
 #include "../Header/Struct.h"
+#include "../GameInstance_Base.h"
 
 // Sets default values
 AItem_Dropped_Base::AItem_Dropped_Base()
@@ -46,6 +47,12 @@ void AItem_Dropped_Base::OnConstruction(const FTransform& _Transform)
 void AItem_Dropped_Base::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
+	m_Img = FSoftObjectPath(pItemInfo->IconImgPath);
+	m_Img.ToSoftObjectPath().PostLoadPath(nullptr);
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+	pGameInst->ASyncLoadDataAsset(m_Img.ToSoftObjectPath());
 }
 
 void AItem_Dropped_Base::Interaction()
@@ -61,7 +68,8 @@ void AItem_Dropped_Base::Interaction()
 	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
 	UUI_Base* pMainUI = pGameMode->GetMainHUD();
 	pMainUI->ShowItemMessageUI(true);
-	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, m_Img, m_Stack);
+	UTexture2D* Img = m_Img.IsPending() ? m_Img.LoadSynchronous() : m_Img.Get();
+	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, Img, m_Stack);
 	pMainUI->ShowMainMessageUI(true);
 
 	Destroy();

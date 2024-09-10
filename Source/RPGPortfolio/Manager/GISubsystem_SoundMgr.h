@@ -26,6 +26,8 @@ class RPGPORTFOLIO_API UGISubsystem_SoundMgr : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 private:
+	UGISubsystem_SoundMgr();
+
 	UPROPERTY()
 	TSoftObjectPtr<UDA_MenuSound>		m_MenuSound;
 	UPROPERTY()
@@ -33,13 +35,15 @@ private:
 
 	UPROPERTY()
 	TSoftObjectPtr<USoundBase>			m_BGM;
-
+	UPROPERTY()
+	TSoftObjectPtr<USoundBase>			m_BossDefeat;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
 	USoundBase* GetMenuSoundForMgr(EMenuSound _SoundType) const;
+	void BGMLoadAsync();
 	USoundBase* GetBGMForMgr() const;
 
 	FMonsterSoundAsset* GetMonSoundMapForMgr(EMONSTER_TYPE _MonType);

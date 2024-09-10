@@ -18,7 +18,7 @@ private:
 	class UBoxComponent* m_Hitbox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
-	class UProjectileMovementComponent* m_ProjectileMovement;
+	UProjectileMovementComponent* m_ProjectileMovement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UNiagaraComponent* m_BaseNiagara;

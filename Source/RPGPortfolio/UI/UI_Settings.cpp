@@ -8,10 +8,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetTextLibrary.h"
-#include "../System/PlayerState_Base.h"
 #include "GameFramework/GameUserSettings.h"
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 void UUI_Settings::NativeConstruct()
 {
@@ -52,8 +52,8 @@ void UUI_Settings::NativeConstruct()
 
 	if (IsValid(m_PlayerName))
 	{
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		m_PlayerName->SetText(FText::FromString(pPlayerState->GetPlayerName()));
+		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+		m_PlayerName->SetText(FText::FromString(pGameInst->GetSubsystem<UGISubsystem_StatMgr>()->GetPlayerName()));
 	}
 
 	GSettingsPannel->SetVisibility(ESlateVisibility::Hidden);
@@ -78,14 +78,14 @@ void UUI_Settings::SettingsVisibilityChanged(ESlateVisibility _Visibility)
 		return;
 	}
 
-	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	if (IsValid(m_Playtime))
 	{
 		uint32 CurrentTime = FMath::Floor(GetWorld()->GetTimeSeconds());
-		uint32 ElapsedTime = CurrentTime - pPlayerState->GetPlayTime();
+		uint32 ElapsedTime = CurrentTime - Cast<UGameInstance_Base>(GetGameInstance())->GetPlayTime();
 
-		uint32 sec = pPlayerState->GetPlayTime() + ElapsedTime;
-		pPlayerState->SetPlayTime(sec);
+		uint32 sec = Cast<UGameInstance_Base>(GetGameInstance())->GetPlayTime() + ElapsedTime;
+		Cast<UGameInstance_Base>(GetGameInstance())->SetPlayTime(sec);
 
 		uint32 min = sec / 60;	// 초를 분으로 바꿈
 		uint32 hour = min / 60;	// 분을 시로 바꿈
@@ -103,12 +103,14 @@ void UUI_Settings::SettingsVisibilityChanged(ESlateVisibility _Visibility)
 
 	if (IsValid(m_Level))
 	{
-		m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerLevel())));
+		m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pGameInst->GetSubsystem<UGISubsystem_StatMgr>()->GetPlayerLevel())));
 	}
 
 	if (IsValid(m_MapName))
 	{
-		m_MapName->SetText(FText::FromString(GetWorld()->GetMapName()));
+		FString LevelName = GetWorld()->GetMapName();
+		LevelName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+		m_MapName->SetText(FText::FromString(LevelName));
 	}
 }
 

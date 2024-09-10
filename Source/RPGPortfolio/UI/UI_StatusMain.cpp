@@ -3,8 +3,8 @@
 
 #include "UI_StatusMain.h"
 #include "Components/TextBlock.h"
-#include "../System/PlayerState_Base.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 void UUI_StatusMain::NativeConstruct()
 {
@@ -36,26 +36,26 @@ void UUI_StatusMain::NativeConstruct()
 
 void UUI_StatusMain::RenewStatusUI()
 {
-	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 
-	m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerLevel())));
-	m_Souls->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerBasePower().AmountOfSoul)));
+	m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerLevel())));
+	m_Souls->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerBasePower().AmountOfSoul)));
 	//m_Required_Souls;
-	m_Vigor->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Vigor)));
-	m_Attunement->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Attunement)));
-	m_Endurance->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Endurance)));
-	m_Strength->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Strength)));
-	m_Dexterity->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Dexterity)));
-	m_Intelligence->SetText(FText::FromString(FString::Printf(TEXT("%d"), pPlayerState->GetPlayerStatus().Intelligence)));
-	m_CurrentHP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().CurHP)));
-	m_MaximumHP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MaxHP)));
-	m_CurrentMP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().CurMP)));
-	m_MaximumMP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MaxMP)));
-	m_CurrentST->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().CurStamina)));
-	m_MaximumST->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MaxStamina)));
-	m_PhysicAtk_Weak->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().PhysicAtk)));
-	m_PhysicAtk_Strong->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( pPlayerState->GetPlayerBasePower().PhysicAtk * 1.5f ))));
-	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MagicAtk)));
-	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().PhysicDef)));
-	m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)pPlayerState->GetPlayerBasePower().MagicDef)));
+	m_Vigor->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerStatus().Vigor)));
+	m_Attunement->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerStatus().Attunement)));
+	m_Endurance->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerStatus().Endurance)));
+	m_Strength->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerStatus().Strength)));
+	m_Dexterity->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerStatus().Dexterity)));
+	m_Intelligence->SetText(FText::FromString(FString::Printf(TEXT("%d"), StatMgr->GetPlayerStatus().Intelligence)));
+	m_CurrentHP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().CurHP)));
+	m_MaximumHP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().MaxHP)));
+	m_CurrentMP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().CurMP)));
+	m_MaximumMP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().MaxMP)));
+	m_CurrentST->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().CurStamina)));
+	m_MaximumST->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().MaxStamina)));
+	m_PhysicAtk_Weak->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().PhysicAtk)));
+	m_PhysicAtk_Strong->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)( StatMgr->GetPlayerBasePower().PhysicAtk * 1.5f ))));
+	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().MagicAtk)));
+	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().PhysicDef)));
+	m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)StatMgr->GetPlayerBasePower().MagicDef)));
 }

@@ -4,8 +4,8 @@
 #include "UI_Player_Soul.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
-#include "../System/PlayerState_Base.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 void UUI_Player_Soul::NativeConstruct()
 {
@@ -15,8 +15,8 @@ void UUI_Player_Soul::NativeConstruct()
 	}
 	else
 	{
-		APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
+		UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+		FCharacterBasePower PlayerBasePower = StatMgr->GetPlayerBasePower();
 		iDisplayedSoul = PlayerBasePower.AmountOfSoul;
 		m_Soul->SetText(FText::FromString(FString::Printf(TEXT("%d"), PlayerBasePower.AmountOfSoul)));
 	}
@@ -47,8 +47,8 @@ void UUI_Player_Soul::StartSoulGain()
 // 획득한 소울 점진적으로 증가하는 것처럼 보이게
 void UUI_Player_Soul::SoulGain()
 {
-	APlayerState_Base* pPlayerState = Cast<APlayerState_Base>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-	FCharacterBasePower PlayerBasePower = pPlayerState->GetPlayerBasePower();
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	FCharacterBasePower PlayerBasePower = StatMgr->GetPlayerBasePower();
 
 	if ( iDisplayedSoul < PlayerBasePower.AmountOfSoul )
 	{

@@ -40,7 +40,7 @@ void UANS_AtkMove::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 		}
 		else
 		{
-			m_Player->SetbNoInputInAtk(true);
+			m_Player->SetbInvalidInput(true);
 			m_Player->SetbAtkRotate(false);
 			if (!m_Player->GetvAtkDir().IsZero())
 			{
