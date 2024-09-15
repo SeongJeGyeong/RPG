@@ -15,6 +15,7 @@
 
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
+class UPlayer_SkillComponent;
 
 UCLASS()
 class RPGPORTFOLIO_API APlayer_Base_Knight : public ACharacter, public IGenericTeamAgentInterface
@@ -31,6 +32,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UPlayer_CameraArm* m_SArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPlayer_SkillComponent* m_SkillComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UInputMappingContext> m_IMC;
@@ -57,8 +61,6 @@ private:
 	TArray<AActor*> HitActorArr;
 
 private:
-	float LockonControlRotationRate;		// 락온 중 타겟 방향으로의 회전보간 속도
-
 	bool bIsJumped;			// 점프모션중인지 체크용
 	bool bHeavyToggle;		// 강공격 체크용 토글
 	bool bNextAtkCheckOn;	// 다음 공격 입력 체크용
@@ -87,7 +89,6 @@ private:
 
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
 	FTimerHandle BlockReactTimer;	// 방어 표현 타이머
-	FTimerHandle LockOnTimer;		// 락온 타이머
 	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
 
@@ -144,9 +145,6 @@ private:
 	void JumpAttack();
 
 	UFUNCTION()
-	void TargetLockOn();
-
-	UFUNCTION()
 	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 public:	
@@ -164,6 +162,8 @@ public:
 	void ShotProjectile();
 	void StopSprint();
 	void ResetCamera(FRotator _Rotate);
+	void MontageBlendOutImmediately();
+
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(0); };	// 플레이어 팀 설정(0)
 

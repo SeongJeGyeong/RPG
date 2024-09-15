@@ -48,6 +48,14 @@ void AItem_Dropped_Base::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (bIsSpawnEditor)
+	{
+		LoadImg();
+	}
+}
+
+void AItem_Dropped_Base::LoadImg()
+{
 	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
 	m_Img = FSoftObjectPath(pItemInfo->IconImgPath);
 	m_Img.ToSoftObjectPath().PostLoadPath(nullptr);

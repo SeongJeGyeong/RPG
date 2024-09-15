@@ -285,3 +285,14 @@ enum class ERecoveryType : uint8
 	DEFAULT,
 	SLOW,
 };
+
+UENUM(BlueprintType)
+enum class ESkillType : uint8
+{
+	NONE,
+	RESTORE,
+	BUFF,
+	DEBUFF,
+	MELEE,
+	RANGE,
+};

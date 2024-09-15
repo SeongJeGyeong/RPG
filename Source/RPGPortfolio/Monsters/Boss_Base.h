@@ -28,13 +28,10 @@ protected:
 	class UBlackboardData* m_Blackboard;
 
 	UPROPERTY()
-	FMonsterInfo	m_Info;
-	UPROPERTY()
 	class UUI_Boss* m_BossWidget;
 
-	UPROPERTY()
+	FMonsterInfo	m_Info;	
 	float StaggerGauge = 0.f;
-	UPROPERTY()
 	float fPhysicsWeight = 1.f;
 	FTimerHandle HitReactTimer;
 	FTimerDelegate HitReactDelegate;
@@ -44,7 +41,6 @@ protected:
 
 private:
 	bool bBossDead;
-	UPROPERTY()
 	int32 iTurnDir;	// 포즈 블렌딩용 변수
 
 public:

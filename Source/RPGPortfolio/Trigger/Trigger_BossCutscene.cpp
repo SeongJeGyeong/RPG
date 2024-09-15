@@ -55,7 +55,7 @@ void ATrigger_BossCutscene::EndLevelSequence()
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if ( IsValid(GameMode) )
 	{
-		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Visible);
+		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		GameMode->PlayBGM(true);
 
 		//GameMode->GetFadeUI()->FadeIn(1.f);

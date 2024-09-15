@@ -153,12 +153,10 @@ void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 
 void UAnimInstance_Knight::AnimNotify_InvalidInput()
 {
-	UE_LOG(LogTemp, Warning, TEXT("InvalidInput"));
 	m_Player->SetbInvalidInput(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_ValidInput()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ValidInput"));
 	m_Player->SetbInvalidInput(false);
 }

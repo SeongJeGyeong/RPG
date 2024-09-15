@@ -11,69 +11,6 @@
 
 void UUI_GameSettingBox::NativeConstruct()
 {
-	switch (Setting_Property)
-	{
-	case ESETTING_PROPERTY::SCREEN_MODE:
-		Txt_SettingProperty->SetText(FText::FromString(L"화면 모드"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode());
-		break;
-	case ESETTING_PROPERTY::RESOLUTION:
-		Txt_SettingProperty->SetText(FText::FromString(L"해상도"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
-		break;
-	case ESETTING_PROPERTY::VIEW_DISTANCE:
-		Txt_SettingProperty->SetText(FText::FromString(L"뷰 디스턴스"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetViewDistanceQuality());
-		break;
-	case ESETTING_PROPERTY::ANTI_ALIASING:
-		Txt_SettingProperty->SetText(FText::FromString(L"안티 에일리어싱"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetAntiAliasingQuality());
-		break;
-	case ESETTING_PROPERTY::POST_PROCESSING:
-		Txt_SettingProperty->SetText(FText::FromString(L"포스트 프로세싱"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetPostProcessingQuality());
-		break;
-	case ESETTING_PROPERTY::SHADOW:
-		Txt_SettingProperty->SetText(FText::FromString(L"섀도"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetShadowQuality());
-		break;
-	case ESETTING_PROPERTY::GLOBAL_ILLUMINATION:
-		Txt_SettingProperty->SetText(FText::FromString(L"글로벌 일루미네이션"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetGlobalIlluminationQuality());
-		break;
-	case ESETTING_PROPERTY::REFLECTION:
-		Txt_SettingProperty->SetText(FText::FromString(L"리플렉션"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetReflectionQuality());
-		break;
-	case ESETTING_PROPERTY::TEXTURE:
-		Txt_SettingProperty->SetText(FText::FromString(L"텍스쳐"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetTextureQuality());
-		break;
-	case ESETTING_PROPERTY::EFFECT:
-		Txt_SettingProperty->SetText(FText::FromString(L"이펙트"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetVisualEffectQuality());
-		break;
-	case ESETTING_PROPERTY::FOLIAGE:
-		Txt_SettingProperty->SetText(FText::FromString(L"폴리지"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetFoliageQuality());
-		break;
-	case ESETTING_PROPERTY::SHADING:
-		Txt_SettingProperty->SetText(FText::FromString(L"셰이딩"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetShadingQuality());
-		break;
-	case ESETTING_PROPERTY::VSYNC:
-		Txt_SettingProperty->SetText(FText::FromString(L"VSync"));
-		SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->IsVSyncEnabled());
-		break;
-	case ESETTING_PROPERTY::SOUND:
-		{
-			Txt_SettingProperty->SetText(FText::FromString(L"사운드 볼륨"));
-			UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
-			SetUserSettingValText(pGameInst->GetMasterVolume());
-			break;
-		}
-	}
-
 	Btn_Down->OnClicked.AddDynamic(this, &UUI_GameSettingBox::DownBtnClicked);
 	Btn_Down->OnHovered.AddDynamic(this, &UUI_GameSettingBox::DownBtnHovered);
 	Btn_Up->OnClicked.AddDynamic(this, &UUI_GameSettingBox::UpBtnClicked);
@@ -82,9 +19,84 @@ void UUI_GameSettingBox::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_GameSettingBox::OnVisibilityChanged(ESlateVisibility _Visibility)
+void UUI_GameSettingBox::SetSettingText(FString _SettingName)
 {
+	Txt_SettingProperty->SetText(FText::FromString(_SettingName));
+}
 
+void UUI_GameSettingBox::InitSettingProperty(ESlateVisibility _Visibility)
+{
+	if ( _Visibility == ESlateVisibility::SelfHitTestInvisible )
+	{
+		switch ( Setting_Property )
+		{
+		case ESETTING_PROPERTY::SCREEN_MODE:
+			Txt_SettingProperty->SetText(FText::FromString(L"화면 모드"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode());
+			break;
+		case ESETTING_PROPERTY::RESOLUTION:
+			Txt_SettingProperty->SetText(FText::FromString(L"해상도"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
+			break;
+		case ESETTING_PROPERTY::VIEW_DISTANCE:
+			Txt_SettingProperty->SetText(FText::FromString(L"뷰 디스턴스"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetViewDistanceQuality());
+			break;
+		case ESETTING_PROPERTY::ANTI_ALIASING:
+			Txt_SettingProperty->SetText(FText::FromString(L"안티 에일리어싱"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetAntiAliasingQuality());
+			break;
+		case ESETTING_PROPERTY::POST_PROCESSING:
+			Txt_SettingProperty->SetText(FText::FromString(L"포스트 프로세싱"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetPostProcessingQuality());
+			break;
+		case ESETTING_PROPERTY::SHADOW:
+			Txt_SettingProperty->SetText(FText::FromString(L"섀도"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetShadowQuality());
+			break;
+		case ESETTING_PROPERTY::GLOBAL_ILLUMINATION:
+			Txt_SettingProperty->SetText(FText::FromString(L"글로벌 일루미네이션"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetGlobalIlluminationQuality());
+			break;
+		case ESETTING_PROPERTY::REFLECTION:
+			Txt_SettingProperty->SetText(FText::FromString(L"리플렉션"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetReflectionQuality());
+			break;
+		case ESETTING_PROPERTY::TEXTURE:
+			Txt_SettingProperty->SetText(FText::FromString(L"텍스쳐"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetTextureQuality());
+			break;
+		case ESETTING_PROPERTY::EFFECT:
+			Txt_SettingProperty->SetText(FText::FromString(L"이펙트"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetVisualEffectQuality());
+			break;
+		case ESETTING_PROPERTY::FOLIAGE:
+			Txt_SettingProperty->SetText(FText::FromString(L"폴리지"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetFoliageQuality());
+			break;
+		case ESETTING_PROPERTY::SHADING:
+			Txt_SettingProperty->SetText(FText::FromString(L"셰이딩"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->GetShadingQuality());
+			break;
+		case ESETTING_PROPERTY::VSYNC:
+			Txt_SettingProperty->SetText(FText::FromString(L"VSync"));
+			SetUserSettingValText(UGameUserSettings::GetGameUserSettings()->IsVSyncEnabled());
+			break;
+		case ESETTING_PROPERTY::SOUND:
+			{
+				Txt_SettingProperty->SetText(FText::FromString(L"사운드 볼륨"));
+				UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+				SetUserSettingValText(pGameInst->GetMasterVolume());
+				break;
+			}
+		}
+	}
+	else
+	{
+		UGameUserSettings::GetGameUserSettings()->LoadSettings();
+		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+		pGameInst->LoadMasterVolume();
+	}
 }
 
 void UUI_GameSettingBox::SetUserSettingValText(int32 _Val)

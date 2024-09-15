@@ -25,15 +25,9 @@ private:
 	UPROPERTY()
 	class ULevelSequencePlayer* m_SeqPlayer;	// 레벨시퀀스 플레이하는 객체
 
-	UPROPERTY()
 	FText tCommand_Key;
-	UPROPERTY()
 	FText tCommand_Name;
-
-	UPROPERTY()
 	bool bDoOnce;
-
-	UPROPERTY()
 	float fFadeRate = 1.f;
 
 	FTimerHandle FadeTimer;

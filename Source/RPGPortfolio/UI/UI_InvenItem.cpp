@@ -66,7 +66,7 @@ void UUI_InvenItem::InitFromData(UObject* _Data)
 	}
 	else
 	{
-		m_EquipMark->SetVisibility(ESlateVisibility::Visible);
+		m_EquipMark->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 }
 

@@ -61,7 +61,8 @@ void UUI_Menu_Main::EquipBtnClicked()
 	}
 
 	UUI_EquipMain* EquipUI = GameMode->GetEquipUI();
-	EquipUI->SetVisibility(ESlateVisibility::Visible);
+	EquipUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
@@ -80,6 +81,7 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 void UUI_Menu_Main::InventoryBtnClicked()
 {
 	UInventory_Mgr::GetInst(GetWorld())->ShowInventoryUI();
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
@@ -105,8 +107,9 @@ void UUI_Menu_Main::StatusBtnClicked()
 	}
 
 	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
-	StatusUI->SetVisibility(ESlateVisibility::Visible);
+	StatusUI->SetVisibility(ESlateVisibility::HitTestInvisible);
 	StatusUI->RenewStatusUI();
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
@@ -132,7 +135,8 @@ void UUI_Menu_Main::ManualBtnClicked()
 	}
 
 	UUI_Manual* ManualUI = GameMode->GetManualUI();
-	ManualUI->SetVisibility(ESlateVisibility::Visible);
+	ManualUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
@@ -158,8 +162,8 @@ void UUI_Menu_Main::SettingsBtnClicked()
 	}
 
 	UUI_Settings* SettingsUI = GameMode->GetSettingsUI();
-	SettingsUI->SetVisibility(ESlateVisibility::Visible);
-
+	SettingsUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 

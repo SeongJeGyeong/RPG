@@ -60,7 +60,7 @@ void UUI_Monster::DisplayDMG(const float _DMG)
 	}
 	fTakedDMG += _DMG;
 	m_MonDMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
-	m_MonDMGFigure->SetVisibility(ESlateVisibility::Visible);
+	m_MonDMGFigure->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	GetWorld()->GetTimerManager().ClearTimer(DmgDisplayTimer);
 	GetWorld()->GetTimerManager().SetTimer(DmgDisplayTimer, [this]()

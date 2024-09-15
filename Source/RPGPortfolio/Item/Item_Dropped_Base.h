@@ -34,12 +34,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	int32		m_Stack = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY()
 	TSoftObjectPtr<UTexture2D>	m_Img;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	bool		bIsSpawnEditor = false;	// 에디터에서 직접 배치했는지 확인
+
 	FText tCommand_Key;
-	UPROPERTY()
 	FText tCommand_Name;
 
 protected:
@@ -56,6 +57,8 @@ public:
 
 	void SetDropItemImg(const TObjectPtr<UTexture2D> _Img) { m_Img = _Img; }
 	void SetDropItemImg(const TSoftObjectPtr<UTexture2D> _Img) { m_Img = _Img.IsPending() ? _Img.LoadSynchronous() : _Img.Get(); }
+
+	void LoadImg();
 
 	virtual FText GetCommand_Key() const override { return tCommand_Key; }
 	virtual FText GetCommand_Name() const override { return tCommand_Name; }

@@ -7,10 +7,6 @@
 #include "../GameInstance_Base.h"
 #include "../Header/Enum.h"
 
-UGISubsystem_SoundMgr::UGISubsystem_SoundMgr()
-{
-}
-
 void UGISubsystem_SoundMgr::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

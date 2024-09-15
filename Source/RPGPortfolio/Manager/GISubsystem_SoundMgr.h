@@ -26,8 +26,6 @@ class RPGPORTFOLIO_API UGISubsystem_SoundMgr : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 private:
-	UGISubsystem_SoundMgr();
-
 	UPROPERTY()
 	TSoftObjectPtr<UDA_MenuSound>		m_MenuSound;
 	UPROPERTY()

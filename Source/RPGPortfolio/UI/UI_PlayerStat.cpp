@@ -90,14 +90,14 @@ void UUI_PlayerStat::SetVisibilityAlterBasePower(bool _bVisibility)
 {
 	if(_bVisibility == true)
 	{
-		m_AltPhysicAtk->SetVisibility(ESlateVisibility::Visible);
-		m_AltPhysicDef->SetVisibility(ESlateVisibility::Visible);
-		m_AltMagicAtk->SetVisibility(ESlateVisibility::Visible);
-		m_AltMagicDef->SetVisibility(ESlateVisibility::Visible);
-		m_PhyAtk_Arrow->SetVisibility(ESlateVisibility::Visible);
-		m_PhyDef_Arrow->SetVisibility(ESlateVisibility::Visible);
-		m_MagAtk_Arrow->SetVisibility(ESlateVisibility::Visible);
-		m_MagDef_Arrow->SetVisibility(ESlateVisibility::Visible);
+		m_AltPhysicAtk->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_AltPhysicDef->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_AltMagicAtk->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_AltMagicDef->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_PhyAtk_Arrow->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_PhyDef_Arrow->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_MagAtk_Arrow->SetVisibility(ESlateVisibility::HitTestInvisible);
+		m_MagDef_Arrow->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 	else
 	{

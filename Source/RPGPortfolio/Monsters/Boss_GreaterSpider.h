@@ -33,11 +33,9 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	float RangedAtkRange; // 원거리 공격 거리
 
+	EGreaterSpider_STATE m_State;
 	bool bAtkTrace;
 	bool bRushMove;
-	EGreaterSpider_STATE m_State;
-
-	UPROPERTY()
 	bool bPhase2;
 
 public:

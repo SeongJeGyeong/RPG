@@ -14,6 +14,7 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	LockonControlRotationRate = 100.f;
 	// 스프링 암 내장 설정
 	TargetArmLength = 500.0f;			// 스프링암 길이
 	bUsePawnControlRotation = true;		// 스프링암이 플레이어의 회전을 따라가도록 설정
@@ -22,14 +23,14 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	bInheritRoll = true;
 	bDoCollisionTest = true;
 
-	bEnableCameraLag = true;			// 카메라 위치가 조금 지연되서 따라오도록 설정
+	bEnableCameraLag = false;			// 카메라 위치가 조금 지연되서 따라오도록 설정
 	bEnableCameraRotationLag = false;	// 카메라 회전 지연(록온 상태일때만 활성화)
-	CameraLagSpeed = 3.f;				// 위치 지연 속도
-	CameraRotationLagSpeed = 2.f;		// 회전 지연 속도
-	CameraLagMaxDistance = 100.f;		// 카메라가 현재 위치보다 지연될 수 있는 최대거리
+	//CameraLagSpeed = 3.f;				// 위치 지연 속도
+	CameraRotationLagSpeed = 30.f;		// 회전 지연 속도
+	CameraLagMaxDistance = 20.f;		// 카메라가 현재 위치보다 지연될 수 있는 최대거리
 
 	// 록온 범위
-	fMaxTargetLockDistance = 1500.f;
+	fMaxLockOnDistance = 1500.f;
 
 	bDrawDebug = false;
 }
@@ -56,21 +57,44 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 			DrawDebugLine(GetWorld(), GetComponentLocation(), Target->GetComponentLocation(), FColor::Green);
 		}
 
-		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxTargetLockDistance, 32, FColor::Cyan);
+		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxLockOnDistance, 32, FColor::Cyan);
+	}
+	
+	if (IsLockedOn())
+	{
+		if ( ( m_Target->GetComponentLocation() - GetComponentLocation() ).Size() > fMaxLockOnDistance + m_Target->GetScaledSphereRadius() )
+		{
+			BreakLockOnTarget();
+			return;
+		}
+
+		// 플레이어에서 타겟으로의 벡터
+		FVector TargetVect = m_Target->GetComponentLocation() - ( GetComponentLocation());
+		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
+		TargetRot.Roll = 0.f;
+		FRotator CurrentRot = m_Player->GetControlRotation();
+		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
+		// 타겟을 바라보도록 로테이션 수정
+		NewRot.Roll = 0.f;
+		NewRot.Pitch -= 1.f;
+		m_Player->GetController()->SetControlRotation(NewRot);
 	}
 }
 
 // Toggle Lock On
 bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 {
-	bool bLockTarget = ((m_Target != nullptr) != _ToggleLockOn);
-
 	if (bDrawDebug)
 	{
-		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxTargetLockDistance, 32, FColor::Cyan, false, 1.f);
+		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxLockOnDistance, 32, FColor::Cyan, false, 1.f);
 	}
 
-	if (bLockTarget)
+	if ( m_Target != nullptr )
+	{
+		BreakLockOnTarget();
+		return true;
+	}
+	else
 	{
 		ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
 
@@ -78,13 +102,6 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 		{
 			LockOnTarget(NewLockOnTarget);
 			return true;
-		}
-	}
-	else
-	{
-		if (m_Target != nullptr)
-		{
-			BreakLockOnTarget();
 		}
 	}
 
@@ -104,7 +121,10 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 		m_Target->SetLockOn(true);
 	}
 	bEnableCameraRotationLag = true;
+	m_Player->GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	m_Player->GetCharacterMovement()->bOrientRotationToMovement = false;
+	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
+
 }
 
 void UPlayer_CameraArm::BreakLockOnTarget()
@@ -113,10 +133,11 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 	{
 		m_Target->SetLockOn(false);
 		m_Target = nullptr;
-
-		bEnableCameraRotationLag = false;
-		m_Player->GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
+	bEnableCameraRotationLag = false;
+	m_Player->GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	m_Player->GetCharacterMovement()->bOrientRotationToMovement = true;
+	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 1000.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
 }
 
 ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
@@ -164,19 +185,6 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
 				TargetComponent = AvailableTargets[i];
 			}
 		}
-
-		/*float DotX = m_Player->GetCamera()->GetForwardVector().X * ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal().X;
-		float DotY = m_Player->GetCamera()->GetForwardVector().Y * ( AvailableTargets[i]->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal().Y;
-
-		float acosAngleX = FMath::Acos(DotX);
-		float fAngleX = FMath::RadiansToDegrees(acosAngleX);
-		float acosAngleY = FMath::Acos(DotY);
-		float fAngleY = FMath::RadiansToDegrees(acosAngleY);*/
-
-		//float acosAngle = FMath::Acos(Dot); //내적을 각도로 변환
-		//float fAngle = FMath::RadiansToDegrees(acosAngle); // 각도를 라디안 각도로 변환
-
-		//UE_LOG(LogTemp, Warning, TEXT("Angle : %f"), fAngle);
 	}
 
 	return TargetComponent;
@@ -243,7 +251,7 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 	TEnumAsByte<EObjectTypeQuery> LockOnTarget = UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 	ObjectTypes.Add(LockOnTarget);
 	// 락온 범위 내의 락온 콜리전 타입을 가진 컴포넌트들을 가져옴
-	UKismetSystemLibrary::SphereOverlapComponents(GetOwner(), GetComponentLocation(), fMaxTargetLockDistance, ObjectTypes, ULockOnTargetComponent::StaticClass(), TArray<AActor*>{GetOwner()}, TargetPrimitive);
+	UKismetSystemLibrary::SphereOverlapComponents(GetOwner(), GetComponentLocation(), fMaxLockOnDistance, ObjectTypes, ULockOnTargetComponent::StaticClass(), TArray<AActor*>{GetOwner()}, TargetPrimitive);
 
 	TArray<ULockOnTargetComponent*> TargetComps;
 	for ( UPrimitiveComponent* Comp : TargetPrimitive )
@@ -259,7 +267,7 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetTargetComponents()
 	return TargetComps;
 }
 
-bool UPlayer_CameraArm::IsCameraLockedToTarget()
+bool UPlayer_CameraArm::IsLockedOn()
 {
 	return m_Target != nullptr;
 }

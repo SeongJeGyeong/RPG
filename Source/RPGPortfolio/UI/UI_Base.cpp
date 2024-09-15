@@ -20,7 +20,7 @@ void UUI_Base::NativeConstruct()
 	}
 	else
 	{
-		m_UI_MenuMain->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_MenuMain->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	if (!IsValid(m_UI_Boss))
 	{
@@ -28,7 +28,7 @@ void UUI_Base::NativeConstruct()
 	}
 	else
 	{
-		m_UI_Boss->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_Boss->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	if (!IsValid(m_UI_MessageBox_Main))
 	{
@@ -36,7 +36,7 @@ void UUI_Base::NativeConstruct()
 	}
 	else
 	{
-		m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	if (!IsValid(m_UI_MessageBox_Item))
 	{
@@ -44,27 +44,33 @@ void UUI_Base::NativeConstruct()
 	}
 	else
 	{
-		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (IsValid(m_UI_PlayerBar))
+	{
+		m_UI_PlayerBar->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+	if ( IsValid(m_UI_QuickSlotMain) )
+	{
+		m_UI_QuickSlotMain->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+	if ( IsValid(m_UI_Soul) )
+	{
+		m_UI_Soul->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 
 	Super::NativeConstruct();
 }
 
-void UUI_Base::ShowMenu(bool _bShow)
+void UUI_Base::MenuVisibility(ESlateVisibility _Visibility)
 {
-	if (_bShow)
-	{
-		m_UI_MenuMain->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		m_UI_MenuMain->SetVisibility(ESlateVisibility::Hidden);
-	}
+	m_UI_MenuMain->SetVisibility(_Visibility);
 }
 
 bool UUI_Base::IsOpendMenu()
 {
-	if (m_UI_MenuMain->GetVisibility() == ESlateVisibility::Visible)
+	if (m_UI_MenuMain->GetVisibility() == ESlateVisibility::Visible || m_UI_MenuMain->GetVisibility() == ESlateVisibility::SelfHitTestInvisible)
 	{
 		return true;
 	}
@@ -76,13 +82,13 @@ void UUI_Base::ShowMainMessageUI(bool _bShow)
 {
 	if (_bShow)
 	{
-		m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Visible);
+		m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 	else
 	{
 		if (!bDisplayRootMessage)
 		{
-			m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Hidden);
+			m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 }
@@ -92,10 +98,10 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 	bDisplayRootMessage = _bShow;
 	if ( _bShow )
 	{
-		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Visible);
+		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 	else
 	{
-		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Hidden);
+		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }

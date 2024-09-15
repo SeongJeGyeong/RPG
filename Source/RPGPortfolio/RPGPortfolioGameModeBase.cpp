@@ -109,6 +109,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 
 			UGISubsystem_StatMgr* StatMgr = pGameInst->GetSubsystem<UGISubsystem_StatMgr>();
 			StatMgr->SetUIInManager();
+			m_MainHUD->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else
 		{
@@ -123,7 +124,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if (IsValid(m_InventoryUI))
 		{
 			m_InventoryUI->AddToViewport(5);
-			m_InventoryUI->SetVisibility(ESlateVisibility::Hidden);
+			m_InventoryUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		else
 		{
@@ -138,7 +139,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if (IsValid(m_StatusUI))
 		{
 			m_StatusUI->AddToViewport(5);
-			m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
+			m_StatusUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 
@@ -148,7 +149,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if (IsValid(m_EquipUI))
 		{
 			m_EquipUI->AddToViewport(5);
-			m_EquipUI->SetVisibility(ESlateVisibility::Hidden);
+			m_EquipUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 
@@ -159,7 +160,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if ( IsValid(m_ManualUI) )
 		{
 			m_ManualUI->AddToViewport(5);
-			m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+			m_ManualUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 
@@ -170,7 +171,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if ( IsValid(m_SettingsUI) )
 		{
 			m_SettingsUI->AddToViewport(5);
-			m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
+			m_SettingsUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 
@@ -194,11 +195,11 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 
 bool ARPGPortfolioGameModeBase::IsSubMenuUIOpened()
 {
-	if (m_InventoryUI->GetVisibility() == ESlateVisibility::Visible ||
-		m_StatusUI->GetVisibility() == ESlateVisibility::Visible ||
-		m_EquipUI->GetVisibility() == ESlateVisibility::Visible	||
-		m_ManualUI->GetVisibility() == ESlateVisibility::Visible ||
-		m_SettingsUI->GetVisibility() == ESlateVisibility::Visible
+	if (m_InventoryUI->GetVisibility() == ESlateVisibility::SelfHitTestInvisible ||
+		m_StatusUI->GetVisibility() == ESlateVisibility::HitTestInvisible ||
+		m_EquipUI->GetVisibility() == ESlateVisibility::SelfHitTestInvisible ||
+		m_ManualUI->GetVisibility() == ESlateVisibility::HitTestInvisible ||
+		m_SettingsUI->GetVisibility() == ESlateVisibility::SelfHitTestInvisible
 		)
 	{
 		return true;
@@ -209,32 +210,37 @@ bool ARPGPortfolioGameModeBase::IsSubMenuUIOpened()
 
 void ARPGPortfolioGameModeBase::CloseSubMenu()
 {
-	if (m_EquipUI->GetVisibility() == ESlateVisibility::Visible)
+	if (m_EquipUI->GetVisibility() == ESlateVisibility::SelfHitTestInvisible)
 	{
 		if (m_EquipUI->GetItemListVisibility())
 		{
 			m_EquipUI->CloseItemList();
+			UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
+			return;
 		}
 		else
 		{
-			m_EquipUI->SetVisibility(ESlateVisibility::Hidden);
+			m_EquipUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
-	if (m_SettingsUI->GetVisibility() == ESlateVisibility::Visible)
+	if (m_SettingsUI->GetVisibility() == ESlateVisibility::SelfHitTestInvisible)
 	{
 		if ( m_SettingsUI->GetGameSettingPannelVisibility() )
 		{
 			m_SettingsUI->CloseGameSettingPannel();
+			UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
+			return;
 		}
 		else
 		{
-			m_SettingsUI->SetVisibility(ESlateVisibility::Hidden);
+			m_SettingsUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
-	m_InventoryUI->SetVisibility(ESlateVisibility::Hidden);
-	m_StatusUI->SetVisibility(ESlateVisibility::Hidden);
-	m_ManualUI->SetVisibility(ESlateVisibility::Hidden);
+	m_InventoryUI->SetVisibility(ESlateVisibility::Collapsed);
+	m_StatusUI->SetVisibility(ESlateVisibility::Collapsed);
+	m_ManualUI->SetVisibility(ESlateVisibility::Collapsed);
 
+	m_MainHUD->MenuVisibility(ESlateVisibility::SelfHitTestInvisible);
 	UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
 }
 
@@ -249,4 +255,9 @@ void ARPGPortfolioGameModeBase::PlayBGM(bool _Play)
 	{
 		m_BGMComp->Stop();
 	}
+}
+
+void ARPGPortfolioGameModeBase::SetPlayerRespawnLoc(const FVector& _Loc)
+{
+	PlayerSpawnLoc = _Loc;
 }

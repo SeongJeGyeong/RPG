@@ -144,7 +144,7 @@ void UInventory_Mgr::ShowInventoryUI()
 	InventoryUI->SetCategoryEnum(EITEM_TYPE::ALL);
 	InventoryUI->SetCategoryUI(EITEM_TYPE::ALL);
 	RenewInventoryUI(EITEM_TYPE::ALL);
-	InventoryUI->SetVisibility(ESlateVisibility::Visible);
+	InventoryUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UInventory_Mgr::CloseInventoryUI()
@@ -158,7 +158,7 @@ void UInventory_Mgr::CloseInventoryUI()
 	}
 
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
-	InventoryUI->SetVisibility(ESlateVisibility::Hidden);
+	InventoryUI->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)

@@ -12,7 +12,7 @@
 AProj_Player_Cutter::AProj_Player_Cutter()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	m_Hitbox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
 	m_Hitbox->SetCollisionProfileName("PlayerRangeAtk");
@@ -21,41 +21,20 @@ AProj_Player_Cutter::AProj_Player_Cutter()
 
 	m_BaseNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara"));
 	m_BaseNiagara->SetupAttachment(m_Hitbox);
-
-	m_ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	m_ProjectileMovement->ProjectileGravityScale = 0.f;
+	fLifeTime = 1.f;
 }
 
 // Called when the game starts or when spawned
 void AProj_Player_Cutter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	UE_LOG(LogTemp, Warning, TEXT("spawnprojectile"));
 
 	m_Hitbox->OnComponentHit.AddDynamic(this, &AProj_Player_Cutter::OnHitProj);
-	/*if (!IsValid(m_BaseNiagara->GetAsset()))
-	{
-		m_BaseNiagara->SetAsset(GetProjBaseNiagara());
-		m_BaseNiagara->bAutoActivate = true;
-	}*/
-}
-
-// Called every frame
-void AProj_Player_Cutter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-	fDestroyTime += DeltaTime;
-
-	if (fDestroyTime > 1.f)
-	{
-		Destroy();
-	}
 }
 
 void AProj_Player_Cutter::LaunchMotion(FVector _LaunchVec)
 {
+	m_ProjectileMovement->SetUpdatedComponent(GetRootComponent());
 	m_ProjectileMovement->Velocity = _LaunchVec;
 }
 
@@ -65,11 +44,12 @@ void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 
 	if (GetOwner() == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("투사체 오너 없음"));
 		return;
 	}
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
-	Destroy();
+	ProjDeactive();
 }

@@ -4,7 +4,6 @@
 
 
 #include "../Header/Enum.h"
-#include "../System/Interface/ProjectileInterface.h"
 #include "CoreMinimal.h"
 #include "Projectile_Base.h"
 #include "Proj_GS_Spiderling.generated.h"
@@ -13,16 +12,13 @@
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API AProj_GS_Spiderling : public AProjectile_Base, public IProjectileInterface
+class RPGPORTFOLIO_API AProj_GS_Spiderling : public AProjectile_Base
 {
 	GENERATED_BODY()
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class USphereComponent* m_Hitbox;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
-	UProjectileMovementComponent* m_ProjectileMovement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UParticleSystemComponent* m_Particle;

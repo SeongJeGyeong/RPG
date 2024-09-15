@@ -46,8 +46,6 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void SlotVisibilityChanged(ESlateVisibility _Visibility);
-
 	void SetItemSlotUI(UTextBlock* _SlotText) { ItemSlotText = _SlotText; }
 	void SetItemNameUI(UTextBlock* _NameText) { ItemNameText = _NameText; }
 	void SetItemListUI(class UUI_EquipItemList* _ItemList) { ItemList = _ItemList; }

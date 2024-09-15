@@ -20,16 +20,19 @@ public:
 	UPlayer_CameraArm();
 
 private:
-	// 록온 가능 거리
 	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
-	float fMaxTargetLockDistance;
+	float fMaxLockOnDistance;			// 록온 가능 거리
 
-	// 디버그 온오프
 	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
-	bool bDrawDebug;
+	float LockonControlRotationRate;	// 락온 중 타겟 방향으로의 회전보간 속도
+
+	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
+	bool bDrawDebug;					// 디버그 온오프
 
 	UPROPERTY()
 	class APlayer_Base_Knight* m_Player;
+
+
 
 public:
 	// 록온 타겟 컴포넌트
@@ -46,7 +49,7 @@ public:
 	void BreakLockOnTarget();
 	void SwitchTarget(ELockOnDirection SwitchDirection);
 
-	bool IsCameraLockedToTarget();
+	bool IsLockedOn();
 
 private:
 	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);

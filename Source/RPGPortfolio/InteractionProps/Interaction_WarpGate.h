@@ -19,9 +19,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UStaticMeshComponent* m_Mesh;
 
-	UPROPERTY()
 	FText tCommand_Key;
-	UPROPERTY()
 	FText tCommand_Name;
 
 public:	

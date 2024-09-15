@@ -20,9 +20,7 @@ AProj_GS_Spiderling::AProj_GS_Spiderling()
 
 	m_Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
 	m_Particle->SetupAttachment(m_Hitbox);
-
-	m_ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-	m_ProjectileMovement->ProjectileGravityScale = 1.f;
+	fLifeTime = 0.f;
 }
 
 void AProj_GS_Spiderling::BeginPlay()
@@ -38,6 +36,8 @@ void AProj_GS_Spiderling::BeginPlay()
 
 void AProj_GS_Spiderling::LaunchMotion(FVector _TargetVec)
 {
+	m_ProjectileMovement->SetUpdatedComponent(GetRootComponent());
+	m_ProjectileMovement->ProjectileGravityScale = 1.f;
 	FVector LaunchVel;
 	// 타겟을 향해 포물선을 그리며 날아가도록 Velocity를 계산
 	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, LaunchVel, GetActorLocation(), _TargetVec);
@@ -54,6 +54,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 		FRotator HitRot = UKismetMathLibrary::MakeRotFromZ(Hit.ImpactNormal);
 		PlayHitEffect(false, Hit.ImpactPoint, HitRot);
 
+		// 바닥에 맞았을 경우 장판 이펙트 범위에 들어왔을 시 데미지 입히도록
 		FHitResult HitResult;
 		FCollisionQueryParams Params(NAME_None, false, this);
 
@@ -89,7 +90,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 			}
 		}
 
-		Destroy();
+		//Destroy();
 		return;
 	}
 	PlayHitEffect(true, Hit.Location);
@@ -97,5 +98,5 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
-	Destroy();
+	//Destroy();
 }

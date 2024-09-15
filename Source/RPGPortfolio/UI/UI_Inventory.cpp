@@ -90,12 +90,12 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 
 		m_ItemName->SetText(FText::FromString(pData->GetItemName()));
-		m_ItemName->SetVisibility(ESlateVisibility::Visible);
+		m_ItemName->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 		m_ItemTooltipUI->SetTooltipUI(pData);
-		m_ItemTooltipUI->SetVisibility(ESlateVisibility::Visible);
+		m_ItemTooltipUI->SetVisibility(ESlateVisibility::HitTestInvisible);
 
-		PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 	}
 	else
 	{
@@ -154,7 +154,7 @@ void UUI_Inventory::Clear()
 
 bool UUI_Inventory::IsInventoryOpened()
 {
-	if (this->GetVisibility() == ESlateVisibility::Visible)
+	if (this->GetVisibility() == ESlateVisibility::SelfHitTestInvisible)
 	{
 		return true;
 	}

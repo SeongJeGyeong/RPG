@@ -47,7 +47,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
 	int32	iRotateDir = 0;		// 회전 방향
 
-	UPROPERTY()
 	FQuat qOldOrientation;	// 현재 방향과 비교해서 캐릭터가 회전중인지 파악하기 위해 사용
 
 public:

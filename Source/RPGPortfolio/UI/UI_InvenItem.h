@@ -35,12 +35,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	class UItem_InvenData* m_ItemData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	bool bItemUseDelay;
-
 	bool bAnchorActive;
 
-	UPROPERTY()
 	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
 
 	// 아이템 장착시 변경될 능력치 표시용

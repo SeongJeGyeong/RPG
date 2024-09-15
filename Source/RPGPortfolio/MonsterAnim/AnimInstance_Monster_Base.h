@@ -8,7 +8,6 @@
 #include "Animation/AnimInstance.h"
 #include "AnimInstance_Monster_Base.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FHitEndDelegate); // 피격 몽타주 종료 델리게이트
 /**
  * 
  */
@@ -40,8 +39,6 @@ public:
 	void SetDeadAnim() { bIsDead = true; }
 
 public:
-	FHitEndDelegate OnHitEnd;
-
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float _fDeltaTime) override;
@@ -54,7 +51,4 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_NextAtkCheck();
-
-	UFUNCTION()
-	void AnimNotify_HitEnd();
 };

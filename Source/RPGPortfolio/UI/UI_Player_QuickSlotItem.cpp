@@ -37,10 +37,10 @@ void UUI_Player_QuickSlotItem::RenewQuickSlotItem(FInvenItemRow* _InvenItem)
 	m_ItemImg->SetBrushFromTexture(pTex2D);
 	m_ItemName->SetText(FText::FromString(_InvenItem->ItemInfo->ItemName));
 	m_Amount->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenItem->Stack)));
-	m_Dish->SetVisibility(ESlateVisibility::Visible);
-	m_ItemImg->SetVisibility(ESlateVisibility::Visible);
-	m_ItemName->SetVisibility(ESlateVisibility::Visible);
-	m_Amount->SetVisibility(ESlateVisibility::Visible);
+	m_Dish->SetVisibility(ESlateVisibility::HitTestInvisible);
+	m_ItemImg->SetVisibility(ESlateVisibility::HitTestInvisible);
+	m_ItemName->SetVisibility(ESlateVisibility::HitTestInvisible);
+	m_Amount->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(FInvenItemRow* _InvenItem)
@@ -57,6 +57,6 @@ void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(FInvenItemRow* _InvenItem)
 	FString ItemImgPath = _InvenItem->ItemInfo->IconImgPath;
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);
-	m_Dish->SetVisibility(ESlateVisibility::Visible);
-	m_ItemImg->SetVisibility(ESlateVisibility::Visible);
+	m_Dish->SetVisibility(ESlateVisibility::HitTestInvisible);
+	m_ItemImg->SetVisibility(ESlateVisibility::HitTestInvisible);
 }

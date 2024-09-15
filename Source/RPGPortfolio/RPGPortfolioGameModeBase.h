@@ -73,7 +73,7 @@ public:
 
 	void PlayBGM(bool _Play);
 
-	void SetPlayerRespawnLoc(FVector _Loc);
+	void SetPlayerRespawnLoc(const FVector& _Loc);
 
 public:
 	virtual void BeginPlay() override;

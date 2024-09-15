@@ -27,8 +27,8 @@ void UUI_EquipItem::NativeConstruct()
 			FString ItemImgPath = pItemInfo->GetItemImgPath();
 			UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 			m_EquipItemImg->SetBrushFromTexture(pTex2D);
-			m_EquipItemImg->SetVisibility(ESlateVisibility::Visible);
-			m_EquipDishImg->SetVisibility(ESlateVisibility::Visible);
+			m_EquipItemImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			m_EquipDishImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else
 		{
@@ -41,21 +41,7 @@ void UUI_EquipItem::NativeConstruct()
 		m_EquipItemBtn->OnUnhovered.AddDynamic(this, &UUI_EquipItem::ItemBtnUnHovered);
 	}
 
-	OnNativeVisibilityChanged.AddUObject(this, &UUI_EquipItem::SlotVisibilityChanged);
-
 	Super::NativeConstruct();
-}
-
-void UUI_EquipItem::SlotVisibilityChanged(ESlateVisibility _Visibility)
-{
-	if ( _Visibility == ESlateVisibility::Visible )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("장비슬롯 보임"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("장비슬롯 안보임"));
-	}
 }
 
 void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
@@ -71,8 +57,8 @@ void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 		FString ItemImgPath = _ItemData->GetItemImgPath();
 		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 		m_EquipItemImg->SetBrushFromTexture(pTex2D);
-		m_EquipItemImg->SetVisibility(ESlateVisibility::Visible);
-		m_EquipDishImg->SetVisibility(ESlateVisibility::Visible);
+		m_EquipItemImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		m_EquipDishImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 }
 
@@ -174,7 +160,7 @@ void UUI_EquipItem::ItemBtnClicked()
 		break;
 	}
 
-	ItemList->SetVisibility(ESlateVisibility::Visible);
+	ItemList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
@@ -258,10 +244,10 @@ void UUI_EquipItem::ItemBtnHovered()
 		UE_LOG(LogTemp, Warning, TEXT("아이템이름 : %s"), *sItemName);
 		ItemNameText->SetText(FText::FromString(sItemName));
 		m_Tooltip->SetTooltipUI(m_ItemData);
-		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
+		m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 	
-	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
+	PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 }
 
 void UUI_EquipItem::ItemBtnUnHovered()
@@ -274,7 +260,7 @@ void UUI_EquipItem::ItemBtnUnHovered()
 	{
 		ItemNameText->SetText(FText::GetEmpty());
 	}
-	if (m_Tooltip->GetVisibility() == ESlateVisibility::Visible)
+	if (m_Tooltip->GetVisibility() == ESlateVisibility::HitTestInvisible )
 	{
 		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
 	}

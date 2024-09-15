@@ -75,9 +75,9 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		}
 
 		m_List_ItemName->SetText(FText::FromString(pData->GetItemName()));
-		m_List_ItemName->SetVisibility(ESlateVisibility::Visible);
+		m_List_ItemName->SetVisibility(ESlateVisibility::HitTestInvisible);
 		m_Tooltip->SetTooltipUI(pData);
-		m_Tooltip->SetVisibility(ESlateVisibility::Visible);
+		m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 		
 		PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));

@@ -14,13 +14,12 @@ UCLASS()
 class RPGPORTFOLIO_API UDamageType_Base : public UDamageType
 {
 	GENERATED_BODY()
-	
+
 private:
-	UPROPERTY()
-	EATTACK_TYPE ATK_TYPE;
+	EATTACK_TYPE	Atk_Type;
 
 public:
-	EATTACK_TYPE GetAtkType() const { return ATK_TYPE; }
-	void SetAtkType(const EATTACK_TYPE& _AtkType) { ATK_TYPE = _AtkType; }
+	EATTACK_TYPE GetAtkType() const { return Atk_Type; }
+	void SetAtkType(const EATTACK_TYPE& _AtkType) { Atk_Type = _AtkType; }
 
 };

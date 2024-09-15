@@ -8,7 +8,6 @@
 
 class UButton;
 class UTextBlock;
-class UCanvasPanel;
 
 /**
  * 
@@ -38,10 +37,7 @@ private:
 	UTextBlock* m_MapName;
 
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	UCanvasPanel* GSettingsPannel;
-
-	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
-	UButton* m_Btn_Apply;
+	class UUI_Settings_GPanel* m_GSettingsPannel;
 
 public:
 	virtual void NativeConstruct() override;
@@ -57,20 +53,9 @@ public:
 	void QuitBtnClicked();
 	UFUNCTION()
 	void QuitBtnHovered();
-	UFUNCTION()
-	void QuitBtnUnHovered();
 
 	UFUNCTION()
 	void GSettingBtnClicked();
 	UFUNCTION()
 	void GSettingBtnHovered();
-	UFUNCTION()
-	void GSettingBtnUnHovered();
-
-	UFUNCTION()
-	void ApplyBtnClicked();
-	UFUNCTION()
-	void ApplyBtnHovered();
-	UFUNCTION()
-	void ApplyBtnUnHovered();
 };

@@ -33,7 +33,7 @@ void UUI_Boss::DisplayDMG(const float _DMG)
 {
 	fTakedDMG += _DMG;
 	m_BossDMGFigure->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)fTakedDMG)));
-	m_BossDMGFigure->SetVisibility(ESlateVisibility::Visible);
+	m_BossDMGFigure->SetVisibility(ESlateVisibility::HitTestInvisible);
 	GetWorld()->GetTimerManager().ClearTimer(BossDmgDisplayTimer);
 	GetWorld()->GetTimerManager().SetTimer(BossDmgDisplayTimer, [this]()
 	{

@@ -30,7 +30,7 @@ void UUI_Player_Soul::RenewAmountOfSoul(int32 _GainedSoul)
 	m_GainSoul->SetText(FText::FromString(FString::Printf(TEXT("+%d"), iGainedSoul)));
 	fOpacity = 1.f;
 	m_GainSoul->SetOpacity(fOpacity);
-	m_GainSoul->SetVisibility(ESlateVisibility::Visible);
+	m_GainSoul->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	GetWorld()->GetTimerManager().SetTimer(SoulGainTimer, this, &UUI_Player_Soul::StartSoulGain, 2.f, false);
 }
@@ -69,7 +69,7 @@ void UUI_Player_Soul::FadeOutSoul()
 	m_GainSoul->SetOpacity(fOpacity);
 	if ( fOpacity <= 0.f )
 	{
-		m_GainSoul->SetVisibility(ESlateVisibility::Hidden);
+		m_GainSoul->SetVisibility(ESlateVisibility::Collapsed);
 		GetWorld()->GetTimerManager().ClearTimer(FadeOutSoulTimer);
 	}
 }

@@ -48,8 +48,9 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void OnVisibilityChanged(ESlateVisibility _Visibility);
+	void SetSettingText(FString _SettingName);
 
+	void InitSettingProperty(ESlateVisibility _Visibility);
 	void SetUserSettingValText(int32 _Val);
 	void SetUserSettingValText(float _Val);
 	void SetUserSettingValText(bool _Val);

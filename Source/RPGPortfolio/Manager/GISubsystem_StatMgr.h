@@ -18,11 +18,8 @@ class RPGPORTFOLIO_API UGISubsystem_StatMgr : public UGameInstanceSubsystem
 private:
 	UGISubsystem_StatMgr();
 
-	UPROPERTY()
 	FCharacterStatSheet PlayerStat;
-	UPROPERTY()
 	FCharacterBasePower PlayerBasePower;
-	UPROPERTY()
 	FEquipmentStat		EquipmentStat;
 
 	UPROPERTY()

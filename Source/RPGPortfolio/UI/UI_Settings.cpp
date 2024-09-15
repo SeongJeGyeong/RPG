@@ -4,14 +4,12 @@
 #include "UI_Settings.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "Components/CanvasPanel.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetTextLibrary.h"
-#include "GameFramework/GameUserSettings.h"
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_StatMgr.h"
+#include "UI_Settings_GPanel.h"
 
 void UUI_Settings::NativeConstruct()
 {
@@ -23,7 +21,6 @@ void UUI_Settings::NativeConstruct()
 	{
 		m_Btn_Quit->OnClicked.AddDynamic(this, &UUI_Settings::QuitBtnClicked);
 		m_Btn_Quit->OnHovered.AddDynamic(this, &UUI_Settings::QuitBtnHovered);
-		m_Btn_Quit->OnUnhovered.AddDynamic(this, &UUI_Settings::QuitBtnUnHovered);
 	}
 
 	if ( !IsValid(m_Btn_GSettings) )
@@ -34,46 +31,33 @@ void UUI_Settings::NativeConstruct()
 	{
 		m_Btn_GSettings->OnClicked.AddDynamic(this, &UUI_Settings::GSettingBtnClicked);
 		m_Btn_GSettings->OnHovered.AddDynamic(this, &UUI_Settings::GSettingBtnHovered);
-		m_Btn_GSettings->OnUnhovered.AddDynamic(this, &UUI_Settings::GSettingBtnUnHovered);
-	}
-
-	if ( !IsValid(m_Btn_Apply) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("게임설정 버튼 위젯 로드 실패"));
-	}
-	else
-	{
-		m_Btn_Apply->OnClicked.AddDynamic(this, &UUI_Settings::ApplyBtnClicked);
-		m_Btn_Apply->OnHovered.AddDynamic(this, &UUI_Settings::ApplyBtnHovered);
-		m_Btn_Apply->OnUnhovered.AddDynamic(this, &UUI_Settings::ApplyBtnUnHovered);
 	}
 
 	OnNativeVisibilityChanged.AddUObject(this, &UUI_Settings::SettingsVisibilityChanged);
-
 	if (IsValid(m_PlayerName))
 	{
 		UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 		m_PlayerName->SetText(FText::FromString(pGameInst->GetSubsystem<UGISubsystem_StatMgr>()->GetPlayerName()));
 	}
 
-	GSettingsPannel->SetVisibility(ESlateVisibility::Hidden);
+	m_GSettingsPannel->SetVisibility(ESlateVisibility::Collapsed);
 
 	Super::NativeConstruct();
 }
 
 bool UUI_Settings::GetGameSettingPannelVisibility()
 {
-	return GSettingsPannel->GetVisibility() == ESlateVisibility::Visible;
+	return m_GSettingsPannel->GetVisibility() == ESlateVisibility::SelfHitTestInvisible;
 }
 
 void UUI_Settings::CloseGameSettingPannel()
 {
-	GSettingsPannel->SetVisibility(ESlateVisibility::Hidden);
+	m_GSettingsPannel->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UUI_Settings::SettingsVisibilityChanged(ESlateVisibility _Visibility)
 {
-	if (_Visibility != ESlateVisibility::Visible)
+	if (_Visibility == ESlateVisibility::Hidden || _Visibility == ESlateVisibility::Collapsed)
 	{
 		return;
 	}
@@ -105,12 +89,20 @@ void UUI_Settings::SettingsVisibilityChanged(ESlateVisibility _Visibility)
 	{
 		m_Level->SetText(FText::FromString(FString::Printf(TEXT("%d"), pGameInst->GetSubsystem<UGISubsystem_StatMgr>()->GetPlayerLevel())));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("레벨 가져오기 실패"));
+	}
 
 	if (IsValid(m_MapName))
 	{
 		FString LevelName = GetWorld()->GetMapName();
 		LevelName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
 		m_MapName->SetText(FText::FromString(LevelName));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("맵이름 가져오기 실패"));
 	}
 }
 
@@ -125,14 +117,9 @@ void UUI_Settings::QuitBtnHovered()
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
 }
 
-void UUI_Settings::QuitBtnUnHovered()
-{
-}
-
 void UUI_Settings::GSettingBtnClicked()
 {
-	GSettingsPannel->SetVisibility(ESlateVisibility::Visible);
-
+	m_GSettingsPannel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	UGISubsystem_SoundMgr* SoundMgr = GetGameInstance()->GetSubsystem<UGISubsystem_SoundMgr>();
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
@@ -141,36 +128,4 @@ void UUI_Settings::GSettingBtnHovered()
 {
 	UGISubsystem_SoundMgr* SoundMgr = GetGameInstance()->GetSubsystem<UGISubsystem_SoundMgr>();
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
-}
-
-void UUI_Settings::GSettingBtnUnHovered()
-{
-}
-
-void UUI_Settings::ApplyBtnClicked()
-{
-	FString sini = GIsEditor ? GEditorSettingsIni : GGameUserSettingsIni;
-	UE_LOG(LogTemp, Warning, TEXT("EditorSettings Path : %s"), *GEditorSettingsIni);
-	FString IniFileLocation = FPaths::GeneratedConfigDir() + UGameplayStatics::GetPlatformName() + "/" + GGameUserSettingsIni + ".ini";
-	UE_LOG(LogTemp, Warning, TEXT("GameUserSettings Path : %s"), *IniFileLocation);
-	UE_LOG(LogTemp, Warning, TEXT("apply ini file : %s"), *sini);
-	UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
-	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
-	if (GetWorld()->WorldType == EWorldType::Game)
-	{
-		pGameInst->ExecuteResoltionCommand();
-	}
-	pGameInst->ApplyMasterVolume();
-	UGameUserSettings::GetGameUserSettings()->SaveConfig();
-
-	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
-}
-
-void UUI_Settings::ApplyBtnHovered()
-{
-	PlaySound(GETMENUSOUND(EMenuSound::MENU_SELECT));
-}
-
-void UUI_Settings::ApplyBtnUnHovered()
-{
 }

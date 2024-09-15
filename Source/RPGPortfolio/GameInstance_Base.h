@@ -24,10 +24,6 @@ private:
 	UPROPERTY()
 	TSubclassOf<class UUserWidget>	m_LoadingScreenClass;
 
-	UPROPERTY()
-	FEquipmentStat EquipmentStat;
-
-	UPROPERTY()
 	uint32 PlayTime;
 
 	UPROPERTY()
@@ -49,9 +45,6 @@ public:
 	UFUNCTION()
 	virtual void EndLoadingScreen(UWorld* InLoadedWorld);
 
-	FEquipmentStat GetEquipmentStatInfo() const { return EquipmentStat; }
-	void SetEquipmentStatInfo(const FEquipmentStat& _EquipmentStat) { EquipmentStat = _EquipmentStat; }
-
 	uint32 GetPlayTime() const { return PlayTime; }
 	void SetPlayTime(const uint32& _PlayTime) { PlayTime = _PlayTime; }
 
@@ -60,6 +53,7 @@ public:
 
 	float GetMasterVolume() const;
 	void SetMasterVolume(const float& _Volume);
+	void LoadMasterVolume();
 	void ApplyMasterVolume();
 	void SetTempVolume(const float& _Volume) { fTempVolume = _Volume; }
 	FIntPoint GetTempResolution() const { return TempResolution; }

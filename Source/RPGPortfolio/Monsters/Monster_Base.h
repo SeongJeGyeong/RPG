@@ -17,9 +17,6 @@ class RPGPORTFOLIO_API AMonster_Base : public ACharacter
 	GENERATED_BODY()
 
 private:
-	UPROPERTY()
-	FMonsterInfo	m_Info;
-
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	EMONSTER_TYPE	m_Type;
 
@@ -35,9 +32,6 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* m_WidgetComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UPDA_MonsterAssets>	m_DataAsset;
-
 	UPROPERTY()
 	class UAnimInstance_Monster_Base* m_AnimInst;
 
@@ -50,11 +44,11 @@ private:
 	UPROPERTY()
 	class UCurveVector* m_HitCurve;
 
-	UPROPERTY()
-	struct FDroppedItemData	m_DropItemInfo;
+	FMonsterInfo	m_Info;
+	FMonsterAnimAsset m_AnimAsset;
 
+	struct FDroppedItemData	m_DropItemInfo;
 	FOnTimelineVector HitTimelineCallback;
-	FOnTimelineEvent HitTimelineFinish;
 
 	float fDeadEffectRatio;
 	bool bMonLockedOn;
@@ -113,7 +107,7 @@ protected:
 	void MonsterDead(AController* EventInstigator);
 
 	UFUNCTION()
-	void OnHitMontageEnded();
+	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 

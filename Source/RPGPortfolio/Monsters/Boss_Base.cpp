@@ -78,7 +78,7 @@ void ABoss_Base::BeginPlay()
 	m_BossWidget = pMainUI->GetBossUI();
 	m_BossWidget->SetName(m_Info.Name);
 	m_BossWidget->SetHPRatio(1.f);
-	m_BossWidget->SetVisibility(ESlateVisibility::Visible);
+	m_BossWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void ABoss_Base::MonsterDead()

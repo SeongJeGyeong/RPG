@@ -48,7 +48,7 @@ public:
 
 	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
 
-	void ShowMenu(bool _bShow);
+	void MenuVisibility(ESlateVisibility _Visibility);
 	bool IsOpendMenu();
 
 	void ShowMainMessageUI(bool _bShow);

@@ -62,6 +62,11 @@ void UGameInstance_Base::SetMasterVolume(const float& _Volume)
 	fTempVolume = _Volume;
 }
 
+void UGameInstance_Base::LoadMasterVolume()
+{
+	fTempVolume = m_MasterVolume->Properties.Volume;
+}
+
 void UGameInstance_Base::ApplyMasterVolume()
 {
 	m_MasterVolume->Properties.Volume = fTempVolume;

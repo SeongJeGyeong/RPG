@@ -65,8 +65,3 @@ void UAnimInstance_Monster_Base::AnimNotify_NextAtkCheck()
 {
 	Montage_JumpToSection(FName(TEXT("Combo2")));
 }
-
-void UAnimInstance_Monster_Base::AnimNotify_HitEnd()
-{
-	OnHitEnd.Broadcast();
-}

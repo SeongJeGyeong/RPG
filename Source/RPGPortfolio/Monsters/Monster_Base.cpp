@@ -21,6 +21,7 @@
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
+#include "../Manager/GISubsystem_MonAssetMgr.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -119,7 +120,8 @@ void AMonster_Base::BeginPlay()
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_Info.DetectRange);
 		}
 		m_AnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-		m_AnimInst->OnHitEnd.AddUObject(this, &AMonster_Base::OnHitMontageEnded);
+		//m_AnimInst->OnHitEnd.AddUObject(this, &AMonster_Base::OnHitMontageEnded);
+		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
 
 	if (!IsValid(m_WidgetComponent))
@@ -142,9 +144,7 @@ void AMonster_Base::BeginPlay()
 		m_Info.CurHP = m_Info.MaxHP;
 	}
 	m_WidgetComponent->SetVisibility(false);
-
-	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
-	pGameInst->ASyncLoadDataAsset(m_DataAsset.ToSoftObjectPath());
+	m_AnimAsset = GetGameInstance()->GetSubsystem<UGISubsystem_MonAssetMgr>()->GetMonAnimAsset(m_Type);
 
 	// 랜덤으로 드롭아이템 지정
 	float fRandNum = FMath::RandRange(1.f, 100.f);
@@ -238,15 +238,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	// 피격 시 몸체 진동
 	m_HitTimeline->PlayFromStart();
 
-	if ( m_DataAsset.IsPending() )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격애니메이션 비동기 로드 실패"));
-		pAnimInst->Montage_Play(m_DataAsset.LoadSynchronous()->GetMonAnimData(m_Type)->HitAnim_Nor);
-	}
-	else
-	{
-		pAnimInst->Montage_Play(m_DataAsset.Get()->GetMonAnimData(m_Type)->HitAnim_Nor);
-	}
+	pAnimInst->Montage_Play(m_AnimAsset.HitAnim_Nor);
 
 	// 피격 이펙트 스폰
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -318,9 +310,11 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 	FRotator Rotator;
 	FVector vDropLoc = GetActorLocation();
 	vDropLoc.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 20.f;
+
 	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
 	pDropItem->SetDropItemID(m_DropItemInfo.ID);
 	pDropItem->SetDropItemStack(m_DropItemInfo.Stack);
+	pDropItem->LoadImg();
 
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Type)->DeadSound, GetActorLocation());
 
@@ -353,25 +347,28 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 }
 
 // 경직상태가 되는 몽타주들 재생 종료시
-void AMonster_Base::OnHitMontageEnded()
+void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	UE_LOG(LogTemp, Warning, TEXT("피격 몽타주 재생 종료"));
-	// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
-	GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
-	GetWorld()->GetTimerManager().SetTimer(HitEndTimer, [this]()
+	if( Montage == m_AnimAsset.HitAnim_Nor )
 	{
-		AAIController* pAIController = Cast<AAIController>(GetController());
-		if ( IsValid(pAIController) )
+		UE_LOG(LogTemp, Warning, TEXT("피격 몽타주 재생 종료"));
+		// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
+		GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
+		GetWorld()->GetTimerManager().SetTimer(HitEndTimer, [this]()
 		{
-			if ( pAIController->GetBlackboardComponent() )
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Hit State End"));
-				pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), false);
-				GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
-			}
-		}
-	},
-	0.8f, false);
+				AAIController* pAIController = Cast<AAIController>(GetController());
+				if ( IsValid(pAIController) )
+				{
+					if ( pAIController->GetBlackboardComponent() )
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Hit State End"));
+						pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), false);
+						GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
+					}
+				}
+		},
+		0.8f, false);
+	}
 
 	return;
 }
@@ -383,16 +380,7 @@ void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 void AMonster_Base::MonsterAttackNormal()
 {
 	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-
-	if ( m_DataAsset.IsPending() )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 공격애니메이션 비동기 로드 실패"));
-		pAnimInst->Montage_Play(m_DataAsset.LoadSynchronous()->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor);
-	}
-	else
-	{
-		pAnimInst->Montage_Play(m_DataAsset.Get()->GetMonAnimData(m_Type)->AtkAnim_Melee_Nor);
-	}
+	pAnimInst->Montage_Play(m_AnimAsset.AtkAnim_Melee_Nor);
 }
 
 void AMonster_Base::SetMonLockedOn(bool _LockedOn)
@@ -512,19 +500,7 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 		if (bBlocked)
 		{
 			UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-
-			UAnimMontage* BlockMontage = nullptr;
-			if ( m_DataAsset.IsPending() )
-			{
-				UE_LOG(LogTemp, Warning, TEXT("몬스터 블록애니메이션 비동기 로드 실패"));
-				BlockMontage = m_DataAsset.LoadSynchronous()->GetMonAnimData(m_Type)->BlockAnim;
-			}
-			else
-			{
-				BlockMontage = m_DataAsset.Get()->GetMonAnimData(m_Type)->BlockAnim;
-			}
-
-			pAnimInst->Montage_Play(BlockMontage);
+			pAnimInst->Montage_Play(m_AnimAsset.BlockAnim);
 
 			return;
 		}
@@ -549,5 +525,5 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 
 void AMonster_Base::TimelineStep(FVector _Value)
 {
-	GetMesh()->SetRelativeLocation(FVector(GetMesh()->GetRelativeLocation().X + (_Value.X * 5.f), GetMesh()->GetRelativeLocation().Y + (_Value.Y * 5.f), GetMesh()->GetRelativeLocation().Z));
+	GetMesh()->SetRelativeLocation(FVector(GetMesh()->GetRelativeLocation().X + (_Value.X * 10.f), GetMesh()->GetRelativeLocation().Y + (_Value.Y * 10.f), GetMesh()->GetRelativeLocation().Z));
 }

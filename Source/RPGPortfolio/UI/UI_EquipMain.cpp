@@ -33,7 +33,7 @@ void UUI_EquipMain::NativeConstruct()
 	}
 	else
 	{
-		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
+		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Collapsed);
 		OnNativeVisibilityChanged.AddUObject(this, &UUI_EquipMain::ListVisibilityChanged);
 	}
 
@@ -42,26 +42,24 @@ void UUI_EquipMain::NativeConstruct()
 
 void UUI_EquipMain::ListVisibilityChanged(ESlateVisibility _Visibility)
 {
-	if (_Visibility == ESlateVisibility::Hidden)
+	if (_Visibility == ESlateVisibility::Collapsed)
 	{
-		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
-		UE_LOG(LogTemp, Warning, TEXT("장비창 메인 안보임"));
+		m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	else
 	{
 		m_Equip_StatUI->SetPlayerStatUI();
-		UE_LOG(LogTemp, Warning, TEXT("장비창 메인 보임"));
 	}
 }
 
 bool UUI_EquipMain::GetItemListVisibility()
 {
-	return m_Equip_ItemListUI->GetVisibility() == ESlateVisibility::Visible;
+	return m_Equip_ItemListUI->GetVisibility() == ESlateVisibility::SelfHitTestInvisible;
 }
 
 void UUI_EquipMain::CloseItemList()
 {
-	m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Hidden);
+	m_Equip_ItemListUI->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, UItem_InvenData* _ItemData)
