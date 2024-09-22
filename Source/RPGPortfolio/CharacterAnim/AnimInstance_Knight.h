@@ -45,15 +45,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	float fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data", meta = ( AllowPrivateAccess = "true" ))
-	bool bIsSprint;			// 달리기 토글 여부
-
 public:
 	bool GetbIsGuard() { return bIsGuard; }
 	void SetbIsGuard(bool _IsGuard) { bIsGuard = _IsGuard; }
 
-	bool GetbIsSprint() { return bIsSprint; }
-	void SetbIsSprint(bool _IsSprint) { bIsSprint = _IsSprint; }
 	void SetLocalVelocityXY(FVector2D _Velocity) { vLocalVelocity.X = _Velocity.X; vLocalVelocity.Y = _Velocity.Y; }
 
 public:
@@ -61,9 +56,6 @@ public:
 	FOnDodgeTimeCheckDelegate	OnDodgeTimeCheck;
 	FOnAttackMoveDelegate		OnAttackMove;
 	FOnJumpAtkDelegate			OnJumpAtk;
-
-	/*UFUNCTION()
-	void AnimNotify_AtkSectionStart();*/
 
 	// 다음콤보 체크
 	UFUNCTION()
@@ -95,6 +87,8 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_Pause_JumpAtk();
+	UFUNCTION()
+	void AnimNotify_JumpAtkEnd();
 
 	// 원거리공격 발사
 	UFUNCTION()

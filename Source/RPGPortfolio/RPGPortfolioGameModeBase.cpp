@@ -72,9 +72,9 @@ ARPGPortfolioGameModeBase::~ARPGPortfolioGameModeBase()
 
 }
 
-void ARPGPortfolioGameModeBase::BeginPlay()
+void ARPGPortfolioGameModeBase::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	// 스탠드얼론으로 플레이할 때
@@ -98,7 +98,31 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 
 		pGameInst->SetTempResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
 	}
+}
 
+void ARPGPortfolioGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+
+	if ( IsValid(m_WidgetClassArr[ 0 ]) )
+	{
+		m_MainHUD = Cast<UUI_Base>(CreateWidget(GetWorld(), m_WidgetClassArr[ 0 ]));
+
+		if ( IsValid(m_MainHUD) )
+		{
+			m_MainHUD->AddToViewport(1);
+
+			UGISubsystem_StatMgr* StatMgr = pGameInst->GetSubsystem<UGISubsystem_StatMgr>();
+			StatMgr->SetUIInManager();
+			m_MainHUD->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UI_Base 캐스팅 실패"));
+		}
+	}
 	if (IsValid(m_WidgetClassArr[0]))
 	{
 		m_MainHUD = Cast<UUI_Base>(CreateWidget(GetWorld(), m_WidgetClassArr[0]));

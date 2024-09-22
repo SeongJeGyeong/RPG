@@ -20,6 +20,11 @@ private:
 	UPROPERTY()
 	class ULevelSequencePlayer* m_SeqPlayer;
 
+	UPROPERTY()
+	AActor* m_TriggeredActor;
+public:
+	ATrigger_BossCutscene();
+
 public:
 	virtual void BeginPlay() override;
 

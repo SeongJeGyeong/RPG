@@ -45,22 +45,22 @@ void UUI_InvenItem::NativeOnListItemObjectSet(UObject* ListItemObject)
 
 void UUI_InvenItem::InitFromData(UObject* _Data)
 {
-	m_ItemData = Cast<UItem_InvenData>(_Data);
-
-	if (!IsValid(m_ItemData))
+	UItem_InvenData* pItem = Cast<UItem_InvenData>(_Data);
+	if (!IsValid(pItem))
 	{
 		UE_LOG(LogTemp, Error, TEXT("인벤토리 위젯에 입력된 아이템 데이터가 올바르지 않음"));
 	}
 
+	eID = pItem->GetItemID();
 	// 아이템 이미지 세팅
-	FString ItemImgPath = m_ItemData->GetItemImgPath();
+	FString ItemImgPath = pItem->GetItemImgPath();
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);
 
 	// 아이템 수량 세팅
-	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), m_ItemData->GetItemQnt())));
+	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), pItem->GetItemQnt())));
 
-	if (m_ItemData->GetEquiped() == EEQUIP_SLOT::EMPTY)
+	if ( pItem->GetEquiped() == EEQUIP_SLOT::EMPTY)
 	{
 		m_EquipMark->SetVisibility(ESlateVisibility::Hidden);
 	}
@@ -83,21 +83,22 @@ void UUI_InvenItem::ItemBtnClicked()
 	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
-		if (m_ItemData->GetEquiped() == eSelectedSlot)
+		FInvenItemRow* pItemRow = UInventory_Mgr::GetInst(GetWorld())->GetInvenItemInfo(eID);
+		if (pItemRow->EquipedSlot == eSelectedSlot)
 		{
 			PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
 		}
 		else
 		{
-			PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
+			PlaySound(GETMENUSOUND(EMenuSound::ITEM_EQUIP));
 		}
 
-		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(m_ItemData->GetItemID(), eSelectedSlot);
-
+		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(pItemRow->ID, eSelectedSlot);
+		FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pItemRow->ID);
 		// 무기 및 방어구 교체 시
-		if (m_ItemData->GetItemType() == EITEM_TYPE::WEAPON || m_ItemData->GetItemType() == EITEM_TYPE::ARM_HELM ||
-			m_ItemData->GetItemType() == EITEM_TYPE::ARM_CHEST || m_ItemData->GetItemType() == EITEM_TYPE::ARM_GAUNTLET ||
-			m_ItemData->GetItemType() == EITEM_TYPE::ARM_LEGGINGS)
+		if ( pInfo->Type == EITEM_TYPE::WEAPON || pInfo->Type == EITEM_TYPE::ARM_HELM ||
+			pInfo->Type == EITEM_TYPE::ARM_CHEST || pInfo->Type == EITEM_TYPE::ARM_GAUNTLET ||
+			pInfo->Type == EITEM_TYPE::ARM_LEGGINGS)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("스테이터스 갱신"));
 			m_StatUI->RenewBasePower();
@@ -118,7 +119,8 @@ UUserWidget* UUI_InvenItem::MenuAnchorDataSetting()
 	UUI_ItemSelectMenu* pWidget = Cast<UUI_ItemSelectMenu>(CreateWidget(GetWorld(), pAnchorClass));
 
 	pWidget->SetbItemUseDelay(bItemUseDelay);
-	pWidget->SetSelectedItemData(m_ItemData);
+	pWidget->SetSelectedItemID(eID);
+	pWidget->SetSelectedItemSlot(eSelectedSlot);
 
 	return pWidget;
 }

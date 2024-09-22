@@ -13,6 +13,8 @@ void UAnimInstance_Knight::NativeInitializeAnimation()
 
 void UAnimInstance_Knight::NativeBeginPlay()
 {
+	Super::NativeBeginPlay();
+
 	m_Player = Cast<APlayer_Base_Knight>(GetOwningActor());
 
 	if (IsValid(m_Player))
@@ -23,6 +25,8 @@ void UAnimInstance_Knight::NativeBeginPlay()
 
 void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 {
+	Super::NativeUpdateAnimation(_DT);
+
 	if (!IsValid(m_Movement) || !IsValid(m_Player))
 	{
 		m_Player = Cast<APlayer_Base_Knight>(GetOwningActor());
@@ -61,20 +65,14 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	else
 	{
 		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 15.f, 0.f, 1.f);
+		m_Player->SetbToggleGuard(false);
 	}
 }
-
-// 공격 몽타주 시작
-//void UAnimInstance_Knight::AnimNotify_AtkSectionStart()
-//{
-//	m_Player->SetbNoInputInAtk(true);
-//	m_Player->SetbAtkRotate(false);
-//	OnAttackRotate.Broadcast();
-//}
 
 // 다음 공격 입력 시작
 void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 {
+	UE_LOG(LogTemp, Warning, TEXT("NextCheckStart"));
 	m_Player->SetbNextAtkCheck(true);
 	m_Player->SetbAtkRotate(true);
 }
@@ -82,10 +80,12 @@ void UAnimInstance_Knight::AnimNotify_NextCheckStart()
 // 다음 공격 입력 끝
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
+	UE_LOG(LogTemp, Warning, TEXT("NextCheckEnd"));
 	m_Player->SetbNextAtkCheck(false);
 	m_Player->SetbInvalidInput(false);
 	m_Player->SetbAtkRotate(false);
-	m_Player->SetvAtkDirZero();
+	m_Player->SetvInputDirZero();
+	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
@@ -121,29 +121,39 @@ void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
-	m_Player->SetbDodging(false);
-	m_Player->SetbInvalidInput(false);
+	//m_Player->SetbDodging(false);
+	//m_Player->SetbInvalidInput(false);
+	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpStart()
 {
-	m_Player->SetbIsJumped(true);
+	//m_Player->SetbIsJumped(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpEnd()
 {
-	m_Player->SetbIsJumped(false);
+	//m_Player->SetbIsJumped(false);
+	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_FallStart()
 {
-	m_Player->SetbIsJumped(true);
+	m_Player->SetState(EPlayerStateType::JUMP);
+	//m_Player->SetbIsJumped(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
 {
 	Montage_Pause();
 	OnJumpAtk.Broadcast();
+}
+
+void UAnimInstance_Knight::AnimNotify_JumpAtkEnd()
+{
+	//m_Player->SetbIsJumped(false);
+	//m_Player->SetbInvalidInput(false);
+	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()
@@ -153,10 +163,11 @@ void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 
 void UAnimInstance_Knight::AnimNotify_InvalidInput()
 {
-	m_Player->SetbInvalidInput(true);
+	//m_Player->SetbInvalidInput(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_ValidInput()
 {
-	m_Player->SetbInvalidInput(false);
+	//m_Player->SetbInvalidInput(false);
+	m_Player->SetState(EPlayerStateType::IDLE);
 }

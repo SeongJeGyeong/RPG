@@ -8,6 +8,8 @@
 #include "UObject/NoExportTypes.h"
 #include "Inventory_Mgr.generated.h"
 
+class UPaperSprite;
+
 UCLASS()
 class RPGPORTFOLIO_API UInventory_Mgr : public UObject
 {
@@ -21,8 +23,11 @@ private:
 	UDataTable* m_ItemDataTable;
 	UPROPERTY()
 	TMap<EITEM_ID, FGameItemInfo>	m_MapItemInfo;	// 게임의 모든 아이템 정보가 담긴 맵
+	UPROPERTY()
+	TArray<FInvenItemMap> m_InvenStorage;	// 플레이어가 인벤토리에 소지 중인 아이템 맵
 
-	TMap<EITEM_ID, FInvenItemRow> m_InvenStorage[ (int32)EITEM_TYPE::END ];		// 플레이어가 인벤토리에 소지 중인 아이템 맵
+	UPROPERTY()
+	class UDA_ItemCategoryIcon* m_Icon;
 
 public:
 	// 스태틱 함수로 선언하여 객체가 생성되지 않았어도 함수 호출 가능
@@ -30,6 +35,8 @@ public:
 	static UInventory_Mgr* GetInst(UGameInstance* _GameInst);
 
 	void SetItemDataTable(UDataTable* _ItemDataTable);
+	void SetInventoryIcon(UDataAsset* _DataAsset);
+
 	void AddGameItem(EITEM_ID _ID, uint32 _Stack);
 	void SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID);
 
@@ -40,10 +47,14 @@ public:
 	void ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 
 	FGameItemInfo* GetItemInfo(EITEM_ID _ID);
+	FInvenItemRow* GetInvenItemInfo(EITEM_ID _ID);
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
 	void RenewItemListUI(EITEM_TYPE _Type);
 	void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
 	void DecreaseInventoryItem(EITEM_ID _ID);
+
+	UPaperSprite* GetCategoryIcon(EITEM_TYPE _type);
+	UPaperSprite* GetEquipSlotIcon(EEQUIP_SLOT _Slot);
 };

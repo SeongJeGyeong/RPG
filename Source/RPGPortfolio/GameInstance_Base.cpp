@@ -25,6 +25,16 @@ UGameInstance_Base::UGameInstance_Base()
 		UE_LOG(LogTemp, Error, TEXT("아이템 데이터테이블 찾지 못함"));
 	}
 
+	ConstructorHelpers::FObjectFinder<UDataAsset> InvenIcon(TEXT("/Script/RPGPortfolio.DA_ItemCategoryIcon'/Game/Blueprint/DataAsset/BPC_DA_CategoryIcon.BPC_DA_CategoryIcon'"));
+	if ( InvenIcon.Succeeded() )
+	{
+		UInventory_Mgr::GetInst(this)->SetInventoryIcon(InvenIcon.Object);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("아이콘 데이터에셋 찾지 못함"));
+	}
+
 	ConstructorHelpers::FClassFinder<UUserWidget> loadingscreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_LoadingScreen.UI_LoadingScreen_C'"));
 	if ( loadingscreen.Succeeded() )
 	{

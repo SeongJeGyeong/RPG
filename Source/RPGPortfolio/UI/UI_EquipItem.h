@@ -30,10 +30,10 @@ private:
 	UImage* m_EquipItemImg;
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UImage* m_EquipDishImg;
+	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
+	UImage* m_BackSlotImg;
 
-	UPROPERTY()
-	class UItem_InvenData* m_ItemData;
-
+	// 장비창 메인 화면의 위젯들. 블루프린트에서 참조받는다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	UTextBlock* ItemSlotText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
@@ -41,21 +41,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	class UUI_EquipItemList*	ItemList;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
-	class UUI_ItemTooltip* m_Tooltip;	// 장비창 메인화면 블루프린트에서 참조
+	class UUI_ItemTooltip* m_Tooltip;
 
 public:
 	virtual void NativeConstruct() override;
-
-	void SetItemSlotUI(UTextBlock* _SlotText) { ItemSlotText = _SlotText; }
-	void SetItemNameUI(UTextBlock* _NameText) { ItemNameText = _NameText; }
-	void SetItemListUI(class UUI_EquipItemList* _ItemList) { ItemList = _ItemList; }
 
 	void SetSlotType(EEQUIP_SLOT _Type) { eSlotType = _Type; }
 	EEQUIP_SLOT GetSlotType() { return eSlotType; }
 	UButton* GetItemBtn() { return m_EquipItemBtn; }
 
-	void SetEquipItem(UItem_InvenData* _ItemData);
-	void SetEquipItemStack(const uint16& _Stack);
+	void SetEquipItem(class UItem_InvenData* _ItemData);
 
 	UFUNCTION()
 	void ItemBtnClicked();

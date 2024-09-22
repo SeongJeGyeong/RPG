@@ -25,7 +25,6 @@ private:
 
 	EATTACK_TYPE	eAtkType;
 	float			fAtkDamage;
-	float			fDestroyTime = 0.f;
 
 public:
 	AProj_GS_Spiderling();

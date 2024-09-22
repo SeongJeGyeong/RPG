@@ -7,28 +7,16 @@
 #include "../CharacterAnim/AnimInstance_Knight.h"
 #include "Player_CameraArm.h"
 #include "../UI/UI_Base.h"
-#include "../UI/UI_Player_Main.h"
-#include "../UI/UI_Message_Main.h"
-#include "../UI/UI_Message_Item.h"
-#include "../UI/UI_EquipMain.h"
-#include "../UI/UI_EquipItemList.h"
-#include "../UI/UI_Player_QuickSlot.h"
-#include "../UI/UI_Player_Soul.h"
 #include "../Item/Item_Dropped_Base.h"
 #include "../Manager/Inventory_Mgr.h"
 #include "../Manager/Equip_Mgr.h"
 #include "../System/Component/LockOnTargetComponent.h"
 #include "../System/DamageType_Base.h"
 #include "../Monsters/Monster_Base.h"
-#include "../Projectiles/Proj_Player_Cutter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
-#include "NiagaraComponent.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Engine/DamageEvents.h"
 #include "Blueprint/UserWidget.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -36,11 +24,18 @@
 #include "../Manager/GISubsystem_EffectMgr.h"
 #include "../Manager/GISubsystem_StatMgr.h"
 #include "Player_SkillComponent.h"
-
+//#include "State/State_Idle.h"
+//#include "State/State_Sprint.h"
+//#include "State/State_Attack.h"
+//#include "State/State_Hit.h"
+//#include "State/State_Dodge.h"
+//#include "State/State_JumpAttack.h"
+//#include "State/State_HeavyAttack.h"
+#include "../System/Subsys_ObjectPool.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
-	: CurrentCombo(1)
+	: CurrentCombo(0)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -51,14 +46,13 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true; // 캐릭터가 입력된 이동방향으로 자동으로 회전하도록
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 1000.0f, 0.0f); // 이동방향으로의 회전 속도
-	GetCharacterMovement()->JumpZVelocity = 500.f;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 1200.0f, 0.0f); // 이동방향으로의 회전 속도
+	GetCharacterMovement()->JumpZVelocity = 400.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
 	m_SArm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SArm"));
 	m_SArm->SetupAttachment(RootComponent);
 	m_SArm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
-	//m_LockArm->SetUsingAbsoluteRotation(false);
 
 	m_Cam = CreateDefaultSubobject<UCameraComponent>(TEXT("Cam"));
 	m_Cam->SetupAttachment(m_SArm);
@@ -67,33 +61,32 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_SkillComponent = CreateDefaultSubobject<UPlayer_SkillComponent>(TEXT("SkillComp"));
 }
 
-// Called when the game starts or when spawned
-void APlayer_Base_Knight::BeginPlay()
+void APlayer_Base_Knight::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
 	APlayerController* pController = Cast<APlayerController>(GetController());
 
-	if (pController)
+	if ( pController )
 	{
+		// 마우스 커서 설정
+		pController->DefaultMouseCursor = EMouseCursor::Default;
+		pController->CurrentMouseCursor = EMouseCursor::Default;
 		// 카메라 상하 범위 제한
 		pController->PlayerCameraManager->ViewPitchMin = -40.f;
 		pController->PlayerCameraManager->ViewPitchMax = 40.f;
 		ULocalPlayer* pLocalPlayer = pController->GetLocalPlayer();
 
 		// 향상된 입력 매핑 컨텍스트 추가
-		if (pLocalPlayer && !m_IMC.IsNull())
+		if ( pLocalPlayer && !m_IMC.IsNull() )
 		{
 			UEnhancedInputLocalPlayerSubsystem* pSubsystem = pLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 			pSubsystem->AddMappingContext(m_IMC.LoadSynchronous(), 0);
 		}
 	}
 
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
-	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
-
 	m_AnimInst = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
-	if (IsValid(m_AnimInst))
+	if ( IsValid(m_AnimInst) )
 	{
 		m_AnimInst->OnNextAttackCheck.AddUObject(this, &APlayer_Base_Knight::NextAttackCheck);
 		m_AnimInst->OnDodgeTimeCheck.AddUObject(this, &APlayer_Base_Knight::DodgeTimeCheck);
@@ -101,6 +94,14 @@ void APlayer_Base_Knight::BeginPlay()
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &APlayer_Base_Knight::MontageEnded);
 	}
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
+}
+
+// Called when the game starts or when spawned
+void APlayer_Base_Knight::BeginPlay()
+{
+	Super::BeginPlay();
 
 	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	if ( !IsValid(pGameMode) )
@@ -108,8 +109,13 @@ void APlayer_Base_Knight::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
+	// 위젯은 BeginPlay 시점에 초기화됨
 	m_MainUI = pGameMode->GetMainHUD();
 
+	if ( !IsValid(m_MainUI) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("메인 UI 로드 실패"));
+	}
 	if ( !IsValid(m_PlayerMontage) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
@@ -120,8 +126,12 @@ void APlayer_Base_Knight::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
 	}
 
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->DefaultMouseCursor = EMouseCursor::Default;
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->CurrentMouseCursor = EMouseCursor::Default;
+	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
+	CurrentState = PoolSubsystem->GetStateFromPool(EPlayerStateType::IDLE);
+	if ( CurrentState )
+	{
+		CurrentState->Enter(this);
+	}
 }
 
 // Called every frame
@@ -129,37 +139,18 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 회피 애니메이션 재생중일 때
-	if (bDodging)
-	{
-		if (bDodgeMove)
-		{
-			if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW)) )
-			{
-				GetCharacterMovement()->AddInputVector(vDodgeVector * -1.f);
-			}
-			else if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_FW)) )
-			{
-				AddMovementInput(vDodgeVector, 1.f);
-			}
-		}
-		SetActorRotation(rDodgeRotation);
-	}
+	//if (bSprintToggle)
+	//{
+	//	// 스테미너가 0일 경우 달리기 불가
+	//	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	//	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
+	//	{
+	//	}
+	//}
 
-	// 공격 판정 트레이스
-	if (bAtkTrace)
+	if (CurrentState)
 	{
-		AttackHitCheck();
-	}
-
-	if (bSprintToggle)
-	{
-		// 스테미너가 0일 경우 달리기 불가
-		UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-		if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
-		{
-			StopSprint();
-		}
+		CurrentState->Update(this, DeltaTime);
 	}
 }
 
@@ -236,19 +227,45 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void APlayer_Base_Knight::SetState(EPlayerStateType _StateType)
+{
+	if ( CurrentState->GetStateType() == _StateType )
+	{
+		if ( _StateType != EPlayerStateType::HIT && _StateType != EPlayerStateType::ATTACK && _StateType != EPlayerStateType::HEAVYATTACK )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("State is Same"));
+			return;
+		}
+	}
+
+	// 기존 상태를 새로운 상태로 교체
+	CurrentState->Exit(this);
+	StateMachine* ReturnState = CurrentState.Release();
+	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
+	PoolSubsystem->ReturnStateToPool(ReturnState->GetStateType(), ReturnState);
+	TUniquePtr<StateMachine> NewState = PoolSubsystem->GetStateFromPool(_StateType);
+	CurrentState = MoveTemp(NewState); //TUniquePtr는 복사가 불가능하므로, 소유권을 이전하려면 반드시 MoveTemp를 사용해 소유권을 이동해야 함
+	CurrentState->Enter(this);
+}
+
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 {
+	if ( Controller == NULL )
+	{
+		return;
+	}
 	// 공격 중 이동 입력으로 공격방향 회전하도록
 	// 락온 중에는 공격방향 적으로 고정해야하므로 불가능하게
 	if (bAtkRotate && !m_SArm->IsLockedOn())
 	{
-		vAtkDir = _Instance.GetValue().Get<FVector>();
+		vInputDir = _Instance.GetValue().Get<FVector>();
 		return;
 	}
 
-	if (bIsJumped || bInvalidInput || Controller == NULL )
+	//if (CurrentState->GetStateType() == EPlayerStateType::JUMP || bInvalidInput || Controller == NULL )
+	if ( CurrentState->GetStateType() != EPlayerStateType::IDLE && CurrentState->GetStateType() != EPlayerStateType::SPRINT)
 	{
 		return;
 	}
@@ -256,15 +273,7 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
 	// 일부 모션의 경우 후딜레이 모션을 캔슬하고 바로 이동모션으로 전환한다.
 	MontageBlendOutImmediately();
-
-	float fSpeedRate = 1.f;
-	if (bSprintToggle)
-	{
-		UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-		StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - 10.f * GetWorld()->GetDeltaSeconds());
-		fSpeedRate = 2.f;
-	}
-
+	
 	if ( vInput.X != 0.0f )
 	{
 		// get forward vector
@@ -280,26 +289,43 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 		AddMovementInput(Direction, vInput.Y);
 	}
 
-	FVector2D vLocVelocity;
-	if (!m_SArm->IsLockedOn())
+	/*if ( bSprintToggle )
+	{
+		ConsumeStamina(10.f * GetWorld()->GetDeltaSeconds());
+	}*/
+
+	//float fSpeedRate = bSprintToggle ? 2.f : 1.f;
+	//FVector2D vLocVelocity = FVector2D(0.f, 0.f);
+	//if (!m_SArm->IsLockedOn())
+	//{
+	//	// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
+	//	vLocVelocity.X = bSprintToggle ? 2.f : 1.f;
+	//	vLocVelocity.Y = 0.f;
+	//}
+	//else
+	//{
+	//	if ( vInputDir.X != 0.0f )
+	//	{
+	//		vLocVelocity.X = ( vInputDir.X > 0.f ) ? fSpeedRate : -fSpeedRate;
+	//	}
+	//	if ( vInputDir.Y != 0.0f )
+	//	{
+	//		vLocVelocity.Y = ( vInputDir.Y > 0.f ) ? fSpeedRate : -fSpeedRate;
+	//	}
+	//}
+
+	if ( !m_SArm->IsLockedOn() )
 	{
 		// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
-		vLocVelocity.X = fSpeedRate;
-		vLocVelocity.Y = 0.f;
+		vInput.X = 1.f;
+		vInput.Y = 0.f;
 	}
-	else
+	if (bSprintToggle)
 	{
-		if ( vInput.X != 0.0f )
-		{
-			vLocVelocity.X = ( vInput.X > 0.f ) ? fSpeedRate : -fSpeedRate;
-		}
-		if ( vInput.Y != 0.0f )
-		{
-			vLocVelocity.Y = ( vInput.Y > 0.f ) ? fSpeedRate : -fSpeedRate;
-		}
+		vInput *= 2;
 	}
 
-	m_AnimInst->SetLocalVelocityXY(vLocVelocity);
+	m_AnimInst->SetLocalVelocityXY(vInput);
 }
 
 void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
@@ -320,67 +346,65 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (bIsJumped || m_AnimInst->GetbIsGuard() || bInvalidInput)
+	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP ||
+		CurrentState->GetStateType() == EPlayerStateType::ATTACK ||
+		CurrentState->GetStateType() == EPlayerStateType::DODGE )
 	{
 		return;
 	}
+	//if (bInvalidInput)
+	//{
+	//	return;
+	//}
 
-	if (bSprintToggle)
-	{
-		StopSprint();
-	}
-	m_AnimInst->StopAllMontages(0.25f);
+	SetState(EPlayerStateType::JUMP);
+
+	//m_AnimInst->StopAllMontages(0.25f);
 	ACharacter::Jump();
 }
 
 void APlayer_Base_Knight::SprintToggleAction(const FInputActionInstance& _Instance)
 {
-	if (m_AnimInst->GetbIsGuard() || bIsJumped || bDodging)
+	if (!(CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT))
+	{
+		return;
+	}
+
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	// 스테미너가 0일 경우 달리기 불가
+	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
+	{
+		return;
+	}
+	// 이동 중에만 토글되도록
+	if (GetCharacterMovement()->Velocity.Size2D() <= 0.f || GetCharacterMovement()->GetCurrentAcceleration().IsZero() )
 	{
 		return;
 	}
 
 	bSprintToggle = _Instance.GetValue().Get<bool>();
 
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	// 스테미너가 0일 경우 달리기 불가
-	if (StatMgr->GetPlayerBasePower().CurStamina <= 0.f)
+	if ( bSprintToggle )
 	{
-		bSprintToggle = false;
-		return;
-	}
-
-	m_AnimInst->SetbIsSprint(bSprintToggle);
-
-	if (bSprintToggle)
-	{
-		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+		SetState(EPlayerStateType::SPRINT);
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		SetState(EPlayerStateType::IDLE);
 	}
 }
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
-	if (bIsJumped || bInvalidInput)
+	bInputGuard = _Instance.GetValue().Get<bool>();
+
+	//if (bSprintToggle)
+	//{
+	//	StopSprint();
+	//}
+	if (CurrentState->GetStateType() == EPlayerStateType::IDLE)
 	{
-		return;
-	}
-
-	bool bGuard = _Instance.GetValue().Get<bool>();
-
-	if (bSprintToggle)
-	{
-		StopSprint();
-	}
-
-	m_AnimInst->SetbIsGuard(bGuard);
-
-	if(!bGuard)
-	{
-		SetbToggleGuard(false);
+		m_AnimInst->SetbIsGuard(bInputGuard);
 	}
 }
 
@@ -392,70 +416,48 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	// 스테미너가 0일 경우 공격 불가
-	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f)
+	// 공격중인 상태에서 다음 공격 입력 기간이 아닐경우
+	if ( !bNextAtkCheckOn && CurrentCombo != 0 )
 	{
-		return;
-	}
-	
-	bool IsAlreadyAttack = ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK)) || m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) );
-	if ( bInvalidInput && !IsAlreadyAttack )
-	{
+		UE_LOG(LogTemp, Warning, TEXT("not attack moment"));
 		return;
 	}
 
-	if (bSprintToggle)
+	if ( CurrentState->GetStateType() == EPlayerStateType::DODGE ||
+		CurrentState->GetStateType() == EPlayerStateType::USEITEM ||
+		CurrentState->GetStateType() == EPlayerStateType::USESKILL_1 ||
+		CurrentState->GetStateType() == EPlayerStateType::HIT )
 	{
-		StopSprint();
-	}
-
-	if (IsAlreadyAttack)
-	{
-		if (bNextAtkCheckOn)
-		{
-			NextAttackCheck();
-			bNextAtkCheckOn = false;
-		}
 		return;
 	}
 
 	// 점프공격
-	if ( GetCharacterMovement()->IsFalling() )
+	if (CurrentState->GetStateType() == EPlayerStateType::JUMP)
 	{
-		if ( GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 50.f &&
-			!m_AnimInst->Montage_IsPlaying((m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK))) )
+		if ( GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
 		{
 			if (ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK))
 			{
-				m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+				SetState(EPlayerStateType::JUMPATTACK);
 			}
-
-			return;
 		}
 	}
 	else
 	{
-		if (!m_AnimInst->GetbIsGuard())
+		if (bHeavyToggle)
 		{
-			CurrentCombo = 1;
-			if (bHeavyToggle)
+			if (ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK))
 			{
-				if (ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK))
-				{
-					// 강공격
-					m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
-				}
+				SetState(EPlayerStateType::HEAVYATTACK);
 			}
-			else
+		}
+		else if(CurrentState->GetStateType() != EPlayerStateType::HEAVYATTACK)
+		{
+			if (ConsumeStaminaForMontage(EPlayerMontage::ATTACK))
 			{
-				if (ConsumeStaminaForMontage(EPlayerMontage::ATTACK))
-				{
-					// 약공격
-					m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ATTACK));
-				}
+				// 약공격
+				SetState(EPlayerStateType::ATTACK);
 			}
-			bNextAtkCheckOn = false;
 		}
 	}
 }
@@ -467,37 +469,28 @@ void APlayer_Base_Knight::HeavyAttackToggle(const FInputActionInstance& _Instanc
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
-	if (m_AnimInst->GetbIsGuard() || bIsJumped || bInvalidInput)
+	// 서 있거나 이동, 달리기 중에만 회피 가능
+	if ( !(	CurrentState->GetStateType() == EPlayerStateType::IDLE || 
+			//CurrentState->GetStateType() == EPlayerStateType::DODGE ||
+			CurrentState->GetStateType() == EPlayerStateType::SPRINT)
+		)
 	{
 		return;
 	}
+	
+	//if (bInvalidInput)
+	//{
+	//	return;
+	//}
+
+	// 현재 스태미나가 소비량보다 적을 경우 회피 불가
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	// 스테미너가 0일 경우 회피 불가
-	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
-	{
-		return;
-	}
-	if (!ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW))
+	if ( !ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW) )
 	{
 		return;
 	}
 
-	//MontageBlendOutImmediately();
-	if ( GetCharacterMovement()->GetLastInputVector().IsZero() )
-	{
-		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW));
-		vDodgeVector = GetActorForwardVector();
-		rDodgeRotation = GetActorRotation();
-	}
-	else
-	{
-		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_FW));
-		vDodgeVector = GetCharacterMovement()->GetLastInputVector();
-		rDodgeRotation = UKismetMathLibrary::MakeRotFromX(vDodgeVector);
-	}
-
-	bDodging = true;
-	bInvalidInput = true;
+	SetState(EPlayerStateType::DODGE);
 }
 
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
@@ -573,7 +566,12 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 {
-	if ( bIsJumped || bInvalidInput || m_AnimInst->GetbIsGuard())
+	//if ( CurrentState->GetStateType() == EPlayerStateType::JUMP || bInvalidInput || m_AnimInst->GetbIsGuard())	
+	if ( CurrentState->GetStateType() != EPlayerStateType::IDLE && CurrentState->GetStateType() != EPlayerStateType::SPRINT )
+	{
+		return;
+	}
+	if ( m_AnimInst->GetbIsGuard() )
 	{
 		return;
 	}
@@ -585,7 +583,7 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::GETITEM), GetActorLocation());
 		}
 
-		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction();
+		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction(this);
 	}
 	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때
 	else if (m_MainUI->GetRootMessageDisplayed())
@@ -601,39 +599,32 @@ void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 	{
 		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
 		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯 인덱스 : %d"), Idx);
-		m_MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(Idx);
+		m_MainUI->RenewQuickSlotUI(Idx);
 	}
 }
 
 void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instance)
 {
-	if ( bIsJumped || bInvalidInput || m_AnimInst->GetbIsGuard() )
+	//if ( CurrentState->GetStateType() != EPlayerStateType::IDLE || m_AnimInst->GetbIsGuard() )
+	if ( CurrentState->GetStateType() != EPlayerStateType::IDLE )
 	{
 		return;
 	}
 
-	if (!bItemDelay)
+	if ( !bItemDelay )
 	{
 		int32 iCurIdx = UEquip_Mgr::GetInst(GetWorld())->GetCurrentIndex();
-		if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx))
+		if ( UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx) )
 		{
-			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
-			UseItem(pItem->ItemInfo->ID, pItem->EquipedSlot);
-
-			// 아이템 사용후 대기시간 on
-			bItemDelay = true;
-			ItemDelaytime(1.f);
+			SetState(EPlayerStateType::USEITEM);
+			TSharedPtr<FInvenItemRow> pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
+			UseItem(pItem->ID, pItem->EquipedSlot);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
 			return;
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 딜레이 대기중"));
-		return;
 	}
 }
 void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
@@ -643,27 +634,26 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
 		return;
 	}
-
-	if (m_AnimInst->GetbIsGuard() || bIsJumped || bInvalidInput )
+	if (m_AnimInst->GetbIsGuard() || CurrentState->GetStateType() == EPlayerStateType::JUMP || bInvalidInput )
 	{
 		return;
 	}
+	if ( m_SkillComponent->GetSkillName() == ESkillName::NONE )
+	{
+		return;
+	}
+	FSkillAsset* Skill = m_SkillComponent->GetEquippedSkill();
 
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	// 마나가 부족할 경우 공격 불가
-	if (StatMgr->GetPlayerBasePower().CurMP < 20.f)
+	if ( StatMgr->GetPlayerBasePower().CurMP < Skill->MP_Consumption || StatMgr->GetPlayerBasePower().CurStamina < Skill->Stamina_Consumption )
 	{
 		return;
 	}
 
-	// 스태미나가 부족할 경우 공격 불가
-	if ( !ConsumeStaminaForMontage(EPlayerMontage::SLASH_CUTTER) )
-	{
-		return;
-	}
-
-	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::SLASH_CUTTER));
-	StatMgr->SetPlayerCurrentMP(StatMgr->GetPlayerBasePower().CurMP - 10.f);
+	ConsumeMP(Skill->MP_Consumption);
+	ConsumeStamina(Skill->Stamina_Consumption);
+	m_AnimInst->Montage_Play(Skill->Animation);
+	//SetState(EPlayerStateType::USESKILL_1);
 	// ShotProjectile로
 }
 //////////////////////////////////////////////////////////////////////////
@@ -675,7 +665,8 @@ void APlayer_Base_Knight::NextAttackCheck()
 	EPlayerMontage AtkMontage = EPlayerMontage::ATTACK;
 	int32 MaxCombo = 3;
 	// 강공격 중에 강공격 토글을 해제할 경우 다음공격 재생안함
-	if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
+	//if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
+	if (CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK)
 	{
 		if ( !bHeavyToggle )
 		{
@@ -712,56 +703,38 @@ void APlayer_Base_Knight::NextAttackCheck()
 	m_AnimInst->Montage_JumpToSection(NextComboCount, m_PlayerMontage->GetPlayerMontage(AtkMontage));
 }
 
-// 공격 트레이스 함수
-void APlayer_Base_Knight::AttackHitCheck()
+// 공격 모션 중 이동
+void APlayer_Base_Knight::AttackMove()
 {
-	float AtkRadius = 10.f;
-	TArray<FHitResult> OutHits;
-	FCollisionQueryParams Params(NAME_None, false, this);
-	FVector vSwordBottom = GetMesh()->GetSocketLocation("FX_Sword_Bottom");
-	FVector vSwordTop = GetMesh()->GetSocketLocation("FX_Sword_Top");
-	bool bResult = GetWorld()->SweepMultiByChannel
-	(
-		OutHits,
-		vSwordBottom,
-		vSwordTop,
-		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel5,	// 트레이스 채널 설정은 Block으로 해놔야 HitResult에 걸림(Block으로 해도 밀려나진 않음)
-		FCollisionShape::MakeCapsule(AtkRadius, (vSwordTop - vSwordBottom).Size() * 0.5f),
-		Params
-	);
-
-	FColor color;
-	bResult ? color = FColor::Red : color = FColor::Green;
-	FVector vMidpoint = FMath::Lerp(vSwordTop, vSwordBottom, 0.5f);
-	//DrawDebugCapsule(GetWorld(), vMidpoint, (vSwordTop - vSwordBottom).Size() * 0.5f, AtkRadius, FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(), color, false, 0.5f);
-	if (bResult)
+	if ( m_SArm->IsLockedOn() )
 	{
-		for (FHitResult HitInfo : OutHits)
+		m_SArm->m_Target->GetComponentLocation();
+		float fDist = ( GetActorLocation() - m_SArm->m_Target->GetComponentLocation() ).Size();
+		float fImpulsePower = 600.f;
+		if ( fDist <= 200.f )
 		{
-			if (HitInfo.GetActor()->IsValidLowLevel())
+			fImpulsePower = FMath::Clamp(fDist, 1.f, 200.f);
+		}
+		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * fImpulsePower, true);
+	}
+	else
+	{
+		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * 500.f, true);
+	}
+}
+
+void APlayer_Base_Knight::JumpAttack()
+{
+	GetWorldTimerManager().SetTimer(JumpAtkTimer, [this]
+		{
+			// 바닥에 착지하면 애니메이션을 다시 재생
+			if ( !GetCharacterMovement()->IsFalling() )
 			{
-				for (AActor* HitActor : HitActorArr)
-				{
-					if (HitInfo.GetActor() == HitActor)
-					{
-						return;
-					}
-				}
-
-				if (m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)))
-				{
-					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
-				}
-				else
-				{
-					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::ATTACK);
-				}
-
-				HitActorArr.Add(HitInfo.GetActor());
+				m_AnimInst->Montage_Resume(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
+				GetWorldTimerManager().ClearTimer(JumpAtkTimer);
 			}
 		}
-	}
+	, 0.001f, true);
 }
 
 void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage)
@@ -836,6 +809,8 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		return 0.f;
 	}
 
+	SetState(EPlayerStateType::HIT);
+
 	m_AnimInst->Montage_SetPlayRate(NULL, 1.f);
 	// 피격 이펙트 스폰
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -847,19 +822,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 	}
 
-	// 방어 상태 해제
-	m_AnimInst->SetbIsGuard(false);
-	SetbToggleGuard(false);
-
-	// 현재 행동상태 해제
-	bAtkTrace = false;
-	bNextAtkCheckOn = false;
-	bAtkRotate = false;
-	bIsJumped = false;
-	bInvalidInput = false;
-	bDodging = false;
-	bDodgeMove = false;
-	StopSprint();
+	ResetVarsOnHitState();
 
 	// 피격 애니메이션 재생
 	m_AnimInst->Montage_Stop(1.f);
@@ -888,24 +851,117 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	return 0.0f;
 }
 
-// 공격 모션 중 이동
-void APlayer_Base_Knight::AttackMove()
+// 공격 트레이스 함수
+void APlayer_Base_Knight::AttackHitCheck()
 {
-	if (m_SArm->IsLockedOn())
+	float AtkRadius = 10.f;
+	TArray<FHitResult> OutHits;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	FVector vSwordBottom = GetMesh()->GetSocketLocation("FX_Sword_Bottom");
+	FVector vSwordTop = GetMesh()->GetSocketLocation("FX_Sword_Top");
+	bool bResult = GetWorld()->SweepMultiByChannel
+	(
+		OutHits,
+		vSwordBottom,
+		vSwordTop,
+		FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(),
+		ECollisionChannel::ECC_GameTraceChannel5,	// 트레이스 채널 설정은 Block으로 해놔야 HitResult에 걸림(Block으로 해도 밀려나진 않음)
+		FCollisionShape::MakeCapsule(AtkRadius, ( vSwordTop - vSwordBottom ).Size() * 0.5f),
+		Params
+	);
+
+	FColor color;
+	bResult ? color = FColor::Red : color = FColor::Green;
+	FVector vMidpoint = FMath::Lerp(vSwordTop, vSwordBottom, 0.5f);
+	DrawDebugCapsule(GetWorld(), vMidpoint, ( vSwordTop - vSwordBottom ).Size() * 0.5f, AtkRadius, FRotationMatrix::MakeFromZ(vSwordTop - vSwordBottom).ToQuat(), color, false, 0.5f);
+	if ( bResult )
 	{
-		m_SArm->m_Target->GetComponentLocation();
-		float fDist = ( GetActorLocation() - m_SArm->m_Target->GetComponentLocation() ).Size();
-		float fImpulsePower = 500.f;
-		if (fDist <= 200.f)
+		for ( FHitResult HitInfo : OutHits )
 		{
-			fImpulsePower = FMath::Clamp(fDist, 1.f, 200.f);
+			if ( HitInfo.GetActor()->IsValidLowLevel() )
+			{
+				for ( AActor* HitActor : HitActorArr )
+				{
+					if ( HitInfo.GetActor() == HitActor )
+					{
+						return;
+					}
+				}
+
+				if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) )
+				{
+					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
+				}
+				else
+				{
+					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::ATTACK);
+				}
+
+				HitActorArr.Add(HitInfo.GetActor());
+			}
 		}
-		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * fImpulsePower, true);
 	}
-	else
+}
+
+bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
+{
+	float fConsumption = 0.f;
+	switch ( _Montage )
 	{
-		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * 500.f, true);
+	case EPlayerMontage::DODGE_FW:
+		fConsumption = 10.f;
+		break;
+	case EPlayerMontage::ATTACK:
+		fConsumption = 10.f;
+		break;
+	case EPlayerMontage::HEAVYATTACK:
+		fConsumption = 15.f;
+		break;
+	case EPlayerMontage::JUMPATTACK:
+		fConsumption = 15.f;
+		break;
+	case EPlayerMontage::SLASH_CUTTER:
+		fConsumption = 20.f;
+		break;
+	default:
+		break;
 	}
+
+	return ConsumeStamina(fConsumption);
+}
+
+bool APlayer_Base_Knight::ConsumeStamina(float _Consumption)
+{
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if ( !IsValid(StatMgr) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스탯 매니저 가져오기 실패"));
+		return false;
+	}
+	if ( StatMgr->GetPlayerBasePower().CurStamina < _Consumption )
+	{
+		return false;
+	}
+
+	StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - _Consumption);
+	return true;
+}
+
+bool APlayer_Base_Knight::ConsumeMP(float _Consumption)
+{
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if ( !IsValid(StatMgr) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스탯 매니저 가져오기 실패"));
+		return false;
+	}
+	if ( StatMgr->GetPlayerBasePower().CurMP < _Consumption )
+	{
+		return false;
+	}
+
+	StatMgr->SetPlayerCurrentMP(StatMgr->GetPlayerBasePower().CurMP - _Consumption);
+	return true;
 }
 
 bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
@@ -933,7 +989,6 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 	{
 		// 방어 풀리고 경직상태 되도록
 		m_AnimInst->SetbIsGuard(false);
-		SetbToggleGuard(false);
 		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
 	}
 	else
@@ -952,7 +1007,7 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 		GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), fGuardPhysicsWeight);
 		GetMesh()->AddImpulseToAllBodiesBelow(_MonDir * 500.f, FName(TEXT("clavicle_l")), true);
 
-		GetWorld()->GetTimerManager().SetTimer(BlockReactTimer, [this]
+		GetWorldTimerManager().SetTimer(BlockReactTimer, [this]
 			{
 				fGuardPhysicsWeight -= 0.1f;
 				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(FName(TEXT("clavicle_l")), fGuardPhysicsWeight);
@@ -960,7 +1015,7 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 				{
 					GetMesh()->SetAllBodiesBelowSimulatePhysics(FName(TEXT("clavicle_l")), false);
 					fGuardPhysicsWeight = 0.5f;
-					GetWorld()->GetTimerManager().ClearTimer(BlockReactTimer);
+					GetWorldTimerManager().ClearTimer(BlockReactTimer);
 				}
 			}, 
 		0.02f, true);
@@ -971,31 +1026,19 @@ bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
 	return true;
 }
 
-void APlayer_Base_Knight::JumpAttack()
-{
-	//m_AnimInst->Montage_Pause(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-	GetWorld()->GetTimerManager().SetTimer(JumpAtkTimer, [this]
-		{
-			// 바닥에 착지하면 애니메이션을 다시 재생
-			if (!GetCharacterMovement()->IsFalling())
-			{
-				m_AnimInst->Montage_Resume(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-				GetWorld()->GetTimerManager().ClearTimer(JumpAtkTimer);
-			}
-		}
-	, 0.001f, true);
-}
-
-void APlayer_Base_Knight::SetbToggleGuard(const bool& _ToggleGuard)
-{
-	bToggleGuard = _ToggleGuard;
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	StatMgr->SetbSTRecovSlowly(bToggleGuard);
-}
-
 void APlayer_Base_Knight::BreakLockOn()
 {
 	m_SArm->BreakLockOnTarget();
+}
+
+void APlayer_Base_Knight::ResetCamera(FRotator _Rotate)
+{
+	FRotator NewRot = FMath::RInterpTo(GetControlRotation(), _Rotate, 0.01f, 10.f);
+	GetController()->SetControlRotation(NewRot);
+	if ( GetControlRotation().Equals(_Rotate, 1.f) )
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+	}
 }
 
 void APlayer_Base_Knight::ShotProjectile()
@@ -1026,8 +1069,7 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	}
 	if ( pItemInfo->Gained_Soul >= 0 )
 	{
-		StatMgr->PlayerGainSoul(pItemInfo->Gained_Soul);
-		m_MainUI->GetSoulUI()->RenewAmountOfSoul(pItemInfo->Gained_Soul);
+		GainMonsterSoul(pItemInfo->Gained_Soul);
 		SoundEnum = EPlayerSound::USESOUL;
 	}
 
@@ -1053,119 +1095,39 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	{
 		int32 idx = UEquip_Mgr::GetInst(GetWorld())->ConvertQuickSlotToIdx(_Slot);
 		UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(idx);
-		UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-		pQuickSlotUI->SetQuickSlotOpacity(0.5f, false);
 	}
+
+	// 아이템 사용후 대기시간 on
+	ItemDelaytime(1.f);
 }
 
 void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
 {
-	UUI_Player_QuickSlot* pQuickSlotUI = m_MainUI->GetQuickSlotUI();
-	pQuickSlotUI->SetLowerSlotDelay(_DelayPercent);
-	if (_DelayPercent > 0.f)
-	{
-		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
-			{
-				float fDelayPercent = FMath::Clamp(_DelayPercent - GetWorld()->GetDeltaSeconds() / 3.f, 0.f, 1.f);
-				ItemDelaytime(fDelayPercent);
-			}
-		));
-	}
-	else
-	{
-		bItemDelay = false;
-		pQuickSlotUI->SetQuickSlotOpacity(1.f, false);
-	}
-}
+	bItemDelay = true;
 
-bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
-{
-	float fConsumption = 0.f;
-	switch (_Montage)
-	{
-	case EPlayerMontage::DODGE_FW:
-		fConsumption = 10.f;
-		break;
-	case EPlayerMontage::ATTACK:
-		fConsumption = 10.f;
-		break;
-	case EPlayerMontage::HEAVYATTACK:
-		fConsumption = 15.f;
-		break;
-	case EPlayerMontage::JUMPATTACK:
-		fConsumption = 15.f;
-		break;
-	case EPlayerMontage::SLASH_CUTTER:
-		fConsumption = 20.f;
-		break;
-	default:
-		break;
-	}
+	m_MainUI->SetQuickSlotUIOpacity(0.5f, false);
+	m_MainUI->SetQuickSlotUIDelay(1.f);
+	fDelayRate = _DelayPercent;
 
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	if (!IsValid(StatMgr))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("스탯 매니저 가져오기 실패"));
-		return false;
-	}
-	if ( StatMgr->GetPlayerBasePower().CurStamina < fConsumption)
-	{
-		return false;
-	}
-	StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - fConsumption);
-
-	return true;
-}
-
-void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
-{
-	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-	if (TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))))
-	{
-		TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
-		m_MainUI->GetMainMessageUI()->SetMessageText(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
-		m_MainUI->ShowMainMessageUI(true);
-		OverlapInteractionArr.Emplace(Interaction);
-	}
-}
-
-void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
-{
-	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-	
-	if (TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))))
-	{
-		// 오버랩 상태의 트리거에서 떨어지거나 아이템을 습득하여 트리거 오버랩이 끝났을 때
-		for (int32 i = 0; i < OverlapInteractionArr.Num(); ++i)
+	GetWorldTimerManager().SetTimer(ItemDelayTimer, FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
 		{
-			if ( OverlapInteractionArr[i]->_getUObject()->GetName().Equals(_OtherActor->GetName()))
+			fDelayRate = FMath::Clamp((fDelayRate - 0.01f) / _DelayPercent, 0.f, _DelayPercent);
+			m_MainUI->SetQuickSlotUIDelay(fDelayRate);
+			if ( fDelayRate <= 0.f )
 			{
-				OverlapInteractionArr.RemoveAt(i);
-				break;
+				bItemDelay = false;
+				m_MainUI->SetQuickSlotUIOpacity(1.f, false);
+				GetWorldTimerManager().ClearTimer(ItemDelayTimer);
 			}
-		}
-
-		if ( OverlapInteractionArr.IsEmpty())
-		{
-			// 아이템 습득 메시지가 표시중일 때
-			if (m_MainUI->GetRootMessageDisplayed())
-			{
-				m_MainUI->GetMainMessageUI()->SetMessageText(FText::FromString(L"F"), FText::FromString(L"확인"));
-				m_MainUI->ShowMainMessageUI(true);
-			}
-			else
-			{
-				m_MainUI->ShowMainMessageUI(false);
-			}
-		}
-	}
+		})
+	,0.01f, true);
 }
 
 void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
 {
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	StatMgr->PlayerGainSoul(_GainedSoul);
-	m_MainUI->GetSoulUI()->RenewAmountOfSoul(_GainedSoul);
+	m_MainUI->RenewAmountSoul(_GainedSoul);
 }
 
 void APlayer_Base_Knight::CloseMenuUI()
@@ -1186,42 +1148,6 @@ void APlayer_Base_Knight::CloseMenuUI()
 	UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
 }
 
-// 무적시간 동안 데미지 안받도록 설정
-void APlayer_Base_Knight::DodgeTimeCheck(bool _Dodge)
-{
-	if (_Dodge)
-	{
-		SetCanBeDamaged(false);
-		bDodgeMove = true;
-		GetCharacterMovement()->MaxWalkSpeed = 500.f;
-		bSprintToggle = false;
-		m_AnimInst->SetbIsSprint(false);
-	}
-	else
-	{
-		SetCanBeDamaged(true);
-		bDodgeMove = false;
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-	}
-}
-
-void APlayer_Base_Knight::StopSprint()
-{
-	bSprintToggle = false;
-	m_AnimInst->SetbIsSprint(false);
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
-}
-
-void APlayer_Base_Knight::ResetCamera(FRotator _Rotate)
-{
-	FRotator NewRot = FMath::RInterpTo(GetControlRotation(), _Rotate, 0.01f, 10.f);
-	GetController()->SetControlRotation(NewRot);
-	if ( GetControlRotation().Equals(_Rotate, 1.f) )
-	{
-		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
-	}
-}
-
 void APlayer_Base_Knight::MontageBlendOutImmediately()
 {
 	if ( m_AnimInst->IsAnyMontagePlaying() )
@@ -1229,7 +1155,7 @@ void APlayer_Base_Knight::MontageBlendOutImmediately()
 		if ( m_AnimInst->GetCurrentActiveMontage() == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_FW) ||
 			m_AnimInst->GetCurrentActiveMontage() == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW) )
 		{
-			bDodging = false;
+			//bDodging = false;
 			return;
 		}
 		FAlphaBlendArgs BlendArgs;
@@ -1239,25 +1165,125 @@ void APlayer_Base_Knight::MontageBlendOutImmediately()
 	}
 }
 
-bool APlayer_Base_Knight::GetbToggleLockOn() const
+void APlayer_Base_Knight::GuardStateOnPlayMontage(bool _MontageIsPlaying)
 {
-	return m_SArm->IsLockedOn();
+	if (bInputGuard)
+	{
+		m_AnimInst->SetbIsGuard(!_MontageIsPlaying);
+	}
+}
+
+void APlayer_Base_Knight::ResetVarsOnHitState()
+{
+	// 현재 행동상태 해제
+	ClearTimerRelatedMontage();
+	bAtkTrace = false;
+	bNextAtkCheckOn = false;
+	bAtkRotate = false;
+	bIsJumped = false;
+	bInvalidInput = false;
+	bDodgeMove = false;
+}
+
+void APlayer_Base_Knight::ClearTimerRelatedMontage()
+{
+	GetWorldTimerManager().ClearTimer(BlockReactTimer);
+	GetWorldTimerManager().ClearTimer(JumpAtkTimer);
+	GetWorldTimerManager().ClearTimer(HitStiffTimer);
+}
+
+// 무적시간 동안 데미지 안받도록 설정
+void APlayer_Base_Knight::DodgeTimeCheck(bool _Dodge)
+{
+	if (_Dodge)
+	{
+		SetCanBeDamaged(false);
+		bDodgeMove = true;
+		GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	}
+	else
+	{
+		SetCanBeDamaged(true);
+		bDodgeMove = false;
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
 }
 
 void APlayer_Base_Knight::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	/*if ( bInterrupted )
+	if ( Montage == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT) )
+	{
+		SetState(EPlayerStateType::IDLE);
+		return;
+	}
+	if ( bInterrupted )
 	{
 		UE_LOG(LogTemp, Warning, TEXT("몽타주 중단됨"));
 	}
-	else
+	//SetState(EPlayerStateType::IDLE);
+}
+
+void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
+{
+	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
+	if ( TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))) )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("몽타주 정상종료됨"));
+		if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
+		{
+			TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
+			m_MainUI->SetMainMessageUI(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
+			m_MainUI->ShowMainMessageUI(true);
+			OverlapInteractionArr.Emplace(Interaction);
+		}
 	}
-	if (Montage == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_FW) ||
-		Montage == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::DODGE_BW) )
+}
+
+void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
+{
+	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
+
+	if ( TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))) )
 	{
-		bDodging = false;
+		if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
+		{
+			// 오버랩 상태의 트리거에서 떨어지거나 아이템을 습득하여 트리거 오버랩이 끝났을 때
+			for ( int32 i = 0; i < OverlapInteractionArr.Num(); ++i )
+			{
+				if ( OverlapInteractionArr[ i ]->_getUObject()->GetName().Equals(_OtherActor->GetName()) )
+				{
+					OverlapInteractionArr.RemoveAt(i);
+					break;
+				}
+			}
+
+			if ( OverlapInteractionArr.IsEmpty() )
+			{
+				// 아이템 습득 메시지가 표시중일 때
+				if ( m_MainUI->GetRootMessageDisplayed() )
+				{
+					m_MainUI->SetMainMessageUI(FText::FromString(L"F"), FText::FromString(L"확인"));
+					m_MainUI->ShowMainMessageUI(true);
+				}
+				else
+				{
+					m_MainUI->ShowMainMessageUI(false);
+				}
+			}
+		}
 	}
-	bInvalidInput = false;*/
+}
+
+void APlayer_Base_Knight::SetbToggleGuard(const bool& _ToggleGuard)
+{
+	bToggleGuard = _ToggleGuard;
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if ( IsValid(StatMgr) )
+	{
+		StatMgr->SetbSTRecovSlowly(bToggleGuard);
+	}
+}
+
+bool APlayer_Base_Knight::GetbToggleLockOn() const
+{
+	return m_SArm->IsLockedOn();
 }

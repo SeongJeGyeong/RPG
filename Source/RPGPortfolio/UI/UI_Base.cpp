@@ -78,6 +78,11 @@ bool UUI_Base::IsOpendMenu()
 	return false;
 }
 
+void UUI_Base::SetMainMessageUI(FText _Command, FText _Action)
+{
+	m_UI_MessageBox_Main->SetMessageText(_Command, _Action);
+}
+
 void UUI_Base::ShowMainMessageUI(bool _bShow)
 {
 	if (_bShow)
@@ -104,4 +109,24 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 	{
 		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UUI_Base::RenewAmountSoul(int32 _GainedSoul)
+{
+	m_UI_Soul->RenewAmountOfSoul(_GainedSoul);
+}
+
+void UUI_Base::RenewQuickSlotUI(int32 _idx)
+{
+	m_UI_QuickSlotMain->RenewLowerQuickSlot(_idx);
+}
+
+void UUI_Base::SetQuickSlotUIOpacity(float _alpha, bool _UorL)
+{
+	m_UI_QuickSlotMain->SetQuickSlotOpacity(_alpha, _UorL);
+}
+
+void UUI_Base::SetQuickSlotUIDelay(float _DelayPercnet)
+{
+	m_UI_QuickSlotMain->SetLowerSlotDelay(_DelayPercnet);
 }

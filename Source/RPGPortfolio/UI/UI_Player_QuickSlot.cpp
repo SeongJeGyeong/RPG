@@ -31,7 +31,7 @@ void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 		return;
 	}
 	
-	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
+	TSharedPtr<FInvenItemRow> ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
 	m_UI_LowerSlot->RenewQuickSlotItem(ItemData);
 	UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(_Idx);
 
@@ -61,7 +61,7 @@ void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 
 void UUI_Player_QuickSlot::RenewNextQuickSlot(int32 _Idx)
 {
-	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
+	TSharedPtr<FInvenItemRow> ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
 	m_UI_NextQuickSlot->RenewNextQuickSlotItem(ItemData);
 }
 

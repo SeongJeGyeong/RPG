@@ -16,7 +16,12 @@ void UANS_AtkMove::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 
 	if (IsValid(m_Player))
 	{
-		if (!m_Player->GetvAtkDir().IsZero())
+		if ( m_Player->GetbToggleLockOn() )
+		{
+			return;
+		}
+
+		if (m_Player->GetActorRotation() != rAtkRot)
 		{
 			fElapsedDuration += FrameDeltaTime;
 			float fAlpha = exp2(FMath::Clamp(fElapsedDuration / fTotalDuration, 0.f, 1.f)) - 1;
@@ -40,11 +45,16 @@ void UANS_AtkMove::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 		}
 		else
 		{
+			if ( m_Player->GetbToggleLockOn() )
+			{
+				return;
+			}
+
 			m_Player->SetbInvalidInput(true);
 			m_Player->SetbAtkRotate(false);
-			if (!m_Player->GetvAtkDir().IsZero())
+			if (!m_Player->GetvInputDir().IsZero())
 			{
-				FRotator InpRot = UKismetMathLibrary::MakeRotFromX(m_Player->GetvAtkDir());
+				FRotator InpRot = UKismetMathLibrary::MakeRotFromX(m_Player->GetvInputDir());
 				rAtkRot = FRotator(0.f, m_Player->GetControlRotation().Yaw + InpRot.Yaw, 0.f);
 			}
 			else
@@ -66,5 +76,5 @@ void UANS_AtkMove::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 		UE_LOG(LogTemp, Error, TEXT("플레이어 로드 실패"));
 		return;
 	}
-	m_Player->SetvAtkDirZero();
+	m_Player->SetvInputDirZero();
 }

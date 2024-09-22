@@ -11,7 +11,6 @@
 
 enum class EProjectileType : uint8;
 enum class EEffectType : uint8;
-class UDA_ProjectileAsset;
 class UDA_ItemEffect;
 class UFXSystemAsset;
 
@@ -25,24 +24,16 @@ class RPGPORTFOLIO_API UGISubsystem_EffectMgr : public UGameInstanceSubsystem
 	
 private:
 	UPROPERTY()
-	TSoftObjectPtr<UDA_ProjectileAsset>		m_ProjAsset;
-
-	UPROPERTY()
 	TSoftObjectPtr<UParticleSystem>			m_HitParticle;
 	
 	UPROPERTY()
 	TSoftObjectPtr<UDA_ItemEffect>			m_ItemEffect;
-
-	UPROPERTY()
-	TSoftClassPtr<class AProjectile_Base>	m_Projectile;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
 	UParticleSystem* GetHitEffect() const;
-
-	UClass* GetProjectile() const;
 
 	/* 파티클 시스템일 경우 Pooling Method는 자동 변환 */
 	void SpawnEffectAtLocation(const UObject* WorldContextObject, UFXSystemAsset* SystemTemplate, FVector Location, FRotator Rotation = FRotator::ZeroRotator, FVector Scale = FVector(1.f), bool bAutoDestroy = true, bool bAutoActivate = true, ENCPoolMethod PoolingMethod = ENCPoolMethod::AutoRelease, bool bPreCullCheck = true);

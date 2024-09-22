@@ -25,6 +25,9 @@ private:
 	UPROPERTY()
 	class ULevelSequencePlayer* m_SeqPlayer;	// 레벨시퀀스 플레이하는 객체
 
+	UPROPERTY()
+	AActor* m_TriggeredActor;
+
 	FText tCommand_Key;
 	FText tCommand_Name;
 	bool bDoOnce;
@@ -49,7 +52,7 @@ public:
 	virtual FText GetCommand_Key() const override { return tCommand_Key; }
 	virtual FText GetCommand_Name() const override { return tCommand_Name; }
 
-	virtual void Interaction() override;
+	virtual void Interaction(AActor* _InteractedActor = nullptr) override;
 
 	UFUNCTION()
 	void EndLevelSequence();

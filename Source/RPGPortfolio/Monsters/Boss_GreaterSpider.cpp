@@ -16,6 +16,7 @@
 #include "../Projectiles/Proj_GS_Spiderling.h"
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
+#include "../System/Subsys_ObjectPool.h"
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
@@ -26,7 +27,7 @@ ABoss_GreaterSpider::ABoss_GreaterSpider()
 	m_PSC->SetupAttachment(GetRootComponent());
 	m_PSC->bAutoActivate = false;
 
-	ConstructorHelpers::FClassFinder<AProj_GS_Spiderling> projectile(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_ShotSpiderling.BPC_ShotSpiderling_C'"));
+	ConstructorHelpers::FClassFinder<AProj_GS_Spiderling> projectile(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_Proj_GS_Spiderling.BPC_Proj_GS_Spiderling_C'"));
 	if ( projectile.Succeeded() )
 	{
 		m_GSProj = projectile.Class;
@@ -61,6 +62,16 @@ void ABoss_GreaterSpider::BeginPlay()
 
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	pGameInst->ASyncLoadDataAsset(m_DataAsset.ToSoftObjectPath());
+
+	if ( m_GSProj != nullptr )
+	{
+		USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
+		if ( !PoolSubsystem->PreLoadObjFromPool<AProj_GS_Spiderling>(m_GSProj, 2, GetOwner()) )
+		{
+			UE_LOG(LogTemp, Error, TEXT("스킬 투사체 풀링 실패"));
+		}
+	}
+
 }
 
 void ABoss_GreaterSpider::Tick(float DeltaTime)
@@ -141,12 +152,24 @@ void ABoss_GreaterSpider::RangedAttack()
 	// 투사체 생성위치	
 	FVector ProjectileLocation = GetMesh()->GetSocketLocation(FName("HeadAttack_End"));
 
-	AProj_GS_Spiderling* pProjectile = GetWorld()->SpawnActor<AProj_GS_Spiderling>(m_GSProj, ProjectileLocation, GetActorRotation(), param);
-	pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, m_Info.MagicAtk);
+	USubsys_ObjectPool* ObjectPool = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
+	if ( !IsValid(ObjectPool) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("오브젝트 풀 가져오기 실패"));
+		return;
+	}
+	AProj_GS_Spiderling* pProjectile = ObjectPool->SpawnObjFromPool<AProj_GS_Spiderling>(m_GSProj, ProjectileLocation, GetActorRotation(), this);
+	if ( IsValid(pProjectile) )
+	{
+		pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, m_Info.MagicAtk);
 
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-	pProjectile->LaunchMotion(pPlayer->GetActorLocation());
+		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		pProjectile->LaunchMotion(pPlayer->GetActorLocation());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("투사체 로드 실패"));
+	}
 }
 
 void ABoss_GreaterSpider::MeleeAttackHitCheck()
@@ -386,8 +409,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		fPhysicsWeight = 1.f;
 
 		// 피격 이펙트 스폰
-		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName);
-
+		UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::AutoRelease);
 		// 피격 부위가 메쉬나 Plevis가 아닐경우(피직스 에셋 오류 방지를 위해)
 		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Pelvis")) && !PointDamageEvent->HitInfo.BoneName.IsEqual(FName("None")))
 		{

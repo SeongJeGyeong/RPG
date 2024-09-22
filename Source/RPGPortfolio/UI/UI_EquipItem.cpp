@@ -11,19 +11,27 @@
 #include "../Manager/Inventory_Mgr.h"
 #include "../Manager/Equip_Mgr.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../System/DataAsset/DA_ItemCategoryIcon.h"
+#include "PaperSprite.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
-	if (!IsValid(m_EquipItemBtn) || !IsValid(m_EquipItemImg) || !IsValid(m_EquipDishImg))
+	if (!IsValid(m_EquipItemBtn) || !IsValid(m_EquipItemImg) || !IsValid(m_EquipDishImg) || !IsValid(m_BackSlotImg))
 	{
 		UE_LOG(LogTemp, Error, TEXT("장비창 아이템 UI 로드 실패"));
+	}
+
+	UPaperSprite* pIcon = UInventory_Mgr::GetInst(GetWorld())->GetEquipSlotIcon(eSlotType);
+	m_BackSlotImg->SetBrushResourceObject(pIcon);
+	if (!m_EquipItemBtn->GetIsEnabled())
+	{
+		m_EquipItemBtn->SetBackgroundColor(FLinearColor::FLinearColor(1.f, 1.f, 1.f, 0.5f));
 	}
 	else
 	{
 		UItem_InvenData* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(eSlotType);
 		if (pItemInfo != nullptr)
 		{
-			m_ItemData = pItemInfo;
 			FString ItemImgPath = pItemInfo->GetItemImgPath();
 			UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 			m_EquipItemImg->SetBrushFromTexture(pTex2D);
@@ -46,8 +54,7 @@ void UUI_EquipItem::NativeConstruct()
 
 void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 {
-	m_ItemData = _ItemData;
-	if (!IsValid(m_ItemData))
+	if (!IsValid(_ItemData))
 	{
 		m_EquipItemImg->SetVisibility(ESlateVisibility::Hidden);
 		m_EquipDishImg->SetVisibility(ESlateVisibility::Hidden);
@@ -60,11 +67,6 @@ void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 		m_EquipItemImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		m_EquipDishImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
-}
-
-void UUI_EquipItem::SetEquipItemStack(const uint16& _Stack)
-{
-	m_ItemData->SetItemQnt(_Stack);
 }
 
 void UUI_EquipItem::ItemBtnClicked()
@@ -237,13 +239,14 @@ void UUI_EquipItem::ItemBtnHovered()
 			break;
 		}
 	}
+	UItem_InvenData* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(eSlotType);
 
-	if (IsValid(ItemNameText) && IsValid(m_ItemData))
+	if (IsValid(ItemNameText) && IsValid(pItemInfo))
 	{
-		FString sItemName = m_ItemData->GetItemName();
+		FString sItemName = pItemInfo->GetItemName();
 		UE_LOG(LogTemp, Warning, TEXT("아이템이름 : %s"), *sItemName);
 		ItemNameText->SetText(FText::FromString(sItemName));
-		m_Tooltip->SetTooltipUI(m_ItemData);
+		m_Tooltip->SetTooltipUI(pItemInfo);
 		m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 	

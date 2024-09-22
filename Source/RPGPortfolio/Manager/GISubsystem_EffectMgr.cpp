@@ -2,7 +2,6 @@
 
 
 #include "GISubsystem_EffectMgr.h"
-#include "../System/DataAsset/DA_ProjectileAsset.h"
 #include "../GameInstance_Base.h"
 #include "../Header/Enum.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,22 +13,15 @@ void UGISubsystem_EffectMgr::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	/*m_ProjAsset = FSoftObjectPath("/Script/RPGPortfolio.DA_ProjectileAsset'/Game/Blueprint/DataAsset/BPC_DA_Projectile.BPC_DA_Projectile'");
-	m_ProjAsset.ToSoftObjectPath().PostLoadPath(nullptr);*/
-
 	m_HitParticle = FSoftObjectPath("/Script/Engine.ParticleSystem'/Game/Realistic_Starter_VFX_Pack_Vol2/Particles/Blood/P_Blood_Splat_Cone.P_Blood_Splat_Cone'");
 	m_HitParticle.ToSoftObjectPath().PostLoadPath(nullptr);
 
 	m_ItemEffect = FSoftObjectPath("/Script/RPGPortfolio.DA_ItemEffect'/Game/Blueprint/DataAsset/BPC_DA_ItemEffect.BPC_DA_ItemEffect'");
 	m_ItemEffect.ToSoftObjectPath().PostLoadPath(nullptr);
 
-	m_Projectile = FSoftClassPath("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_SlashCutter.BPC_SlashCutter_C'");
-	m_Projectile.ToSoftObjectPath().PostLoadPath(nullptr);
-
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	pGameInst->ASyncLoadDataAsset(m_HitParticle.ToSoftObjectPath());
 	pGameInst->ASyncLoadDataAsset(m_ItemEffect.ToSoftObjectPath());
-	pGameInst->ASyncLoadDataAsset(m_Projectile.ToSoftObjectPath());
 }
 
 void UGISubsystem_EffectMgr::Deinitialize()
@@ -45,16 +37,6 @@ UParticleSystem* UGISubsystem_EffectMgr::GetHitEffect() const
 	}
 
 	return m_HitParticle.Get();
-}
-
-UClass* UGISubsystem_EffectMgr::GetProjectile() const
-{
-	if ( m_Projectile.IsPending() )
-	{
-		return m_Projectile.LoadSynchronous();
-	}
-
-	return m_Projectile.Get();
 }
 
 void UGISubsystem_EffectMgr::SpawnEffectAtLocation(const UObject* WorldContextObject, UFXSystemAsset* SystemTemplate, FVector Location, FRotator Rotation, FVector Scale, bool bAutoDestroy, bool bAutoActivate, ENCPoolMethod PoolingMethod, bool bPreCullCheck)
@@ -92,12 +74,3 @@ void UGISubsystem_EffectMgr::SpawnEffectAttached(EEffectType _EffectType, UScene
 	UFXSystemAsset* System = m_ItemEffect.IsPending() ? m_ItemEffect.LoadSynchronous()->GetItemEffect(_EffectType) : m_ItemEffect.Get()->GetItemEffect(_EffectType);
 	SpawnEffectAttached(System, AttachToComponent, AttachPointName, Location, Rotation, LocationType, bAutoDestroy, Scale, bAutoActivate, PoolingMethod, bPreCullCheck);
 }
-
-//USoundBase* UGISubsystem_EffectMgr::GetProjHitSound(EProjectileType _ProjType) const
-//{
-//	if ( m_ProjAsset.IsPending() )
-//	{
-//		return m_ProjAsset.LoadSynchronous()->GetProjectileData(_ProjType).ProjHitSound;
-//	}
-//	return m_ProjAsset.Get()->GetProjectileData(_ProjType).ProjHitSound;
-//}

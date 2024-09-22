@@ -219,6 +219,8 @@ enum class EITEM_ID : uint8
 UENUM(BlueprintType)
 enum class EEQUIP_SLOT : uint8
 {
+	EMPTY,
+
 	WEAPON_1,
 	WEAPON_2,
 	WEAPON_3,
@@ -245,8 +247,6 @@ enum class EEQUIP_SLOT : uint8
 	CONSUMABLE_3,
 	CONSUMABLE_4,
 	CONSUMABLE_5,
-
-	EMPTY,
 };
 
 UENUM(BlueprintType)
@@ -287,12 +287,38 @@ enum class ERecoveryType : uint8
 };
 
 UENUM(BlueprintType)
+enum class ESkillName : uint8
+{
+	NONE,
+	Slash_Cutter,
+};
+
+UENUM(BlueprintType)
 enum class ESkillType : uint8
 {
 	NONE,
 	RESTORE,
 	BUFF,
 	DEBUFF,
-	MELEE,
-	RANGE,
+	PHYSIC_MELEE,
+	PHYSIC_RANGE,
+	MAGIC_MELEE,
+	MAGIC_RANGE,
+};
+
+UENUM(BlueprintType)
+enum class EPlayerStateType : uint8
+{
+	NONE,
+	IDLE,
+	JUMP,
+	SPRINT,
+	DODGE,
+	ATTACK,
+	HEAVYATTACK,
+	JUMPATTACK,
+	HIT,
+	USEITEM,
+	ACTION,
+	USESKILL_1,
 };

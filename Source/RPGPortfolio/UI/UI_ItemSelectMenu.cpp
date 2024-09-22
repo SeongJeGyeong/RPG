@@ -32,9 +32,10 @@ void UUI_ItemSelectMenu::NativeConstruct()
 		m_Btn_Use->SetIsEnabled(false);
 	}
 
-	if (IsValid(m_SelectedItemData))
+	if (m_ID != EITEM_ID::END)
 	{
-		if (m_SelectedItemData->GetItemType() != EITEM_TYPE::CONSUMABLE)
+		FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_ID);
+		if (pInfo->Type != EITEM_TYPE::CONSUMABLE)
 		{
 			m_Txt_Use->SetColorAndOpacity(FLinearColor::FLinearColor(0.5f, 0.5f, 0.5f, 0.5f));
 			m_Btn_Use->SetIsEnabled(false);
@@ -46,22 +47,19 @@ void UUI_ItemSelectMenu::NativeConstruct()
 
 void UUI_ItemSelectMenu::UseBtnClicked()
 {
-	if (IsValid(m_SelectedItemData))
+	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_ID);
+	if (pInfo->Type == EITEM_TYPE::CONSUMABLE)
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		
 		UInventory_Mgr::GetInst(GetGameInstance())->CloseInventoryUI();
 		pPlayer->CloseMenuUI();
 
-		pPlayer->UseItem(m_SelectedItemData->GetItemID(), m_SelectedItemData->GetEquiped());
-
-		// 아이템 사용후 대기시간 on
-		pPlayer->SetbItemDelay(true);
-		pPlayer->ItemDelaytime(1.f);
+		pPlayer->UseItem(m_ID, m_Slot);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("인벤토리 앵커 데이터 전달 실패"));
+		UE_LOG(LogTemp, Warning, TEXT("인벤토리 앵커 데이터 오류"));
 	}
 
 }

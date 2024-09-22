@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_ItemSelectMenu.generated.h"
@@ -32,8 +33,11 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UButton*		m_Btn_DiscardAll;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
-	UItem_InvenData* m_SelectedItemData;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
+	//UItem_InvenData* m_SelectedItemData;
+
+	EITEM_ID		m_ID = EITEM_ID::END;
+	EEQUIP_SLOT		m_Slot = EEQUIP_SLOT::EMPTY;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
 	bool bItemUseDelay;
@@ -42,7 +46,9 @@ public:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetSelectedItemData(UItem_InvenData* _ItemData) { m_SelectedItemData = _ItemData; }
+	//void SetSelectedItemData(UItem_InvenData* _ItemData) { m_SelectedItemData = _ItemData; }
+	void SetSelectedItemID(EITEM_ID _ID) { m_ID = _ID; }
+	void SetSelectedItemSlot(EEQUIP_SLOT _Slot) { m_Slot = _Slot; }
 	void SetbItemUseDelay(const bool& _ItemUseDelay) { bItemUseDelay = _ItemUseDelay; }
 
 	UFUNCTION()

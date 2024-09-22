@@ -236,9 +236,17 @@ struct FInvenItemRow
 {
 	GENERATED_USTRUCT_BODY()
 
-	FGameItemInfo* ItemInfo;
+	EITEM_ID	ID;
 	uint32		Stack;
 	EEQUIP_SLOT	EquipedSlot;
+};
+
+USTRUCT()
+struct FInvenItemMap
+{
+	GENERATED_USTRUCT_BODY()
+
+	TMap<EITEM_ID, FInvenItemRow> StorageMap;
 };
 
 USTRUCT()
@@ -336,24 +344,6 @@ struct FMonsterItemDropTable
 };
 
 USTRUCT(Atomic, BlueprintType)
-struct FProjectileAssets
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UFXSystemAsset* ProjectileEffect_Shot;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UFXSystemAsset* ProjectileEffect_Hit_Actor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UFXSystemAsset* ProjectileEffect_Hit_Wall;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USoundBase*			ProjHitSound;
-};
-
-USTRUCT(Atomic, BlueprintType)
 struct FMonsterSoundAsset
 {
 	GENERATED_USTRUCT_BODY()
@@ -413,4 +403,42 @@ struct FMonsterAnimAsset
 	// 공격 방어에 막힐 경우 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* BlockAnim;
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FSkillAsset
+{
+	GENERATED_USTRUCT_BODY()
+
+	// 스킬 몽타주
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Animation;
+
+	// 투사체 존재할 경우
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AProjectile_Base> Projectile;
+
+	// 이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UFXSystemAsset* Effect;
+
+	// 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* Sound;
+
+	// 스킬 종류
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESkillType SkillType;
+
+	// 마나 소비량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MP_Consumption;
+
+	// 스태미나 소비량
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Stamina_Consumption;
+
+	// 기본 데미지
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
 };

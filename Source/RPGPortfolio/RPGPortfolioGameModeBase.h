@@ -76,6 +76,7 @@ public:
 	void SetPlayerRespawnLoc(const FVector& _Loc);
 
 public:
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 
 };

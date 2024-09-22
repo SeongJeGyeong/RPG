@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_Player_QuickSlotItem.generated.h"
@@ -30,7 +31,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void RenewQuickSlotItem(struct FInvenItemRow* _InvenItem);
-	void RenewNextQuickSlotItem(FInvenItemRow* _InvenItem);
+	void RenewQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem);
+	void RenewNextQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem);
 
 };

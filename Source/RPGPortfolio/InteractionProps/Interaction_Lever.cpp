@@ -48,7 +48,7 @@ void AInteraction_Lever::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AInteraction_Lever::Interaction()
+void AInteraction_Lever::Interaction(AActor* _InteractedActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("레버 돌리기"));
 	if (IsValid(m_LevelSeq))
@@ -69,6 +69,12 @@ void AInteraction_Lever::Interaction()
 				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
 				GameMode->GetMainHUD()->ShowMainMessageUI(false);
 			}
+			m_TriggeredActor = _InteractedActor;
+			if ( IsValid(m_TriggeredActor) )
+			{
+				m_TriggeredActor->DisableInput(NULL);
+			}
+
 			m_SeqPlayer->Play();
 		}
 		else
@@ -98,5 +104,10 @@ void AInteraction_Lever::EndLevelSequence()
 		{
 			GameViewportClient->Fade(1.f, false);
 		}
+	}
+
+	if ( IsValid(m_TriggeredActor) )
+	{
+		m_TriggeredActor->EnableInput(NULL);
 	}
 }

@@ -25,7 +25,7 @@ void ARespawnPoint::Tick(float DeltaTime)
 
 }
 
-void ARespawnPoint::Interaction()
+void ARespawnPoint::Interaction(AActor* _InteractedActor)
 {
 }
 

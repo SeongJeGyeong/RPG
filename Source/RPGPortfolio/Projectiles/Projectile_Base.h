@@ -2,8 +2,8 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
 #include "../System/Interface/PoolableObj.h"
-#include "../System/DataAsset/DA_ProjectileAsset.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"

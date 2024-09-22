@@ -42,7 +42,7 @@ void AInteraction_WarpGate::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AInteraction_WarpGate::Interaction()
+void AInteraction_WarpGate::Interaction(AActor* _InteractedActor)
 {
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BossRoom"));
 }

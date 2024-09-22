@@ -211,5 +211,5 @@ void UUI_EquipMain::RenewEquipItemStack(EEQUIP_SLOT _Slot, uint16 _Stack)
 		break;
 	}
 
-	pEquipItem->SetEquipItemStack(_Stack);
+	//pEquipItem->SetEquipItemStack(_Stack);
 }

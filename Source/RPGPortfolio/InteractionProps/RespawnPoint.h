@@ -37,6 +37,6 @@ public:
 	virtual FText GetCommand_Key() const override { return tCommand_Key; }
 	virtual FText GetCommand_Name() const override { return tCommand_Name; }
 
-	virtual void Interaction() override;
+	virtual void Interaction(AActor* _InteractedActor = nullptr) override;
 
 };

@@ -32,13 +32,14 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UMenuAnchor* m_ItemMenuAnchor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
-	class UItem_InvenData* m_ItemData;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
+	//class UItem_InvenData* m_ItemData;
+
+	EITEM_ID	eID = EITEM_ID::END;
+	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
 
 	bool bItemUseDelay;
 	bool bAnchorActive;
-
-	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
 
 	// 아이템 장착시 변경될 능력치 표시용
 	class UUI_PlayerStat* m_StatUI;

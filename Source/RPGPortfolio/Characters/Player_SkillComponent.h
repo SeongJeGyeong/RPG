@@ -2,11 +2,12 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Player_SkillComponent.generated.h"
 
-class AProj_Player_Cutter;
+//class AProj_Player_Cutter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RPGPORTFOLIO_API UPlayer_SkillComponent : public UActorComponent
@@ -18,8 +19,16 @@ public:
 	UPlayer_SkillComponent();
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Projectile", meta = ( AllowPrivateAccess = "true" ))
-	TSubclassOf<AProj_Player_Cutter> ProjSubclass;
+	UPROPERTY()
+	ESkillName m_SkillName;
+
+	FSkillAsset* m_Skill;
+
+	UPROPERTY()
+	class UDA_PlayerSkill* m_SkillDA;
+
+	/*UPROPERTY(EditAnywhere, Category = "Projectile", meta = ( AllowPrivateAccess = "true" ))
+	TSubclassOf<AProj_Player_Cutter> ProjSubclass;*/
 
 protected:
 	// Called when the game starts
@@ -27,4 +36,7 @@ protected:
 
 public:
 	void ShotSkillProj(FVector _SpawnLoc, FRotator _SpawnRot, FVector _ShotVec);
+
+	FSkillAsset* GetEquippedSkill() const { return m_Skill; }
+	ESkillName GetSkillName() const { return m_SkillName; }
 };

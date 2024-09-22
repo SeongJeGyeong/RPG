@@ -11,6 +11,7 @@
 #include "../UI/UI_EquipMain.h"
 #include "Inventory_Mgr.h"
 #include "../Item/Item_InvenData.h"
+#include "../Manager/Inventory_Mgr.h"
 
 UWorld* UEquip_Mgr::m_World = nullptr;
 
@@ -34,7 +35,7 @@ UEquip_Mgr* UEquip_Mgr::GetInst(UGameInstance* _GameInst)
 	return pGameInst->m_EquipMgr;
 }
 
-FInvenItemRow* UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
+TSharedPtr<FInvenItemRow> UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
 {
 	if (m_QuickSlotArr.IsEmpty())
 	{
@@ -98,7 +99,7 @@ bool UEquip_Mgr::QuickSlotValidForIdx(int32 _Idx)
 
 void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 {
-	FInvenItemRow* pItem = GetQSItemForIndex(_Idx);
+	TSharedPtr<FInvenItemRow> pItem = GetQSItemForIndex(_Idx);
 
 	if (nullptr == pItem)
 	{
@@ -116,7 +117,7 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 		if (pItem->Stack <= 0)
 		{	
 			EEQUIP_SLOT Slot = ConvertIdxToQuickSlot(_Idx);
-			UInventory_Mgr::GetInst(m_World)->SubGameItem(Slot, pItem->ItemInfo->ID);
+			UInventory_Mgr::GetInst(m_World)->SubGameItem(Slot, pItem->ID);
 		}
 		// 개수가 0이 아니면 퀵슬롯에서 해당 아이템의 갯수만 줄인다.
 		else
@@ -160,32 +161,32 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 
 UItem_InvenData* UEquip_Mgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
 {
-	FInvenItemRow* pItemInfo = m_EquipItemMap.Find(_Slot);
-	if (pItemInfo == nullptr)
+	FInvenItemRow* pItemRow = m_EquipItemMap.Find(_Slot);
+	if (pItemRow == nullptr)
 	{
 		//UE_LOG(LogTemp, Error, TEXT("조회할 슬롯에 아이템이 장비되어있지 않음"));
 		return nullptr;
 	}
+	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pItemRow->ID);
 
 	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-
-	pItemData->SetItemImgPath(pItemInfo->ItemInfo->IconImgPath);
-	pItemData->SetItemName(pItemInfo->ItemInfo->ItemName);
-	pItemData->SetItemDesc(pItemInfo->ItemInfo->Description);
-	pItemData->SetItemQnt(pItemInfo->Stack);
-	pItemData->SetPhysicAtkVal(pItemInfo->ItemInfo->PhysicAtk);
-	pItemData->SetPhysicDefVal(pItemInfo->ItemInfo->PhysicDef);
-	pItemData->SetMagicAtkVal(pItemInfo->ItemInfo->MagicAtk);
-	pItemData->SetMagicDefVal(pItemInfo->ItemInfo->MagicDef);
-	pItemData->SetRestoreHP(pItemInfo->ItemInfo->Restore_HP);
-	pItemData->SetRestoreMP(pItemInfo->ItemInfo->Restore_MP);
-	pItemData->SetRequireStr(pItemInfo->ItemInfo->Require_Str);
-	pItemData->SetRequireDex(pItemInfo->ItemInfo->Require_Dex);
-	pItemData->SetRequireInt(pItemInfo->ItemInfo->Require_Int);
-	pItemData->SetMaximumStack(pItemInfo->ItemInfo->Maximum_Stack);
-	pItemData->SetItemType(pItemInfo->ItemInfo->Type);
-	pItemData->SetEquiped(pItemInfo->EquipedSlot);
-	pItemData->SetItemID(pItemInfo->ItemInfo->ID);
+	pItemData->SetItemImgPath(pInfo->IconImgPath);
+	pItemData->SetItemName(pInfo->ItemName);
+	pItemData->SetItemDesc(pInfo->Description);
+	pItemData->SetItemQnt(pItemRow->Stack);
+	pItemData->SetPhysicAtkVal(pInfo->PhysicAtk);
+	pItemData->SetPhysicDefVal(pInfo->PhysicDef);
+	pItemData->SetMagicAtkVal(pInfo->MagicAtk);
+	pItemData->SetMagicDefVal(pInfo->MagicDef);
+	pItemData->SetRestoreHP(pInfo->Restore_HP);
+	pItemData->SetRestoreMP(pInfo->Restore_MP);
+	pItemData->SetRequireStr(pInfo->Require_Str);
+	pItemData->SetRequireDex(pInfo->Require_Dex);
+	pItemData->SetRequireInt(pInfo->Require_Int);
+	pItemData->SetMaximumStack(pInfo->Maximum_Stack);
+	pItemData->SetItemType(pInfo->Type);
+	pItemData->SetEquiped(pItemRow->EquipedSlot);
+	pItemData->SetItemID(pItemRow->ID);
 
 	return pItemData;
 }
@@ -219,7 +220,7 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _
 		{
 			continue;
 		}
-		if ( m_QuickSlotArr[i]->ItemInfo->ID == _InvenItem->ItemInfo->ID && m_QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
+		if ( m_QuickSlotArr[i]->ID == _InvenItem->ID && m_QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
 		{
 			m_QuickSlotArr[i] = nullptr;
 			break;
@@ -228,7 +229,7 @@ void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _
 
 	UE_LOG(LogTemp, Display, TEXT("QuickSlotArr 최대 인덱스 : %d"), m_QuickSlotArr.Num());
 
-	m_QuickSlotArr[_Idx] = _InvenItem;
+	m_QuickSlotArr[_Idx] = MakeShareable(_InvenItem);
 
 	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
 	{

@@ -15,6 +15,14 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "../System/FadeViewportClient.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Characters/Player_Base_Knight.h"
+#include "Components/ShapeComponent.h"
+#include "../Sequencer/LSP_Cutscene.h"
+
+ATrigger_BossCutscene::ATrigger_BossCutscene()
+{
+	GetCollisionComponent()->SetCollisionProfileName(TEXT("InteractionTrigger"));
+}
 
 void ATrigger_BossCutscene::BeginPlay()
 {
@@ -25,6 +33,9 @@ void ATrigger_BossCutscene::BeginPlay()
 
 void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherActor)
 {
+	FString Name;
+	_OtherActor->GetName(Name);
+	UE_LOG(LogTemp, Warning, TEXT("트리거 오버랩 액터 : %s"), *Name);
 	if (IsValid(m_LevelSeq))
 	{
 		FMovieSceneSequencePlaybackSettings Settings = {};
@@ -35,7 +46,6 @@ void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherAc
 		if (!IsValid(m_SeqPlayer))
 		{
 			m_SeqPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), m_LevelSeq, Settings, pSequenceActor);
-
 			// 레벨시퀀스 종료시 호출할 Delegate 등록
 			m_SeqPlayer->OnFinished.AddDynamic(this, &ATrigger_BossCutscene::EndLevelSequence);
 			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -43,6 +53,9 @@ void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherAc
 			{
 				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
 			}
+
+			m_TriggeredActor = _OtherActor;
+			m_TriggeredActor->DisableInput(NULL);
 			m_SeqPlayer->Play();
 		}
 	}
@@ -81,6 +94,7 @@ void ATrigger_BossCutscene::EndLevelSequence()
 			pAIController->GetBlackboardComponent()->SetValueAsBool(TEXT("bStop"), false);
 		}
 	}
+	m_TriggeredActor->EnableInput(NULL);
 
 	Destroy();
 }

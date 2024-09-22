@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Header/Enum.h"
+#include "../Characters/State/StateMachine.h"
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Subsys_ObjectPool.generated.h"
@@ -35,6 +37,8 @@ private:
 	UPROPERTY()
 	TMap<UClass*, FObjectPoolArr> ObjPools;
 
+	TMap<EPlayerStateType, TUniquePtr<StateMachine>> StatePool;
+
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -47,8 +51,8 @@ public:
 
 	void ReturnObjToPool(AActor* _Poolable);
 
-	/*UPROPERTY()
-	TArray<AProjectile_Base*> ProjPool;*/
+	TUniquePtr<StateMachine> GetStateFromPool(EPlayerStateType _Type);
+	void ReturnStateToPool(EPlayerStateType _Type, StateMachine* _State);
 };
 
 template<typename T>

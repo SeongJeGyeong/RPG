@@ -9,7 +9,7 @@
 // Sets default values
 AProjectile_Base::AProjectile_Base()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	m_ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	m_ProjectileMovement->ProjectileGravityScale = 0.f;

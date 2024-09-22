@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI_Player_QuickSlotItem.h"
-#include "../Header/Struct.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
+#include "../Manager/Inventory_Mgr.h"
 
 void UUI_Player_QuickSlotItem::NativeConstruct()
 {
@@ -21,7 +21,7 @@ void UUI_Player_QuickSlotItem::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Player_QuickSlotItem::RenewQuickSlotItem(FInvenItemRow* _InvenItem)
+void UUI_Player_QuickSlotItem::RenewQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem)
 {
 	if (_InvenItem == nullptr)
 	{
@@ -31,11 +31,11 @@ void UUI_Player_QuickSlotItem::RenewQuickSlotItem(FInvenItemRow* _InvenItem)
 		m_Amount->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
-
-	FString ItemImgPath = _InvenItem->ItemInfo->IconImgPath;
+	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_InvenItem->ID);
+	FString ItemImgPath = pInfo->IconImgPath;
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);
-	m_ItemName->SetText(FText::FromString(_InvenItem->ItemInfo->ItemName));
+	m_ItemName->SetText(FText::FromString(pInfo->ItemName));
 	m_Amount->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenItem->Stack)));
 	m_Dish->SetVisibility(ESlateVisibility::HitTestInvisible);
 	m_ItemImg->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -43,7 +43,7 @@ void UUI_Player_QuickSlotItem::RenewQuickSlotItem(FInvenItemRow* _InvenItem)
 	m_Amount->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
-void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(FInvenItemRow* _InvenItem)
+void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem)
 {
 	if (_InvenItem == nullptr)
 	{
@@ -54,7 +54,8 @@ void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(FInvenItemRow* _InvenItem)
 		return;
 	}
 
-	FString ItemImgPath = _InvenItem->ItemInfo->IconImgPath;
+	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_InvenItem->ID);
+	FString ItemImgPath = pInfo->IconImgPath;
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);
 	m_Dish->SetVisibility(ESlateVisibility::HitTestInvisible);

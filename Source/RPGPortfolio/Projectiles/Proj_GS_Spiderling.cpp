@@ -20,6 +20,7 @@ AProj_GS_Spiderling::AProj_GS_Spiderling()
 
 	m_Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
 	m_Particle->SetupAttachment(m_Hitbox);
+
 	fLifeTime = 0.f;
 }
 
@@ -28,10 +29,6 @@ void AProj_GS_Spiderling::BeginPlay()
 	Super::BeginPlay();
 
 	m_Hitbox->OnComponentHit.AddDynamic(this, &AProj_GS_Spiderling::OnHitProj);
-	/*if (!IsValid(m_Particle->Template))
-	{
-		m_Particle->SetTemplate(GetProjBaseParticle());
-	}*/
 }
 
 void AProj_GS_Spiderling::LaunchMotion(FVector _TargetVec)
@@ -90,7 +87,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 			}
 		}
 
-		//Destroy();
+		ProjDeactive();
 		return;
 	}
 	PlayHitEffect(true, Hit.Location);
@@ -98,5 +95,5 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(eAtkType);
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
-	//Destroy();
+	ProjDeactive();
 }
