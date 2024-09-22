@@ -111,5 +111,13 @@ Content/ParagonSparrow/*
 Content/Effects/*
 Content/QuadrapedCreatures/*
 Content/Weapons/*
+Content/Assets_Animation/*
 Content/PhysicsMaterials/*
+Content/Assets_Effect/*
+Content/Assets_Mesh_Actor/*
+Content/Assets_Mesh_Object/*
+Content/Brutal_axe_shield_Set/*
+Content/BossyEnemy/*
+Content/EssentialSwordShieldAnimationPack/*
+Content/Weapon_Shield_Animations/*
 backup/*
