@@ -51,8 +51,10 @@ public:
 
 	bool IsLockedOn();
 
+	class ULockOnTargetComponent* GetLockOnTarget() const { return m_Target; };
+
 private:
 	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
 	TArray<class ULockOnTargetComponent*> GetTargetComponents();
-	class ULockOnTargetComponent* GetLockTarget();
+	class ULockOnTargetComponent* GetSelectedTarget();
 };

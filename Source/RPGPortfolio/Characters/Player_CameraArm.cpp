@@ -96,7 +96,7 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 	}
 	else
 	{
-		ULockOnTargetComponent* NewLockOnTarget = GetLockTarget();
+		ULockOnTargetComponent* NewLockOnTarget = GetSelectedTarget();
 
 		if ( NewLockOnTarget != nullptr )
 		{
@@ -123,7 +123,7 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 	bEnableCameraRotationLag = true;
 	m_Player->GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	m_Player->GetCharacterMovement()->bOrientRotationToMovement = false;
-	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 200.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
+	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 400.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
 
 }
 
@@ -140,7 +140,7 @@ void UPlayer_CameraArm::BreakLockOnTarget()
 	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 1000.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
 }
 
-ULockOnTargetComponent* UPlayer_CameraArm::GetLockTarget()
+ULockOnTargetComponent* UPlayer_CameraArm::GetSelectedTarget()
 {
 	TArray<ULockOnTargetComponent*> AvailableTargets = GetTargetComponents();
 	if ( AvailableTargets.Num() == 0 )

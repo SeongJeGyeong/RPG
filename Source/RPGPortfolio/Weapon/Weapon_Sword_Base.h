@@ -17,6 +17,9 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = ( AllowPrivateAccess = "true" ))
+	class UCapsuleComponent* m_HitCollision;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = ( AllowPrivateAccess = "true" ))
 	USkeletalMeshComponent* m_WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
@@ -30,4 +33,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+public:
+	void HitcollisionActivate(bool _Activate);
+
+	UFUNCTION()
+	void CollisionBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
 };

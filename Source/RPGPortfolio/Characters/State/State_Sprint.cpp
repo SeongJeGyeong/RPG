@@ -8,8 +8,7 @@
 void State_Sprint::Enter(APlayer_Base_Knight* Character)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Enter SprintState"));
-	Character->GuardStateOnPlayMontage(true);
-	Character->SetbSprintToggle(true);
+	Character->SetbSprint(true);
 	Character->GetCharacterMovement()->MaxWalkSpeed = 600.f;
 }
 
@@ -30,6 +29,6 @@ void State_Sprint::Update(APlayer_Base_Knight* Character, float DeltaTime)
 void State_Sprint::Exit(APlayer_Base_Knight* Character)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Exit SprintState"));
-	Character->SetbSprintToggle(false);
+	Character->SetbSprint(false);
 	Character->GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }

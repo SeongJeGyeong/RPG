@@ -6,8 +6,7 @@
 
 void State_Jump::Enter(APlayer_Base_Knight* Character)
 {
-	Character->GuardStateOnPlayMontage(true);
-	Character->SetCurrentCombo(0);
+	Character->SetCurrentCombo(1);
 }
 
 void State_Jump::Update(APlayer_Base_Knight* Character, float DeltaTime)
@@ -16,5 +15,4 @@ void State_Jump::Update(APlayer_Base_Knight* Character, float DeltaTime)
 
 void State_Jump::Exit(APlayer_Base_Knight* Character)
 {
-	//Character->GuardStateOnPlayMontage(false);
 }

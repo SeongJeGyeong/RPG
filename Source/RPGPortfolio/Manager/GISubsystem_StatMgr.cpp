@@ -156,5 +156,6 @@ void UGISubsystem_StatMgr::StaminaRecoveryStart()
 	{
 		PlayerBasePower.CurStamina = FMath::Clamp(PlayerBasePower.CurStamina + 0.25f, 0.f, PlayerBasePower.MaxStamina);
 	}
+
 	PlayerMainUI->SetPlayerSTRatio(PlayerBasePower.CurStamina / PlayerBasePower.MaxStamina);
 }

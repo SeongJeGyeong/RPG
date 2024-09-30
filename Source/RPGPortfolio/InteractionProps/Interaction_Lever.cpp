@@ -11,6 +11,7 @@
 #include "../UI/UI_Base.h"
 #include "../UI/UI_FadeScreen.h"
 #include "../System/FadeViewportClient.h"
+#include "../Characters/Player_Base_Knight.h"
 
 // Sets default values
 AInteraction_Lever::AInteraction_Lever()
@@ -51,6 +52,7 @@ void AInteraction_Lever::Tick(float DeltaTime)
 void AInteraction_Lever::Interaction(AActor* _InteractedActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("레버 돌리기"));
+
 	if (IsValid(m_LevelSeq))
 	{
 		FMovieSceneSequencePlaybackSettings Settings = {};

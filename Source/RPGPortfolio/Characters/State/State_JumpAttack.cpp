@@ -7,8 +7,7 @@
 void State_JumpAttack::Enter(APlayer_Base_Knight* Character)
 {
 	Character->GetMesh()->GetAnimInstance()->Montage_Play(Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::JUMPATTACK));
-	Character->SetbInvalidInput(true);
-	Character->SetCurrentCombo(0);
+	Character->SetCurrentCombo(2);
 }
 
 void State_JumpAttack::Update(APlayer_Base_Knight* Character, float DeltaTime)
@@ -17,4 +16,5 @@ void State_JumpAttack::Update(APlayer_Base_Knight* Character, float DeltaTime)
 
 void State_JumpAttack::Exit(APlayer_Base_Knight* Character)
 {
+	Character->SetCurrentCombo(1);
 }

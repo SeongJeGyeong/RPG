@@ -48,7 +48,10 @@ private:
 	FMonsterAnimAsset m_AnimAsset;
 
 	struct FDroppedItemData	m_DropItemInfo;
+
+	FVector RelLoc;
 	FOnTimelineVector HitTimelineCallback;
+	FOnTimelineEvent TimelineFinishCallback;
 
 	float fDeadEffectRatio;
 	bool bMonLockedOn;
@@ -113,4 +116,7 @@ protected:
 
 	UFUNCTION()
 	void TimelineStep(FVector _Value);
+
+	UFUNCTION()
+	void TimelineFinished();
 };

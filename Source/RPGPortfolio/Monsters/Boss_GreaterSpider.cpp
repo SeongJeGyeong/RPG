@@ -330,7 +330,7 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
 	// 러시어택이 아니고 플레이어가 가드중일 때
-	if (m_State != EGreaterSpider_STATE::RUSHATTACK && pPlayer->GetbToggleGuard())
+	if (m_State != EGreaterSpider_STATE::RUSHATTACK && pPlayer->GetbHoldGuard())
 	{	
 		UE_LOG(LogTemp, Warning, TEXT("Guard"));
 		FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();

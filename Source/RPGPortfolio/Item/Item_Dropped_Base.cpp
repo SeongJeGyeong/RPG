@@ -11,6 +11,7 @@
 #include "../UI/UI_Message_Item.h"
 #include "../Header/Struct.h"
 #include "../GameInstance_Base.h"
+#include "../Characters/Player_Base_Knight.h"
 
 // Sets default values
 AItem_Dropped_Base::AItem_Dropped_Base()
@@ -29,12 +30,12 @@ AItem_Dropped_Base::AItem_Dropped_Base()
 	m_Trigger->SetCollisionProfileName(TEXT("InteractionTrigger"));
 	m_Mesh->SetCollisionProfileName(TEXT("IgnoreAll"));
 
-	/*static ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/Assets_Effect/RPGEffects/ParticlesNiagara/StatusEffects/MagicGlow/NS_Status_Magic_Glow.NS_Status_Magic_Glow'"));
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> niagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/RPGEffects/ParticlesNiagara/StatusEffects/MagicGlow/NS_Status_Magic_Glow.NS_Status_Magic_Glow'"));
 	if (niagara.Succeeded())
 	{
 		m_Niagara->SetAsset(niagara.Object);
 		m_Niagara->Activate(true);
-	}*/
+	}
 
 	tCommand_Key = FText::FromString(TEXT("F"));
 	tCommand_Name = FText::FromString(TEXT("획득한다"));
@@ -81,6 +82,9 @@ void AItem_Dropped_Base::Interaction(AActor* _InteractedActor)
 	UTexture2D* Img = m_Img.IsPending() ? m_Img.LoadSynchronous() : m_Img.Get();
 	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, Img, m_Stack);
 	pMainUI->ShowMainMessageUI(true);
-
+	
+	APlayer_Base_Knight* Player = Cast<APlayer_Base_Knight>(_InteractedActor);
+	Player->GetMesh()->GetAnimInstance()->Montage_Play(Player->GetMontageDA()->GetPlayerMontage(EPlayerMontage::ACTION_ITEM));
+	Player->SetState(EPlayerStateType::ACTION);
 	Destroy();
 }

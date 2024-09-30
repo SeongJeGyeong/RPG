@@ -13,6 +13,8 @@
 #include "../Characters/State/State_HeavyAttack.h"
 #include "../Characters/State/State_UseItem.h"
 #include "../Characters/State/State_UseSkill.h"
+#include "../Characters/State/State_Action.h"
+#include "../Characters/State/State_Guard.h"
 
 void USubsys_ObjectPool::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -28,6 +30,8 @@ void USubsys_ObjectPool::Initialize(FSubsystemCollectionBase& Collection)
 	StatePool.Add(EPlayerStateType::HEAVYATTACK, MakeUnique<State_HeavyAttack>());
 	StatePool.Add(EPlayerStateType::USEITEM, MakeUnique<State_UseItem>());
 	StatePool.Add(EPlayerStateType::USESKILL_1, MakeUnique<State_UseSkill>());
+	StatePool.Add(EPlayerStateType::ACTION, MakeUnique<State_Action>());
+	StatePool.Add(EPlayerStateType::GUARD, MakeUnique<State_Guard>());
 }
 
 void USubsys_ObjectPool::Deinitialize()
@@ -99,9 +103,13 @@ TUniquePtr<StateMachine> USubsys_ObjectPool::GetStateFromPool(EPlayerStateType _
 		pState = MakeUnique<State_UseItem>();
 		break;
 	case EPlayerStateType::ACTION:
+		pState = MakeUnique<State_Action>();
 		break;
 	case EPlayerStateType::USESKILL_1:
 		pState = MakeUnique<State_UseSkill>();
+		break;
+	case EPlayerStateType::GUARD:
+		pState = MakeUnique<State_Guard>();
 		break;
 	default:
 		break;

@@ -6,9 +6,71 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/CapsuleComponent.h"
+#include "../Characters/Player_Base_Knight.h"
+
+void FAnimInstanceProxy_Knight::InitializeObjects(UAnimInstance* _InAnimInstance)
+{
+	Super::InitializeObjects(_InAnimInstance);
+
+	if ( !_InAnimInstance )
+	{
+		return;
+	}
+
+	AnimInstance = Cast<UAnimInstance_Knight>(_InAnimInstance);
+	Player = Cast<APlayer_Base_Knight>(_InAnimInstance->GetOwningActor());
+
+	if (Player)
+	{
+		Movement = Player->GetCharacterMovement();
+	}
+
+}
+
+void FAnimInstanceProxy_Knight::PreUpdate(UAnimInstance* _InAnimInstance, float _DeltaSeconds)
+{
+	Super::PreUpdate(_InAnimInstance, _DeltaSeconds);
+
+	if (Player)
+	{
+		fGuardBlendWeight = Player->GetfGuardWeight();
+		vLocalVelocity.X = Player->GetfForwardSpeed();
+		vLocalVelocity.Y = Player->GetfRightSpeed();
+		vLocalVelocity.Z = Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(Movement->Velocity).Z;
+		fMoveSpeed = Movement->Velocity.Size2D();
+		vCurAcceleration = Movement->GetCurrentAcceleration();
+	}
+}
+
+void FAnimInstanceProxy_Knight::Update(float _DeltaSeconds)
+{
+	Super::Update(_DeltaSeconds);
+
+	if ( Player )
+	{
+		if ( 0.f < fMoveSpeed && !vCurAcceleration.IsZero() )
+		{
+			AnimInstance->m_bIsMove = true;
+		}
+		else
+		{
+			AnimInstance->m_bIsMove = false;
+		}
+		AnimInstance->m_fMoveSpeed = fMoveSpeed;
+		AnimInstance->m_vLocalVelocity = vLocalVelocity;
+
+		AnimInstance->m_fGuardBlendWeight = fGuardBlendWeight;
+	}
+}
+
+void FAnimInstanceProxy_Knight::PostUpdate(UAnimInstance* _InAnimInstance) const
+{
+	Super::PostUpdate(_InAnimInstance);
+}
 
 void UAnimInstance_Knight::NativeInitializeAnimation()
 {
+	Super::NativeInitializeAnimation();
 }
 
 void UAnimInstance_Knight::NativeBeginPlay()
@@ -19,7 +81,7 @@ void UAnimInstance_Knight::NativeBeginPlay()
 
 	if (IsValid(m_Player))
 	{
-		m_Movement = m_Player->GetCharacterMovement();
+		UE_LOG(LogTemp, Warning, TEXT("애님 인스턴스 : 플레이어 캐릭터 참조 성공"));
 	}
 }
 
@@ -27,7 +89,7 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 {
 	Super::NativeUpdateAnimation(_DT);
 
-	if (!IsValid(m_Movement) || !IsValid(m_Player))
+	/*if (!IsValid(m_Movement) || !IsValid(m_Player))
 	{
 		m_Player = Cast<APlayer_Base_Knight>(GetOwningActor());
 
@@ -36,71 +98,49 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 			m_Movement = m_Player->GetCharacterMovement();
 		}
 		return;
-	}
-	vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
+	}*/
+	//vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
 
 	// bIsMove = Idle->Move Trigger
-	fMoveSpeed = m_Movement->Velocity.Size2D();
-	if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
-	{
-		bIsMove = true;
-	}
-	else
-	{
-		bIsMove = false;
-		vLocalVelocity.X = 0.f;
-		vLocalVelocity.Y = 0.f;
-	}
-
-	// 가드 모션
-	if (bIsGuard)
-	{
-		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight + _DT * 10.f, 0.f, 1.f);
-
-		if ( fGuardBlendWeight >= 1.f )
-		{
-			m_Player->SetbToggleGuard(true);
-		}
-	}
-	else
-	{
-		fGuardBlendWeight = FMath::Clamp(fGuardBlendWeight - _DT * 15.f, 0.f, 1.f);
-		m_Player->SetbToggleGuard(false);
-	}
+	//fMoveSpeed = m_Movement->Velocity.Size2D();
+	//if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
+	//{
+	//	bIsMove = true;
+	//}
+	//else
+	//{
+	//	bIsMove = false;
+	//	//vLocalVelocity.X = 0.f;
+	//	//vLocalVelocity.Y = 0.f;
+	//}
 }
 
-// 다음 공격 입력 시작
-void UAnimInstance_Knight::AnimNotify_NextCheckStart()
+void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("NextCheckStart"));
-	m_Player->SetbNextAtkCheck(true);
-	m_Player->SetbAtkRotate(true);
+	m_Player->SetbNextAtkStart(true);
 }
 
 // 다음 공격 입력 끝
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("NextCheckEnd"));
 	m_Player->SetbNextAtkCheck(false);
-	m_Player->SetbInvalidInput(false);
-	m_Player->SetbAtkRotate(false);
-	m_Player->SetvInputDirZero();
 	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
+	//m_Player->HitBoxActivate(true);
 	m_Player->SetbAtkTrace(true);
+	m_Player->SetbNextAtkCheck(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 {
+	//m_Player->HitBoxActivate(false);
 	m_Player->SetbAtkTrace(false);
 	// 공격 대상 배열 초기화
 	m_Player->EmptyHitActorArr();
-	// 공격 판정 끝난 뒤에 공격 입력이 들어와야만 다음 콤보로 넘어가도록
-	//m_Player->SetbAtkToggle(false);
-
+	m_Player->ResetPrevTraceLoc();
 }
 
 void UAnimInstance_Knight::AnimNotify_MoveStart()
@@ -121,26 +161,21 @@ void UAnimInstance_Knight::AnimNotify_DodgeEnd()
 
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
-	//m_Player->SetbDodging(false);
-	//m_Player->SetbInvalidInput(false);
 	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpStart()
 {
-	//m_Player->SetbIsJumped(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpEnd()
 {
-	//m_Player->SetbIsJumped(false);
 	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_FallStart()
 {
 	m_Player->SetState(EPlayerStateType::JUMP);
-	//m_Player->SetbIsJumped(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
@@ -151,8 +186,6 @@ void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
 
 void UAnimInstance_Knight::AnimNotify_JumpAtkEnd()
 {
-	//m_Player->SetbIsJumped(false);
-	//m_Player->SetbInvalidInput(false);
 	m_Player->SetState(EPlayerStateType::IDLE);
 }
 

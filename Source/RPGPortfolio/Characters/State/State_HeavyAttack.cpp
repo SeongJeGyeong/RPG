@@ -7,39 +7,58 @@
 void State_HeavyAttack::Enter(APlayer_Base_Knight* Character)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Enter HeavyAttackState"));
-	Character->GuardStateOnPlayMontage(true);
+
 	Character->SetbNextAtkCheck(false);
+	Character->SetbIsAttacking(false);
+	Character->SetbNextAtkStart(false);
+	Character->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	uint8 Combo = Character->GetCurrentCombo();
-	if (++Combo == 1)
+	UE_LOG(LogTemp, Warning, TEXT("Combo : %d"), Combo);
+
+	if ( Combo > 3 )
 	{
-		Character->GetMesh()->GetAnimInstance()->Montage_Play(Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
+		Combo = 1;
 	}
-	else
+	UAnimMontage* Animation = nullptr;
+	switch ( Combo )
 	{
-		if (Combo > 2)
-		{
-			Combo = 1;
-		}
-		UE_LOG(LogTemp, Warning, TEXT("jumpSection"));
-		FName NextComboCount = FName(*FString::Printf(TEXT("Combo%d"), Combo));
-		Character->GetMesh()->GetAnimInstance()->Montage_JumpToSection(NextComboCount, Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK));
+	case 1:
+		Animation = Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK_1);
+		break;
+	case 2:
+		Animation = Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK_2);
+		break;
+	case 3:
+		Animation = Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HEAVYATTACK_3);
+		break;
+	default:
+		break;
 	}
 
-	Character->SetCurrentCombo(Combo);
+	Character->SetCurrentCombo(++Combo);
+	Character->MotionWarping_Attack(Animation, 0.45f);
+	Character->GetMesh()->GetAnimInstance()->Montage_Play(Animation);
 }
 
 void State_HeavyAttack::Update(APlayer_Base_Knight* Character, float DeltaTime)
 {
 	// 공격 판정 트레이스
-	if ( Character->GetbAtkTrace() )
+	/*if ( Character->GetbAtkTrace() )
 	{
 		Character->AttackHitCheck();
+	}*/
+
+	if (Character->GetbIsAttacking() && Character->GetbNextAtkStart())
+	{
+		Character->AttackStart();
 	}
 }
 
 void State_HeavyAttack::Exit(APlayer_Base_Knight* Character)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Exit HeavyAttackState"));
-	Character->SetbAtkTrace(false);
-	//Character->GetMesh()->GetAnimInstance()->StopAllMontages(0.25f);
+	//Character->SetbAtkTrace(false);
+	Character->SetbNextAtkCheck(false);
+	Character->SetbNextAtkStart(false);
+	Character->SetbIsAttacking(false);
 }

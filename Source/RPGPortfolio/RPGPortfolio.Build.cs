@@ -8,7 +8,7 @@ public class RPGPortfolio : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Niagara", "AIModule", "GameplayTasks", "NavigationSystem", "UMG", "Slate", "SlateCore", "Paper2D", "MovieScene", "LevelSequence", "MoviePlayer"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Niagara", "AIModule", "GameplayTasks", "NavigationSystem", "UMG", "Slate", "SlateCore", "Paper2D", "MovieScene", "LevelSequence", "MoviePlayer", "MotionWarping" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

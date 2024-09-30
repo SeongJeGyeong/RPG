@@ -17,6 +17,10 @@
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
 class UPlayer_SkillComponent;
+class ULockOnTargetComponent;
+class UMotionWarpingComponent;
+class UUI_Base;
+class IPlayerInteraction;
 
 UCLASS()
 class RPGPORTFOLIO_API APlayer_Base_Knight : public ACharacter, public IGenericTeamAgentInterface
@@ -28,19 +32,22 @@ public:
 	APlayer_Base_Knight();
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UCameraComponent* m_Cam;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_CameraArm* m_SArm;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_SkillComponent* m_SkillComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UMotionWarpingComponent* m_MWComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UInputMappingContext> m_IMC;
 
-	UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = "Input", meta = ( AllowPrivateAccess = "true" ))
 	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
 	UPROPERTY(EditAnywhere, Category = "Animation", meta = ( AllowPrivateAccess = "true" ))
@@ -49,14 +56,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Sound", meta = ( AllowPrivateAccess = "true" ))
 	UDA_PlayerSound* m_PlayerSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	class UCapsuleComponent* HitCollision;
+
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 
 	UPROPERTY()
-	TArray<TScriptInterface<class IPlayerInteraction>> OverlapInteractionArr;	// 오버랩된 상호작용 오브젝트 목록
+	TArray<TScriptInterface<IPlayerInteraction>> OverlapInteractionArr;	// 오버랩된 상호작용 오브젝트 목록
 
 	UPROPERTY()
-	class UUI_Base* m_MainUI;
+	UUI_Base* m_MainUI;
 
 	UPROPERTY()
 	TArray<AActor*> HitActorArr;
@@ -65,29 +75,26 @@ private:
 	TUniquePtr<StateMachine> CurrentState;
 
 private:
-	bool bIsJumped;			// 점프모션중인지 체크용
-	bool bHeavyToggle;		// 강공격 체크용 토글
+	bool bIsAttacking;
+	bool bNextAtkStart;
+	bool bHeavyHold;		// 강공격 체크용
 	bool bNextAtkCheckOn;	// 다음 공격 입력 체크용
 	bool bAtkTrace;			// 공격 판정 체크
 
-	// 몽타주 재생 도중 입력받지 못하는 상태 체크
-	bool bInvalidInput;		// 공격 판정 모션과 공격 애니메이션 종료 사이에 움직일 수 있도록 해주기 위해
-
-	bool bSprintToggle;		// 달리기 체크용 토글
+	bool bSprint;		// 달리기 체크용 토글
 	bool bItemDelay;		// 아이템 사용 딜레이 체크용
 
-	bool bAtkRotate;		// 공격 중 회전 체크용
-	FVector vInputDir = FVector::ZeroVector;	// 공격 중 회전 방향
+	float fForwardSpeed;
+	float fRightSpeed;
 
 	// 구르기 관련
 	//bool bDodging;
-	bool bDodgeMove;
-	//FVector vDodgeVector;
-	//FRotator rDodgeRotation;
+	//bool bDodgeMove;
 
 	// 방패 방어 상태(가드를 완전히 올린 상태에서만 true)
 	bool bInputGuard;
-	bool bToggleGuard;
+	bool bHoldGuard;
+	float fGuardWeight;
 
 	// 공격 관련
 	uint8 CurrentCombo;
@@ -99,45 +106,47 @@ private:
 	FTimerHandle ItemDelayTimer;
 
 	float fDelayRate;
-	float fGuardPhysicsWeight;
-
+	FVector PrevTraceLoc;
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
+	UDA_PlayerSound* GetSoundDA() const { return m_PlayerSound; }
+	UMotionWarpingComponent* GetMotionWarpingComp() const { return m_MWComponent; }
+	bool GetbIsAttacking() const { return bIsAttacking; }
+	void SetbIsAttacking(const bool& _IsAttacking) { bIsAttacking = _IsAttacking; }
 
 	bool GetbAtkTrace() const { return bAtkTrace; }
-	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace;}
+	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace; }
+	void ResetPrevTraceLoc() { PrevTraceLoc = FVector::ZeroVector; }
+
+	bool GetbNextAtkStart() const { return bNextAtkStart; }
+	void SetbNextAtkStart(const bool& _NextAtkStart) { bNextAtkStart = _NextAtkStart; }
 
 	uint8 GetCurrentCombo() const { return CurrentCombo; }
 	void SetCurrentCombo(const uint8& _Combo) { CurrentCombo = _Combo; }
 
 	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
-	// 조작 불가 상태
-	void SetbInvalidInput(const bool& _InvalidInput) { bInvalidInput = _InvalidInput; }
-	void SetbAtkRotate(const bool& _AtkRotate) { bAtkRotate = _AtkRotate; }
-	// 이동 가능 상태
-	void SetbIsJumped(const bool& _IsJumped) { bIsJumped = _IsJumped; }
 	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
 	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
 
 	bool GetbInputGuard() const { return bInputGuard; }
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
-	bool GetbToggleGuard() const { return bToggleGuard; }
-	void SetbToggleGuard(const bool& _ToggleGuard);
+	bool GetbHoldGuard() const { return bHoldGuard; }
+	void SetbHoldGuard(const bool& _HoldGuard);
+	float GetfGuardWeight() const { return fGuardWeight; }
+	void SetfGuardWeight(const float& _GuardWeight) { fGuardWeight = _GuardWeight; }
 
-	// 회피 애니메이션 종료 설정
-	bool GetbDodgeMove() const { return bDodgeMove; }
-	void SetbDodgeMove(const bool& _DodgeMove) { bDodgeMove = _DodgeMove; }
+	bool GetbSprint() const { return bSprint; }
+	void SetbSprint(const bool& _bSprint) { bSprint = _bSprint; }
 
-	bool GetbSprintToggle() const { return bSprintToggle; }
-	void SetbSprintToggle(const bool& _bSprint) { bSprintToggle = _bSprint; }
+	float GetfForwardSpeed() const { return fForwardSpeed; }
+	float GetfRightSpeed() const { return fRightSpeed; }
 
-	const UCameraComponent* GetCamera() { return m_Cam; }
-
+	UCameraComponent* GetCamera() const { return m_Cam; }
+	//UPlayer_CameraArm* GetCameraArm() const { return m_SArm; }
 	// 락온 토글 상태 확인
 	bool GetbToggleLockOn() const;
-	FVector GetvInputDir() const { return vInputDir; }
-	void SetvInputDirZero()  { vInputDir = FVector::ZeroVector; }
+	ULockOnTargetComponent* GetLockOnTarget() const;
 
 	UAnimInstance_Knight* GetAnimInst() const { return m_AnimInst; }
 
@@ -162,10 +171,10 @@ private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);
 	void JumpAction(const FInputActionInstance& _Instance);
-	void SprintToggleAction(const FInputActionInstance& _Instance);
+	void SprintAction(const FInputActionInstance& _Instance);
 	void GuardAction(const FInputActionInstance& _Instance);
 	void AttackAction(const FInputActionInstance& _Instance);
-	void HeavyAttackToggle(const FInputActionInstance& _Instance);
+	void HeavyAttack(const FInputActionInstance& _Instance);
 	void DodgeAction(const FInputActionInstance& _Instance);
 	void ParryAction(const FInputActionInstance& _Instance);
 	void LockOnToggleAction(const FInputActionInstance& _Instance);
@@ -176,7 +185,6 @@ private:
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 	void UseSkill_1(const FInputActionInstance& _Instance);
 
-	void NextAttackCheck();				// 다음 공격 발동 체크
 	void AttackMove();				// 공격 모션 중 이동
 	void JumpAttack();
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
@@ -185,6 +193,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void AttackHitCheck();				// 어택 트레이스용
+	void AttackStart();
+	void HitBoxActivate(bool _Activate);
 
 	bool ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	bool ConsumeStamina(float _Consumption);
@@ -198,16 +208,20 @@ public:
 	void ItemDelaytime(float _DelayPercent);
 	void GainMonsterSoul(int32 _GainedSoul);
 	void CloseMenuUI();
-	void MontageBlendOutImmediately();
 
-	void GuardStateOnPlayMontage(bool _MontageIsPlaying);
 	void ResetVarsOnHitState();
-	void ClearTimerRelatedMontage();
+	void ClearMontageRelatedTimer(); // 몽타주 관련 타이머 clear
+	void MotionWarping_Attack(UAnimSequenceBase* _Anim, float _EndTime);
+	void MotionWarping_Dodge(UAnimSequenceBase* _Anim, float _EndTime);
+
 private:
 	void DodgeTimeCheck(bool _Dodge);	// 회피 무적시간 체크
 
 	UFUNCTION()
 	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void HitBoxBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
 
 	UFUNCTION()
 	void ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
@@ -217,4 +231,6 @@ private:
 
 public:
 	virtual FGenericTeamId GetGenericTeamId() const override { return FGenericTeamId(0); };	// 플레이어 팀 설정(0)
+
+	void DrawDebugAttackTrace(const UWorld* World, const FVector& Start, const FVector& End, FQuat& Rot, const FCollisionShape& CollisionShape, bool bHit, const TArray<FHitResult>& OutHits, FLinearColor TraceColor, FLinearColor TraceHitColor, float DrawTime);
 };

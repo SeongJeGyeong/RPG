@@ -65,9 +65,10 @@ AMonster_Base::AMonster_Base()
 	if ( m_HitTimeline ) {
 
 		HitTimelineCallback.BindUFunction(this, TEXT("TimelineStep"));
+		TimelineFinishCallback.BindUFunction(this, TEXT("TimelineFinished"));
 		m_HitTimeline->AddInterpVector(m_HitCurve, HitTimelineCallback);
-
-		m_HitTimeline->SetTimelineLength(0.4f);
+		m_HitTimeline->SetTimelineFinishedFunc(TimelineFinishCallback);
+		m_HitTimeline->SetTimelineLength(0.3f);
 		m_HitTimeline->SetLooping(false);
 	}
 
@@ -159,6 +160,7 @@ void AMonster_Base::BeginPlay()
 		}
 	}
 	m_DropItemArr.Empty();
+	RelLoc = GetMesh()->GetRelativeLocation();
 }
 
 // Called every frame
@@ -255,9 +257,10 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	
 	// 공격한 대상(투사체 포함)의 반대방향으로 밀려남
-	const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-	FVector LaunchVec = GetActorLocation() - PointDamageEvent->HitInfo.ImpactPoint;
-	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
+	//const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+	//FVector LaunchVec = GetActorLocation() - PointDamageEvent->HitInfo.ImpactPoint;
+	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
+	FVector LaunchForce = LaunchVec.GetSafeNormal() * 500.f;
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
@@ -351,7 +354,6 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if( Montage == m_AnimAsset.HitAnim_Nor )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("피격 몽타주 재생 종료"));
 		// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
 		GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
 		GetWorld()->GetTimerManager().SetTimer(HitEndTimer, [this]()
@@ -361,7 +363,6 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 				{
 					if ( pAIController->GetBlackboardComponent() )
 					{
-						UE_LOG(LogTemp, Warning, TEXT("Hit State End"));
 						pAIController->GetBlackboardComponent()->SetValueAsBool(FName("bHitted"), false);
 						GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);
 					}
@@ -491,7 +492,7 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
 	// 플레이어가 가드중일 때
-	if (pPlayer->GetbToggleGuard())
+	if (pPlayer->GetbHoldGuard())
 	{
 		FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
 		bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, vMonsterDir);
@@ -526,4 +527,9 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 void AMonster_Base::TimelineStep(FVector _Value)
 {
 	GetMesh()->SetRelativeLocation(FVector(GetMesh()->GetRelativeLocation().X + (_Value.X * 10.f), GetMesh()->GetRelativeLocation().Y + (_Value.Y * 10.f), GetMesh()->GetRelativeLocation().Z));
+}
+
+void AMonster_Base::TimelineFinished()
+{
+	GetMesh()->SetRelativeLocation(RelLoc);
 }
