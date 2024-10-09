@@ -18,19 +18,15 @@ EBTNodeResult::Type UBTT_RandomPattern::ExecuteTask(UBehaviorTreeComponent& _Own
 	if (iNum <= 3)
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(AAIC_Monster_Base::PatternNumber, 1);
-		UE_LOG(LogTemp, Warning, TEXT("Pattern 1"));
 	}
 	else if (iNum <= 8)
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(AAIC_Monster_Base::PatternNumber, 2);
-		UE_LOG(LogTemp, Warning, TEXT("Pattern 2"));
 	}
 	else
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(AAIC_Monster_Base::PatternNumber, 3);
-		UE_LOG(LogTemp, Warning, TEXT("Pattern 3"));
 	}
 
-	//return EBTNodeResult::Failed;
 	return EBTNodeResult::Succeeded;
 }

@@ -14,29 +14,39 @@ void UUI_Player_QuickSlot::NativeConstruct()
 	}
 	else
 	{
-		RenewLowerQuickSlot(0);
+		InitLowerQuickSlot();
 	}
 
 	Super::NativeConstruct();
 }
 
-void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
+void UUI_Player_QuickSlot::InitLowerQuickSlot()
 {
-	// 퀵슬롯에 등록된 아이템이 없을 때
-	if (!UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr())
+	// 퀵슬롯에 등록된 아이템이 하나도 없을 때
+	if ( !UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr() )
 	{
 		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 아이템 없음"));
-		m_UI_LowerSlot->RenewQuickSlotItem(nullptr);
-		m_UI_NextQuickSlot->RenewNextQuickSlotItem(nullptr);
+		EmptyLowerQuickSlot();
 		return;
 	}
-	
-	TSharedPtr<FInvenItemRow> ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
+
+	int32 CurIdx = UEquip_Mgr::GetInst(GetWorld())->GetCurrentIndex();
+	if ( UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(CurIdx) )
+	{
+		RenewLowerQuickSlot(CurIdx);
+		return;
+	}
+	int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextValidIndex();
+	RenewLowerQuickSlot(Idx);
+}
+
+void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
+{
+	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
 	m_UI_LowerSlot->RenewQuickSlotItem(ItemData);
-	UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(_Idx);
 
 	// 퀵슬롯에 등록된 아이템이 하나뿐일 때
-	int32 NextIdx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
+	int32 NextIdx = UEquip_Mgr::GetInst(GetWorld())->GetNextValidIndex();
 	if(_Idx == NextIdx)
 	{
 		m_UI_NextQuickSlot->RenewNextQuickSlotItem(nullptr);
@@ -61,8 +71,14 @@ void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 
 void UUI_Player_QuickSlot::RenewNextQuickSlot(int32 _Idx)
 {
-	TSharedPtr<FInvenItemRow> ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
+	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
 	m_UI_NextQuickSlot->RenewNextQuickSlotItem(ItemData);
+}
+
+void UUI_Player_QuickSlot::EmptyLowerQuickSlot()
+{
+	m_UI_LowerSlot->RenewQuickSlotItem(nullptr);
+	m_UI_NextQuickSlot->RenewNextQuickSlotItem(nullptr);
 }
 
 void UUI_Player_QuickSlot::SetQuickSlotOpacity(float Alpha, bool UorL)

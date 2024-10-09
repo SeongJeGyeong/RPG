@@ -17,9 +17,11 @@ class RPGPORTFOLIO_API UDamageType_Base : public UDamageType
 
 private:
 	EATTACK_TYPE	Atk_Type;
-
+	EATTACK_WEIGHT	Atk_Weight;
 public:
 	EATTACK_TYPE GetAtkType() const { return Atk_Type; }
 	void SetAtkType(const EATTACK_TYPE& _AtkType) { Atk_Type = _AtkType; }
 
+	EATTACK_WEIGHT GetAtkWeight() const { return Atk_Weight; }
+	void SetAtkWeight(const EATTACK_WEIGHT& _AtkWeight) { Atk_Weight = _AtkWeight; }
 };

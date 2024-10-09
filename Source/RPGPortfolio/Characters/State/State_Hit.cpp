@@ -6,13 +6,7 @@
 
 void State_Hit::Enter(APlayer_Base_Knight* Character)
 {
-	if ( Character->GetbHoldGuard() )
-	{
-		Character->GetMesh()->GetAnimInstance()->Montage_Play(Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::GUARDBREAK));
-		Character->SetbHoldGuard(false);
-		Character->SetfGuardWeight(0.f);
-	}
-
+	Character->ResetVarsOnHitState();
 }
 
 void State_Hit::Update(APlayer_Base_Knight* Character, float DeltaTime)
@@ -20,6 +14,16 @@ void State_Hit::Update(APlayer_Base_Knight* Character, float DeltaTime)
 	if ( !Character->GetMesh()->GetAnimInstance()->IsAnyMontagePlaying() )
 	{
 		Character->SetState(EPlayerStateType::IDLE);
+		return;
+	}
+
+	if ( Character->GetMesh()->GetAnimInstance()->Montage_IsPlaying(Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HIT_AIR)) &&
+		!Character->GetCharacterMovement()->IsFalling() )
+	{
+		if ( !FName("Land").IsEqual(Character->GetMesh()->GetAnimInstance()->Montage_GetCurrentSection()) )
+		{
+			Character->GetMesh()->GetAnimInstance()->Montage_JumpToSection(FName("Land"), Character->GetMontageDA()->GetPlayerMontage(EPlayerMontage::HIT_AIR));
+		}
 	}
 }
 

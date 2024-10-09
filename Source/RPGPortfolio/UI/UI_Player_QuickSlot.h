@@ -30,9 +30,11 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
+	void InitLowerQuickSlot();
 	void RenewLowerQuickSlot(int32 _Idx);
 	void RenewNextQuickSlot(int32 _Idx);
-	
+	void EmptyLowerQuickSlot();
+
 	/*	false면 아래쪽 슬롯 투명도 세팅
 		true면 위쪽 슬롯의 투명도 세팅	*/
 	void SetQuickSlotOpacity(float Alpha, bool UorL);

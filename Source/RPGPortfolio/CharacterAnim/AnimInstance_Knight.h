@@ -10,9 +10,9 @@
 class APlayer_Base_Knight;
 class UCharacterMovementComponent;
 
-DECLARE_MULTICAST_DELEGATE_OneParam (FOnDodgeTimeCheckDelegate, bool);	// 무적시간 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnAttackMoveDelegate);						// 공격 중 이동 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam (FOnInvincibleDelegate, bool);	// 무적시간 체크 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate);							// 점프공격 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnDeadDelegate);
 
 USTRUCT(BlueprintType)
 struct RPGPORTFOLIO_API FAnimInstanceProxy_Knight : public FAnimInstanceProxy
@@ -47,9 +47,12 @@ protected:
 	FVector	vCurAcceleration;
 
 	UPROPERTY(Transient, BlueprintReadWrite, Category = "Data")
-	float fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
-};
+	float fGuardBlendWeight; // 가드 애니메이션 블렌드용 수치
 
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "Data")
+	bool bIsLockOn;
+
+};
 
 /**
  * 
@@ -78,6 +81,9 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Data")
 	bool m_bIsMove;
 
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Data")
+	bool m_bIsLockOn;
+
 	UPROPERTY(Transient, BlueprintReadWrite, Category = "Data")
 	FVector	m_vLocalVelocity;	// 이동 블렌드 스페이스용 벡터
 
@@ -87,16 +93,10 @@ protected:
 public:
 	float GetGuardBlendWeight() const { return m_fGuardBlendWeight; }
 
-	//bool GetbIsGuard() const { return bIsGuard; }
-	//void SetbIsGuard(const bool& _IsGuard) { bIsGuard = _IsGuard; }
-
-	//void SetLocalVelocityXY(FVector2D _Velocity) { vLocalVelocity.X = _Velocity.X; vLocalVelocity.Y = _Velocity.Y; }
-
 public:
-	//FOnNextAttackCheckDelegate	OnNextAttackCheck;
-	FOnDodgeTimeCheckDelegate	OnDodgeTimeCheck;
-	FOnAttackMoveDelegate		OnAttackMove;
+	FOnInvincibleDelegate	OnInvincibleState;
 	FOnJumpAtkDelegate			OnJumpAtk;
+	FOnDeadDelegate				OnDead;
 
 	// 다음콤보 체크
 	UFUNCTION()
@@ -110,17 +110,13 @@ public:
 	void AnimNotify_HitCheckEnd();
 
 	UFUNCTION()
-	void AnimNotify_MoveStart();
+	void AnimNotify_InvincibleOn();
+	UFUNCTION()
+	void AnimNotify_InvincibleOff();
 
-	UFUNCTION()
-	void AnimNotify_DodgeStart();
-	UFUNCTION()
-	void AnimNotify_DodgeEnd();
 	UFUNCTION()
 	void AnimNotify_DodgeAnimEnd();
 
-	UFUNCTION()
-	void AnimNotify_JumpStart();
 	UFUNCTION()
 	void AnimNotify_JumpEnd();
 	UFUNCTION()
@@ -136,9 +132,10 @@ public:
 	void AnimNotify_ShotProjectile();
 
 	UFUNCTION()
-	void AnimNotify_InvalidInput();
-	UFUNCTION()
 	void AnimNotify_ValidInput();
+
+	UFUNCTION()
+	void AnimNotify_Dead();
 
 public:
 	virtual void NativeInitializeAnimation() override;

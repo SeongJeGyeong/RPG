@@ -10,10 +10,6 @@
  */
 class RPGPORTFOLIO_API State_Dodge : public StateMachine
 {
-private:
-	FVector vDodgeVector;
-	FRotator rDodgeRotation;
-	EPlayerMontage DodgeType;
 public:
 	virtual void Enter(APlayer_Base_Knight* Character) override;
 	virtual void Update(APlayer_Base_Knight* Character, float DeltaTime) override;

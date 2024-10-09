@@ -7,6 +7,9 @@
 #include "Anim_GreaterSpider.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnRushAttackDelegate, bool);	// 러시공격 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnRangedAttackDelegate);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSwingAttackDelegate, EGreaterSpider_STATE);
+DECLARE_MULTICAST_DELEGATE(FOnStompAttackDelegate);
 /**
  * 
  */
@@ -22,6 +25,9 @@ private:
 
 public:
 	FOnRushAttackDelegate	OnRushAttack;
+	FOnRangedAttackDelegate OnRangedAttack;
+	FOnSwingAttackDelegate OnSwingAttack;
+	FOnStompAttackDelegate OnStompAttack;
 
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
@@ -43,4 +49,13 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_ShotProj();
+
+	UFUNCTION()
+	void AnimNotify_Stomp();
+
+	UFUNCTION()
+	void AnimNotify_SwingArm_Left();
+
+	UFUNCTION()
+	void AnimNotify_SwingArm_Right();
 };

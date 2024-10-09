@@ -52,6 +52,7 @@ void UUI_InvenItem::InitFromData(UObject* _Data)
 	}
 
 	eID = pItem->GetItemID();
+	eSelectedSlot = pItem->GetEquiped();
 	// 아이템 이미지 세팅
 	FString ItemImgPath = pItem->GetItemImgPath();
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
@@ -100,7 +101,6 @@ void UUI_InvenItem::ItemBtnClicked()
 			pInfo->Type == EITEM_TYPE::ARM_CHEST || pInfo->Type == EITEM_TYPE::ARM_GAUNTLET ||
 			pInfo->Type == EITEM_TYPE::ARM_LEGGINGS)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("스테이터스 갱신"));
 			m_StatUI->RenewBasePower();
 		}
 	}
@@ -108,7 +108,6 @@ void UUI_InvenItem::ItemBtnClicked()
 
 UUserWidget* UUI_InvenItem::MenuAnchorDataSetting()
 {
-	UE_LOG(LogTemp, Warning, TEXT("GetMenuContent!!"));
 	TSubclassOf<UUserWidget> pAnchorClass = LoadClass<UUserWidget>(nullptr, TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Item_SelectMenu.BPC_UI_Item_SelectMenu_C'"));
 
 	if (!IsValid(pAnchorClass))
@@ -117,7 +116,6 @@ UUserWidget* UUI_InvenItem::MenuAnchorDataSetting()
 	}
 
 	UUI_ItemSelectMenu* pWidget = Cast<UUI_ItemSelectMenu>(CreateWidget(GetWorld(), pAnchorClass));
-
 	pWidget->SetbItemUseDelay(bItemUseDelay);
 	pWidget->SetSelectedItemID(eID);
 	pWidget->SetSelectedItemSlot(eSelectedSlot);

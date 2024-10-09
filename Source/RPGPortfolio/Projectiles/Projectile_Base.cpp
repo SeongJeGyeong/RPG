@@ -47,7 +47,6 @@ void AProjectile_Base::SetActiveOnSpawn(const bool& _Active)
 	SetActorHiddenInGame(!_Active);	// 액티브 되었을 경우 보여야 하므로 false가 되어야 함
 	if (_Active)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("액티브 온"));
 		if (fLifeTime > 0.f)
 		{
 			GetWorldTimerManager().SetTimer(LifeTimeTimer, this, &AProjectile_Base::ProjDeactive, fLifeTime, false);
@@ -55,7 +54,6 @@ void AProjectile_Base::SetActiveOnSpawn(const bool& _Active)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("액티브 오프"));
 		GetWorldTimerManager().ClearTimer(LifeTimeTimer);
 		m_ProjectileMovement->StopMovementImmediately();
 	}
@@ -65,7 +63,6 @@ void AProjectile_Base::ProjReturnToPool()
 {
 	if ( IsValid(GetWorld()) )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("투사체 회수"));
 		USubsys_ObjectPool* ObjectPool = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
 		ObjectPool->ReturnObjToPool(this);
 	}
@@ -73,7 +70,6 @@ void AProjectile_Base::ProjReturnToPool()
 
 void AProjectile_Base::ProjDeactive()
 {
-	UE_LOG(LogTemp, Warning, TEXT("투사체 비활성화"));
 	SetActorHiddenInGame(true);
 	GetWorldTimerManager().ClearTimer(LifeTimeTimer);
 	SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
@@ -84,11 +80,10 @@ void AProjectile_Base::ProjDeactive()
 
 void AProjectile_Base::OnSpawnObjFromPool(bool _Activate)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnSpawnObjFromPool"));
 	SetActiveOnSpawn(_Activate);
 }
 
 void AProjectile_Base::OnReturnObjToPool()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnReturnObjToPool"));
+
 }

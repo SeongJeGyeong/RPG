@@ -35,7 +35,6 @@ void ATrigger_BossCutscene::BeginOverlap(AActor* _TriggerActor, AActor* _OtherAc
 {
 	FString Name;
 	_OtherActor->GetName(Name);
-	UE_LOG(LogTemp, Warning, TEXT("트리거 오버랩 액터 : %s"), *Name);
 	if (IsValid(m_LevelSeq))
 	{
 		FMovieSceneSequencePlaybackSettings Settings = {};

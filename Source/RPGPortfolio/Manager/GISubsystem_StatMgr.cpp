@@ -39,17 +39,6 @@ UGISubsystem_StatMgr::UGISubsystem_StatMgr()
 void UGISubsystem_StatMgr::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-
-	UE_LOG(LogTemp, Warning, TEXT("MaxHP : %f"), PlayerBasePower.MaxHP);
-	UE_LOG(LogTemp, Warning, TEXT("CurHP : %f"), PlayerBasePower.CurHP);
-	UE_LOG(LogTemp, Warning, TEXT("MaxMP : %f"), PlayerBasePower.MaxMP);
-	UE_LOG(LogTemp, Warning, TEXT("CurMP : %f"), PlayerBasePower.CurMP);
-	UE_LOG(LogTemp, Warning, TEXT("MaxStamina : %f"), PlayerBasePower.MaxStamina);
-	UE_LOG(LogTemp, Warning, TEXT("CurStamina : %f"), PlayerBasePower.CurStamina);
-	UE_LOG(LogTemp, Warning, TEXT("PhysicAtk : %f"), PlayerBasePower.PhysicAtk);
-	UE_LOG(LogTemp, Warning, TEXT("PhysicDef : %f"), PlayerBasePower.PhysicDef);
-	UE_LOG(LogTemp, Warning, TEXT("MagicAtk : %f"), PlayerBasePower.MagicAtk);
-	UE_LOG(LogTemp, Warning, TEXT("MagicDef : %f"), PlayerBasePower.MagicDef);
 }
 
 void UGISubsystem_StatMgr::Deinitialize()
@@ -150,11 +139,11 @@ void UGISubsystem_StatMgr::StaminaRecoveryStart()
 
 	if ( RecoveryType == ERecoveryType::SLOW )
 	{
-		PlayerBasePower.CurStamina = FMath::Clamp(PlayerBasePower.CurStamina + 0.1f, 0.f, PlayerBasePower.MaxStamina);
+		PlayerBasePower.CurStamina = FMath::Clamp(PlayerBasePower.CurStamina + 0.25f, 0.f, PlayerBasePower.MaxStamina);
 	}
 	else
 	{
-		PlayerBasePower.CurStamina = FMath::Clamp(PlayerBasePower.CurStamina + 0.25f, 0.f, PlayerBasePower.MaxStamina);
+		PlayerBasePower.CurStamina = FMath::Clamp(PlayerBasePower.CurStamina + 0.5f, 0.f, PlayerBasePower.MaxStamina);
 	}
 
 	PlayerMainUI->SetPlayerSTRatio(PlayerBasePower.CurStamina / PlayerBasePower.MaxStamina);

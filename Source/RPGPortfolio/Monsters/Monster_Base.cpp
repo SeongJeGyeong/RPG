@@ -281,7 +281,7 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	GetMesh()->SetCollisionProfileName(TEXT("IgnoreAll"));
 	// 록온 상태일 경우 해제
-	if (pPlayer->GetbToggleLockOn())
+	if (pPlayer->GetbIsLockOn())
 	{
 		pPlayer->BreakLockOn();
 	}
@@ -380,8 +380,12 @@ void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted
 
 void AMonster_Base::MonsterAttackNormal()
 {
-	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	pAnimInst->Montage_Play(m_AnimAsset.AtkAnim_Melee_Nor);
+	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.AtkAnim_Melee_Nor);
+}
+
+void AMonster_Base::PlayAtkBlockedAnim()
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.BlockAnim);
 }
 
 void AMonster_Base::SetMonLockedOn(bool _LockedOn)
@@ -490,22 +494,22 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 		break;
 	}
 
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
-	// 플레이어가 가드중일 때
-	if (pPlayer->GetbHoldGuard())
-	{
-		FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
-		bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, vMonsterDir);
+	//APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
+	//// 플레이어가 가드중일 때
+	//if (pPlayer->GetbHoldGuard())
+	//{
+	//	//FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
+	//	bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, GetActorLocation());
 
-		// 플레이어의 가드에 공격이 막힐 경우
-		if (bBlocked)
-		{
-			UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-			pAnimInst->Montage_Play(m_AnimAsset.BlockAnim);
+	//	// 플레이어의 가드에 공격이 막힐 경우
+	//	if (bBlocked)
+	//	{
+	//		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
+	//		pAnimInst->Montage_Play(m_AnimAsset.BlockAnim);
 
-			return;
-		}
-	}
+	//		return;
+	//	}
+	//}
 
 	// 공격 적중 시 잠시 경직
 	m_AnimInst->Montage_Pause();
@@ -518,8 +522,8 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
-
-	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
+	DamageTypeBase.GetDefaultObject()->SetAtkWeight(EATTACK_WEIGHT::LIGHT);
+	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.ImpactPoint, HitInfo, GetController(), this, DamageTypeBase);
 
 	bAtkTrace = false;
 }

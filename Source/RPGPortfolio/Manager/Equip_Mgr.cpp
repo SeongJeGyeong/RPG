@@ -35,34 +35,45 @@ UEquip_Mgr* UEquip_Mgr::GetInst(UGameInstance* _GameInst)
 	return pGameInst->m_EquipMgr;
 }
 
-TSharedPtr<FInvenItemRow> UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
+FInvenItemRow* UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
 {
-	if (m_QuickSlotArr.IsEmpty())
+	FInvenItemRow* pItemRow = m_EquipItemMap.Find(ConvertIdxToQuickSlot(_Idx));
+	if (pItemRow != nullptr)
 	{
-		return nullptr;
+		return pItemRow;
 	}
 
-	return m_QuickSlotArr[_Idx];
+	return nullptr;
 }
 
-int32 UEquip_Mgr::GetNextArrayIndex()
+int32 UEquip_Mgr::GetNextIndex()
+{
+	int32 idx = CurQuickSlotIdx;
+	if ( ++idx > 4 )
+	{
+		idx = 0;
+	}
+	return idx;
+}
+
+int32 UEquip_Mgr::GetNextValidIndex()
 {
 	int32 idx = CurQuickSlotIdx;
 	int32 iCount = 0;
-	while (++idx)
+	while ( ++idx )
 	{
-		if (iCount >= 5)
+		if ( iCount >= 5 )
 		{
 			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 등록된 아이템 없음"));
 			return CurQuickSlotIdx;
 		}
 
-		if (idx >= m_QuickSlotArr.Num())
+		if ( idx >= 5 )
 		{
 			idx = 0;
 		}
 
-		if (m_QuickSlotArr[idx] == nullptr)
+		if ( GetQSItemForIndex(idx) == nullptr )
 		{
 			++iCount;
 		}
@@ -76,9 +87,10 @@ int32 UEquip_Mgr::GetNextArrayIndex()
 
 bool UEquip_Mgr::QuickSlotValidForArr()
 {
-	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
+	for (int32 i = 0; i < 5; ++i)
 	{
-		if (m_QuickSlotArr[i] != nullptr)
+		FInvenItemRow* Item = GetQSItemForIndex(i);
+		if (Item != nullptr)
 		{
 			return true;
 		}
@@ -89,7 +101,7 @@ bool UEquip_Mgr::QuickSlotValidForArr()
 
 bool UEquip_Mgr::QuickSlotValidForIdx(int32 _Idx)
 {
-	if (m_QuickSlotArr[_Idx] != nullptr)
+	if ( GetQSItemForIndex(_Idx) != nullptr)
 	{
 		return true;
 	}
@@ -99,28 +111,22 @@ bool UEquip_Mgr::QuickSlotValidForIdx(int32 _Idx)
 
 void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 {
-	TSharedPtr<FInvenItemRow> pItem = GetQSItemForIndex(_Idx);
+	FInvenItemRow* pItem = GetQSItemForIndex(_Idx);
 
 	if (nullptr == pItem)
 	{
-		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		UE_LOG(LogTemp, Error, TEXT("DecreaseLowerSlotItem : 해당하는 아이템 정보를 찾을 수 없음"));
 		return;
 	}
 
 	if (pItem->Stack > 0)
 	{
 		--pItem->Stack;
+		// DecreaseInventoryItem 안에 SubGameItem 포함
+		UInventory_Mgr::GetInst(m_World)->DecreaseInventoryItem(pItem->ID);
 
-		UE_LOG(LogTemp, Warning, TEXT("남은 개수 : %d"), pItem->Stack);
-
-		// 개수가 0이 되면 퀵슬롯에서 해당 아이템을 없앤다.
-		if (pItem->Stack <= 0)
-		{	
-			EEQUIP_SLOT Slot = ConvertIdxToQuickSlot(_Idx);
-			UInventory_Mgr::GetInst(m_World)->SubGameItem(Slot, pItem->ID);
-		}
 		// 개수가 0이 아니면 퀵슬롯에서 해당 아이템의 갯수만 줄인다.
-		else
+		if( pItem->Stack > 0 )
 		{
 			RenewQuickSlotUI(_Idx);
 			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
@@ -148,7 +154,7 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 
 	if ( _InvenItem == nullptr)
 	{
-		m_EquipItemMap.Emplace(_Slot);
+		m_EquipItemMap.Remove(_Slot);
 	}
 	else
 	{
@@ -164,80 +170,48 @@ UItem_InvenData* UEquip_Mgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
 	FInvenItemRow* pItemRow = m_EquipItemMap.Find(_Slot);
 	if (pItemRow == nullptr)
 	{
-		//UE_LOG(LogTemp, Error, TEXT("조회할 슬롯에 아이템이 장비되어있지 않음"));
 		return nullptr;
 	}
-	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pItemRow->ID);
 
-	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-	pItemData->SetItemImgPath(pInfo->IconImgPath);
-	pItemData->SetItemName(pInfo->ItemName);
-	pItemData->SetItemDesc(pInfo->Description);
-	pItemData->SetItemQnt(pItemRow->Stack);
-	pItemData->SetPhysicAtkVal(pInfo->PhysicAtk);
-	pItemData->SetPhysicDefVal(pInfo->PhysicDef);
-	pItemData->SetMagicAtkVal(pInfo->MagicAtk);
-	pItemData->SetMagicDefVal(pInfo->MagicDef);
-	pItemData->SetRestoreHP(pInfo->Restore_HP);
-	pItemData->SetRestoreMP(pInfo->Restore_MP);
-	pItemData->SetRequireStr(pInfo->Require_Str);
-	pItemData->SetRequireDex(pInfo->Require_Dex);
-	pItemData->SetRequireInt(pInfo->Require_Int);
-	pItemData->SetMaximumStack(pInfo->Maximum_Stack);
-	pItemData->SetItemType(pInfo->Type);
-	pItemData->SetEquiped(pItemRow->EquipedSlot);
-	pItemData->SetItemID(pItemRow->ID);
-
+	UItem_InvenData* pItemData = UInventory_Mgr::GetInst(m_World)->GetInvenDataToItemRow(*pItemRow);
 	return pItemData;
 }
 
-void UEquip_Mgr::SetQuickSlotArray(FInvenItemRow* _InvenItem, int32 _Idx, bool _Unequip)
+void UEquip_Mgr::EquipQuickSlotArray(const FInvenItemRow& _InvenItem, EEQUIP_SLOT _Slot)
 {
-	if (_Unequip)
+	m_EquipItemMap.Emplace(_Slot, _InvenItem);
+	
+	// 현재 퀵슬롯에 장착된 아이템이 지금 장착한 아이템 뿐일 경우
+	if (!QuickSlotValidForIdx(CurQuickSlotIdx))
 	{
-		m_QuickSlotArr[_Idx] = nullptr;
-
-		if (_Idx == CurQuickSlotIdx)
-		{
-			// 현재 퀵슬롯의 아이템을 장비해제 했을경우 다음 퀵슬롯으로 자리를 옮긴다.
-			CurQuickSlotIdx = GetNextArrayIndex();
-		}
-
-		for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
-		{
-			if (m_QuickSlotArr[i] == nullptr)
-			{
-				continue;
-			}
-			UE_LOG(LogTemp, Display, TEXT("QuickSlotArr[%d] 채워짐"), i);
-		}
-		return;
+		int32 Index = ConvertQuickSlotToIdx(_Slot);
+		CurQuickSlotIdx = Index;
 	}
 
-	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
+	// 장착한 아이템이 어느슬롯에 장착되건 현재 보고있는 퀵슬롯 기준으로 갱신하면 알아서 표시될것
+	// 퀵슬롯에 표시되는 아이템은 현재 퀵슬롯과 그 다음 슬롯중 아이템이 장착되어 있는 가장 가까운 슬롯인데, 
+	// 현재 퀵슬롯을 갱신할 때 바로 다음에 아이템이 장착되어 있는 슬롯을 찾아서 갱신하기 때문
+	RenewQuickSlotUI(CurQuickSlotIdx);
+}
+
+void UEquip_Mgr::UnEquipQuickSlotArray(EEQUIP_SLOT _Slot)
+{
+	m_EquipItemMap.Remove(_Slot);
+	if ( ConvertQuickSlotToIdx(_Slot) == CurQuickSlotIdx )
 	{
-		if ( m_QuickSlotArr[i] == nullptr)
-		{
-			continue;
-		}
-		if ( m_QuickSlotArr[i]->ID == _InvenItem->ID && m_QuickSlotArr[i]->EquipedSlot != _InvenItem->EquipedSlot)
-		{
-			m_QuickSlotArr[i] = nullptr;
-			break;
-		}
+		// 현재 퀵슬롯의 아이템을 장비해제 했을경우 다음 장착아이템이 있는 퀵슬롯으로 자리를 옮긴다.
+		CurQuickSlotIdx = GetNextValidIndex();
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("QuickSlotArr 최대 인덱스 : %d"), m_QuickSlotArr.Num());
-
-	m_QuickSlotArr[_Idx] = MakeShareable(_InvenItem);
-
-	for (int32 i = 0; i < m_QuickSlotArr.Num(); ++i)
+	if ( QuickSlotValidForIdx(CurQuickSlotIdx) )
 	{
-		if ( m_QuickSlotArr[i] == nullptr)
-		{
-			continue;
-		}
-		UE_LOG(LogTemp, Display, TEXT("QuickSlotArr[%d] 채워짐"), i);
+		// 현재 퀵슬롯 ui 갱신
+		RenewQuickSlotUI(CurQuickSlotIdx);
+	}
+	else
+	{
+		// 다른 슬롯에 장비된 아이템이 없을 경우 퀵슬롯 UI 비우기
+		EmptyQuickSlotUI();
 	}
 }
 
@@ -264,7 +238,20 @@ void UEquip_Mgr::RenewNextQuickSlotUI(int32 _Idx)
 	}
 	UUI_Base* MainUI = GameMode->GetMainHUD();
 
-	MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
+	MainUI->GetQuickSlotUI()->RenewNextQuickSlot(_Idx);
+}
+
+void UEquip_Mgr::EmptyQuickSlotUI()
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+	if ( !IsValid(GameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("EmptyQuickSlotUI 게임모드 캐스팅 실패"));
+		return;
+	}
+	UUI_Base* MainUI = GameMode->GetMainHUD();
+
+	MainUI->GetQuickSlotUI()->EmptyLowerQuickSlot();
 }
 
 int32 UEquip_Mgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)

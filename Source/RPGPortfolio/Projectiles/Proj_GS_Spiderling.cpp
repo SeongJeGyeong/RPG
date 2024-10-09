@@ -44,7 +44,6 @@ void AProj_GS_Spiderling::LaunchMotion(FVector _TargetVec)
 
 void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UE_LOG(LogTemp, Warning, TEXT("HitProj"));
 	APlayer_Base_Knight* pTarget = Cast<APlayer_Base_Knight>(OtherActor);
 	if (!IsValid(pTarget))
 	{

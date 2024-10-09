@@ -40,8 +40,6 @@ void UUI_TitleScreen::NewBtnClicked()
 
 void UUI_TitleScreen::NewBtnHovered()
 {
-	UE_LOG(LogTemp, Warning, TEXT("NewButton Hovered"));
-
 	UWidgetBlueprintGeneratedClass* pWidgetClass = GetWidgetTreeOwningClass();
 
 	for (int32 i = 0; i < pWidgetClass->Animations.Num(); ++i)

@@ -52,7 +52,20 @@ void UAnim_GreaterSpider::AnimNotify_AttackEnd()
 
 void UAnim_GreaterSpider::AnimNotify_ShotProj()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ShotProj"));
-	ABoss_GreaterSpider* pSpider = Cast<ABoss_GreaterSpider>(TryGetPawnOwner());
-	pSpider->RangedAttack();
+	OnRangedAttack.Broadcast();
+}
+
+void UAnim_GreaterSpider::AnimNotify_Stomp()
+{
+	OnStompAttack.Broadcast();
+}
+
+void UAnim_GreaterSpider::AnimNotify_SwingArm_Left()
+{
+	OnSwingAttack.Broadcast(EGreaterSpider_STATE::LEFTATTACK);
+}
+
+void UAnim_GreaterSpider::AnimNotify_SwingArm_Right()
+{
+	OnSwingAttack.Broadcast(EGreaterSpider_STATE::RIGHTATTACK);
 }

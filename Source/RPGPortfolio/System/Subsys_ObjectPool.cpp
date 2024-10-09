@@ -15,6 +15,8 @@
 #include "../Characters/State/State_UseSkill.h"
 #include "../Characters/State/State_Action.h"
 #include "../Characters/State/State_Guard.h"
+#include "../Characters/State/State_GuardBreak.h"
+#include "../Characters/State/State_AttackWait.h"
 
 void USubsys_ObjectPool::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -32,6 +34,8 @@ void USubsys_ObjectPool::Initialize(FSubsystemCollectionBase& Collection)
 	StatePool.Add(EPlayerStateType::USESKILL_1, MakeUnique<State_UseSkill>());
 	StatePool.Add(EPlayerStateType::ACTION, MakeUnique<State_Action>());
 	StatePool.Add(EPlayerStateType::GUARD, MakeUnique<State_Guard>());
+	StatePool.Add(EPlayerStateType::GUARDBREAK, MakeUnique<State_GuardBreak>());
+	StatePool.Add(EPlayerStateType::ATTACK_WAIT, MakeUnique<State_AttackWait>());
 }
 
 void USubsys_ObjectPool::Deinitialize()
@@ -110,6 +114,12 @@ TUniquePtr<StateMachine> USubsys_ObjectPool::GetStateFromPool(EPlayerStateType _
 		break;
 	case EPlayerStateType::GUARD:
 		pState = MakeUnique<State_Guard>();
+		break;
+	case EPlayerStateType::GUARDBREAK:
+		pState = MakeUnique<State_GuardBreak>();
+		break;
+	case EPlayerStateType::ATTACK_WAIT:
+		pState = MakeUnique<State_AttackWait>();
 		break;
 	default:
 		break;

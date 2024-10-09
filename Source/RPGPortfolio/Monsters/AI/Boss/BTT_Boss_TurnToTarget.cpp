@@ -26,21 +26,15 @@ EBTNodeResult::Type UBTT_Boss_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& 
 		return EBTNodeResult::Failed;
 	}
 
-	FVector LookVector = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-	LookVector.Z = 0.f;
-	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
-	
-	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-	FVector Cross = FVector::CrossProduct(vOffset, pBoss->GetActorForwardVector());
-	float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
+	int32 iDir = _OwnComp.GetBlackboardComponent()->GetValueAsInt(TEXT("TargetDirection"));
 
 	// 몬스터 기준 왼쪽
-	if ( fDir >= 100.f )
+	if ( iDir == 2)
 	{
 		pBoss->SetiTurnDir(1);
 	}
 	// 몬스터 기준 오른쪽
-	else if ( fDir <= -100.f )
+	else if ( iDir == 3 )
 	{
 		pBoss->SetiTurnDir(2);
 	}
@@ -48,6 +42,10 @@ EBTNodeResult::Type UBTT_Boss_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& 
 	{
 		pBoss->SetiTurnDir(0);
 	}
+
+	FVector LookVector = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
+	LookVector.Z = 0.f;
+	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
 
 	pBoss->SetActorRotation(FMath::RInterpTo(pBoss->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 5.f));
 

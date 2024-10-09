@@ -28,6 +28,9 @@
 #include "MotionWarpingComponent.h"
 #include "RootMotionModifier_SkewWarp.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "../System/FadeViewportClient.h"
+#include "../GameInstance_Base.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -58,7 +61,6 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_MWComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarp"));
 
 	HitCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCollision"));
-	HitCollision->SetCollisionProfileName(TEXT("PlayerAttack"));
 }
 
 void APlayer_Base_Knight::PostInitializeComponents()
@@ -88,9 +90,9 @@ void APlayer_Base_Knight::PostInitializeComponents()
 	m_AnimInst = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
 	if ( IsValid(m_AnimInst) )
 	{
-		m_AnimInst->OnDodgeTimeCheck.AddUObject(this, &APlayer_Base_Knight::DodgeTimeCheck);
-		m_AnimInst->OnAttackMove.AddUObject(this, &APlayer_Base_Knight::AttackMove);
+		m_AnimInst->OnInvincibleState.AddUObject(this, &APlayer_Base_Knight::InvincibleCheck);
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
+		m_AnimInst->OnDead.AddUObject(this, &APlayer_Base_Knight::PlayerDead);
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &APlayer_Base_Knight::MontageEnded);
 	}
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
@@ -139,10 +141,6 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		CurrentState->Enter(this);
 	}
-
-	HitCollision->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::HitBoxBeginOverlap);
-	HitCollision->SetGenerateOverlapEvents(true);
-	HitCollision->SetUseCCD(true);
 }
 
 // Called every frame
@@ -259,6 +257,51 @@ void APlayer_Base_Knight::SetState(EPlayerStateType _StateType)
 	CurrentState->Enter(this);
 }
 
+bool APlayer_Base_Knight::IsPossibleStateTransition(EPlayerStateType _State)
+{
+	bool IsPossible = true;
+	switch ( _State )
+	{
+	case EPlayerStateType::IDLE:
+		break;
+	case EPlayerStateType::HIT:
+		break;
+	case EPlayerStateType::ATTACK_WAIT:
+		break;
+	case EPlayerStateType::JUMP:
+	case EPlayerStateType::SPRINT:
+	case EPlayerStateType::DODGE:
+	case EPlayerStateType::USESKILL_1:
+	case EPlayerStateType::USEITEM:
+		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE ||
+					   CurrentState->GetStateType() == EPlayerStateType::SPRINT ||
+					   CurrentState->GetStateType() == EPlayerStateType::ATTACK_WAIT );
+		break;
+	case EPlayerStateType::ATTACK:
+	case EPlayerStateType::HEAVYATTACK:
+		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE ||
+					   CurrentState->GetStateType() == EPlayerStateType::SPRINT ||
+					   CurrentState->GetStateType() == EPlayerStateType::ATTACK_WAIT ||
+					   CurrentState->GetStateType() == EPlayerStateType::ATTACK ||
+					   CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK );
+		break;
+	case EPlayerStateType::JUMPATTACK:
+		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::JUMP );
+		break;
+	case EPlayerStateType::ACTION:
+		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT );
+		break;
+	case EPlayerStateType::GUARD:
+	case EPlayerStateType::GUARDBREAK:
+		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE );
+		break;
+	default:
+		break;
+	}
+
+	return IsPossible;
+}
+
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
@@ -267,10 +310,14 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	{
 		return;
 	}
-
+	
 	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP || 
 		CurrentState->GetStateType() == EPlayerStateType::HIT || 
-		CurrentState->GetStateType() == EPlayerStateType::ACTION )
+		CurrentState->GetStateType() == EPlayerStateType::ACTION ||
+		CurrentState->GetStateType() == EPlayerStateType::GUARD ||
+		CurrentState->GetStateType() == EPlayerStateType::JUMPATTACK ||
+		CurrentState->GetStateType() == EPlayerStateType::USESKILL_1 ||
+		CurrentState->GetStateType() == EPlayerStateType::USEITEM )
 	{
 		return;
 	}
@@ -292,21 +339,6 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, vInput.Y);
 	}
-
-	if ( !m_SArm->IsLockedOn() )
-	{
-		// 락온 중이 아닐때는 캐릭터의 정면으로만 이동하므로
-		vInput.X = 1.f;
-		vInput.Y = 0.f;
-	}
-	if (bSprint)
-	{
-		vInput *= 2;
-	}
-
-	fForwardSpeed = vInput.X;
-	fRightSpeed = vInput.Y;
-	//m_AnimInst->SetLocalVelocityXY(vInput);
 }
 
 void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
@@ -327,18 +359,16 @@ void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 {
-	if (CurrentState->GetStateType() != EPlayerStateType::IDLE && CurrentState->GetStateType() != EPlayerStateType::SPRINT)
+	if ( IsPossibleStateTransition(EPlayerStateType::JUMP) )
 	{
-		return;
+		SetState(EPlayerStateType::JUMP);
+		ACharacter::Jump();
 	}
-
-	SetState(EPlayerStateType::JUMP);
-	ACharacter::Jump();
 }
 
 void APlayer_Base_Knight::SprintAction(const FInputActionInstance& _Instance)
 {
-	if (!(CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT))
+	if ( !IsPossibleStateTransition(EPlayerStateType::SPRINT) )
 	{
 		return;
 	}
@@ -355,9 +385,7 @@ void APlayer_Base_Knight::SprintAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	bSprint = _Instance.GetValue().Get<bool>();
-
-	if ( bSprint )
+	if ( _Instance.GetValue().Get<bool>() )
 	{
 		SetState(EPlayerStateType::SPRINT);
 	}
@@ -371,13 +399,7 @@ void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
 {
 	bInputGuard = _Instance.GetValue().Get<bool>();
 
-
 	SetbHoldGuard(bInputGuard);
-
-	//if (CurrentState->GetStateType() == EPlayerStateType::IDLE)
-	//{
-	//	//m_AnimInst->SetbIsGuard(bInputGuard);
-	//}
 }
 
 void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
@@ -388,33 +410,25 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if ( CurrentState->GetStateType() == EPlayerStateType::DODGE ||
-	CurrentState->GetStateType() == EPlayerStateType::USEITEM ||
-	CurrentState->GetStateType() == EPlayerStateType::USESKILL_1 ||
-	CurrentState->GetStateType() == EPlayerStateType::HIT )
+	EPlayerStateType State = (CurrentState->GetStateType() == EPlayerStateType::JUMP) ? EPlayerStateType::JUMPATTACK : EPlayerStateType::ATTACK;
+	if ( !IsPossibleStateTransition(State) )
 	{
 		return;
 	}
 
 	// 공격중인 상태에서 다음 공격 입력 기간이 아닐경우
-	if ( !bNextAtkCheckOn && CurrentCombo != 1 )
+	if ( !bEnableAtkInput && CurrentCombo != 1 )
 	{
 		return;
 	}
 
-	if ( bHeavyHold && CurrentState->GetStateType() == EPlayerStateType::ATTACK)
-	{
-		return;
-	}
 	bIsAttacking = _Instance.GetValue().Get<bool>();
 
 	// 공격 중일 경우 어택 스테이트에서 다음 콤보 발동 처리
-	if ( CurrentCombo != 1 )
+	if ( CurrentCombo == 1 )
 	{
-		return;
+		AttackStart();
 	}
-
-	AttackStart();
 }
 
 void APlayer_Base_Knight::HeavyAttack(const FInputActionInstance& _Instance)
@@ -424,19 +438,18 @@ void APlayer_Base_Knight::HeavyAttack(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 {
+	if ( !IsValid(m_AnimInst) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
+		return;
+	}
+
 	// 서 있거나 이동, 달리기 중에만 회피 가능
-	if ( !(	CurrentState->GetStateType() == EPlayerStateType::IDLE || 
-			//CurrentState->GetStateType() == EPlayerStateType::DODGE ||
-			CurrentState->GetStateType() == EPlayerStateType::SPRINT)
-		)
+	// 공격중일 때 다음 공격 시작 구간이면 회피로 전환 가능
+	if ( !IsPossibleStateTransition(EPlayerStateType::DODGE) )
 	{
 		return;
 	}
-	
-	//if (bInvalidInput)
-	//{
-	//	return;
-	//}
 
 	// 현재 스태미나가 소비량보다 적을 경우 회피 불가
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
@@ -451,7 +464,6 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
 {
 	// 미구현
-	//m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::PARRY));
 }
 
 void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
@@ -521,11 +533,17 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 {
-	//if ( CurrentState->GetStateType() == EPlayerStateType::JUMP || bInvalidInput || m_AnimInst->GetbIsGuard())	
-	if ( CurrentState->GetStateType() != EPlayerStateType::IDLE && CurrentState->GetStateType() != EPlayerStateType::SPRINT )
+	if ( !IsValid(m_AnimInst) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
+		return;
+	}
+
+	if ( !IsPossibleStateTransition(EPlayerStateType::ACTION) )
 	{
 		return;
 	}
+
 	if ( bInputGuard )
 	{
 		return;
@@ -535,12 +553,12 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	{
 		if ( OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->_getUObject()->IsA(AItem_Dropped_Base::StaticClass()) )
 		{
-			m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ACTION_ITEM));
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::GETITEM), GetActorLocation());
+			Play_PlayerMontage(EPlayerMontage::ACTION_ITEM);
+			Play_PlayerSound(EPlayerSound::GETITEM);
 		}
 		else
 		{
-			m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::ACTION_PROP));
+			Play_PlayerMontage(EPlayerMontage::ACTION_PROP);
 		}
 
 		SetState(EPlayerStateType::ACTION);
@@ -558,15 +576,14 @@ void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 {
 	if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr())
 	{
-		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextArrayIndex();
-		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯 인덱스 : %d"), Idx);
-		m_MainUI->RenewQuickSlotUI(Idx);
+		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextValidIndex();
+		UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
+		m_MainUI->HUD_RenewQuickSlotUI(Idx);
 	}
 }
 
 void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instance)
 {
-	//if ( CurrentState->GetStateType() != EPlayerStateType::IDLE || m_AnimInst->GetbIsGuard() )
 	if ( CurrentState->GetStateType() != EPlayerStateType::IDLE )
 	{
 		return;
@@ -577,7 +594,7 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		int32 iCurIdx = UEquip_Mgr::GetInst(GetWorld())->GetCurrentIndex();
 		if ( UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx) )
 		{
-			TSharedPtr<FInvenItemRow> pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
+			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
 			UseItem(pItem->ID, pItem->EquipedSlot);
 		}
 		else
@@ -594,10 +611,12 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
 		return;
 	}
-	if (bInputGuard || CurrentState->GetStateType() == EPlayerStateType::JUMP)
+
+	if ( !IsPossibleStateTransition(EPlayerStateType::USESKILL_1) )
 	{
 		return;
 	}
+
 	if ( m_SkillComponent->GetSkillName() == ESkillName::NONE )
 	{
 		return;
@@ -613,31 +632,11 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 	ConsumeMP(Skill->MP_Consumption);
 	ConsumeStamina(Skill->Stamina_Consumption);
 	m_AnimInst->Montage_Play(Skill->Animation);
-	//SetState(EPlayerStateType::USESKILL_1);
+	SetState(EPlayerStateType::USESKILL_1);
 	// ShotProjectile로
 }
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
-
-// 공격 모션 중 이동
-void APlayer_Base_Knight::AttackMove()
-{
-	if ( m_SArm->IsLockedOn() )
-	{
-		m_SArm->m_Target->GetComponentLocation();
-		float fDist = ( GetActorLocation() - m_SArm->m_Target->GetComponentLocation() ).Size();
-		float fImpulsePower = 600.f;
-		if ( fDist <= 200.f )
-		{
-			fImpulsePower = FMath::Clamp(fDist, 1.f, 200.f);
-		}
-		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * fImpulsePower, true);
-	}
-	else
-	{
-		GetCharacterMovement()->AddImpulse(GetActorForwardVector() * 500.f, true);
-	}
-}
 
 void APlayer_Base_Knight::JumpAttack()
 {
@@ -690,13 +689,81 @@ void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
 }
 
+void APlayer_Base_Knight::PlayerDead()
+{
+	m_AnimInst->Montage_Pause();
+	m_MainUI->SetVisibility(ESlateVisibility::Collapsed);
+
+	TSubclassOf<UUserWidget> DeadUIClass = LoadClass<UUserWidget>(nullptr, TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_DeadScreen.UI_DeadScreen_C'"));
+	if ( !IsValid(DeadUIClass) )
+	{
+		return;
+	}
+
+	UUserWidget* DeadUI = CreateWidget(GetWorld(), DeadUIClass);
+	DeadUI->SetRenderOpacity(0.f);
+	DeadUI->AddToViewport(6);
+	GetWorldTimerManager().SetTimer(DeadTimer, FTimerDelegate::CreateWeakLambda(this, [DeadUI, this]
+		{
+			DeadUI->SetRenderOpacity(DeadUI->GetRenderOpacity() + 0.003f);
+			if ( DeadUI->GetRenderOpacity() >= 1.f )
+			{
+				UGameInstance_Base* GameInst = Cast<UGameInstance_Base>(GetGameInstance());
+				if ( IsValid(GameInst) )
+				{
+					GameInst->RestartPlayer();
+					GetWorldTimerManager().ClearTimer(DeadTimer);
+				}
+			}
+		}
+	)
+	, 0.01f, true);
+
+}
+
 float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if ( bDead )
+	{
+		return 0.f;
+	}
+
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>( &DamageEvent );
+	// 공격받은 방향 구하기
+	// 일반 몬스터의 경우 몬스터의 위치, 보스의 경우 공격의 ImpactPoint
+	bool IsCommonMon = DamageCauser->IsA(AMonster_Base::StaticClass());
+	FVector vOffset;
+	if (IsCommonMon)
+	{
+		vOffset = ( DamageCauser->GetActorLocation() - GetActorLocation() ).GetSafeNormal();
+	}
+	else
+	{
+		vOffset = ( PointDamageEvent->HitInfo.ImpactPoint - GetActorLocation() ).GetSafeNormal();
+	}
+	// 공격 방향 구하기
+	uint8 HitDir = GetHitDirection(vOffset);
 
+	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
+	// 플레이어가 가드중이고 공격이 정면에서 오고 있을때
+	if ( bHoldGuard && HitDir == 1 )
+	{
+		// 스태미너가 부족해 가드브레이크 상태가 되면 false
+		if ( GuardEnemyAttack(FinalDamage, pDamageType->GetAtkWeight()) )
+		{
+			if (IsCommonMon)
+			{
+				AMonster_Base* Monster = Cast<AMonster_Base>(DamageCauser);
+				Monster->PlayAtkBlockedAnim();
+			}
+
+			return 0.f;
+		}
+	}
+
+	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 받은 공격타입에 따라 몬스터의 방어력 설정
 	float fPlayerDef = 0.f;
 	switch (pDamageType->GetAtkType())
@@ -716,53 +783,38 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	FinalDamage = FMath::Clamp(FinalDamage - fPlayerDef, 0.f, FinalDamage);
 	int32 iCurHP = StatMgr->GetPlayerBasePower().CurHP;
 	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, StatMgr->GetPlayerBasePower().MaxHP);
-
 	StatMgr->SetPlayerCurrentHP(iCurHP);
 
-	if ( iCurHP <= 0.f && GetController() )
+	if ( iCurHP <= 0.f && !bDead )
 	{
+		bDead = true;
 		// 사망처리
+		DisableInput(NULL);
+		Play_PlayerMontage(EPlayerMontage::DIE);
+		Play_PlayerSound(EPlayerSound::DIE);
 		return 0.f;
 	}
 
 	// 피격 이펙트 스폰
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
-	{
-		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-		UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
-		
-		UParticleSystem* Particle = EffectMgr->GetHitEffect();
-		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
-	}
+	UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
+	UParticleSystem* Particle = EffectMgr->GetHitEffect();
+	UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 
-	// 피격 시 공격대상 반대방향으로 밀려나도록
-	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
-	FVector LaunchForce = LaunchVec.GetSafeNormal() * 300.f;
-	LaunchCharacter(LaunchForce, false, false);
-	
-	// 피격 사운드 재생
-	if (!IsValid(m_PlayerSound->GetPlayerSound(EPlayerSound::HIT)))
+	if ( GetCharacterMovement()->IsFalling() )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("플레이어 피격사운드 로드 실패"));
+		Play_PlayerMontage(EPlayerMontage::HIT_AIR);
+	}
+	else if (pDamageType->GetAtkWeight() == EATTACK_WEIGHT::HEAVY )
+	{
+		Play_PlayerMontage(EPlayerMontage::HIT_HEAVY);
 	}
 	else
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(EPlayerSound::HIT), GetActorLocation());
+		PlayHitAnimation(HitDir);
 	}
 
-	// 피격 애니메이션 재생
-	m_AnimInst->Montage_Stop(1.f);
-	if ( !IsValid(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT)) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("플레이어 피격몽타주 로드 실패"));
-	}
-	else
-	{
-		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT));
-	}
-
+	Play_PlayerSound(EPlayerSound::HIT);
 	SetState(EPlayerStateType::HIT);
-	ResetVarsOnHitState();
 
 	return 0.0f;
 }
@@ -772,11 +824,9 @@ void APlayer_Base_Knight::AttackHitCheck()
 {
 	TArray<FHitResult> OutHits;
 	FCollisionQueryParams Params(NAME_None, false, this);
+	FCollisionShape Shape = HitCollision->GetCollisionShape();
 	FVector CurrentLoc = HitCollision->GetComponentLocation();  // 현재 위치
 	FQuat Rotation = HitCollision->GetComponentQuat();             // 현재 회전
-	float CapsuleRadius = HitCollision->GetUnscaledCapsuleRadius();
-	float CapsuleHalfHeight = HitCollision->GetUnscaledCapsuleHalfHeight();
-	FCollisionShape Shape = FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight);
 	if ( PrevTraceLoc.IsZero() )
 	{
 		PrevTraceLoc = CurrentLoc;
@@ -809,7 +859,7 @@ void APlayer_Base_Knight::AttackHitCheck()
 					}
 				}
 
-				if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) )
+				if ( CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK )
 				{
 					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
 				}
@@ -848,7 +898,7 @@ void APlayer_Base_Knight::AttackStart()
 				SetState(EPlayerStateType::HEAVYATTACK);
 			}
 		}
-		else if ( CurrentState->GetStateType() != EPlayerStateType::HEAVYATTACK )
+		else
 		{
 			bIsAttacking = ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
 			if ( bIsAttacking )
@@ -858,21 +908,6 @@ void APlayer_Base_Knight::AttackStart()
 			}
 		}
 	}
-}
-
-void APlayer_Base_Knight::HitBoxActivate(bool _Activate)
-{
-	if ( _Activate )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hitbox On"));
-		HitCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hitbox Off"));
-		HitCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	HitActorArr.Empty();
 }
 
 bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
@@ -936,38 +971,58 @@ bool APlayer_Base_Knight::ConsumeMP(float _Consumption)
 	return true;
 }
 
-bool APlayer_Base_Knight::BlockEnemyAttack(float _Damage, FVector _MonDir)
+uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
 {
-	// 플레이어와 몬스터가 바라보는 방향 사이의 각도 구하기
-	// fDegree가 180도에 가까울수록 서로 마주보고 있음(몬스터가 플레이어의 정면에 있음)
-	// fDegree가 0도에 가까울수록 서로 같은 방향을 보고 있음(몬스터가 플레이어의 뒤를 노림)
-	// 플레이어 정면 기준으로 160도 각도 안에서 공격했을 경우 막히도록
-	// 보스의 경우 히트한 트레이스 정보의 노멀 벡터를 반전시켜 히트 콜리전에서 플레이어를 바라보는 벡터를 구해 적용함
-	FVector vPlayerDir = GetActorForwardVector().GetSafeNormal();
-	float fDot = FVector::DotProduct(vPlayerDir, _MonDir);
-	float fAcosAngle = FMath::Acos(fDot);
-	float fDegree = FMath::RadiansToDegrees(fAcosAngle);
+	// 1. 공격위치가 플레이어의 전후좌우 어느쪽인지 판별
+	// RightAngle : 플레이어 측면으로부터 공격위치 판별. 1이에 가까울수록 오른쪽, -1에 가까울수록 왼쪽이다. 0이면 정확히 플레이어의 정후면에 위치.
+	// ForwardAngle : 플레이어 정면으로부터 공격위치 판별. 1이면 정면, -1이면 후면, 0이면 측면.
+	// 2. 두 내적값을 이용해 각도를 구한다.
+	// atan2의 경우 atan과 달리 -180~180 까지의 각도를 표현할 수 있기 때문에 좌우판별에 유용하다.
+	float RightAngle = FVector::DotProduct(_MonVec, GetActorRightVector());
+	float ForwardAngle = FVector::DotProduct(_MonVec, GetActorForwardVector());
+	float fAngle = FMath::Atan2(RightAngle, ForwardAngle);
+	float fDir = FMath::RadiansToDegrees(fAngle);
 
-	// 가드 범위 밖에서 공격받을 경우 가드 실패
-	if (fDegree < 100.f)
+	// 피격 애니메이션 재생
+	uint8 iDir = 4;
+	if ( -45.f < fDir && fDir < 45.f )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("가드 실패"));
-		return false;
+		iDir = 1;
+	}
+	else if ( -135 < fDir && fDir <= -45.f )
+	{
+		iDir = 2;
+	}
+	else if ( 45.f <= fDir && fDir < 135.f )
+	{
+		iDir = 3;
 	}
 
+	return iDir;
+}
+
+bool APlayer_Base_Knight::GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType)
+{
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 몬스터의 공격력의 10분의 1 만큼 스태미나 감소
 	StatMgr->SetPlayerCurrentStamina(FMath::Clamp(StatMgr->GetPlayerBasePower().CurStamina - _Damage * 0.1f, 0.f, StatMgr->GetPlayerBasePower().CurStamina));
-	if (StatMgr->GetPlayerBasePower().CurStamina <= 0.f)
+	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
 	{
 		// 방어 풀리고 경직상태 되도록
-		SetState(EPlayerStateType::HIT);
+		SetState(EPlayerStateType::GUARDBREAK);
+		return false;
+	}
+
+	if ( _WeightType == EATTACK_WEIGHT::LIGHT )
+	{
+		Play_PlayerMontage(EPlayerMontage::GUARD_LIGHT);
 	}
 	else
 	{
-		SetState(EPlayerStateType::GUARD);
+		Play_PlayerMontage(EPlayerMontage::GUARD_HEAVY);
 	}
 
+	SetState(EPlayerStateType::GUARD);
 	return true;
 }
 
@@ -1020,14 +1075,7 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 	UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
 	EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
-	if(!IsValid(m_PlayerSound->GetPlayerSound(SoundEnum)))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 사운드 로드 실패"));
-	}
-	else
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(SoundEnum), GetActorLocation());
-	}
+	Play_PlayerSound(SoundEnum);
 
 	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
 	if ( _Slot == EEQUIP_SLOT::EMPTY )
@@ -1041,11 +1089,10 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(idx);
 	}
 
-	m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::USEITEM));
-
+	Play_PlayerMontage(EPlayerMontage::USEITEM);
 	SetState(EPlayerStateType::ACTION);
 	// 아이템 사용후 대기시간 on
-	ItemDelaytime(1.f);
+	ItemDelaytime(2.f);
 }
 
 void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
@@ -1099,38 +1146,49 @@ void APlayer_Base_Knight::ResetVarsOnHitState()
 {
 	// 현재 행동상태 해제
 	ClearMontageRelatedTimer();
-	//bAtkTrace = false;
-	bNextAtkCheckOn = false;
+	bAtkTrace = false;
+	bEnableAtkInput = false;
 }
 
 void APlayer_Base_Knight::ClearMontageRelatedTimer()
 {
-	GetWorldTimerManager().ClearTimer(BlockReactTimer);
 	GetWorldTimerManager().ClearTimer(JumpAtkTimer);
 	GetWorldTimerManager().ClearTimer(HitStiffTimer);
+}
+
+void APlayer_Base_Knight::PlayerMotionWarping(EPlayerMontage _MontageType, float _EndTime)
+{
+	if ( _MontageType == EPlayerMontage::DODGE_FW )
+	{
+		MotionWarping_Dodge(m_PlayerMontage->GetPlayerMontage(_MontageType), _EndTime);
+	}
+	else
+	{
+		MotionWarping_Attack(m_PlayerMontage->GetPlayerMontage(_MontageType), _EndTime);
+	}
 }
 
 void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _EndTime)
 {
 	FVector PlayerLoc = GetActorLocation();
 	m_AnimInst->RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
-	if ( GetbToggleLockOn() )
+	if ( GetbIsLockOn() )
 	{
 		const FVector TargetLoc = GetLockOnTarget()->GetComponentLocation();
 		float Distance = ( TargetLoc - PlayerLoc ).Size();
 
 		FVector MoveLoc = PlayerLoc + (TargetLoc - PlayerLoc).GetSafeNormal() * 60.f;
-		if ( Distance <= 300.f )
+		if ( Distance <= 200.f )
 		{
-			if ( Distance >= 200.f )
+			if ( Distance >= 100.f )
 			{
-				// 락온 대상과의 거리가 2m 이상 3m 이하면 translation on
-				// 캐릭터가 대상 앞 2m 거리로 워프하도록 하여 공격 모션의 이동 거리 때문에 적의 뒤까지 이동하지 않도록
-				MoveLoc = ( ( PlayerLoc - TargetLoc ).GetSafeNormal() * 200.f ) + TargetLoc;
+				// 락온 대상과의 거리가 1m 이상 2m 이하면 translation on
+				// 캐릭터가 대상 앞 1m 거리로 워프하도록 하여 공격 모션의 이동 거리 때문에 적의 뒤까지 이동하지 않도록
+				MoveLoc = ( ( PlayerLoc - TargetLoc ).GetSafeNormal() * 100.f ) + TargetLoc;
 			}
 			else
 			{
-				// 락온 대상과의 거리가 2m 미만이면 앞으로 이동하지 않고 현재 위치에 멈추도록 설정
+				// 락온 대상과의 거리가 1m 미만이면 앞으로 이동하지 않고 현재 위치에 멈추도록 설정
 				MoveLoc = PlayerLoc;
 				m_AnimInst->RootMotionMode = ERootMotionMode::IgnoreRootMotion;
 			}
@@ -1181,86 +1239,51 @@ void APlayer_Base_Knight::MotionWarping_Dodge(UAnimSequenceBase* _Anim, float _E
 	}
 }
 
-// 무적시간 동안 데미지 안받도록 설정
-void APlayer_Base_Knight::DodgeTimeCheck(bool _Dodge)
+void APlayer_Base_Knight::Play_PlayerMontage(EPlayerMontage _MontageType)
 {
-	if (_Dodge)
+	if ( !IsValid(m_PlayerMontage->GetPlayerMontage(_MontageType)) )
 	{
-		SetCanBeDamaged(false);
+		UE_LOG(LogTemp, Warning, TEXT("플레이어 몽타주 로드 실패"));
 	}
 	else
 	{
-		SetCanBeDamaged(true);
+		m_AnimInst->Montage_Play(m_PlayerMontage->GetPlayerMontage(_MontageType));
 	}
+}
+
+void APlayer_Base_Knight::Play_PlayerSound(EPlayerSound _SoundType)
+{
+	if ( !IsValid(m_PlayerSound->GetPlayerSound(_SoundType)) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("플레이어 사운드 로드 실패"));
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), m_PlayerSound->GetPlayerSound(_SoundType), GetActorLocation());
+	}
+}
+
+void APlayer_Base_Knight::PlayHitAnimation(uint8 _Dir)
+{
+	// 1 : front, 2 : left, 3 : right, 4 : back
+	FName HitSection = FName(*FString::Printf(TEXT("Hit%d"), _Dir));
+	Play_PlayerMontage(EPlayerMontage::HIT);
+	GetMesh()->GetAnimInstance()->Montage_JumpToSection(HitSection, m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT));
+}
+
+// 무적시간 동안 데미지 안받도록 설정
+void APlayer_Base_Knight::InvincibleCheck(bool _Invinc)
+{
+	SetCanBeDamaged(!_Invinc);
 }
 
 void APlayer_Base_Knight::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if ( Montage == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT) )
-	{
-		SetState(EPlayerStateType::IDLE);
-		return;
-	}
-}
-
-void APlayer_Base_Knight::HitBoxBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("HitBoxOverlap"));
-
-	// 캡슐의 위치 및 크기 정보 가져오기
-	FVector StartLocation = HitCollision->GetComponentLocation();  // 현재 위치
-	FQuat Rotation = HitCollision->GetComponentQuat();             // 현재 회전
-	float CapsuleRadius = HitCollision->GetUnscaledCapsuleRadius();
-	float CapsuleHalfHeight = HitCollision->GetUnscaledCapsuleHalfHeight();
-
-	TArray<FHitResult> HitResults;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);  // 자기 자신은 무시
-	Params.bTraceComplex = true;   // 복잡한 충돌 검사
-
-	// 같은 크기와 위치로 스윕 수행
-	bool bResult = GetWorld()->SweepMultiByChannel(
-		HitResults,                              // 충돌 결과 저장
-		StartLocation,                           // 시작 위치
-		StartLocation,                           // 종료 위치 (이동 없음)
-		Rotation,                                // 현재 회전 값
-		ECollisionChannel::ECC_GameTraceChannel5,                   // 충돌 트레이스 채널
-		FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),  // 캡슐 콜리전 크기
-		Params                                  // 충돌 관련 설정
-	);
-
-	FColor color;
-	color = bResult ? FColor::Red : FColor::Green;
-	FVector vMidpoint = HitCollision->GetComponentLocation();
-	DrawDebugCapsule(GetWorld(), vMidpoint, CapsuleHalfHeight, CapsuleRadius, Rotation, color, false, 1.f);
-
-	if ( bResult )
-	{
-		for ( FHitResult HitInfo : HitResults )
-		{
-			if ( HitInfo.GetActor()->IsValidLowLevel() )
-			{
-				for ( AActor* HitActor : HitActorArr )
-				{
-					if ( HitInfo.GetActor() == HitActor )
-					{
-						return;
-					}
-				}
-
-				if ( m_AnimInst->Montage_IsPlaying(m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HEAVYATTACK)) )
-				{
-					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
-				}
-				else
-				{
-					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::ATTACK);
-				}
-
-				HitActorArr.Add(HitInfo.GetActor());
-			}
-		}
-	}
+	//if ( Montage == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT) )
+	//{
+	//	SetState(EPlayerStateType::IDLE);
+	//	return;
+	//}
 }
 
 void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
@@ -1390,7 +1413,7 @@ void APlayer_Base_Knight::DrawDebugAttackTrace(const UWorld* World, const FVecto
 
 void APlayer_Base_Knight::SetbHoldGuard(const bool& _ToggleGuard)
 {
-	bHoldGuard = true;
+	bHoldGuard = _ToggleGuard;
 
 	// 서브시스템의 경우 게임 실행 시 생성되므로 애님 블루프린트 에디터에서 해당 함수에 접근하는 경우 막아야 함
 	if (GetWorld()->WorldType == EWorldType::Editor || GetWorld()->WorldType == EWorldType::EditorPreview)
@@ -1410,7 +1433,7 @@ ULockOnTargetComponent* APlayer_Base_Knight::GetLockOnTarget() const
 	return m_SArm->GetLockOnTarget();
 }
 
-bool APlayer_Base_Knight::GetbToggleLockOn() const
+bool APlayer_Base_Knight::GetbIsLockOn() const
 {
 	return m_SArm->IsLockedOn();
 }

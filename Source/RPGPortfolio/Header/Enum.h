@@ -46,6 +46,8 @@ enum class EPlayerMontage : uint8
 	JUMPATTACK,
 	PARRY,
 	HIT,
+	HIT_HEAVY,
+	HIT_AIR,
 	GUARDBREAK,
 	USEITEM,
 	SLASH_CUTTER,
@@ -53,6 +55,7 @@ enum class EPlayerMontage : uint8
 	ACTION_PROP,
 	GUARD_LIGHT,
 	GUARD_HEAVY,
+	DIE,
 };
 
 UENUM(BlueprintType)
@@ -67,6 +70,7 @@ enum class EPlayerSound : uint8
 	USERESTORE,
 	USESOUL,
 	GUARDBLOCK,
+	DIE,
 };
 
 UENUM(BlueprintType)
@@ -333,4 +337,12 @@ enum class EPlayerStateType : uint8
 	USESKILL_1,
 	GUARD,
 	GUARDBREAK,
+	ATTACK_WAIT,
+};
+
+UENUM(BlueprintType)
+enum class EATTACK_WEIGHT : uint8
+{
+	LIGHT,
+	HEAVY,
 };

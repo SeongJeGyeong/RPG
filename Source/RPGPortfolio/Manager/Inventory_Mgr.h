@@ -51,10 +51,14 @@ public:
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
 	void RenewItemListUI(EITEM_TYPE _Type);
-	void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip);
+	//void RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip);
+	//void EquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
+	void EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow);
+	void UnEquipConsumeUI(EEQUIP_SLOT _Slot);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
 	void DecreaseInventoryItem(EITEM_ID _ID);
 
 	UPaperSprite* GetCategoryIcon(EITEM_TYPE _type);
 	UPaperSprite* GetEquipSlotIcon(EEQUIP_SLOT _Slot);
+	class UItem_InvenData* GetInvenDataToItemRow(const FInvenItemRow& _ItemRow);
 };

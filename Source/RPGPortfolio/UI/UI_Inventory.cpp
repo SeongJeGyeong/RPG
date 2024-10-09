@@ -87,7 +87,6 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 		// 인벤토리에서는 메뉴앵커 표시 되도록
 		UUI_InvenItem* ItemUI = Cast<UUI_InvenItem>(m_ItemTileView->GetEntryWidgetFromItem(_ItemData));
 		ItemUI->SetAnchorActive(true);
-
 		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 		FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pData->GetItemID());
 		m_ItemName->SetText(FText::FromString(pItemInfo->ItemName));
@@ -221,15 +220,6 @@ void UUI_Inventory::SetCategoryUI(const EITEM_TYPE _Type)
 	if ( IsValid(pSprite) )
 	{
 		m_Category_Img->SetBrushResourceObject(pSprite);
-		// 스프라이트를 브러쉬로 바꾸기 위해 MakeBrushFromSprite가 필요함
-		// PaperSpriteBlueprintLibrary 는 Paper2D API에 포함되어 있지 않음
-		// MakeBrushFromSprite함수를 쓸 수 없기 때문에 해당 함수의 내용을 직접 가져와서 사용
-		//const FSlateAtlasData SpriteAtlasData = pSprite->GetSlateAtlasData();
-		//const FVector2D SpriteSize = SpriteAtlasData.GetSourceDimensions();
-		//FSlateBrush Brush;
-		//Brush.SetResourceObject(pSprite);
-		//Brush.ImageSize = FVector2D(80, 100);
-		//m_Category_Img->SetBrush(Brush);
 	}
 	else
 	{

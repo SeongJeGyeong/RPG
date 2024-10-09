@@ -22,23 +22,43 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 	{
 		return;
 	}
-
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	if (!IsValid(pPlayer))
+	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(FName("Target")));
+	if ( !IsValid(pPlayer) )
 	{
 		return;
 	}
 
 	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-	FVector Cross = FVector::CrossProduct(vOffset, pBoss->GetActorForwardVector());
-	float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
-	vOffset = vOffset.GetSafeNormal();
-	float fAngle = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
-	// fAngle : 1에 가까울 수록 몬스터의 정면에 가까우며, -1에 가까울 수록 몬스터의 후면에 가까움
-	// 0 = 몬스터의 90도 측면에 있음
-	float fDegree = FMath::RadiansToDegrees(fAngle);
 
-	_OwnComp.GetBlackboardComponent()->SetValueAsFloat(TEXT("TargetDirection"), fAngle);
+	float RightAngle = FVector::DotProduct(vOffset, pBoss->GetActorRightVector());
+	float ForwardAngle = FVector::DotProduct(vOffset, pBoss->GetActorForwardVector());
+	float fAngle = FMath::Atan2(RightAngle, ForwardAngle);
+	float fDir = FMath::RadiansToDegrees(fAngle);
+
+	int32 iDir = 4;
+	if ( -90.f < fDir && fDir < 90.f )
+	{
+		iDir = 1;	// 정면
+	}
+	else if ( -135 < fDir && fDir <= -90.f )
+	{
+		iDir = 2;	// 왼쪽
+	}
+	else if ( 90.f <= fDir && fDir < 135.f )
+	{
+		iDir = 3;	// 오른쪽
+	}
+
+	//FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
+	//vOffset = vOffset.GetSafeNormal();
+	//FVector Cross = FVector::CrossProduct(vOffset, pBoss->GetActorForwardVector());
+	//float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
+	//float fAngle = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
+	//// fAngle : 1에 가까울 수록 몬스터의 정면에 가까우며, -1에 가까울 수록 몬스터의 후면에 가까움
+	//// 0 = 몬스터의 90도 측면에 있음
+	//float fDegree = FMath::RadiansToDegrees(fAngle);
+
+	_OwnComp.GetBlackboardComponent()->SetValueAsInt(TEXT("TargetDirection"), iDir);
 
 	float Distance = FVector::Distance(pBoss->GetActorLocation(), pPlayer->GetActorLocation());
 
@@ -57,7 +77,7 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 
 	FColor AtkColor;
 	InAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
-	DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fAtkRange, 40, AtkColor, false, 0.4f);
+	//DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fAtkRange, 40, AtkColor, false, 0.4f);
 
 	float fRangedAtkRange = _OwnComp.GetBlackboardComponent()->GetValueAsFloat(FName("RangedAtkRange"));
 	bool InRangedAtkRange;
@@ -74,5 +94,5 @@ void UBTS_Boss_ChkDirection::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _
 
 	FColor RangedAtkColor;
 	InRangedAtkRange ? RangedAtkColor = FColor::Red : RangedAtkColor = FColor::Blue;
-	DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fRangedAtkRange, 40, RangedAtkColor, false, 0.4f);
+	//DrawDebugSphere(GetWorld(), pBoss->GetActorLocation(), fRangedAtkRange, 40, RangedAtkColor, false, 0.4f);
 }

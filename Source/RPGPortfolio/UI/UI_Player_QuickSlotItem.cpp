@@ -21,7 +21,7 @@ void UUI_Player_QuickSlotItem::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Player_QuickSlotItem::RenewQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem)
+void UUI_Player_QuickSlotItem::RenewQuickSlotItem(const FInvenItemRow* const _InvenItem)
 {
 	if (_InvenItem == nullptr)
 	{
@@ -43,7 +43,7 @@ void UUI_Player_QuickSlotItem::RenewQuickSlotItem(TSharedPtr<FInvenItemRow> _Inv
 	m_Amount->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
-void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem)
+void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(const FInvenItemRow* const _InvenItem)
 {
 	if (_InvenItem == nullptr)
 	{

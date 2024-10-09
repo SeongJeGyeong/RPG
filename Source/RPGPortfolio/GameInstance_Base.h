@@ -60,6 +60,8 @@ public:
 	void SetTempResolution(const FIntPoint& _Res) { TempResolution = _Res; }
 	void ExecuteResoltionCommand();
 
+	void RestartPlayer();
+
 private:
 	void AssetLoaded(FString _AssetName);
 

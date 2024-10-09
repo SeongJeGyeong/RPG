@@ -80,22 +80,7 @@ void ARPGPortfolioGameModeBase::PostInitializeComponents()
 	// 스탠드얼론으로 플레이할 때
 	if ( GetWorld()->WorldType == EWorldType::Game )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Play Standalone"));
-
 		// 스탠드얼론 상태에서는 해상도 적용이 이상하게 되므로 시작 시에 명시한다.
-		//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(FIntPoint(1280, 720));
-		//UGameUserSettings::GetGameUserSettings()->SetViewDistanceQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetAntiAliasingQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetPostProcessingQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetShadowQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetGlobalIlluminationQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetReflectionQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetTextureQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetVisualEffectQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetFoliageQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->SetShadingQuality(1);
-		//UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
-
 		pGameInst->SetTempResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
 	}
 }
@@ -106,23 +91,6 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 
-	if ( IsValid(m_WidgetClassArr[ 0 ]) )
-	{
-		m_MainHUD = Cast<UUI_Base>(CreateWidget(GetWorld(), m_WidgetClassArr[ 0 ]));
-
-		if ( IsValid(m_MainHUD) )
-		{
-			m_MainHUD->AddToViewport(1);
-
-			UGISubsystem_StatMgr* StatMgr = pGameInst->GetSubsystem<UGISubsystem_StatMgr>();
-			StatMgr->SetUIInManager();
-			m_MainHUD->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UI_Base 캐스팅 실패"));
-		}
-	}
 	if (IsValid(m_WidgetClassArr[0]))
 	{
 		m_MainHUD = Cast<UUI_Base>(CreateWidget(GetWorld(), m_WidgetClassArr[0]));

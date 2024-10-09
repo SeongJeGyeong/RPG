@@ -42,7 +42,7 @@ void UANS_AtkMove::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 		}
 		else
 		{
-			if ( m_Player->GetbToggleLockOn() )
+			if ( m_Player->GetbIsLockOn() )
 			{
 				FVector TargetVect = m_Player->GetLockOnTarget()->GetComponentLocation() - m_Player->GetActorLocation();
 				rAtkRot = UKismetMathLibrary::MakeRotFromX(TargetVect.GetSafeNormal());

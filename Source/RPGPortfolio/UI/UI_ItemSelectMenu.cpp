@@ -54,7 +54,6 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 		
 		UInventory_Mgr::GetInst(GetGameInstance())->CloseInventoryUI();
 		pPlayer->CloseMenuUI();
-
 		pPlayer->UseItem(m_ID, m_Slot);
 	}
 	else

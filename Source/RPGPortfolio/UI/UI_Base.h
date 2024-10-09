@@ -58,7 +58,7 @@ public:
 
 	void RenewAmountSoul(int32 _GainedSoul);
 
-	void RenewQuickSlotUI(int32 _idx);
+	void HUD_RenewQuickSlotUI(int32 _idx);
 	void SetQuickSlotUIOpacity(float _alpha, bool _UorL);
 	void SetQuickSlotUIDelay(float _DelayPercnet);
 

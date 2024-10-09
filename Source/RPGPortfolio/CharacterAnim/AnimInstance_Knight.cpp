@@ -33,9 +33,17 @@ void FAnimInstanceProxy_Knight::PreUpdate(UAnimInstance* _InAnimInstance, float 
 
 	if (Player)
 	{
+		FVector Vec = Player->GetActorRotation().UnrotateVector(Player->GetLastMovementInputVector());
+
 		fGuardBlendWeight = Player->GetfGuardWeight();
-		vLocalVelocity.X = Player->GetfForwardSpeed();
-		vLocalVelocity.Y = Player->GetfRightSpeed();
+		vLocalVelocity.X = Vec.GetSafeNormal().X;
+		vLocalVelocity.Y = Vec.GetSafeNormal().Y;
+		if ( Player->GetCharacterMovement()->MaxWalkSpeed >= 600.f )
+		{
+			vLocalVelocity.X *= 2;
+			vLocalVelocity.Y *= 2;
+		}
+		bIsLockOn = Player->GetbIsLockOn();
 		vLocalVelocity.Z = Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(Movement->Velocity).Z;
 		fMoveSpeed = Movement->Velocity.Size2D();
 		vCurAcceleration = Movement->GetCurrentAcceleration();
@@ -60,6 +68,7 @@ void FAnimInstanceProxy_Knight::Update(float _DeltaSeconds)
 		AnimInstance->m_vLocalVelocity = vLocalVelocity;
 
 		AnimInstance->m_fGuardBlendWeight = fGuardBlendWeight;
+		AnimInstance->m_bIsLockOn = bIsLockOn;
 	}
 }
 
@@ -88,84 +97,47 @@ void UAnimInstance_Knight::NativeBeginPlay()
 void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 {
 	Super::NativeUpdateAnimation(_DT);
-
-	/*if (!IsValid(m_Movement) || !IsValid(m_Player))
-	{
-		m_Player = Cast<APlayer_Base_Knight>(GetOwningActor());
-
-		if (IsValid(m_Player))
-		{
-			m_Movement = m_Player->GetCharacterMovement();
-		}
-		return;
-	}*/
-	//vLocalVelocity.Z = m_Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity).Z;
-
-	// bIsMove = Idle->Move Trigger
-	//fMoveSpeed = m_Movement->Velocity.Size2D();
-	//if (0.f < fMoveSpeed && !m_Movement->GetCurrentAcceleration().IsZero())
-	//{
-	//	bIsMove = true;
-	//}
-	//else
-	//{
-	//	bIsMove = false;
-	//	//vLocalVelocity.X = 0.f;
-	//	//vLocalVelocity.Y = 0.f;
-	//}
 }
 
 void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 {
-	m_Player->SetbNextAtkStart(true);
+	m_Player->SetState(EPlayerStateType::ATTACK_WAIT);
 }
 
 // 다음 공격 입력 끝
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
-	m_Player->SetbNextAtkCheck(false);
+	m_Player->SetbEnableAtkInput(false);
 	m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
-	//m_Player->HitBoxActivate(true);
 	m_Player->SetbAtkTrace(true);
-	m_Player->SetbNextAtkCheck(true);
+	m_Player->SetbEnableAtkInput(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 {
-	//m_Player->HitBoxActivate(false);
 	m_Player->SetbAtkTrace(false);
 	// 공격 대상 배열 초기화
 	m_Player->EmptyHitActorArr();
 	m_Player->ResetPrevTraceLoc();
 }
 
-void UAnimInstance_Knight::AnimNotify_MoveStart()
+void UAnimInstance_Knight::AnimNotify_InvincibleOn()
 {
-	OnAttackMove.Broadcast();
+	OnInvincibleState.Broadcast(true);
 }
 
-// 무적 프레임 시작
-void UAnimInstance_Knight::AnimNotify_DodgeStart()
+void UAnimInstance_Knight::AnimNotify_InvincibleOff()
 {
-	OnDodgeTimeCheck.Broadcast(true);
-}
-// 무적 프레임 끝
-void UAnimInstance_Knight::AnimNotify_DodgeEnd()
-{
-	OnDodgeTimeCheck.Broadcast(false);
+	OnInvincibleState.Broadcast(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
 	m_Player->SetState(EPlayerStateType::IDLE);
-}
-
-void UAnimInstance_Knight::AnimNotify_JumpStart()
-{
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpEnd()
@@ -194,13 +166,12 @@ void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 	m_Player->ShotProjectile();
 }
 
-void UAnimInstance_Knight::AnimNotify_InvalidInput()
-{
-	//m_Player->SetbInvalidInput(true);
-}
-
 void UAnimInstance_Knight::AnimNotify_ValidInput()
 {
-	//m_Player->SetbInvalidInput(false);
 	m_Player->SetState(EPlayerStateType::IDLE);
+}
+
+void UAnimInstance_Knight::AnimNotify_Dead()
+{
+	OnDead.Broadcast();
 }

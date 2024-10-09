@@ -84,7 +84,7 @@ void AItem_Dropped_Base::Interaction(AActor* _InteractedActor)
 	pMainUI->ShowMainMessageUI(true);
 	
 	APlayer_Base_Knight* Player = Cast<APlayer_Base_Knight>(_InteractedActor);
-	Player->GetMesh()->GetAnimInstance()->Montage_Play(Player->GetMontageDA()->GetPlayerMontage(EPlayerMontage::ACTION_ITEM));
+	Player->Play_PlayerMontage(EPlayerMontage::ACTION_ITEM);
 	Player->SetState(EPlayerStateType::ACTION);
 	Destroy();
 }

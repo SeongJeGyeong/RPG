@@ -21,6 +21,9 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UDA_GreaterSpider>	m_DataAsset;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	class UMotionWarpingComponent* m_MWComponent;
+
 	UPROPERTY()
 	class UAnim_GreaterSpider* m_AnimInst;
 
@@ -60,15 +63,20 @@ private:
 	void MeleeAttackHitCheck();
 	void SweepAtkTrace(FName _Start, FName _End, float _Radius);
 	void RushAttack(bool _Rush);
-	void RushAttackHitCheck(float _Radius);
+	void AttackSphereHitCheck(FVector _Location,float _Radius);
+	void RangedAttack();
+	void SwingAttack(EGreaterSpider_STATE _state);
+	void StompAttack();
 
 	void MonsterDead(AController* EventInstigator);
+
+	void PlayGSSound(EGreaterSpider_STATE _state);
+	void SpawnGSEffect(EGreaterSpider_STATE _state);
 
 public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EGreaterSpider_STATE _AtkState);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void RangedAttack();
 	void PlayGSMontage(EGreaterSpider_STATE _State);
 	void DeadCollisionSetting();
 

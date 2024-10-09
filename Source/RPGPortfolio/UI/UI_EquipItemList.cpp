@@ -86,7 +86,6 @@ void UUI_EquipItemList::OnTileHovered(UObject* _ItemData, bool _Hovered)
 	{
 		m_List_ItemName->SetVisibility(ESlateVisibility::Hidden);
 		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
-		ItemUI->SetSelectedSlot(EEQUIP_SLOT::EMPTY);
 
 		m_Stat->SetVisibilityAlterBasePower(false);
 	}

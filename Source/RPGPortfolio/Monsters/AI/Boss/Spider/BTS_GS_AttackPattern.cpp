@@ -30,26 +30,23 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	}
 
 	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-	FVector Cross = FVector::CrossProduct(vOffset, pBoss->GetActorForwardVector());
-	float fDir = FVector::DotProduct(Cross, pBoss->GetActorUpVector());
 
+	float RightAngle = FVector::DotProduct(vOffset, pBoss->GetActorRightVector());
+	float ForwardAngle = FVector::DotProduct(vOffset, pBoss->GetActorForwardVector());
+	float fAngle = FMath::Atan2(RightAngle, ForwardAngle);
+	float fDir = FMath::RadiansToDegrees(fAngle);
 	// 몬스터 기준 왼쪽
-	if ( fDir >= 50.f )
+	if ( fDir <= -30.f )
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 1);
-		UE_LOG(LogTemp, Warning, TEXT("Pattern1"));
 	}
 	// 몬스터 기준 오른쪽
-	else if ( fDir <= -50.f )
+	else if ( fDir >= 30.f )
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 2);
-		UE_LOG(LogTemp, Warning, TEXT("Pattern2"));
 	}
 	else
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 0);
-		UE_LOG(LogTemp, Warning, TEXT("Pattern0"));
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("OnBecomeRelevant"));
 }

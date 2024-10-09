@@ -98,7 +98,7 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 
 	if ( nullptr == pItemInfo )
 	{
-		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		UE_LOG(LogTemp, Error, TEXT("AddGameItem : 해당하는 아이템 정보를 찾을 수 없음"));
 		return;
 	}
 
@@ -108,8 +108,6 @@ void UInventory_Mgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 	FInvenItemRow* ItemRow = m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Find(_ID);
 	if ( ItemRow == nullptr )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("아이템 로우 비어있음"));
-		//m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Add(_ID, FInvenItemRow{ pItemInfo, _ID, _Stack, EEQUIP_SLOT::EMPTY });
 		m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Add(_ID, FInvenItemRow{ _ID, _Stack, EEQUIP_SLOT::EMPTY });
 	}
 	else
@@ -125,7 +123,7 @@ void UInventory_Mgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
 
 	if (nullptr == pItemInfo)
 	{
-		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		UE_LOG(LogTemp, Error, TEXT("SubGameItem : 해당하는 아이템 정보를 찾을 수 없음"));
 		return;
 	}
 
@@ -141,7 +139,11 @@ void UInventory_Mgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
 	{
 		if ( _Slot != EEQUIP_SLOT::EMPTY )
 		{
-			RenewEquipConsumeUI(_Slot, pItemRow, true);
+			if ( pItemInfo->Type == EITEM_TYPE::CONSUMABLE )
+			{
+				// 장비창에서 아이템 표시 삭제
+				UnEquipConsumeUI(_Slot);
+			}
 		}
 		m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Remove(_ID);
 	}
@@ -201,27 +203,7 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 		{
 			for ( auto Iter = m_InvenStorage[i].StorageMap.CreateConstIterator(); Iter; ++Iter )
 			{
-				UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-				FGameItemInfo* pItemInfo = GetItemInfo(Iter.Key());
-				
-				pItemData->SetItemImgPath(pItemInfo->IconImgPath);
-				pItemData->SetItemName(pItemInfo->ItemName);
-				pItemData->SetItemDesc(pItemInfo->Description);
-				pItemData->SetItemQnt(Iter.Value().Stack);
-				pItemData->SetPhysicAtkVal(pItemInfo->PhysicAtk);
-				pItemData->SetPhysicDefVal(pItemInfo->PhysicDef);
-				pItemData->SetMagicAtkVal(pItemInfo->MagicAtk);
-				pItemData->SetMagicDefVal(pItemInfo->MagicDef);
-				pItemData->SetRestoreHP(pItemInfo->Restore_HP);
-				pItemData->SetRestoreMP(pItemInfo->Restore_MP);
-				pItemData->SetRequireStr(pItemInfo->Require_Str);
-				pItemData->SetRequireDex(pItemInfo->Require_Dex);
-				pItemData->SetRequireInt(pItemInfo->Require_Int);
-				pItemData->SetMaximumStack(pItemInfo->Maximum_Stack);
-				pItemData->SetItemType(pItemInfo->Type);
-				pItemData->SetEquiped(Iter.Value().EquipedSlot);
-				pItemData->SetItemID(Iter.Key());
-
+				UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
 				InventoryUI->AddInventoryItem(pItemData);
 			}
 		}
@@ -231,27 +213,7 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 	{
 		for ( auto Iter = m_InvenStorage[ (int32)_Type ].StorageMap.CreateConstIterator(); Iter; ++Iter )
 		{
-			UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-			FGameItemInfo* pItemInfo = GetItemInfo(Iter.Key());
-
-			pItemData->SetItemImgPath(pItemInfo->IconImgPath);
-			pItemData->SetItemName(pItemInfo->ItemName);
-			pItemData->SetItemDesc(pItemInfo->Description);
-			pItemData->SetItemQnt(Iter.Value().Stack);
-			pItemData->SetPhysicAtkVal(pItemInfo->PhysicAtk);
-			pItemData->SetPhysicDefVal(pItemInfo->PhysicDef);
-			pItemData->SetMagicAtkVal(pItemInfo->MagicAtk);
-			pItemData->SetMagicDefVal(pItemInfo->MagicDef);
-			pItemData->SetRestoreHP(pItemInfo->Restore_HP);
-			pItemData->SetRestoreMP(pItemInfo->Restore_MP);
-			pItemData->SetRequireStr(pItemInfo->Require_Str);
-			pItemData->SetRequireDex(pItemInfo->Require_Dex);
-			pItemData->SetRequireInt(pItemInfo->Require_Int);
-			pItemData->SetMaximumStack(pItemInfo->Maximum_Stack);
-			pItemData->SetItemType(pItemInfo->Type);
-			pItemData->SetEquiped(Iter.Value().EquipedSlot);
-			pItemData->SetItemID(Iter.Key());
-
+			UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
 			InventoryUI->AddInventoryItem(pItemData);
 		}
 	}
@@ -279,27 +241,7 @@ void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
 
 	for ( auto Iter = m_InvenStorage[ (int32)_Type ].StorageMap.CreateConstIterator(); Iter; ++Iter )
 	{
-		UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-		FGameItemInfo* pItemInfo = GetItemInfo(Iter.Key());
-
-		pItemData->SetItemImgPath(pItemInfo->IconImgPath);
-		pItemData->SetItemName(pItemInfo->ItemName);
-		pItemData->SetItemDesc(pItemInfo->Description);
-		pItemData->SetItemQnt(Iter.Value().Stack);
-		pItemData->SetPhysicAtkVal(pItemInfo->PhysicAtk);
-		pItemData->SetPhysicDefVal(pItemInfo->PhysicDef);
-		pItemData->SetMagicAtkVal(pItemInfo->MagicAtk);
-		pItemData->SetMagicDefVal(pItemInfo->MagicDef);
-		pItemData->SetRestoreHP(pItemInfo->Restore_HP);
-		pItemData->SetRestoreMP(pItemInfo->Restore_MP);
-		pItemData->SetRequireStr(pItemInfo->Require_Str);
-		pItemData->SetRequireDex(pItemInfo->Require_Dex);
-		pItemData->SetRequireInt(pItemInfo->Require_Int);
-		pItemData->SetMaximumStack(pItemInfo->Maximum_Stack);
-		pItemData->SetItemType(pItemInfo->Type);
-		pItemData->SetEquiped(Iter.Value().EquipedSlot);
-		pItemData->SetItemID(Iter.Key());
-
+		UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
 		EquipItemListUI->AddEquipItemList(pItemData);
 	}
 }
@@ -378,7 +320,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다. 
 		if ( _Type == EITEM_TYPE::CONSUMABLE )
 		{
-			RenewEquipConsumeUI(_Slot, pItemRow, true);
+			UnEquipConsumeUI(_Slot);
 		}
 		else
 		{
@@ -403,7 +345,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
 			{
 				// 기존에 장비되어있던 아이템 퀵슬롯에서 해제
-				RenewEquipConsumeUI(Iter.Value().EquipedSlot, m_InvenStorage[ (int32)_Type ].StorageMap.Find(Iter.Key()), true);
+				UnEquipConsumeUI(Iter.Value().EquipedSlot);
 			}
 			else
 			{
@@ -411,6 +353,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			}
 
 			Iter.Value().EquipedSlot = EEQUIP_SLOT::EMPTY;
+			continue;
 		}
 
 		if ( Iter.Key() == _ID )
@@ -420,7 +363,7 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			{
 				if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
 				{
-					RenewEquipConsumeUI(Iter.Value().EquipedSlot, m_InvenStorage[ (int32)_Type ].StorageMap.Find(_ID), true);
+					UnEquipConsumeUI(Iter.Value().EquipedSlot);
 				}
 				else
 				{
@@ -433,10 +376,9 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	}
 
 	RenewItemListUI(_Type);
-
 	if (_Type == EITEM_TYPE::CONSUMABLE)
 	{
-		RenewEquipConsumeUI(_Slot, pItemRow, false);
+		EquipConsumeUI(_Slot, *pItemRow);
 	}
 	else
 	{
@@ -448,13 +390,11 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		StatMgr->SetEquipFigure(pInfo, true);
 		StatMgr->SetAtkAndDef();
 	}
-
 }
 
-void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow, bool _Unequip)
+void UInventory_Mgr::EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow)
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-
 	if ( !IsValid(GameMode) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("RenewEquipConsumeUI 게임모드 캐스팅 실패"));
@@ -462,61 +402,24 @@ void UInventory_Mgr::RenewEquipConsumeUI(EEQUIP_SLOT _Slot, FInvenItemRow* _Item
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
 
-	// 장비슬롯 열거형을 인덱스로 변환
-	int32 Index = UEquip_Mgr::GetInst(m_World)->ConvertQuickSlotToIdx(_Slot);
-	UE_LOG(LogTemp, Display, TEXT("지정된 슬롯 인덱스 : %d"), Index);
-
-	//장비해제인 경우
-	if (_Unequip)
-	{
-		EquipMainUI->RenewEquipItem(_Slot);
-		UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index, true);
-
-		int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
-		UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(curIdx);
-
-		return;
-	}
-
-	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-	FGameItemInfo* pInfo = GetItemInfo(_ItemRow->ID);
-
-	pItemData->SetItemImgPath(pInfo->IconImgPath);
-	pItemData->SetItemName(pInfo->ItemName);
-	pItemData->SetItemDesc(pInfo->Description);
-	pItemData->SetItemQnt(_ItemRow->Stack);
-	pItemData->SetPhysicAtkVal(pInfo->PhysicAtk);
-	pItemData->SetPhysicDefVal(pInfo->PhysicDef);
-	pItemData->SetMagicAtkVal(pInfo->MagicAtk);
-	pItemData->SetMagicDefVal(pInfo->MagicDef);
-	pItemData->SetRestoreHP(pInfo->Restore_HP);
-	pItemData->SetRestoreMP(pInfo->Restore_MP);
-	pItemData->SetRequireStr(pInfo->Require_Str);
-	pItemData->SetRequireDex(pInfo->Require_Dex);
-	pItemData->SetRequireInt(pInfo->Require_Int);
-	pItemData->SetMaximumStack(pInfo->Maximum_Stack);
-	pItemData->SetItemType(pInfo->Type);
-	pItemData->SetEquiped(_ItemRow->EquipedSlot);
-	pItemData->SetItemID(_ItemRow->ID);
-
+	UItem_InvenData* pItemData = GetInvenDataToItemRow(_ItemRow);
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 
-	UEquip_Mgr::GetInst(m_World)->SetQuickSlotArray(_ItemRow, Index, false);
+	UEquip_Mgr::GetInst(m_World)->EquipQuickSlotArray(_ItemRow, _Slot);
+}
 
-	int32 curIdx = UEquip_Mgr::GetInst(m_World)->GetCurrentIndex();
-	UE_LOG(LogTemp, Display, TEXT("현재 슬롯 인덱스 : %d"), curIdx);
-	if (Index == curIdx)
+void UInventory_Mgr::UnEquipConsumeUI(EEQUIP_SLOT _Slot)
+{
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+	if ( !IsValid(GameMode) )
 	{
-		UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(Index);
+		UE_LOG(LogTemp, Error, TEXT("UnEquipConsumeUI : 게임모드 캐스팅 실패"));
+		return;
 	}
-	else
-	{
-		int32 nextIdx = UEquip_Mgr::GetInst(m_World)->GetNextArrayIndex();
-		if (curIdx != nextIdx)
-		{
-			UEquip_Mgr::GetInst(m_World)->RenewQuickSlotUI(curIdx);
-		}
-	}
+	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
+	EquipMainUI->RenewEquipItem(_Slot);
+
+	UEquip_Mgr::GetInst(m_World)->UnEquipQuickSlotArray(_Slot);
 }
 
 void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
@@ -536,27 +439,7 @@ void UInventory_Mgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow
 		return;
 	}
 
-	UItem_InvenData* pItemData = NewObject<UItem_InvenData>();
-	FGameItemInfo* pInfo = GetItemInfo(_ItemRow->ID);
-
-	pItemData->SetItemImgPath(pInfo->IconImgPath);
-	pItemData->SetItemName(pInfo->ItemName);
-	pItemData->SetItemDesc(pInfo->Description);
-	pItemData->SetItemQnt(_ItemRow->Stack);
-	pItemData->SetPhysicAtkVal(pInfo->PhysicAtk);
-	pItemData->SetPhysicDefVal(pInfo->PhysicDef);
-	pItemData->SetMagicAtkVal(pInfo->MagicAtk);
-	pItemData->SetMagicDefVal(pInfo->MagicDef);
-	pItemData->SetRestoreHP(pInfo->Restore_HP);
-	pItemData->SetRestoreMP(pInfo->Restore_MP);
-	pItemData->SetRequireStr(pInfo->Require_Str);
-	pItemData->SetRequireDex(pInfo->Require_Dex);
-	pItemData->SetRequireInt(pInfo->Require_Int);
-	pItemData->SetMaximumStack(pInfo->Maximum_Stack);
-	pItemData->SetItemType(pInfo->Type);
-	pItemData->SetEquiped(_ItemRow->EquipedSlot);
-	pItemData->SetItemID(_ItemRow->ID);
-
+	UItem_InvenData* pItemData = GetInvenDataToItemRow(*_ItemRow);
 	EquipMainUI->RenewEquipItem(_Slot, pItemData);
 }
 
@@ -566,7 +449,7 @@ void UInventory_Mgr::DecreaseInventoryItem(EITEM_ID _ID)
 
 	if (nullptr == pItemInfo)
 	{
-		UE_LOG(LogTemp, Error, TEXT("해당하는 아이템 정보를 찾을 수 없음"));
+		UE_LOG(LogTemp, Error, TEXT("DecreaseInventoryItem : 해당하는 아이템 정보를 찾을 수 없음"));
 		return;
 	}
 
@@ -597,4 +480,30 @@ UPaperSprite* UInventory_Mgr::GetCategoryIcon(EITEM_TYPE _type)
 UPaperSprite* UInventory_Mgr::GetEquipSlotIcon(EEQUIP_SLOT _Slot)
 {
 	return m_Icon->GetEquipSlotIcon(_Slot);
+}
+
+UItem_InvenData* UInventory_Mgr::GetInvenDataToItemRow(const FInvenItemRow& _ItemRow)
+{
+	UItem_InvenData* ItemData = NewObject<UItem_InvenData>();
+	FGameItemInfo* Info = GetItemInfo(_ItemRow.ID);
+
+	ItemData->SetItemImgPath(Info->IconImgPath);
+	ItemData->SetItemName(Info->ItemName);
+	ItemData->SetItemDesc(Info->Description);
+	ItemData->SetItemQnt(_ItemRow.Stack);
+	ItemData->SetPhysicAtkVal(Info->PhysicAtk);
+	ItemData->SetPhysicDefVal(Info->PhysicDef);
+	ItemData->SetMagicAtkVal(Info->MagicAtk);
+	ItemData->SetMagicDefVal(Info->MagicDef);
+	ItemData->SetRestoreHP(Info->Restore_HP);
+	ItemData->SetRestoreMP(Info->Restore_MP);
+	ItemData->SetRequireStr(Info->Require_Str);
+	ItemData->SetRequireDex(Info->Require_Dex);
+	ItemData->SetRequireInt(Info->Require_Int);
+	ItemData->SetMaximumStack(Info->Maximum_Stack);
+	ItemData->SetItemType(Info->Type);
+	ItemData->SetEquiped(_ItemRow.EquipedSlot);
+	ItemData->SetItemID(_ItemRow.ID);
+
+	return ItemData;
 }

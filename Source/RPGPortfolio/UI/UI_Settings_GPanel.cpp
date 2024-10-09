@@ -61,11 +61,8 @@ void UUI_Settings_GPanel::GameSettingsVisibilityChanged(ESlateVisibility _Visibi
 
 void UUI_Settings_GPanel::ApplyBtnClicked()
 {
-	FString sini = GIsEditor ? GEditorSettingsIni : GGameUserSettingsIni;
-	UE_LOG(LogTemp, Warning, TEXT("EditorSettings Path : %s"), *GEditorSettingsIni);
-	FString IniFileLocation = FPaths::GeneratedConfigDir() + UGameplayStatics::GetPlatformName() + "/" + GGameUserSettingsIni + ".ini";
-	UE_LOG(LogTemp, Warning, TEXT("GameUserSettings Path : %s"), *IniFileLocation);
-	UE_LOG(LogTemp, Warning, TEXT("apply ini file : %s"), *sini);
+	//FString sini = GIsEditor ? GEditorSettingsIni : GGameUserSettingsIni;
+	//FString IniFileLocation = FPaths::GeneratedConfigDir() + UGameplayStatics::GetPlatformName() + "/" + GGameUserSettingsIni + ".ini";
 	UGameUserSettings::GetGameUserSettings()->ApplySettings(true);
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	if ( GetWorld()->WorldType == EWorldType::Game )

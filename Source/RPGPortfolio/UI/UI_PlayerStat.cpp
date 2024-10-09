@@ -75,11 +75,6 @@ void UUI_PlayerStat::RenewBasePower()
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	FCharacterBasePower PlayerBasePower = StatMgr->GetPlayerBasePower();
 
-	UE_LOG(LogTemp, Warning, TEXT("physicAtk : %f"), PlayerBasePower.PhysicAtk);
-	UE_LOG(LogTemp, Warning, TEXT("physicDef : %f"), PlayerBasePower.PhysicDef);
-	UE_LOG(LogTemp, Warning, TEXT("MagicAtk : %f"), PlayerBasePower.MagicAtk);
-	UE_LOG(LogTemp, Warning, TEXT("MagicDef : %f"), PlayerBasePower.MagicDef);
-
 	m_PhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicAtk)));
 	m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.MagicAtk)));
 	m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)PlayerBasePower.PhysicDef)));

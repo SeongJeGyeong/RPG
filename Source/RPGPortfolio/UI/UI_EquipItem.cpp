@@ -239,12 +239,12 @@ void UUI_EquipItem::ItemBtnHovered()
 			break;
 		}
 	}
+
 	UItem_InvenData* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(eSlotType);
 
 	if (IsValid(ItemNameText) && IsValid(pItemInfo))
 	{
 		FString sItemName = pItemInfo->GetItemName();
-		UE_LOG(LogTemp, Warning, TEXT("아이템이름 : %s"), *sItemName);
 		ItemNameText->SetText(FText::FromString(sItemName));
 		m_Tooltip->SetTooltipUI(pItemInfo);
 		m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);

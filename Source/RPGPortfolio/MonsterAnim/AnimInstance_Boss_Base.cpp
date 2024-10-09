@@ -29,11 +29,7 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 	if (!IsValid(m_Boss) || !IsValid(m_Movement))
 	{
 		m_Boss = Cast<ABoss_Base>(TryGetPawnOwner());
-		if (!IsValid(m_Boss))
-		{
-			//UE_LOG(LogTemp, Error, TEXT("Anim_Boss_Base: 애님클래스 오너 찾지 못함"));
-		}
-		else
+		if (IsValid(m_Boss))
 		{
 			m_Movement = m_Boss->GetCharacterMovement();
 		}

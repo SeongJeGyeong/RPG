@@ -116,7 +116,7 @@ void UUI_Base::RenewAmountSoul(int32 _GainedSoul)
 	m_UI_Soul->RenewAmountOfSoul(_GainedSoul);
 }
 
-void UUI_Base::RenewQuickSlotUI(int32 _idx)
+void UUI_Base::HUD_RenewQuickSlotUI(int32 _idx)
 {
 	m_UI_QuickSlotMain->RenewLowerQuickSlot(_idx);
 }

@@ -31,7 +31,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void RenewQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem);
-	void RenewNextQuickSlotItem(TSharedPtr<FInvenItemRow> _InvenItem);
+	void RenewQuickSlotItem(const FInvenItemRow* const _InvenItem);
+	void RenewNextQuickSlotItem(const FInvenItemRow* const _InvenItem);
 
 };

@@ -75,21 +75,12 @@ private:
 	TUniquePtr<StateMachine> CurrentState;
 
 private:
-	bool bIsAttacking;
-	bool bNextAtkStart;
+	bool bIsAttacking;		// 공격 입력 체크
 	bool bHeavyHold;		// 강공격 체크용
-	bool bNextAtkCheckOn;	// 다음 공격 입력 체크용
+	bool bEnableAtkInput;	// 공격 입력 가능한 상태 체크용
 	bool bAtkTrace;			// 공격 판정 체크
 
-	bool bSprint;		// 달리기 체크용 토글
 	bool bItemDelay;		// 아이템 사용 딜레이 체크용
-
-	float fForwardSpeed;
-	float fRightSpeed;
-
-	// 구르기 관련
-	//bool bDodging;
-	//bool bDodgeMove;
 
 	// 방패 방어 상태(가드를 완전히 올린 상태에서만 true)
 	bool bInputGuard;
@@ -100,17 +91,19 @@ private:
 	uint8 CurrentCombo;
 
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
-	FTimerHandle BlockReactTimer;	// 방어 표현 타이머
 	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
 	FTimerHandle ItemDelayTimer;
+	FTimerHandle DeadTimer;
 
 	float fDelayRate;
 	FVector PrevTraceLoc;
+
+	bool bDead;
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
 	UDA_PlayerSound* GetSoundDA() const { return m_PlayerSound; }
-	UMotionWarpingComponent* GetMotionWarpingComp() const { return m_MWComponent; }
+
 	bool GetbIsAttacking() const { return bIsAttacking; }
 	void SetbIsAttacking(const bool& _IsAttacking) { bIsAttacking = _IsAttacking; }
 
@@ -118,34 +111,25 @@ public:
 	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace; }
 	void ResetPrevTraceLoc() { PrevTraceLoc = FVector::ZeroVector; }
 
-	bool GetbNextAtkStart() const { return bNextAtkStart; }
-	void SetbNextAtkStart(const bool& _NextAtkStart) { bNextAtkStart = _NextAtkStart; }
-
 	uint8 GetCurrentCombo() const { return CurrentCombo; }
 	void SetCurrentCombo(const uint8& _Combo) { CurrentCombo = _Combo; }
 
-	void SetbNextAtkCheck(const bool& _NextAtkCheck) { bNextAtkCheckOn = _NextAtkCheck; }
+	void SetbEnableAtkInput(const bool& _EnableAtkInput) { bEnableAtkInput = _EnableAtkInput; }
 	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
-	void SetbItemDelay(const bool& _ItemDelay) { bItemDelay = _ItemDelay; }
 
 	bool GetbInputGuard() const { return bInputGuard; }
+	void SetbInputGuard(const bool& _InputGuard) { bInputGuard = _InputGuard; }
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
-	bool GetbHoldGuard() const { return bHoldGuard; }
+	//bool GetbHoldGuard() const { return bHoldGuard; }
 	void SetbHoldGuard(const bool& _HoldGuard);
 	float GetfGuardWeight() const { return fGuardWeight; }
 	void SetfGuardWeight(const float& _GuardWeight) { fGuardWeight = _GuardWeight; }
 
-	bool GetbSprint() const { return bSprint; }
-	void SetbSprint(const bool& _bSprint) { bSprint = _bSprint; }
-
-	float GetfForwardSpeed() const { return fForwardSpeed; }
-	float GetfRightSpeed() const { return fRightSpeed; }
-
 	UCameraComponent* GetCamera() const { return m_Cam; }
 	//UPlayer_CameraArm* GetCameraArm() const { return m_SArm; }
 	// 락온 토글 상태 확인
-	bool GetbToggleLockOn() const;
+	bool GetbIsLockOn() const;
 	ULockOnTargetComponent* GetLockOnTarget() const;
 
 	UAnimInstance_Knight* GetAnimInst() const { return m_AnimInst; }
@@ -166,7 +150,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void SetState(EPlayerStateType _StateType);
-
+	bool IsPossibleStateTransition(EPlayerStateType _State);
 private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);
@@ -185,21 +169,23 @@ private:
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 	void UseSkill_1(const FInputActionInstance& _Instance);
 
-	void AttackMove();				// 공격 모션 중 이동
+	//void AttackMove();				// 공격 모션 중 이동
 	void JumpAttack();
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
+
+	void PlayerDead();
 
 public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void AttackHitCheck();				// 어택 트레이스용
 	void AttackStart();
-	void HitBoxActivate(bool _Activate);
 
 	bool ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	bool ConsumeStamina(float _Consumption);
 	bool ConsumeMP(float _Consumption);
-	bool BlockEnemyAttack(float _Damage, FVector _MonDir); // 적 공격 방어
+	uint8 GetHitDirection(FVector _MonVec);
+	bool GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType); // 적 공격 방어
 	void BreakLockOn();
 	void ResetCamera(FRotator _Rotate);
 	void ShotProjectile();
@@ -211,17 +197,19 @@ public:
 
 	void ResetVarsOnHitState();
 	void ClearMontageRelatedTimer(); // 몽타주 관련 타이머 clear
+	void PlayerMotionWarping(EPlayerMontage _MontageType, float _EndTime);
 	void MotionWarping_Attack(UAnimSequenceBase* _Anim, float _EndTime);
 	void MotionWarping_Dodge(UAnimSequenceBase* _Anim, float _EndTime);
 
+	void Play_PlayerMontage(EPlayerMontage _MontageType);
+	void Play_PlayerSound(EPlayerSound _SoundType);
+	void PlayHitAnimation(uint8 _Dir);
+
 private:
-	void DodgeTimeCheck(bool _Dodge);	// 회피 무적시간 체크
+	void InvincibleCheck(bool _Invinc);	// 무적시간 체크
 
 	UFUNCTION()
 	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION()
-	void HitBoxBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);
 
 	UFUNCTION()
 	void ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);

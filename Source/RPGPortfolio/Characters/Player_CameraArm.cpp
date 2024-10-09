@@ -14,7 +14,6 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	LockonControlRotationRate = 100.f;
 	// 스프링 암 내장 설정
 	TargetArmLength = 500.0f;			// 스프링암 길이
 	bUsePawnControlRotation = true;		// 스프링암이 플레이어의 회전을 따라가도록 설정
@@ -22,16 +21,14 @@ UPlayer_CameraArm::UPlayer_CameraArm()
 	bInheritYaw = true;
 	bInheritRoll = true;
 	bDoCollisionTest = true;
-
-	bEnableCameraLag = false;			// 카메라 위치가 조금 지연되서 따라오도록 설정
+	bEnableCameraLag = true;			// 카메라 위치가 조금 지연되서 따라오도록 설정
 	bEnableCameraRotationLag = false;	// 카메라 회전 지연(록온 상태일때만 활성화)
-	//CameraLagSpeed = 3.f;				// 위치 지연 속도
-	CameraRotationLagSpeed = 30.f;		// 회전 지연 속도
-	CameraLagMaxDistance = 20.f;		// 카메라가 현재 위치보다 지연될 수 있는 최대거리
+	CameraLagSpeed = 3.f;				// 위치 지연 속도
+	CameraRotationLagSpeed = 5.f;		// 회전 지연 속도
+	CameraLagMaxDistance = 100.f;		// 카메라가 현재 위치보다 지연될 수 있는 최대거리
 
-	// 록온 범위
-	fMaxLockOnDistance = 1500.f;
-	
+	fMaxLockOnDistance = 1500.f;		// 록온 범위
+	LockonControlRotationRate = 10.f;	// 록온 시 타겟으로의 카메라 회전 보간 속도
 	bDrawDebug = false;
 }
 
@@ -59,7 +56,7 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 		DrawDebugSphere(GetWorld(), GetComponentLocation(), fMaxLockOnDistance, 32, FColor::Cyan);
 	}
-	
+
 	if (IsLockedOn())
 	{
 		if ( ( m_Target->GetComponentLocation() - GetComponentLocation() ).Size() > fMaxLockOnDistance + m_Target->GetScaledSphereRadius() )
@@ -71,12 +68,11 @@ void UPlayer_CameraArm::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		// 플레이어에서 타겟으로의 벡터
 		FVector TargetVect = m_Target->GetComponentLocation() - ( GetComponentLocation());
 		FRotator TargetRot = TargetVect.GetSafeNormal().Rotation();
-		TargetRot.Roll = 0.f;
+		//TargetRot.Roll = 0.f;
 		FRotator CurrentRot = m_Player->GetControlRotation();
 		FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LockonControlRotationRate);
-		// 타겟을 바라보도록 로테이션 수정
 		NewRot.Roll = 0.f;
-		NewRot.Pitch -= 1.f;
+		// 타겟을 바라보도록 로테이션 수정
 		m_Player->GetController()->SetControlRotation(NewRot);
 	}
 }

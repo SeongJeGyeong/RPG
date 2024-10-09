@@ -51,8 +51,6 @@ void AInteraction_Lever::Tick(float DeltaTime)
 
 void AInteraction_Lever::Interaction(AActor* _InteractedActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("레버 돌리기"));
-
 	if (IsValid(m_LevelSeq))
 	{
 		FMovieSceneSequencePlaybackSettings Settings = {};
@@ -81,7 +79,6 @@ void AInteraction_Lever::Interaction(AActor* _InteractedActor)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("이미 플레이함"));
 			return;
 		}
 	}
@@ -95,7 +92,6 @@ void AInteraction_Lever::EndLevelSequence()
 	if (IsValid(GameMode))
 	{
 		GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		// GameMode->GetFadeUI()->FadeIn(1.f);
 	}
 
 	const UWorld* World = GetWorld();

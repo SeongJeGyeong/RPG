@@ -17,6 +17,7 @@
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
 #include "../System/Subsys_ObjectPool.h"
+#include "MotionWarpingComponent.h"
 
 ABoss_GreaterSpider::ABoss_GreaterSpider()
 {
@@ -32,6 +33,8 @@ ABoss_GreaterSpider::ABoss_GreaterSpider()
 	{
 		m_GSProj = projectile.Class;
 	}
+
+	m_MWComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MWComponent"));
 }
 
 void ABoss_GreaterSpider::OnConstruction(const FTransform& _Transform)
@@ -58,6 +61,9 @@ void ABoss_GreaterSpider::BeginPlay()
 	if (IsValid(m_AnimInst))
 	{
 		m_AnimInst->OnRushAttack.AddUObject(this, &ABoss_GreaterSpider::RushAttack);
+		m_AnimInst->OnRangedAttack.AddUObject(this, &ABoss_GreaterSpider::RangedAttack);
+		m_AnimInst->OnSwingAttack.AddUObject(this, &ABoss_GreaterSpider::SwingAttack);
+		m_AnimInst->OnStompAttack.AddUObject(this, &ABoss_GreaterSpider::StompAttack);
 	}
 
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
@@ -94,8 +100,20 @@ void ABoss_GreaterSpider::PlayGSMontage(EGreaterSpider_STATE _State)
 {
 	m_State = _State;
 
-	UAnimMontage* pAtkMontage = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetAnimGSpider(_State) : m_DataAsset.Get()->GetAnimGSpider(_State);
+	if ( _State == EGreaterSpider_STATE::RIGHTATTACK || _State == EGreaterSpider_STATE::LEFTATTACK )
+	{
+		AAIController* pAIController = Cast<AAIController>(GetController());
+		if ( IsValid(pAIController) )
+		{
+			AActor* pTarget = Cast<AActor>(pAIController->GetBlackboardComponent()->GetValueAsObject(FName("Target")));
+			FRotator TargetRot = FRotationMatrix::MakeFromX(( pTarget->GetActorLocation() - GetActorLocation() ).GetSafeNormal()).Rotator();
+			TargetRot.Pitch = 0.f;
+			TargetRot.Roll = 0.f;
+			m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("BossRotate"), FVector::ZeroVector, TargetRot);
+		}
+	}
 
+	UAnimMontage* pAtkMontage = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetAnimGSpider(_State) : m_DataAsset.Get()->GetAnimGSpider(_State);
 	if (!IsValid(pAtkMontage))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("거미여왕 공격몽타주 로드 실패"));
@@ -111,33 +129,78 @@ void ABoss_GreaterSpider::RushAttack(bool _Rush)
 	if ( _Rush )
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 1200.f;
-		USoundBase* RushSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::RUSHATTACK) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::RUSHATTACK);
-		if (IsValid(RushSound))
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), RushSound, GetActorLocation());
-		}
+		PlayGSSound(EGreaterSpider_STATE::RUSHATTACK);
+
 		m_PSC->ToggleActive();
 		bAtkTrace = true;
 	}
 	else
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 300.f;
-		USoundBase* BodySlamSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::BODYSLAM) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::BODYSLAM);
-		if ( IsValid(BodySlamSound) )
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), BodySlamSound, GetActorLocation());
-		}
+		PlayGSSound(EGreaterSpider_STATE::BODYSLAM);
+
 		UFXSystemAsset* BodySlamEffect = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetEffectGSpider(EGreaterSpider_STATE::BODYSLAM) : m_DataAsset.Get()->GetEffectGSpider(EGreaterSpider_STATE::BODYSLAM);
-		if ( IsValid(BodySlamEffect) )
+		if (IsValid(BodySlamEffect))
 		{
 			UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Cast<UParticleSystem>(BodySlamEffect), GetMesh(), FName("Root"), FVector(0.f, 0.f, 100.f), FRotator(0.f, 90.f, 0.f), FVector(2.f, 2.f, 2.f));
 		}
 
-		RushAttackHitCheck(400.f);
+		AttackSphereHitCheck(GetActorLocation(), 400.f);
 		m_PSC->ToggleActive();
 		bAtkTrace = false;
 
 		HitActorArr.Empty();
+	}
+}
+
+void ABoss_GreaterSpider::AttackSphereHitCheck(FVector _Location, float _Radius)
+{
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+
+	bool bResult = GetWorld()->SweepSingleByChannel
+	(
+		HitResult,
+		_Location,
+		_Location,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel6,
+		FCollisionShape::MakeSphere(_Radius),
+		Params
+	);
+
+	FColor color;
+	bResult ? color = FColor::Red : color = FColor::Green;
+
+	DrawDebugSphere(GetWorld(), _Location, _Radius, 40, color, false, 0.4f);
+	if ( bResult )
+	{
+		if ( HitResult.GetActor()->IsValidLowLevel() )
+		{
+			APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
+
+			if ( !IsValid(pPlayer) )
+			{
+				UE_LOG(LogTemp, Display, TEXT("타격 상대가 플레이어가 아님"));
+				return;
+			}
+			// 무적 상태일 경우
+			if ( !pPlayer->CanBeDamaged() )
+			{
+				return;
+			}
+
+			for ( AActor* HitActor : HitActorArr )
+			{
+				if ( HitResult.GetActor() == HitActor )
+				{
+					return;
+				}
+			}
+			HitActorArr.Add(HitResult.GetActor());
+
+			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, m_State);
+		}
 	}
 }
 
@@ -172,25 +235,53 @@ void ABoss_GreaterSpider::RangedAttack()
 	}
 }
 
+void ABoss_GreaterSpider::SwingAttack(EGreaterSpider_STATE _state)
+{
+	UFXSystemAsset* SwingEffect = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetEffectGSpider(_state) : m_DataAsset.Get()->GetEffectGSpider(_state);
+	if ( IsValid(SwingEffect) )
+	{
+		FVector Loc = GetActorLocation() + ( GetActorForwardVector() * 250.f );
+		Loc.Z = GetMesh()->GetBoneLocation(FName("Root")).Z + 10.f;
+		FRotator Rot = GetActorRotation();
+		Rot.Yaw -= 90.f;
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Cast<UParticleSystem>(SwingEffect), Loc, Rot, FVector(3.f, 3.f, 3.f));
+		Loc.Z -= 50.f;
+		AttackSphereHitCheck(Loc, 300.f);
+	}
+}
+
+void ABoss_GreaterSpider::StompAttack()
+{
+	UFXSystemAsset* StompEffect = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetEffectGSpider(EGreaterSpider_STATE::CENTERATTACK) : m_DataAsset.Get()->GetEffectGSpider(EGreaterSpider_STATE::CENTERATTACK);
+	if ( IsValid(StompEffect) )
+	{
+		FVector Loc = GetActorLocation() + ( GetActorForwardVector() * 450.f );
+		Loc.Z = GetMesh()->GetBoneLocation(FName("Root")).Z - 20.f;
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Cast<UParticleSystem>(StompEffect), Loc, GetActorRotation(), FVector(1.5f, 1.5f, 1.5f));
+
+		AttackSphereHitCheck(Loc, 300.f);
+	}
+}
+
 void ABoss_GreaterSpider::MeleeAttackHitCheck()
 {
 	switch ( m_State )
 	{
 	case EGreaterSpider_STATE::RIGHTATTACK:
-		SweepAtkTrace(FName("Left_LoArm_Start"), FName("Left_Knee_Start"), 20.f);
-		SweepAtkTrace(FName("Left_Knee_Start"), FName("Left_Knee_End"), 30.f);
+		SweepAtkTrace(FName("Left_LoArm_Start"), FName("Left_Knee_Start"), 30.f);
+		SweepAtkTrace(FName("Left_Knee_Start"), FName("Left_Knee_End"), 40.f);
 		break;
 	case EGreaterSpider_STATE::LEFTATTACK:
-		SweepAtkTrace(FName("Right_LoArm_Start"), FName("Right_Knee_Start"), 20.f);
-		SweepAtkTrace(FName("Right_Knee_Start"), FName("Right_Knee_End"), 30.f);
+		SweepAtkTrace(FName("Right_LoArm_Start"), FName("Right_Knee_Start"), 30.f);
+		SweepAtkTrace(FName("Right_Knee_Start"), FName("Right_Knee_End"), 40.f);
 		break;
 	case EGreaterSpider_STATE::CENTERATTACK:
-		SweepAtkTrace(FName("Left_Knee_Start"), FName("Left_Knee_End"), 30.f);
-		SweepAtkTrace(FName("Right_Knee_Start"), FName("Right_Knee_End"), 30.f);
+		SweepAtkTrace(FName("Left_Knee_Start"), FName("Left_Knee_End"), 40.f);
+		SweepAtkTrace(FName("Right_Knee_Start"), FName("Right_Knee_End"), 40.f);
 		SweepAtkTrace(FName("HeadAttack_Start"), FName("HeadAttack_End"), 40.f);
 		break;
 	case EGreaterSpider_STATE::RUSHATTACK:
-		RushAttackHitCheck(250.f);
+		AttackSphereHitCheck(GetActorLocation(), 250.f);
 		break;
 	default:
 		break;
@@ -201,17 +292,16 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 {
 	FVector vStart = GetMesh()->GetSocketLocation(_Start);
 	FVector vEnd = GetMesh()->GetSocketLocation(_End);
-
+	FVector vMidpoint = FMath::Lerp(vEnd, vStart, 0.5f);
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	float fTraceHalfHeight = ( vEnd - vStart ).Size() * 0.5;
-
 	bool bResult = GetWorld()->SweepSingleByChannel
 	(
 		HitResult,
-		vStart,
-		vEnd,
-		FQuat::Identity,
+		vMidpoint,
+		vMidpoint - 0.01f,			// 언리얼5의 버그로, 스윕의 시작지점과 끝지점이 동일하면 impactpoint가 잘못된 값을 반환한다.(정규화된 값?)
+		FRotationMatrix::MakeFromZ(vEnd - vStart).ToQuat(),
 		ECollisionChannel::ECC_GameTraceChannel6,
 		FCollisionShape::MakeCapsule(_Radius, fTraceHalfHeight),
 		Params
@@ -219,62 +309,8 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 
 	FColor color;
 	bResult ? color = FColor::Red : color = FColor::Green;
+	//DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, _Radius, FRotationMatrix::MakeFromZ(vEnd - vStart).ToQuat(), color, false, 0.5f);
 
-	FVector vMidpoint = FMath::Lerp(vEnd, vStart, 0.5f);
-	DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, _Radius, FRotationMatrix::MakeFromZ(vEnd - vStart).ToQuat(), color, false, 0.5f);
-
-	if ( bResult )
-	{
-		if ( HitResult.GetActor()->IsValidLowLevel() )
-		{
-			APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
-
-			if ( !IsValid(pPlayer) )
-			{
-				UE_LOG(LogTemp, Display, TEXT("타격 상대가 플레이어가 아님"));
-				return;
-			}
-			// 무적 상태일 경우
-			if (!pPlayer->CanBeDamaged())
-			{
-				return;
-			}
-
-			for ( AActor* HitActor : HitActorArr )
-			{
-				if ( HitResult.GetActor() == HitActor )
-				{
-					return;
-				}
-			}
-			HitActorArr.Add(HitResult.GetActor());
-
-			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE, m_State);
-			//bAtkTrace = false;
-		}
-	}
-}
-
-void ABoss_GreaterSpider::RushAttackHitCheck(float _Radius)
-{
-	FHitResult HitResult;
-	FCollisionQueryParams Params(NAME_None, false, this);
-
-	bool bResult = GetWorld()->SweepSingleByChannel
-	(
-		HitResult,
-		GetActorLocation(),
-		GetActorLocation(),
-		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel6,
-		FCollisionShape::MakeSphere(_Radius),
-		Params
-	);
-
-	FColor color;
-	bResult ? color = FColor::Red : color = FColor::Green;
-
-	DrawDebugSphere(GetWorld(), GetActorLocation(), _Radius, 40, color, false, 0.4f);
 	if ( bResult )
 	{
 		if ( HitResult.GetActor()->IsValidLowLevel() )
@@ -309,7 +345,7 @@ void ABoss_GreaterSpider::RushAttackHitCheck(float _Radius)
 void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EGreaterSpider_STATE _AtkState)
 {
 	float iDamage = 0.f;
-
+	EATTACK_WEIGHT Weight = EATTACK_WEIGHT::LIGHT;
 	switch ( _AtkType )
 	{
 	case EATTACK_TYPE::PHYSIC_MELEE:
@@ -318,6 +354,7 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 		if (_AtkState == EGreaterSpider_STATE::RUSHATTACK)
 		{
 			iDamage = iDamage * 2.f;
+			Weight = EATTACK_WEIGHT::HEAVY;
 		}
 		break;
 	case EATTACK_TYPE::MAGIC_MELEE:
@@ -328,23 +365,10 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 		break;
 	}
 
-	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
-	// 러시어택이 아니고 플레이어가 가드중일 때
-	if (m_State != EGreaterSpider_STATE::RUSHATTACK && pPlayer->GetbHoldGuard())
-	{	
-		UE_LOG(LogTemp, Warning, TEXT("Guard"));
-		FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
-		bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, -HitInfo.ImpactNormal.GetSafeNormal());
-		if (bBlocked)
-		{
-			return;
-		}
-	}
-
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
-
-	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.Normal, HitInfo, GetController(), this, DamageTypeBase);
+	DamageTypeBase.GetDefaultObject()->SetAtkWeight(Weight);	
+	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.ImpactPoint, HitInfo, GetController(), this, DamageTypeBase);
 }
 
 float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -423,15 +447,7 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		}
 	}
 
-	USoundBase* HitSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::HIT) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::HIT);
-	if (IsValid(HitSound))
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 피격사운드 로드 실패"));
-	}
+	PlayGSSound(EGreaterSpider_STATE::HIT);
 
 	return 0.0f;
 }
@@ -443,18 +459,12 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 	m_AnimInst->StopAllMontages(1.f);
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
 
-	USoundBase* DeadSound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(EGreaterSpider_STATE::DEAD) : m_DataAsset.Get()->GetSoundGSpider(EGreaterSpider_STATE::DEAD);
-	if (!IsValid(DeadSound))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("몬스터 사망사운드 로드 실패"));
-		return;
-	}
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeadSound, GetActorLocation());
+	PlayGSSound(EGreaterSpider_STATE::DEAD);
 	m_AnimInst->SetDeadAnim();
 
 	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 	// 록온 상태일 경우 해제
-	if ( pPlayer->GetbToggleLockOn() )
+	if ( pPlayer->GetbIsLockOn() )
 	{
 		pPlayer->BreakLockOn();
 	}
@@ -474,6 +484,28 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 	}
 
 	Super::MonsterDead();
+}
+
+void ABoss_GreaterSpider::PlayGSSound(EGreaterSpider_STATE _state)
+{
+	USoundBase* Sound = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetSoundGSpider(_state) : m_DataAsset.Get()->GetSoundGSpider(_state);
+	if ( !IsValid(Sound) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("보스 사운드 로드 실패"));
+		return;
+	}
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, GetActorLocation());
+}
+
+void ABoss_GreaterSpider::SpawnGSEffect(EGreaterSpider_STATE _state)
+{
+	UFXSystemAsset* Effect = m_DataAsset.IsPending() ? m_DataAsset.LoadSynchronous()->GetEffectGSpider(_state) : m_DataAsset.Get()->GetEffectGSpider(_state);
+	if ( !IsValid(Effect) )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("보스 이펙트 로드 실패"));
+		return;
+	}
+	UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Cast<UParticleSystem>(Effect), GetMesh(), FName("Root"), FVector(0.f, 0.f, 100.f), FRotator(0.f, 90.f, 0.f), FVector(2.f, 2.f, 2.f));
 }
 
 void ABoss_GreaterSpider::DeadCollisionSetting()
