@@ -12,7 +12,7 @@ ULockOnTargetComponent::ULockOnTargetComponent()
 
 	m_LockOnMark = CreateDefaultSubobject<UWidgetComponent>(TEXT("LockOnWidget"));
 
-	ConstructorHelpers::FClassFinder<UUserWidget> LockOnUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> LockOnUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_LockOnMarker.BPC_UI_LockOnMarker_C'"));
 	if ( LockOnUI.Succeeded() )
 	{
 		m_LockOnMark->SetWidgetClass(LockOnUI.Class);

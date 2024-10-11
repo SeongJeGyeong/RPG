@@ -15,7 +15,7 @@ UGameInstance_Base::UGameInstance_Base()
 	: m_InvenMgr(nullptr)
 	, m_EquipMgr(nullptr)
 {
-	ConstructorHelpers::FObjectFinder<UDataTable> ItemTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_ItemInfo.DT_ItemInfo'"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> ItemTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_ItemInfo.DT_ItemInfo'"));
 	if (ItemTable.Succeeded())
 	{
 		UInventory_Mgr::GetInst(this)->SetItemDataTable(ItemTable.Object);
@@ -25,7 +25,7 @@ UGameInstance_Base::UGameInstance_Base()
 		UE_LOG(LogTemp, Error, TEXT("아이템 데이터테이블 찾지 못함"));
 	}
 
-	ConstructorHelpers::FObjectFinder<UDataAsset> InvenIcon(TEXT("/Script/RPGPortfolio.DA_ItemCategoryIcon'/Game/Blueprint/DataAsset/BPC_DA_CategoryIcon.BPC_DA_CategoryIcon'"));
+	static ConstructorHelpers::FObjectFinder<UDataAsset> InvenIcon(TEXT("/Script/RPGPortfolio.DA_ItemCategoryIcon'/Game/Blueprint/DataAsset/BPC_DA_CategoryIcon.BPC_DA_CategoryIcon'"));
 	if ( InvenIcon.Succeeded() )
 	{
 		UInventory_Mgr::GetInst(this)->SetInventoryIcon(InvenIcon.Object);
@@ -35,13 +35,13 @@ UGameInstance_Base::UGameInstance_Base()
 		UE_LOG(LogTemp, Error, TEXT("아이콘 데이터에셋 찾지 못함"));
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> loadingscreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_LoadingScreen.UI_LoadingScreen_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> loadingscreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_LoadingScreen.UI_LoadingScreen_C'"));
 	if ( loadingscreen.Succeeded() )
 	{
 		m_LoadingScreenClass = loadingscreen.Class;
 	}
 
-	ConstructorHelpers::FObjectFinder<USoundClass> soundclass(TEXT("/Script/Engine.SoundClass'/Game/Audio/Classes/Overall.Overall'"));
+	static ConstructorHelpers::FObjectFinder<USoundClass> soundclass(TEXT("/Script/Engine.SoundClass'/Game/Audio/Classes/Overall.Overall'"));
 	if ( loadingscreen.Succeeded() )
 	{
 		m_MasterVolume = soundclass.Object;
@@ -60,6 +60,8 @@ void UGameInstance_Base::Init()
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &UGameInstance_Base::EndLoadingScreen);
 	
 	fTempVolume = m_MasterVolume->Properties.Volume;
+	TempResolution = UGameUserSettings::GetGameUserSettings()->GetScreenResolution();
+	TempWindowMode = UGameUserSettings::GetGameUserSettings()->GetFullscreenMode();
 }
 
 float UGameInstance_Base::GetMasterVolume() const

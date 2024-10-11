@@ -27,42 +27,45 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 	Super::TickNode(_OwnComp, _NodeMemory, _DT);
 
 	AAIC_Monster_Base* pController = Cast<AAIC_Monster_Base>(_OwnComp.GetAIOwner());
-
 	if (!IsValid(pController))
 	{
 		return;
 	}
 
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
-
 	if (!IsValid(pMonster))
 	{
 		return;
 	}
 
-	ACharacter* pPlayer = Cast<ACharacter>(pController->GetBlackboardComponent()->GetValueAsObject(TEXT("Target")));
+	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(TEXT("Target")));
+	if ( !IsValid(pPlayer) )
+	{
+		return;
+	}
+
 	float Distance = FVector::Distance(pMonster->GetActorLocation(), pPlayer->GetActorLocation());
-	
 	if (Distance < pController->GetLoseSightRadius())
 	{
-		bDetect = true;
+		//bDetect = true;
 	}
 	else
 	{
 		pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), nullptr);
-		bDetect = false;
-	}
-
-	if (Distance < pMonster->GetMonsterInfo().AtkRange)
-	{
-		bIsAtkRange = true;
-	}
-	else
-	{
-		bIsAtkRange = false;
+		//bDetect = false;
 	}
 
 //#ifdef ENABLE_DRAW_DEBUG
+//	float AtkRange = pController->GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
+//	if ( Distance < AtkRange )
+//	{
+//		bIsAtkRange = true;
+//	}
+//	else
+//	{
+//		bIsAtkRange = false;
+//	}
+// 
 //	if (pMonster->bDebug)
 //	{
 //		FColor color;

@@ -25,7 +25,7 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 {
 	Super::NativeUpdateAnimation(_fDeltaTime);
 
-	// 애니메이션 블루프린트에서도 함수가 호출되는것으로 보임
+	// 애니메이션 블루프린트에서도 함수가 호출됨
 	if (!IsValid(m_Boss) || !IsValid(m_Movement))
 	{
 		m_Boss = Cast<ABoss_Base>(TryGetPawnOwner());
@@ -38,7 +38,7 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 
 	// 인티저 포즈 블렌딩용
 	iRotateDir = m_Boss->GetiTurnDir();
-
+	
 	FQuat Orientation = m_Movement->UpdatedComponent->GetComponentQuat();
 	fMoveSpeed = m_Movement->Velocity.Size2D();
 	if (0.f < fMoveSpeed)
@@ -50,6 +50,6 @@ void UAnimInstance_Boss_Base::NativeUpdateAnimation(float _fDeltaTime)
 		bIsMove = false;
 	}
 	qOldOrientation = Orientation;
-
+	
 	vLocalVelocity = m_Boss->GetRootComponent()->GetRelativeRotation().UnrotateVector(m_Movement->Velocity);
 }

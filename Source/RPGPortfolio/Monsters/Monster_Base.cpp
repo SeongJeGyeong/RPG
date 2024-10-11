@@ -43,19 +43,19 @@ AMonster_Base::AMonster_Base()
 	m_WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	m_WidgetComponent->SetDrawSize(FVector2D(200.f, 200.f));
 
-	ConstructorHelpers::FClassFinder<UUserWidget> MonsterUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_MonsterMain.BPC_UI_MonsterMain_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> MonsterUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_MonsterMain.BPC_UI_MonsterMain_C'"));
 	if ( MonsterUI.Succeeded() )
 	{
 		m_WidgetComponent->SetWidgetClass(MonsterUI.Class);
 	}
 
-	ConstructorHelpers::FObjectFinder<UDataTable> ItemDropTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_MonsterDropTable.DT_MonsterDropTable'"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> ItemDropTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_MonsterDropTable.DT_MonsterDropTable'"));
 	if ( ItemDropTable.Succeeded() )
 	{
 		m_ItemTable = ItemDropTable.Object;
 	}
 
-	ConstructorHelpers::FObjectFinder<UCurveVector> TLCurve(TEXT("/Script/Engine.CurveVector'/Game/Blueprint/Timeline/Curve/HitTimelineCurve.HitTimelineCurve'"));
+	static ConstructorHelpers::FObjectFinder<UCurveVector> TLCurve(TEXT("/Script/Engine.CurveVector'/Game/Blueprint/Timeline/Curve/HitTimelineCurve.HitTimelineCurve'"));
 	if (TLCurve.Succeeded())
 	{
 		m_HitCurve = TLCurve.Object;
@@ -72,6 +72,9 @@ AMonster_Base::AMonster_Base()
 		m_HitTimeline->SetLooping(false);
 	}
 
+	GetCharacterMovement()->MaxWalkSpeed = 250.f;
+	m_DetectRange = 800.f;
+	m_AtkRange = 200.f;
 }
 
 // 에디터 상에서 호출됨(게임 실행 전)
@@ -117,11 +120,10 @@ void AMonster_Base::BeginPlay()
 		if (pAIController->GetBlackboardComponent())
 		{
 			pAIController->GetBlackboardComponent()->SetValueAsVector(FName("SpawnPosition"), GetActorLocation());
-			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_Info.AtkRange);
-			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_Info.DetectRange);
+			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_AtkRange);
+			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_DetectRange);
 		}
 		m_AnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-		//m_AnimInst->OnHitEnd.AddUObject(this, &AMonster_Base::OnHitMontageEnded);
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
 
@@ -246,7 +248,10 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-		UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::AutoRelease);
+		if (!PointDamageEvent->HitInfo.BoneName.IsNone())
+		{
+			UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::AutoRelease);
+		}
 	}
 
 	if (!bMonLockedOn)
@@ -431,26 +436,39 @@ void AMonster_Base::MeleeAttackHitCheck()
 	FVector vHitStart = GetMesh()->GetSocketLocation("Socket_HitStart");
 	FVector vHitEnd = GetMesh()->GetSocketLocation("Socket_HitEnd");
 	float fTraceHalfHeight = (vHitEnd - vHitStart).Size() * 0.5;
+	FVector vMidpoint = FMath::Lerp(vHitEnd, vHitStart, 0.5f);
+	FQuat Rot = FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat();
+	if ( PrevTraceLoc.IsZero() )
+	{
+		PrevTraceLoc = vMidpoint;
+	}
 
 	bool bResult = GetWorld()->SweepSingleByChannel
 	(
 		HitResult,
-		vHitStart,
-		vHitEnd,
-		FQuat::Identity,
+		PrevTraceLoc,
+		vMidpoint,
+		Rot,
 		ECollisionChannel::ECC_GameTraceChannel6,
 		FCollisionShape::MakeCapsule(AtkRadius, fTraceHalfHeight),
 		Params
 	);
 
-	FColor color;
-	bResult ? color = FColor::Red : color = FColor::Green;
-
-	FVector vMidpoint = FMath::Lerp(vHitEnd, vHitStart, 0.5f);
-	if (bDebug)
+	PrevTraceLoc = vMidpoint;
+	if ( bResult )
 	{
-		DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat(), color, false, 0.5f);
+		FVector const BlockingHitPoint = HitResult.Location;
+		DrawDebugCapsule(GetWorld(), BlockingHitPoint, fTraceHalfHeight, AtkRadius, Rot, FColor::Red, false, 1.f);
 	}
+
+	//if (bDebug)
+	//{
+	// 	FVector CapsuleTip = Rot.RotateVector(FVector(0, 0, fTraceHalfHeight));
+	//	DrawDebugCapsule(GetWorld(), PrevTraceLoc, fTraceHalfHeight, AtkRadius, Rot, FColor::Green, false, 1.f);
+	//	DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, Rot, FColor::Green, false, 1.f);
+	//	DrawDebugLine(GetWorld(), PrevTraceLoc + CapsuleTip, vMidpoint + CapsuleTip, FColor::Green, false, 1.f);
+	//	DrawDebugLine(GetWorld(), PrevTraceLoc - CapsuleTip, vMidpoint - CapsuleTip, FColor::Green, false, 1.f);
+	//}
 
 	if (bResult)
 	{
@@ -493,23 +511,6 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 	default:
 		break;
 	}
-
-	//APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitInfo.GetActor());
-	//// 플레이어가 가드중일 때
-	//if (pPlayer->GetbHoldGuard())
-	//{
-	//	//FVector vMonsterDir = GetActorForwardVector().GetSafeNormal();
-	//	bool bBlocked = pPlayer->BlockEnemyAttack(iDamage, GetActorLocation());
-
-	//	// 플레이어의 가드에 공격이 막힐 경우
-	//	if (bBlocked)
-	//	{
-	//		UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	//		pAnimInst->Montage_Play(m_AnimAsset.BlockAnim);
-
-	//		return;
-	//	}
-	//}
 
 	// 공격 적중 시 잠시 경직
 	m_AnimInst->Montage_Pause();

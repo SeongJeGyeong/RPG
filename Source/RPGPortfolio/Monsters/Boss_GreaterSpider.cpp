@@ -28,7 +28,7 @@ ABoss_GreaterSpider::ABoss_GreaterSpider()
 	m_PSC->SetupAttachment(GetRootComponent());
 	m_PSC->bAutoActivate = false;
 
-	ConstructorHelpers::FClassFinder<AProj_GS_Spiderling> projectile(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_Proj_GS_Spiderling.BPC_Proj_GS_Spiderling_C'"));
+	static ConstructorHelpers::FClassFinder<AProj_GS_Spiderling> projectile(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_Proj_GS_Spiderling.BPC_Proj_GS_Spiderling_C'"));
 	if ( projectile.Succeeded() )
 	{
 		m_GSProj = projectile.Class;
@@ -46,18 +46,7 @@ void ABoss_GreaterSpider::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AAIController* pAIController = Cast<AAIController>(GetController());
-	if (IsValid(pAIController))
-	{
-		// 블랙보드에 몬스터정보 전달
-		if (pAIController->GetBlackboardComponent())
-		{
-			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("RangedAtkRange"), RangedAtkRange);
-		}
-	}
-
 	m_AnimInst = Cast<UAnim_GreaterSpider>(GetMesh()->GetAnimInstance());
-
 	if (IsValid(m_AnimInst))
 	{
 		m_AnimInst->OnRushAttack.AddUObject(this, &ABoss_GreaterSpider::RushAttack);
@@ -172,7 +161,6 @@ void ABoss_GreaterSpider::AttackSphereHitCheck(FVector _Location, float _Radius)
 	FColor color;
 	bResult ? color = FColor::Red : color = FColor::Green;
 
-	DrawDebugSphere(GetWorld(), _Location, _Radius, 40, color, false, 0.4f);
 	if ( bResult )
 	{
 		if ( HitResult.GetActor()->IsValidLowLevel() )
@@ -296,6 +284,10 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	float fTraceHalfHeight = ( vEnd - vStart ).Size() * 0.5;
+	if ( PrevTraceLoc.IsZero() )
+	{
+		PrevTraceLoc = vMidpoint;
+	}
 	bool bResult = GetWorld()->SweepSingleByChannel
 	(
 		HitResult,
@@ -306,9 +298,10 @@ void ABoss_GreaterSpider::SweepAtkTrace(FName _Start, FName _End, float _Radius)
 		FCollisionShape::MakeCapsule(_Radius, fTraceHalfHeight),
 		Params
 	);
-
-	FColor color;
-	bResult ? color = FColor::Red : color = FColor::Green;
+	PrevTraceLoc = vMidpoint;
+	
+	//FColor color;
+	//bResult ? color = FColor::Red : color = FColor::Green;
 	//DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, _Radius, FRotationMatrix::MakeFromZ(vEnd - vStart).ToQuat(), color, false, 0.5f);
 
 	if ( bResult )
@@ -351,11 +344,6 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 	case EATTACK_TYPE::PHYSIC_MELEE:
 	case EATTACK_TYPE::PHYSIC_RANGE:
 		iDamage = m_Info.PhysicAtk;
-		if (_AtkState == EGreaterSpider_STATE::RUSHATTACK)
-		{
-			iDamage = iDamage * 2.f;
-			Weight = EATTACK_WEIGHT::HEAVY;
-		}
 		break;
 	case EATTACK_TYPE::MAGIC_MELEE:
 	case EATTACK_TYPE::MAGIC_RANGE:
@@ -364,6 +352,16 @@ void ABoss_GreaterSpider::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 	default:
 		break;
 	}
+	if ( _AtkState == EGreaterSpider_STATE::RUSHATTACK )
+	{
+		iDamage = iDamage * 2.f;
+		Weight = EATTACK_WEIGHT::HEAVY;
+	}
+	else if ( _AtkState == EGreaterSpider_STATE::CENTERATTACK )
+	{
+		Weight = EATTACK_WEIGHT::HEAVY;
+	}
+
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
@@ -458,7 +456,7 @@ void ABoss_GreaterSpider::MonsterDead(AController* EventInstigator)
 	pAIController->GetBrainComponent()->StopLogic(TEXT("Dead"));
 	m_AnimInst->StopAllMontages(1.f);
 	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(EventInstigator->GetPawn());
-
+	PlayGSSound(EGreaterSpider_STATE::DEADHIT);
 	PlayGSSound(EGreaterSpider_STATE::DEAD);
 	m_AnimInst->SetDeadAnim();
 

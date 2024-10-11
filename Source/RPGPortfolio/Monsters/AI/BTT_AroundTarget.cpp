@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 UBTT_AroundTarget::UBTT_AroundTarget()
 {
@@ -20,14 +21,13 @@ EBTNodeResult::Type UBTT_AroundTarget::ExecuteTask(UBehaviorTreeComponent& _OwnC
 {
 	Super::ExecuteTask(_OwnComp, _NodeMemory);
 
-	AAIController* pController = _OwnComp.GetAIOwner();
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if ( nullptr == pMonster )
 	{
 		return EBTNodeResult::Failed;
 	}
-
-	pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	vCurTargetVec = pMonster->GetActorLocation();
+	pMonster->GetCharacterMovement()->MaxWalkSpeed = 250.f;
 
 	int32 iRand = FMath::RandRange(0, 1);
 	if ( iRand )
@@ -48,32 +48,35 @@ void UBTT_AroundTarget::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeM
 
 	if ( m_TargetKey.IsNone() )
 	{
-		UE_LOG(LogTemp, Error, TEXT("추적 대상 설정 안됨"));
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
 
-	AAIController* pController = _OwnComp.GetAIOwner();
-	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
+	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if ( nullptr == pMonster )
 	{
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		return;
 	}
 
-	ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(m_TargetKey.SelectedKeyName));
 	if ( nullptr == pPlayer )
 	{
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
+		return;
 	}
+	vCurTargetVec = pPlayer->GetActorLocation();
 
 	FVector LookVector = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
 	LookVector.Z = 0.f;
-
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
-	FRotator NewRot = FMath::RInterpTo(pMonster->GetControlRotation(), TargetRot, _DeltaSeconds, 20.f);
+	FRotator NewRot = FMath::RInterpTo(pMonster->GetControlRotation(), TargetRot, _DeltaSeconds, 30.f);
 	pMonster->SetActorRotation(NewRot);
 
 	const FRotator YawRotation(0, TargetRot.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	pMonster->AddMovementInput(Direction, fAroundDir);
+
+	_OwnComp.GetBlackboardComponent()->SetValueAsVector(FName("RecentTargetPos"), vCurTargetVec);
+	_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("RecentPosSet"), true);
 }

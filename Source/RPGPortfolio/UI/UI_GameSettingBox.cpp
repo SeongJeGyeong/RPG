@@ -216,6 +216,9 @@ FIntPoint UUI_GameSettingBox::ChangeScreenResolution(FIntPoint _Res, bool _UpDow
 		ChangeRes.X = _UpDown ? 2560 : 1920;
 		ChangeRes.Y = _UpDown ? 1440 : 1080;
 		break;
+	default:
+		ChangeRes.X = _UpDown ? 1920 : 1280;
+		ChangeRes.Y = _UpDown ? 1080 : 720;
 	}
 
 	if (GetWorld()->WorldType == EWorldType::Game)
@@ -224,6 +227,7 @@ FIntPoint UUI_GameSettingBox::ChangeScreenResolution(FIntPoint _Res, bool _UpDow
 		pGameInst->SetTempResolution(FIntPoint(ChangeRes.X, ChangeRes.Y));
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("new resolution : %d x %d"), ChangeRes.X, ChangeRes.Y);
 	return FIntPoint(ChangeRes.X, ChangeRes.Y);
 }
 
@@ -235,17 +239,24 @@ void UUI_GameSettingBox::DownBtnClicked()
 	{
 	case ESETTING_PROPERTY::SCREEN_MODE:
 		{
-		GEngine->GetGameUserSettings();
-			EWindowMode::Type ScreenMode = ChangeScreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode(), false);
+			UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+			EWindowMode::Type ScreenMode = ChangeScreenMode(pGameInst->GetTempWindowMode(), false);
 			SetUserSettingValText(ScreenMode);
-			UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(ScreenMode);
+			pGameInst->SetTempWindowMode(ScreenMode);
+			//EWindowMode::Type ScreenMode = ChangeScreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode(), false);
+			//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
+			//UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(ScreenMode);
 			break;
 		}
 	case ESETTING_PROPERTY::RESOLUTION:
 		{
-			FIntPoint Resolution = ChangeScreenResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution(), false);
+			UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+			FIntPoint Resolution = ChangeScreenResolution(pGameInst->GetTempResolution(), false);
 			SetUserSettingValText(Resolution);
-			UGameUserSettings::GetGameUserSettings()->SetScreenResolution(Resolution);
+			pGameInst->SetTempResolution(Resolution);
+			//FIntPoint Resolution = ChangeScreenResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution(), false);
+			//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(Resolution);
+			//UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode());
 			break;
 		}
 	case ESETTING_PROPERTY::VIEW_DISTANCE:
@@ -349,16 +360,24 @@ void UUI_GameSettingBox::UpBtnClicked()
 	{
 	case ESETTING_PROPERTY::SCREEN_MODE:
 		{
-			EWindowMode::Type ScreenMode = ChangeScreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode(), true);
+			UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+			EWindowMode::Type ScreenMode = ChangeScreenMode(pGameInst->GetTempWindowMode(), true);
 			SetUserSettingValText(ScreenMode);
-			UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(ScreenMode);
+			pGameInst->SetTempWindowMode(ScreenMode);
+			//EWindowMode::Type ScreenMode = ChangeScreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode(), true);
+			//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution());
+			//UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(ScreenMode);
 			break;
 		}
 	case ESETTING_PROPERTY::RESOLUTION:
 		{
-			FIntPoint Resolution = ChangeScreenResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution(), true);
+			UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
+			FIntPoint Resolution = ChangeScreenResolution(pGameInst->GetTempResolution(), true);
 			SetUserSettingValText(Resolution);
-			UGameUserSettings::GetGameUserSettings()->SetScreenResolution(Resolution);
+			pGameInst->SetTempResolution(Resolution);
+			//FIntPoint Resolution = ChangeScreenResolution(UGameUserSettings::GetGameUserSettings()->GetScreenResolution(), true);
+			//UGameUserSettings::GetGameUserSettings()->SetScreenResolution(Resolution);
+			//UGameUserSettings::GetGameUserSettings()->SetFullscreenMode(UGameUserSettings::GetGameUserSettings()->GetFullscreenMode());
 			break;
 		}
 	case ESETTING_PROPERTY::VIEW_DISTANCE:

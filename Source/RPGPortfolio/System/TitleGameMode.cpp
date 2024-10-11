@@ -5,7 +5,7 @@
 
 ATitleGameMode::ATitleGameMode()
 {
-	ConstructorHelpers::FClassFinder<UUserWidget> TitleScreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_Title.UI_Title_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> TitleScreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_Title.UI_Title_C'"));
 	if (TitleScreen.Succeeded())
 	{
 		m_TitleScreenClass = TitleScreen.Class;

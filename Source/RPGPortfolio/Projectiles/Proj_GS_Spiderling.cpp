@@ -68,7 +68,7 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 		FColor color;
 		bResult ? color = FColor::Red : color = FColor::Green;
 
-		DrawDebugBox(GetWorld(), Hit.ImpactPoint, FVector(200.f, 200.f, 20.f), color, false, 0.5f);
+		//DrawDebugBox(GetWorld(), Hit.ImpactPoint, FVector(200.f, 200.f, 20.f), color, false, 0.5f);
 
 		if (bResult)
 		{

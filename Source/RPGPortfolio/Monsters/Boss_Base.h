@@ -27,6 +27,12 @@ protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBlackboardData* m_Blackboard;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( DisplayName = "공격 가능 범위" ))
+	float m_AtkRange;		// 공격 가능범위
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( DisplayName = "원거리 공격 가능 범위" ))
+	float m_RangedAtkRange; // 원거리 공격 거리
+
 	UPROPERTY()
 	class UUI_Boss* m_BossWidget;
 

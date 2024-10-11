@@ -33,13 +33,12 @@ private:
 	UPROPERTY()
 	TSubclassOf<class AProj_GS_Spiderling> m_GSProj;
 
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	float RangedAtkRange; // 원거리 공격 거리
-
 	EGreaterSpider_STATE m_State;
 	bool bAtkTrace;
 	bool bRushMove;
 	bool bPhase2;
+
+	FVector PrevTraceLoc;
 
 public:
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }

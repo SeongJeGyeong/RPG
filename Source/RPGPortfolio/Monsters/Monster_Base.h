@@ -23,14 +23,20 @@ private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_MonsterInfoTableRow;
 
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	class UWidgetComponent* m_WidgetComponent;
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	float m_DetectRange;	// 플레이어 탐지 범위
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
+	float m_AtkRange;		// 공격 가능범위
+
 	UPROPERTY()
 	UDataTable* m_ItemTable;
 
 	UPROPERTY()
 	TArray<struct FMonsterItemDropTable> m_DropItemArr;
-
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
-	class UWidgetComponent* m_WidgetComponent;
 
 	UPROPERTY()
 	class UAnimInstance_Monster_Base* m_AnimInst;
@@ -44,11 +50,14 @@ private:
 	UPROPERTY()
 	class UCurveVector* m_HitCurve;
 
+	UPROPERTY()
 	FMonsterInfo	m_Info;
+	UPROPERTY()
 	FMonsterAnimAsset m_AnimAsset;
 
 	struct FDroppedItemData	m_DropItemInfo;
 
+	FVector PrevTraceLoc;
 	FVector RelLoc;
 	FOnTimelineVector HitTimelineCallback;
 	FOnTimelineEvent TimelineFinishCallback;

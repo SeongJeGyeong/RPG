@@ -43,7 +43,7 @@ EBTNodeResult::Type UBTT_NextPos_Monster::ExecuteTask(UBehaviorTreeComponent& _O
 	AMonster_Base* pMonster = Cast<AMonster_Base>(_OwnComp.GetAIOwner()->GetPawn());
 	if (IsValid(pMonster))
 	{
-		pMonster->GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		pMonster->GetCharacterMovement()->MaxWalkSpeed = 250.f;
 	}
 
 	_OwnComp.GetBlackboardComponent()->SetValueAsVector(m_NextPosKey.SelectedKeyName, vNextPos);

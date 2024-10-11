@@ -5,6 +5,7 @@
 #include "../Monster_Base.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 EBTNodeResult::Type UBTT_LoseTarget_Monster::ExecuteTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory)
 {
@@ -13,6 +14,7 @@ EBTNodeResult::Type UBTT_LoseTarget_Monster::ExecuteTask(UBehaviorTreeComponent&
 	if (IsValid(pMonster))
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsBool(FName("RecentPosSet"), false);
+		pMonster->GetCharacterMovement()->MaxWalkSpeed = 250.f;
 	}
 
 	return Super::ExecuteTask(_OwnComp, _NodeMemory);

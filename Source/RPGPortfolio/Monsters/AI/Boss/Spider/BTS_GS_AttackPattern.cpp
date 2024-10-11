@@ -30,7 +30,6 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	}
 
 	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-
 	float RightAngle = FVector::DotProduct(vOffset, pBoss->GetActorRightVector());
 	float ForwardAngle = FVector::DotProduct(vOffset, pBoss->GetActorForwardVector());
 	float fAngle = FMath::Atan2(RightAngle, ForwardAngle);

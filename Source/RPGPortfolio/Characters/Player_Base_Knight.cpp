@@ -45,7 +45,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true; // 캐릭터가 입력된 이동방향으로 자동으로 회전하도록
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 1200.0f, 0.0f); // 이동방향으로의 회전 속도
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 1200.f, 0.f); // 이동방향으로의 회전 속도
 	GetCharacterMovement()->JumpZVelocity = 400.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
@@ -61,6 +61,8 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_MWComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarp"));
 
 	HitCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCollision"));
+
+	bDebugOn = false;
 }
 
 void APlayer_Base_Knight::PostInitializeComponents()
@@ -323,8 +325,6 @@ void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
 	}
 
 	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
-	// 일부 모션의 경우 후딜레이 모션을 캔슬하고 바로 이동모션으로 전환한다.
-
 	if ( vInput.X != 0.0f )
 	{
 		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
@@ -758,9 +758,9 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 				AMonster_Base* Monster = Cast<AMonster_Base>(DamageCauser);
 				Monster->PlayAtkBlockedAnim();
 			}
-
-			return 0.f;
 		}
+
+		return 0.f;
 	}
 
 	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
@@ -800,21 +800,12 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	UParticleSystem* Particle = EffectMgr->GetHitEffect();
 	UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
 
-	if ( GetCharacterMovement()->IsFalling() )
-	{
-		Play_PlayerMontage(EPlayerMontage::HIT_AIR);
-	}
-	else if (pDamageType->GetAtkWeight() == EATTACK_WEIGHT::HEAVY )
-	{
-		Play_PlayerMontage(EPlayerMontage::HIT_HEAVY);
-	}
-	else
-	{
-		PlayHitAnimation(HitDir);
-	}
-
-	Play_PlayerSound(EPlayerSound::HIT);
+	// 피격 몽타주 재생
 	SetState(EPlayerStateType::HIT);
+	PlayHitAnimation(HitDir, pDamageType->GetAtkWeight());
+
+	// 피격 사운드 재생
+	Play_PlayerSound(EPlayerSound::HIT);
 
 	return 0.0f;
 }
@@ -843,7 +834,10 @@ void APlayer_Base_Knight::AttackHitCheck()
 		Params
 	);
 
-	DrawDebugAttackTrace(GetWorld(), PrevTraceLoc, CurrentLoc, Rotation, Shape, bResult, OutHits, FLinearColor::Green, FLinearColor::Red, 1.f);
+	if ( bDebugOn )
+	{
+		DrawDebugAttackTrace(GetWorld(), PrevTraceLoc, CurrentLoc, Rotation, Shape, bResult, OutHits, FLinearColor::Green, FLinearColor::Red, 1.f);
+	}
 	PrevTraceLoc = CurrentLoc;
 	if ( bResult )
 	{
@@ -1097,16 +1091,18 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
 {
+	GetWorldTimerManager().ClearTimer(ItemDelayTimer);
 	bItemDelay = true;
-
 	m_MainUI->SetQuickSlotUIOpacity(0.5f, false);
 	m_MainUI->SetQuickSlotUIDelay(1.f);
 	fDelayRate = _DelayPercent;
 
 	GetWorldTimerManager().SetTimer(ItemDelayTimer, FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
 		{
-			fDelayRate = FMath::Clamp((fDelayRate - 0.01f) / _DelayPercent, 0.f, _DelayPercent);
-			m_MainUI->SetQuickSlotUIDelay(fDelayRate);
+			fDelayRate -= 0.01f;
+			float UIRate = FMath::Clamp(fDelayRate / _DelayPercent, 0.f, _DelayPercent);
+			UE_LOG(LogTemp, Warning, TEXT("DelayRate : %f"), UIRate);
+			m_MainUI->SetQuickSlotUIDelay(UIRate);
 			if ( fDelayRate <= 0.f )
 			{
 				bItemDelay = false;
@@ -1209,6 +1205,7 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 		return;
 	}
 
+	// 입력받은 이동 방향으로 공격 중 회전
 	const FVector InputVector = GetLastMovementInputVector();
 	if ( InputVector.IsZero() )
 	{
@@ -1263,12 +1260,41 @@ void APlayer_Base_Knight::Play_PlayerSound(EPlayerSound _SoundType)
 	}
 }
 
-void APlayer_Base_Knight::PlayHitAnimation(uint8 _Dir)
+void APlayer_Base_Knight::PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight)
 {
-	// 1 : front, 2 : left, 3 : right, 4 : back
-	FName HitSection = FName(*FString::Printf(TEXT("Hit%d"), _Dir));
-	Play_PlayerMontage(EPlayerMontage::HIT);
-	GetMesh()->GetAnimInstance()->Montage_JumpToSection(HitSection, m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT));
+	if ( GetCharacterMovement()->IsFalling() )
+	{
+		Play_PlayerMontage(EPlayerMontage::HIT_AIR);
+	}
+	else if ( _Weight == EATTACK_WEIGHT::HEAVY )
+	{
+		FRotator Rot = GetActorRotation();
+		switch ( _Dir )
+		{
+		case 2:
+			Rot.Yaw += 90.f;
+			SetActorRotation(Rot);
+			break;
+		case 3:
+			Rot.Yaw -= 90.f;
+			SetActorRotation(Rot);
+			break;
+		case 4:
+			Rot.Yaw -= 180.f;
+			SetActorRotation(Rot);
+			break;
+		default:
+			break;
+		}
+		Play_PlayerMontage(EPlayerMontage::HIT_HEAVY);
+	}
+	else
+	{
+		// 1 : front, 2 : left, 3 : right, 4 : back
+		FName HitSection = FName(*FString::Printf(TEXT("Hit%d"), _Dir));
+		Play_PlayerMontage(EPlayerMontage::HIT);
+		GetMesh()->GetAnimInstance()->Montage_JumpToSection(HitSection, m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT));
+	}
 }
 
 // 무적시간 동안 데미지 안받도록 설정

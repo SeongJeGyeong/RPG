@@ -57,15 +57,16 @@ EBTNodeResult::Type UBTT_GS_Attack::ExecuteTask(UBehaviorTreeComponent& _OwnComp
 		else
 		{
 			int32 fAttackPattern = _OwnComp.GetBlackboardComponent()->GetValueAsInt(FName("PatternNumber"));
-			// 왼쪽 공격
+
+			// 오른쪽 공격
 			if (fAttackPattern == 1)
 			{
-				AtkState = EGreaterSpider_STATE::LEFTATTACK;
+				AtkState = EGreaterSpider_STATE::RIGHTATTACK;
 			}
-			// 오른쪽 공격
+			// 왼쪽 공격
 			else if (fAttackPattern == 2)
 			{
-				AtkState = EGreaterSpider_STATE::RIGHTATTACK;
+				AtkState = EGreaterSpider_STATE::LEFTATTACK;
 			}
 			// 정면 공격
 			else if (fAttackPattern == 0)

@@ -17,7 +17,7 @@ AAIC_Monster_Base::AAIC_Monster_Base()
 	m_AISight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight"));
 
 	m_AISight->SightRadius = 800.f;					// 시야 반경
-	m_AISight->LoseSightRadius = 1600.f;			// 포착한 대상을 상실하는 시야 반경
+	m_AISight->LoseSightRadius = 1200.f;			// 포착한 대상을 상실하는 시야 반경
 	m_AISight->PeripheralVisionAngleDegrees = 45.f;	// 시야각 : 설정치수로 각각 왼쪽, 오른쪽의 시야각을 설정. 45의 경우 총 90도의 시야각을 가짐
 	m_AISight->SetMaxAge(2.f);
 	m_AISight->DetectionByAffiliation.bDetectEnemies = true;

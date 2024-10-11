@@ -60,15 +60,6 @@ struct FMonsterInfo : public FTableRowBase
 	float MagicDef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DetectRange;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AtkRange;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float BOSS_PerceiveRange;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Dropped_Soul;
 };
 

@@ -44,7 +44,7 @@ EBTNodeResult::Type UBTT_Trace_Monster::ExecuteTask(UBehaviorTreeComponent& _Own
 	_OwnComp.GetBlackboardComponent()->SetValueAsVector(m_RecentTargetPos.SelectedKeyName, pCharacter->GetActorLocation());
 
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
-	pMonster->GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	pMonster->GetCharacterMovement()->MaxWalkSpeed = 400.f;
 
 	return EBTNodeResult::InProgress;
 }

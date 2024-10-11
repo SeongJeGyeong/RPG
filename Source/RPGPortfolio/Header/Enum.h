@@ -171,6 +171,7 @@ enum class EGreaterSpider_STATE : uint8
 	IDLE,
 	PHASE2,
 	SHOUT,
+	DEADHIT,
 };
 
 UENUM(BlueprintType)

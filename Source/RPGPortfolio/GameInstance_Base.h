@@ -31,6 +31,7 @@ private:
 
 	float fTempVolume;
 	FIntPoint TempResolution;
+	EWindowMode::Type TempWindowMode;
 
 	FStreamableManager AssetStreamManager;
 	FTimerHandle StreamTimer;
@@ -58,8 +59,9 @@ public:
 	void SetTempVolume(const float& _Volume) { fTempVolume = _Volume; }
 	FIntPoint GetTempResolution() const { return TempResolution; }
 	void SetTempResolution(const FIntPoint& _Res) { TempResolution = _Res; }
+	EWindowMode::Type GetTempWindowMode() const { return TempWindowMode; }
+	void SetTempWindowMode(const EWindowMode::Type& _WindowMode) { TempWindowMode = _WindowMode; }
 	void ExecuteResoltionCommand();
-
 	void RestartPlayer();
 
 private:

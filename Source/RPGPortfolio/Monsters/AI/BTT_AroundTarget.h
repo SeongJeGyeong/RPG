@@ -16,9 +16,10 @@ class RPGPORTFOLIO_API UBTT_AroundTarget : public UBTTaskNode
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = ( AllowPrivateAccess = true ))
-	FBlackboardKeySelector m_TargetKey;
+	FBlackboardKeySelector	m_TargetKey;
 
-	float				   fAroundDir;
+	FVector					vCurTargetVec;
+	float					fAroundDir;
 
 public:
 	UBTT_AroundTarget();

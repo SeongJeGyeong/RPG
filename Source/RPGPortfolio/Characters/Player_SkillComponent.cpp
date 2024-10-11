@@ -12,17 +12,12 @@ UPlayer_SkillComponent::UPlayer_SkillComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	ConstructorHelpers::FObjectFinder<UDA_PlayerSkill> skillda(TEXT("/Script/RPGPortfolio.DA_PlayerSkill'/Game/Blueprint/DataAsset/BPC_DA_PlayerSkill.BPC_DA_PlayerSkill'"));
+	static  ConstructorHelpers::FObjectFinder<UDA_PlayerSkill> skillda(TEXT("/Script/RPGPortfolio.DA_PlayerSkill'/Game/Blueprint/DataAsset/BPC_DA_PlayerSkill.BPC_DA_PlayerSkill'"));
 	if ( skillda.Succeeded() )
 	{
 		m_SkillDA = skillda.Object;
 	}
 
-	//ConstructorHelpers::FClassFinder<AProj_Player_Cutter> projectile(TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Projectile/BPC_Proj_Cutter.BPC_Proj_Cutter_C'"));
-	//if ( projectile.Succeeded() )
-	//{
-	//	ProjSubclass = projectile.Class;
-	//}
 	m_SkillName = ESkillName::Slash_Cutter;
 }
 

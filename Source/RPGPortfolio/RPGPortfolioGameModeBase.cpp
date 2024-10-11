@@ -19,37 +19,37 @@
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
-	ConstructorHelpers::FClassFinder<UUserWidget> mainHUD(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_MainHUD.UI_MainHUD_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> mainHUD(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_MainHUD.UI_MainHUD_C'"));
 	if (mainHUD.Succeeded())
 	{
 		m_WidgetClassArr.Add(mainHUD.Class);
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Inventory(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> Inventory(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Inventory.BPC_UI_Inventory_C'"));
 	if (Inventory.Succeeded())
 	{
 		m_WidgetClassArr.Add(Inventory.Class);
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Status(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Status/BPC_UI_Status.BPC_UI_Status_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> Status(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Status/BPC_UI_Status.BPC_UI_Status_C'"));
 	if (Status.Succeeded())
 	{
 		m_WidgetClassArr.Add(Status.Class);
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Equip(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Equip/BPC_UI_Equip.BPC_UI_Equip_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> Equip(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Equip/BPC_UI_Equip.BPC_UI_Equip_C'"));
 	if (Equip.Succeeded())
 	{
 		m_WidgetClassArr.Add(Equip.Class);
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Manual(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Manual/BPC_UI_Manual.BPC_UI_Manual_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> Manual(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Manual/BPC_UI_Manual.BPC_UI_Manual_C'"));
 	if (Manual.Succeeded())
 	{
 		m_WidgetClassArr.Add(Manual.Class);
 	}
 
-	ConstructorHelpers::FClassFinder<UUserWidget> Settings(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Settings/BPC_UI_Settings.BPC_UI_Settings_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> Settings(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Settings/BPC_UI_Settings.BPC_UI_Settings_C'"));
 	if (Settings.Succeeded())
 	{
 		m_WidgetClassArr.Add(Settings.Class);

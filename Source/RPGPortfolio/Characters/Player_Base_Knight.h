@@ -59,6 +59,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	class UCapsuleComponent* HitCollision;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug", meta = ( AllowPrivateAccess = "true" ))
+	bool bDebugOn;
+
 	UPROPERTY()
 	UAnimInstance_Knight* m_AnimInst;
 
@@ -203,7 +206,7 @@ public:
 
 	void Play_PlayerMontage(EPlayerMontage _MontageType);
 	void Play_PlayerSound(EPlayerSound _SoundType);
-	void PlayHitAnimation(uint8 _Dir);
+	void PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight);
 
 private:
 	void InvincibleCheck(bool _Invinc);	// 무적시간 체크

@@ -27,6 +27,9 @@ ABoss_Base::ABoss_Base()
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MonsterCapGroup"));
 	GetMesh()->SetCollisionProfileName(TEXT("MonsterMeshGroup"));
+
+	m_AtkRange = 700.f;
+	m_RangedAtkRange = 1500.f;
 }
 
 void ABoss_Base::OnConstruction(const FTransform& _Transform)
@@ -57,7 +60,8 @@ void ABoss_Base::BeginPlay()
 		// 블랙보드에 몬스터정보 전달
 		if ( pAIController->GetBlackboardComponent() )
 		{
-			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_Info.AtkRange);
+			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_AtkRange);
+			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("RangedAtkRange"), m_RangedAtkRange);
 			ACharacter* pPlayer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 			if (!IsValid(pPlayer))
 			{
