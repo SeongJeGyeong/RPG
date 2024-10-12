@@ -20,13 +20,13 @@ public:
 	UPlayer_CameraArm();
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(EditDefaultsOnly, Category = "LockOn", meta = ( AllowPrivateAccess = "true" ))
 	float fMaxLockOnDistance;			// 록온 가능 거리
 
-	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(EditDefaultsOnly, Category = "LockOn", meta = ( AllowPrivateAccess = "true" ))
 	float LockonControlRotationRate;	// 락온 중 타겟 방향으로의 회전보간 속도
 
-	UPROPERTY(EditDefaultsOnly, Category = "Lock On Camera", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(EditDefaultsOnly, Category = "LockOn", meta = ( AllowPrivateAccess = "true" ))
 	bool bDrawDebug;					// 디버그 온오프
 
 	UPROPERTY()

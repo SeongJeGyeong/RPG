@@ -11,11 +11,6 @@ class APlayer_Base_Knight;
  */
 class RPGPORTFOLIO_API StateMachine
 {
-
-public:
-	StateMachine();
-	~StateMachine();
-
 public:
 	virtual void Enter(APlayer_Base_Knight* Character) = 0;
 	virtual void Update(APlayer_Base_Knight* Character, float DeltaTime) = 0;

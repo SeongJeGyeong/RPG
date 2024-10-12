@@ -74,58 +74,7 @@ TUniquePtr<StateMachine> USubsys_ObjectPool::GetStateFromPool(EPlayerStateType _
 		return pState;
 	}
 
-	TUniquePtr<StateMachine> pState = nullptr;
-	switch ( _Type )
-	{
-	case EPlayerStateType::NONE:
-		break;
-	case EPlayerStateType::IDLE:
-		pState = MakeUnique<State_Idle>();
-		break;
-	case EPlayerStateType::JUMP:
-		pState = MakeUnique<State_Jump>();
-		break;
-	case EPlayerStateType::SPRINT:
-		pState = MakeUnique<State_Sprint>();
-		break;
-	case EPlayerStateType::DODGE:
-		pState = MakeUnique<State_Dodge>();
-		break;
-	case EPlayerStateType::ATTACK:
-		pState = MakeUnique<State_Attack>();
-		break;
-	case EPlayerStateType::HEAVYATTACK:
-		pState = MakeUnique<State_HeavyAttack>();
-		break;
-	case EPlayerStateType::JUMPATTACK:
-		pState = MakeUnique<State_JumpAttack>();
-		break;
-	case EPlayerStateType::HIT:
-		pState = MakeUnique<State_Hit>();
-		break;
-	case EPlayerStateType::USEITEM:
-		pState = MakeUnique<State_UseItem>();
-		break;
-	case EPlayerStateType::ACTION:
-		pState = MakeUnique<State_Action>();
-		break;
-	case EPlayerStateType::USESKILL_1:
-		pState = MakeUnique<State_UseSkill>();
-		break;
-	case EPlayerStateType::GUARD:
-		pState = MakeUnique<State_Guard>();
-		break;
-	case EPlayerStateType::GUARDBREAK:
-		pState = MakeUnique<State_GuardBreak>();
-		break;
-	case EPlayerStateType::ATTACK_WAIT:
-		pState = MakeUnique<State_AttackWait>();
-		break;
-	default:
-		break;
-	}
-
-	return pState;
+	return nullptr;
 }
 
 void USubsys_ObjectPool::ReturnStateToPool(EPlayerStateType _Type, StateMachine* _State)

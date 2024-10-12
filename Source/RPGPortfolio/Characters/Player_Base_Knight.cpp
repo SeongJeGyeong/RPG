@@ -139,7 +139,7 @@ void APlayer_Base_Knight::BeginPlay()
 
 	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
 	CurrentState = PoolSubsystem->GetStateFromPool(EPlayerStateType::IDLE);
-	if ( CurrentState )
+	if ( CurrentState != nullptr )
 	{
 		CurrentState->Enter(this);
 	}
@@ -240,23 +240,17 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 void APlayer_Base_Knight::SetState(EPlayerStateType _StateType)
 {
-	if ( CurrentState->GetStateType() == _StateType )
-	{
-		if ( _StateType != EPlayerStateType::HIT && _StateType != EPlayerStateType::ATTACK && _StateType != EPlayerStateType::HEAVYATTACK )
-		{
-			UE_LOG(LogTemp, Warning, TEXT("State is Same"));
-			return;
-		}
-	}
-
 	// 기존 상태를 새로운 상태로 교체
 	CurrentState->Exit(this);
 	StateMachine* ReturnState = CurrentState.Release();
 	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
 	PoolSubsystem->ReturnStateToPool(ReturnState->GetStateType(), ReturnState);
 	TUniquePtr<StateMachine> NewState = PoolSubsystem->GetStateFromPool(_StateType);
-	CurrentState = MoveTemp(NewState); //TUniquePtr는 복사가 불가능하므로, 소유권을 이전하려면 반드시 MoveTemp를 사용해 소유권을 이동해야 함
-	CurrentState->Enter(this);
+	if (NewState != nullptr)
+	{
+		CurrentState = MoveTemp(NewState); //TUniquePtr는 복사가 불가능하므로, 소유권을 이전하려면 반드시 MoveTemp를 사용해 소유권을 이동해야 함
+		CurrentState->Enter(this);
+	}
 }
 
 bool APlayer_Base_Knight::IsPossibleStateTransition(EPlayerStateType _State)
@@ -265,10 +259,10 @@ bool APlayer_Base_Knight::IsPossibleStateTransition(EPlayerStateType _State)
 	switch ( _State )
 	{
 	case EPlayerStateType::IDLE:
-		break;
-	case EPlayerStateType::HIT:
+		IsPossible = (CurrentState->GetStateType() != EPlayerStateType::IDLE);
 		break;
 	case EPlayerStateType::ATTACK_WAIT:
+		IsPossible = (CurrentState->GetStateType() == EPlayerStateType::ATTACK || CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK);
 		break;
 	case EPlayerStateType::JUMP:
 	case EPlayerStateType::SPRINT:
@@ -291,7 +285,7 @@ bool APlayer_Base_Knight::IsPossibleStateTransition(EPlayerStateType _State)
 		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::JUMP );
 		break;
 	case EPlayerStateType::ACTION:
-		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT );
+		IsPossible = ( (CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT) && !bInputGuard );
 		break;
 	case EPlayerStateType::GUARD:
 	case EPlayerStateType::GUARDBREAK:
@@ -362,7 +356,6 @@ void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 	if ( IsPossibleStateTransition(EPlayerStateType::JUMP) )
 	{
 		SetState(EPlayerStateType::JUMP);
-		ACharacter::Jump();
 	}
 }
 
@@ -540,11 +533,6 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	}
 
 	if ( !IsPossibleStateTransition(EPlayerStateType::ACTION) )
-	{
-		return;
-	}
-
-	if ( bInputGuard )
 	{
 		return;
 	}
@@ -967,29 +955,34 @@ bool APlayer_Base_Knight::ConsumeMP(float _Consumption)
 
 uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
 {
-	// 1. 공격위치가 플레이어의 전후좌우 어느쪽인지 판별
-	// RightAngle : 플레이어 측면으로부터 공격위치 판별. 1이에 가까울수록 오른쪽, -1에 가까울수록 왼쪽이다. 0이면 정확히 플레이어의 정후면에 위치.
-	// ForwardAngle : 플레이어 정면으로부터 공격위치 판별. 1이면 정면, -1이면 후면, 0이면 측면.
-	// 2. 두 내적값을 이용해 각도를 구한다.
-	// atan2의 경우 atan과 달리 -180~180 까지의 각도를 표현할 수 있기 때문에 좌우판별에 유용하다.
-	float RightAngle = FVector::DotProduct(_MonVec, GetActorRightVector());
-	float ForwardAngle = FVector::DotProduct(_MonVec, GetActorForwardVector());
-	float fAngle = FMath::Atan2(RightAngle, ForwardAngle);
-	float fDir = FMath::RadiansToDegrees(fAngle);
+	// 내적을 이용해 각도를 판별
+	float fDot = FVector::DotProduct(GetActorForwardVector(), _MonVec);	// 벡터의 내적으로 코사인세타를 구함
+	float fAngle = FMath::Acos(fDot);			// 아크코사인 함수로 세타만 구함
+	fAngle = FMath::RadiansToDegrees(fAngle);	// 라디안 각도를 디그리로 변환
 
-	// 피격 애니메이션 재생
-	uint8 iDir = 4;
-	if ( -45.f < fDir && fDir < 45.f )
+	// 외적을 이용해 방향을 판별
+	FVector vCross = FVector::CrossProduct(GetActorForwardVector(), _MonVec);
+
+	UE_LOG(LogTemp, Warning, TEXT("Cross X : %f, Y : %f, Z : %f"), vCross.X, vCross.Y, vCross.Z);
+	if ( vCross.Z < 0.f )
 	{
-		iDir = 1;
+		// 적이 왼쪽에 있을 경우 각도가 음수가 되도록 만듬
+		fAngle *= -1;
 	}
-	else if ( -135 < fDir && fDir <= -45.f )
+
+	// 4방향을 int로 반환
+	uint8 iDir = 4;	// 후
+	if ( -45.f < fAngle && fAngle < 45.f )
 	{
-		iDir = 2;
+		iDir = 1;	// 전
 	}
-	else if ( 45.f <= fDir && fDir < 135.f )
+	else if ( -135 < fAngle && fAngle <= -45.f )
 	{
-		iDir = 3;
+		iDir = 2;	// 좌
+	}
+	else if ( 45.f <= fAngle && fAngle < 135.f )
+	{
+		iDir = 3;	// 우
 	}
 
 	return iDir;
@@ -1272,11 +1265,11 @@ void APlayer_Base_Knight::PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight)
 		switch ( _Dir )
 		{
 		case 2:
-			Rot.Yaw += 90.f;
+			Rot.Yaw -= 90.f;
 			SetActorRotation(Rot);
 			break;
-		case 3:
-			Rot.Yaw -= 90.f;
+		case 3:	
+			Rot.Yaw += 90.f;
 			SetActorRotation(Rot);
 			break;
 		case 4:

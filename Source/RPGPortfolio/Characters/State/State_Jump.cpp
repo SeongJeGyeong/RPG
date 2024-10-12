@@ -7,6 +7,7 @@
 void State_Jump::Enter(APlayer_Base_Knight* Character)
 {
 	Character->SetCurrentCombo(1);
+	Character->Jump();
 }
 
 void State_Jump::Update(APlayer_Base_Knight* Character, float DeltaTime)

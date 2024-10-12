@@ -30,17 +30,22 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	}
 
 	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
-	float RightAngle = FVector::DotProduct(vOffset, pBoss->GetActorRightVector());
-	float ForwardAngle = FVector::DotProduct(vOffset, pBoss->GetActorForwardVector());
-	float fAngle = FMath::Atan2(RightAngle, ForwardAngle);
-	float fDir = FMath::RadiansToDegrees(fAngle);
+	float fDot = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
+	float fAngle = FMath::Acos(fDot);
+	fAngle = FMath::RadiansToDegrees(fAngle);
+	FVector vCross = FVector::CrossProduct(pBoss->GetActorForwardVector(), vOffset);
+	if ( vCross.Z < 0.f )
+	{
+		fAngle *= -1;
+	}
+
 	// 몬스터 기준 왼쪽
-	if ( fDir <= -30.f )
+	if ( fAngle <= -30.f )
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 1);
 	}
 	// 몬스터 기준 오른쪽
-	else if ( fDir >= 30.f )
+	else if ( fAngle >= 30.f )
 	{
 		_OwnComp.GetBlackboardComponent()->SetValueAsInt(FName("PatternNumber"), 2);
 	}

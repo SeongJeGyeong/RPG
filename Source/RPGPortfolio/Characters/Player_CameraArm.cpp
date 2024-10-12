@@ -119,7 +119,7 @@ void UPlayer_CameraArm::LockOnTarget(ULockOnTargetComponent* NewTargetComponent)
 	bEnableCameraRotationLag = true;
 	m_Player->GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	m_Player->GetCharacterMovement()->bOrientRotationToMovement = false;
-	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 400.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
+	m_Player->GetCharacterMovement()->RotationRate = FRotator(0.0f, 600.f, 0.0f); // 카메라 방향으로의 액터 회전 속도
 
 }
 
