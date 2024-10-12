@@ -43,7 +43,7 @@ public:
 	void AddInventoryItem(UObject* _ItemData);
 	void Clear();
 	bool IsInventoryOpened();
-	void SetStatUI(APlayerState* _PlayerState);
+	void SetStatUI();
 	void SetCategoryEnum(const EITEM_TYPE _Type) { eCategory = _Type; }
 	void SetCategoryUI(const EITEM_TYPE _Type);
 

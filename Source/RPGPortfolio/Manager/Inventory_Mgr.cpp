@@ -38,7 +38,7 @@ UInventory_Mgr* UInventory_Mgr::GetInst(UGameInstance* _GameInst)
 		pGameInst->m_InvenMgr = NewObject<UInventory_Mgr>();
 		
 		// AddToRoot : 객체를 루트에 추가함
-		// 루트에 존재하는 객체는 참조되고 있지 않을 때도 가비지컬렉터가 자동으로 삭제하지 않기 때문에
+		// 루트에 존재하는 객체는 참조되고 있지 않을 때도 가비지컬렉터가 자동으로 삭제하지 않음
 		// 대신 사용하지 않을 때는 수동으로 삭제해줘야함
 		pGameInst->m_InvenMgr->AddToRoot();
 	}
@@ -160,7 +160,7 @@ void UInventory_Mgr::ShowInventoryUI()
 	}
 
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
-	InventoryUI->SetStatUI(UGameplayStatics::GetPlayerState(m_World, 0));
+	InventoryUI->SetStatUI();
 	InventoryUI->SetCategoryEnum(EITEM_TYPE::ALL);
 	InventoryUI->SetCategoryUI(EITEM_TYPE::ALL);
 	RenewInventoryUI(EITEM_TYPE::ALL);
@@ -467,7 +467,7 @@ void UInventory_Mgr::DecreaseInventoryItem(EITEM_ID _ID)
 		--pItemRow->Stack;
 		if (pItemRow->Stack <= 0)
 		{
-			UInventory_Mgr::GetInst(m_World)->SubGameItem(pItemRow->EquipedSlot, pItemRow->ID);
+			SubGameItem(pItemRow->EquipedSlot, pItemRow->ID);
 		}
 	}
 }

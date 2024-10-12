@@ -99,8 +99,8 @@ enum class EATTACK_TYPE : uint8
 UENUM(BlueprintType)
 enum class ELockOnDirection : uint8
 {
-	Left	UMETA(DisplayName = "Left"),
-	Right	UMETA(DisplayName = "Right"),
+	Left,
+	Right,
 };
 
 UENUM(BlueprintType)

@@ -51,7 +51,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 
 	m_SArm = CreateDefaultSubobject<UPlayer_CameraArm>(TEXT("SArm"));
 	m_SArm->SetupAttachment(RootComponent);
-	m_SArm->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
+	m_SArm->SetRelativeLocation(FVector(0.f, 0.f, 80.f));
 
 	m_Cam = CreateDefaultSubobject<UCameraComponent>(TEXT("Cam"));
 	m_Cam->SetupAttachment(m_SArm);

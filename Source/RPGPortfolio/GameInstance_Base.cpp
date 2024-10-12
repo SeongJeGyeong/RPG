@@ -3,6 +3,7 @@
 
 #include "GameInstance_Base.h"
 #include "Manager/Inventory_Mgr.h"
+#include "Manager/Equip_Mgr.h"
 #include "MoviePlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "RPGPortfolioGameModeBase.h"

@@ -164,7 +164,7 @@ bool UUI_Inventory::IsInventoryOpened()
 	}
 }
 
-void UUI_Inventory::SetStatUI(APlayerState* _PlayerState)
+void UUI_Inventory::SetStatUI()
 {
 	m_PlayerStatUI->SetPlayerStatUI();
 }

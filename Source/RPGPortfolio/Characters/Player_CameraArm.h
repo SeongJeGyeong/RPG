@@ -26,13 +26,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "LockOn", meta = ( AllowPrivateAccess = "true" ))
 	float LockonControlRotationRate;	// 락온 중 타겟 방향으로의 회전보간 속도
 
-	UPROPERTY(EditDefaultsOnly, Category = "LockOn", meta = ( AllowPrivateAccess = "true" ))
-	bool bDrawDebug;					// 디버그 온오프
-
 	UPROPERTY()
 	class APlayer_Base_Knight* m_Player;
-
-
 
 public:
 	// 록온 타겟 컴포넌트
@@ -47,14 +42,14 @@ public:
 
 	bool ToggleCameraLockOn(const bool& _ToggleLockOn);
 	void BreakLockOnTarget();
-	void SwitchTarget(ELockOnDirection SwitchDirection);
+	void SwitchTarget(ELockOnDirection _Direction);
 
 	bool IsLockedOn();
 
 	class ULockOnTargetComponent* GetLockOnTarget() const { return m_Target; };
 
 private:
-	void LockOnTarget(ULockOnTargetComponent* NewTargetComponent);
-	TArray<class ULockOnTargetComponent*> GetTargetComponents();
+	void LockOnTarget(ULockOnTargetComponent* _TargetComponent);
+	TArray<class ULockOnTargetComponent*> GetDetectedTargets();
 	class ULockOnTargetComponent* GetSelectedTarget();
 };
