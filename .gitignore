@@ -76,3 +76,8 @@ DerivedDataCache/*
 # Personal Ignore
 backup/*
 Content/*
+Config/*
+Platforms/*
+RPGPortfolio.uproject
+.vsconfig
+.editorconfig
