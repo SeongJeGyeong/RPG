@@ -72,96 +72,97 @@ void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 void UUI_EquipItem::ItemBtnClicked()
 {
 	ItemList->SetSlotCategory(eSlotType);
+	EITEM_TYPE Type = EITEM_TYPE::ALL;
 	switch ( eSlotType )
 	{
 	case EEQUIP_SLOT::WEAPON_1:
 		ItemList->SetCategoryText(FText::FromString(L"무기 1"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::WEAPON);
+		Type = EITEM_TYPE::WEAPON;
 		break;
 	case EEQUIP_SLOT::WEAPON_2:
 		ItemList->SetCategoryText(FText::FromString(L"무기 2"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::WEAPON);
+		Type = EITEM_TYPE::WEAPON;
 		break;
 	case EEQUIP_SLOT::WEAPON_3:
 		ItemList->SetCategoryText(FText::FromString(L"무기 3"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::WEAPON);
+		Type = EITEM_TYPE::WEAPON;
 		break;
 	case EEQUIP_SLOT::SHIELD_1:
 		ItemList->SetCategoryText(FText::FromString(L"방패 1"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::SHIELD);
+		Type = EITEM_TYPE::SHIELD;
 		break;
 	case EEQUIP_SLOT::SHIELD_2:
 		ItemList->SetCategoryText(FText::FromString(L"방패 2"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::SHIELD);
+		Type = EITEM_TYPE::SHIELD;
 		break;
 	case EEQUIP_SLOT::SHIELD_3:
 		ItemList->SetCategoryText(FText::FromString(L"방패 3"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::SHIELD);
+		Type = EITEM_TYPE::SHIELD;
 		break;
 	case EEQUIP_SLOT::ARROW:
 		ItemList->SetCategoryText(FText::FromString(L"화살"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ARROWS);
+		Type = EITEM_TYPE::ARROWS;
 		break;
 	case EEQUIP_SLOT::BOLT:
 		ItemList->SetCategoryText(FText::FromString(L"볼트"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ARROWS);
+		Type = EITEM_TYPE::ARROWS;
 		break;
 	case EEQUIP_SLOT::HELM:
 		ItemList->SetCategoryText(FText::FromString(L"투구"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ARM_HELM);
+		Type = EITEM_TYPE::ARM_HELM;
 		break;
 	case EEQUIP_SLOT::CHEST:
 		ItemList->SetCategoryText(FText::FromString(L"갑옷"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ARM_CHEST);
+		Type = EITEM_TYPE::ARM_CHEST;
 		break;
 	case EEQUIP_SLOT::GAUNTLET:
 		ItemList->SetCategoryText(FText::FromString(L"장갑"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ARM_GAUNTLET);
+		Type = EITEM_TYPE::ARM_GAUNTLET;
 		break;
 	case EEQUIP_SLOT::LEGGINGS:
 		ItemList->SetCategoryText(FText::FromString(L"각반"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ARM_LEGGINGS);
+		Type = EITEM_TYPE::ARM_LEGGINGS;
 		break;
 	case EEQUIP_SLOT::ACCESSORIE_1:
 		ItemList->SetCategoryText(FText::FromString(L"악세사리 1"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		Type = EITEM_TYPE::ACCESSORIE;
 		break;
 	case EEQUIP_SLOT::ACCESSORIE_2:
 		ItemList->SetCategoryText(FText::FromString(L"악세사리 2"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		Type = EITEM_TYPE::ACCESSORIE;
 		break;
 	case EEQUIP_SLOT::ACCESSORIE_3:
 		ItemList->SetCategoryText(FText::FromString(L"악세사리 3"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		Type = EITEM_TYPE::ACCESSORIE;
 		break;
 	case EEQUIP_SLOT::ACCESSORIE_4:
 		ItemList->SetCategoryText(FText::FromString(L"악세사리 4"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::ACCESSORIE);
+		Type = EITEM_TYPE::ACCESSORIE;
 		break;
 	case EEQUIP_SLOT::CONSUMABLE_1:
 		ItemList->SetCategoryText(FText::FromString(L"소비아이템 1"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		Type = EITEM_TYPE::CONSUMABLE;
 		break;
 	case EEQUIP_SLOT::CONSUMABLE_2:
 		ItemList->SetCategoryText(FText::FromString(L"소비아이템 2"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		Type = EITEM_TYPE::CONSUMABLE;
 		break;
 	case EEQUIP_SLOT::CONSUMABLE_3:
 		ItemList->SetCategoryText(FText::FromString(L"소비아이템 3"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		Type = EITEM_TYPE::CONSUMABLE;
 		break;
 	case EEQUIP_SLOT::CONSUMABLE_4:
 		ItemList->SetCategoryText(FText::FromString(L"소비아이템 4"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		Type = EITEM_TYPE::CONSUMABLE;
 		break;
 	case EEQUIP_SLOT::CONSUMABLE_5:
 		ItemList->SetCategoryText(FText::FromString(L"소비아이템 5"));
-		UInventory_Mgr::GetInst(GetWorld())->RenewItemListUI(EITEM_TYPE::CONSUMABLE);
+		Type = EITEM_TYPE::CONSUMABLE;
 		break;
 	default:
 		break;
 	}
-
+	UInventory_Mgr::GetInst(GetWorld())->RenewEquipItemListUI(Type);
 	ItemList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }

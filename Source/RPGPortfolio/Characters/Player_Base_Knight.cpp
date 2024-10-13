@@ -531,12 +531,10 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
 		return;
 	}
-
 	if ( !IsPossibleStateTransition(EPlayerStateType::ACTION) )
 	{
 		return;
 	}
-
 	if (!OverlapInteractionArr.IsEmpty())
 	{
 		if ( OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->_getUObject()->IsA(AItem_Dropped_Base::StaticClass()) )
@@ -804,8 +802,8 @@ void APlayer_Base_Knight::AttackHitCheck()
 	TArray<FHitResult> OutHits;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	FCollisionShape Shape = HitCollision->GetCollisionShape();
-	FVector CurrentLoc = HitCollision->GetComponentLocation();  // 현재 위치
-	FQuat Rotation = HitCollision->GetComponentQuat();             // 현재 회전
+	FVector CurrentLoc = HitCollision->GetComponentLocation();
+	FQuat Rotation = HitCollision->GetComponentQuat();
 	if ( PrevTraceLoc.IsZero() )
 	{
 		PrevTraceLoc = CurrentLoc;
@@ -840,7 +838,6 @@ void APlayer_Base_Knight::AttackHitCheck()
 						return;
 					}
 				}
-
 				if ( CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK )
 				{
 					ApplyPointDamage(HitInfo, EATTACK_TYPE::PHYSIC_MELEE, EPlayerMontage::HEAVYATTACK);
@@ -1207,7 +1204,6 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 	else
 	{
 		const FRotator TargetRot = FRotationMatrix::MakeFromX(InputVector).Rotator();
-		// 락온 중이 아닐 때는 translation off
 		URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
 		m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("AttackWarp"), PlayerLoc + GetActorForwardVector() * 60.f, TargetRot);
 	}

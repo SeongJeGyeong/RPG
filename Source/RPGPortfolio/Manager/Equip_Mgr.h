@@ -22,10 +22,6 @@ private:
 	UPROPERTY()
 	TMap<EEQUIP_SLOT, FInvenItemRow> m_EquipItemMap;
 
-	// TFixedAllocator : 지정한 숫자만큼의 배열 메모리를 정적으로 할당
-	// 할당된 인덱스를 넘어서 엘리먼트를 추가하려고 하면 코드 오류 발생
-	//TArray<TSharedPtr<FInvenItemRow>, TFixedAllocator<5>> m_QuickSlotArr = {nullptr, nullptr, nullptr, nullptr, nullptr};
-
 	int32 CurQuickSlotIdx = 0;
 
 public:
@@ -41,7 +37,7 @@ public:
 	void EquipQuickSlotArray(const FInvenItemRow& _InvenItem, EEQUIP_SLOT _Slot);
 	void UnEquipQuickSlotArray(EEQUIP_SLOT _Slot);
 	void RenewQuickSlotUI(int32 _Idx);
-	void RenewNextQuickSlotUI(int32 _Idx);
+	//void RenewNextQuickSlotUI(int32 _Idx);
 	void EmptyQuickSlotUI();
 	int32 ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot);
 	EEQUIP_SLOT ConvertIdxToQuickSlot(int32 _Idx);

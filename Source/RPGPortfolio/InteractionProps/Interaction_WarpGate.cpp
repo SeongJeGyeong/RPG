@@ -20,6 +20,7 @@ AInteraction_WarpGate::AInteraction_WarpGate()
 	m_Trigger->SetCollisionProfileName(TEXT("InteractionTrigger"));
 	m_Mesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 
+	nWarpLevel = FName("BossRoom");
 }
 
 void AInteraction_WarpGate::OnConstruction(const FTransform& _Transform)
@@ -44,6 +45,6 @@ void AInteraction_WarpGate::Tick(float DeltaTime)
 
 void AInteraction_WarpGate::Interaction(AActor* _InteractedActor)
 {
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("BossRoom"));
+	UGameplayStatics::OpenLevel(GetWorld(), nWarpLevel);
 }
 

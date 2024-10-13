@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "PlayerInteraction.generated.h"
-
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UPlayerInteraction : public UInterface
 {
@@ -20,7 +18,6 @@ class RPGPORTFOLIO_API IPlayerInteraction
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void Interaction(AActor* _InteractedActor = nullptr) = 0;
 	virtual FText GetCommand_Key() const = 0;

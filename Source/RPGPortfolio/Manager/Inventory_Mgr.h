@@ -50,7 +50,7 @@ public:
 	FInvenItemRow* GetInvenItemInfo(EITEM_ID _ID);
 public:
 	void RenewInventoryUI(EITEM_TYPE _Type);
-	void RenewItemListUI(EITEM_TYPE _Type);
+	void RenewEquipItemListUI(EITEM_TYPE _Type);
 	void EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow);
 	void UnEquipConsumeUI(EEQUIP_SLOT _Slot);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);

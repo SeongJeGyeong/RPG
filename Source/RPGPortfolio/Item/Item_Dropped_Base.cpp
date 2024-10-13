@@ -82,9 +82,6 @@ void AItem_Dropped_Base::Interaction(AActor* _InteractedActor)
 	UTexture2D* Img = m_Img.IsPending() ? m_Img.LoadSynchronous() : m_Img.Get();
 	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, Img, m_Stack);
 	pMainUI->ShowMainMessageUI(true);
-	
-	APlayer_Base_Knight* Player = Cast<APlayer_Base_Knight>(_InteractedActor);
-	Player->Play_PlayerMontage(EPlayerMontage::ACTION_ITEM);
-	Player->SetState(EPlayerStateType::ACTION);
+
 	Destroy();
 }

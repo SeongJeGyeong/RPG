@@ -11,7 +11,6 @@
 #include "../UI/UI_EquipMain.h"
 #include "Inventory_Mgr.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/Inventory_Mgr.h"
 
 UWorld* UEquip_Mgr::m_World = nullptr;
 
@@ -59,25 +58,16 @@ int32 UEquip_Mgr::GetNextIndex()
 int32 UEquip_Mgr::GetNextValidIndex()
 {
 	int32 idx = CurQuickSlotIdx;
-	int32 iCount = 0;
 	while ( ++idx )
 	{
-		if ( iCount >= 5 )
+		if ( idx >= 5 ) idx = 0;
+
+		if ( idx == CurQuickSlotIdx )
 		{
 			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 등록된 아이템 없음"));
-			return CurQuickSlotIdx;
+			break;
 		}
-
-		if ( idx >= 5 )
-		{
-			idx = 0;
-		}
-
-		if ( GetQSItemForIndex(idx) == nullptr )
-		{
-			++iCount;
-		}
-		else
+		if ( GetQSItemForIndex(idx) != nullptr )
 		{
 			break;
 		}
@@ -139,8 +129,6 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 			EquipMainUI->RenewEquipItemStack(pItem->EquipedSlot, pItem->Stack);
 		}
 	}
-
-
 }
 
 void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
@@ -148,7 +136,6 @@ void UEquip_Mgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("SetEquipSlotMap 게임모드 캐스팅 실패"));
 		return;
 	}
 
@@ -188,7 +175,7 @@ void UEquip_Mgr::EquipQuickSlotArray(const FInvenItemRow& _InvenItem, EEQUIP_SLO
 		CurQuickSlotIdx = Index;
 	}
 
-	// 장착한 아이템이 어느슬롯에 장착되건 현재 보고있는 퀵슬롯 기준으로 갱신하면 알아서 표시될것
+	// 장착한 아이템이 어느슬롯에 장착되건 현재 보고있는 퀵슬롯 기준으로 갱신하면 알아서 표시됨
 	// 퀵슬롯에 표시되는 아이템은 현재 퀵슬롯과 그 다음 슬롯중 아이템이 장착되어 있는 가장 가까운 슬롯인데, 
 	// 현재 퀵슬롯을 갱신할 때 바로 다음에 아이템이 장착되어 있는 슬롯을 찾아서 갱신하기 때문
 	RenewQuickSlotUI(CurQuickSlotIdx);
@@ -228,18 +215,18 @@ void UEquip_Mgr::RenewQuickSlotUI(int32 _Idx)
 	MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
 }
 
-void UEquip_Mgr::RenewNextQuickSlotUI(int32 _Idx)
-{
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("RenewNextQuickSlotUI 게임모드 캐스팅 실패"));
-		return;
-	}
-	UUI_Base* MainUI = GameMode->GetMainHUD();
-
-	MainUI->GetQuickSlotUI()->RenewNextQuickSlot(_Idx);
-}
+//void UEquip_Mgr::RenewNextQuickSlotUI(int32 _Idx)
+//{
+//	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
+//	if ( !IsValid(GameMode) )
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("RenewNextQuickSlotUI 게임모드 캐스팅 실패"));
+//		return;
+//	}
+//	UUI_Base* MainUI = GameMode->GetMainHUD();
+//
+//	MainUI->GetQuickSlotUI()->RenewNextQuickSlot(_Idx);
+//}
 
 void UEquip_Mgr::EmptyQuickSlotUI()
 {

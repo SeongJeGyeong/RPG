@@ -12,7 +12,7 @@
 #include "../UI/UI_Player_Main.h"
 #include "../UI/UI_Player_Soul.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/Equip_Mgr.h"
+#include "Equip_Mgr.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
@@ -93,7 +93,7 @@ FInvenItemRow* UInventory_Mgr::GetInvenItemInfo(EITEM_ID _ID)
 
 void UInventory_Mgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 {
-	//습득한 아이템과 동일한 ID의 아이템 정보를 가져온다
+	//획득한 아이템과 동일한 ID의 아이템 정보를 가져온다
 	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
 
 	if ( nullptr == pItemInfo )
@@ -184,17 +184,13 @@ void UInventory_Mgr::CloseInventoryUI()
 void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 {
 	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("RenewInventoryUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
-
 	// 인벤토리 위젯 내용 초기화
 	InventoryUI->Clear();
-
 	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
 	// 전체아이템 인벤토리일 경우
 	if ( _Type == EITEM_TYPE::ALL )
@@ -219,7 +215,7 @@ void UInventory_Mgr::RenewInventoryUI(EITEM_TYPE _Type)
 	}
 }
 
-void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
+void UInventory_Mgr::RenewEquipItemListUI(EITEM_TYPE _Type)
 {
 	if ( !IsValid(m_World) )
 	{
@@ -231,7 +227,7 @@ void UInventory_Mgr::RenewItemListUI(EITEM_TYPE _Type)
 
 	if ( !IsValid(GameMode) )
 	{
-		UE_LOG(LogTemp, Error, TEXT("RenewItemListUI 게임모드 캐스팅 실패"));
+		UE_LOG(LogTemp, Error, TEXT("RenewEquipItemListUI 게임모드 캐스팅 실패"));
 		return;
 	}
 	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
@@ -311,12 +307,11 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 	FInvenItemRow* pItemRow = m_InvenStorage[ (int32)_Type ].StorageMap.Find(_ID);
 
-	// 이미 해당슬롯에 장비중인 아이템을 다시 클릭할 경우 장비슬롯을 EMPTY로 바꾼 후 스토리지에 다시 넣는다.
+	// 이미 해당슬롯에 장비중인 아이템을 다시 클릭할 경우 장비슬롯을 EMPTY로 바꾼다.
 	if ( pItemRow->EquipedSlot == _Slot )
 	{
 		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
-		m_InvenStorage[ (int32)_Type ].StorageMap.Add(_ID, *pItemRow);
-		RenewItemListUI(_Type);
+		RenewEquipItemListUI(_Type);
 		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다. 
 		if ( _Type == EITEM_TYPE::CONSUMABLE )
 		{
@@ -374,8 +369,8 @@ void UInventory_Mgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			Iter.Value().EquipedSlot = _Slot;
 		}
 	}
+	RenewEquipItemListUI(_Type);
 
-	RenewItemListUI(_Type);
 	if (_Type == EITEM_TYPE::CONSUMABLE)
 	{
 		EquipConsumeUI(_Slot, *pItemRow);

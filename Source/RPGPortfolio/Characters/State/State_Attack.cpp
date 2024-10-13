@@ -9,7 +9,6 @@ void State_Attack::Enter(APlayer_Base_Knight* Character)
 {
 	Character->SetbEnableAtkInput(false);
 	Character->SetbIsAttacking(false);
-	//Character->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	uint8 Combo = Character->GetCurrentCombo();
 
 	EPlayerMontage MontageType = EPlayerMontage::ATTACK_1;

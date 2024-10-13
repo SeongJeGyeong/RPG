@@ -19,6 +19,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UStaticMeshComponent* m_Mesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LevelName", meta = ( AllowPrivateAccess = "true" ))
+	FName nWarpLevel;
+
 	FText tCommand_Key;
 	FText tCommand_Name;
 
