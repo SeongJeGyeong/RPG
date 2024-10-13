@@ -26,3 +26,9 @@ public:
 	void SetAtkWeight(const EATTACK_WEIGHT& _AtkWeight) { Atk_Weight = _AtkWeight; }
 };
 ```
+```c++
+TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
+DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
+DamageTypeBase.GetDefaultObject()->SetAtkWeight(Weight);	
+UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), iDamage, HitInfo.ImpactPoint, HitInfo, GetController(), this, DamageTypeBase);
+```
