@@ -24,7 +24,6 @@ EBTNodeResult::Type UBTT_GS_P2_PatternSelect::ExecuteTask(UBehaviorTreeComponent
 	}
 
 	float Distance = (pBoss->GetActorLocation() - pPlayer->GetActorLocation()).Size();
-
 	int iNum = FMath::RandRange(1, 10);
 	if ( iNum > 7 )
 	{

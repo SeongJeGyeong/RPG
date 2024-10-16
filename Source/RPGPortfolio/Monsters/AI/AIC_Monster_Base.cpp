@@ -16,9 +16,6 @@ AAIC_Monster_Base::AAIC_Monster_Base()
 	m_AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception"));
 	m_AISight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight"));
 
-	m_AISight->SightRadius = 800.f;					// 시야 반경
-	m_AISight->LoseSightRadius = 1200.f;			// 포착한 대상을 상실하는 시야 반경
-	m_AISight->PeripheralVisionAngleDegrees = 45.f;	// 시야각 : 설정치수로 각각 왼쪽, 오른쪽의 시야각을 설정. 45의 경우 총 90도의 시야각을 가짐
 	m_AISight->SetMaxAge(2.f);
 	m_AISight->DetectionByAffiliation.bDetectEnemies = true;
 
@@ -94,4 +91,24 @@ void AAIC_Monster_Base::PerceptionUpdate(const TArray<AActor*>& _UpdateActors)
 	{
 		GetBlackboardComponent()->SetValueAsObject("Target", PerceivedActors[0]);
 	}
+}
+
+void AAIC_Monster_Base::SetAISightRadius(const float& _Radius)
+{
+	m_AISight->SightRadius = _Radius;
+}
+
+void AAIC_Monster_Base::SetAILoseSightRadius(const float& _Radius)
+{
+	m_AISight->LoseSightRadius = _Radius;
+}
+
+void AAIC_Monster_Base::SetAIVisionAngle(const float& _Degree)
+{
+	m_AISight->PeripheralVisionAngleDegrees = _Degree;
+}
+
+void AAIC_Monster_Base::SaveAIConfigureSense()
+{
+	m_AIPerception->ConfigureSense(*m_AISight);
 }

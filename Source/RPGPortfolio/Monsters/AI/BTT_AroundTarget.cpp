@@ -58,15 +58,14 @@ void UBTT_AroundTarget::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _NodeM
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
-
 	ACharacter* pPlayer = Cast<ACharacter>(_OwnComp.GetBlackboardComponent()->GetValueAsObject(m_TargetKey.SelectedKeyName));
 	if ( nullptr == pPlayer )
 	{
 		FinishLatentTask(_OwnComp, EBTNodeResult::Failed);
 		return;
 	}
-	vCurTargetVec = pPlayer->GetActorLocation();
 
+	vCurTargetVec = pPlayer->GetActorLocation();
 	FVector LookVector = pPlayer->GetActorLocation() - pMonster->GetActorLocation();
 	LookVector.Z = 0.f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();

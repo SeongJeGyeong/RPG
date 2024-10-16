@@ -7,7 +7,7 @@ void UFadeViewportClient::PostRender(UCanvas* Canvas)
 {
 	Super::PostRender(Canvas);
 
-	if ( bFading )
+	if ( bFade )
 	{
 		DrawScreenFade(Canvas);
 	}
@@ -15,16 +15,16 @@ void UFadeViewportClient::PostRender(UCanvas* Canvas)
 
 void UFadeViewportClient::ClearFade()
 {
-	bFading = false;
+	bFade = false;
 }
 
-void UFadeViewportClient::Fade(const float _Duration, const bool _ToBlack)
+void UFadeViewportClient::Fade(const float _Duration, const bool _OutOrIn)
 {
 	const UWorld* pWorld = GetWorld();
 	if (pWorld)
 	{
-		bFading = true;
-		bToBlack = _ToBlack;
+		bFade = true;
+		bOutOrIn = _OutOrIn;
 		fFadeDuration = _Duration;
 		fFadeStartTime = pWorld->GetTimeSeconds();
 	}
@@ -32,7 +32,7 @@ void UFadeViewportClient::Fade(const float _Duration, const bool _ToBlack)
 
 void UFadeViewportClient::DrawScreenFade(UCanvas* Canvas)
 {
-	if (bFading)
+	if ( bFade )
 	{
 		const UWorld* pWorld = GetWorld();
 		if ( pWorld )
@@ -40,15 +40,21 @@ void UFadeViewportClient::DrawScreenFade(UCanvas* Canvas)
 			const float fCurrentTime = pWorld->GetTimeSeconds();
 			const float fAlpha = FMath::Clamp((fCurrentTime - fFadeStartTime) / fFadeDuration, 0.f, 1.f);
 
-			if (fAlpha >= 1.f && !bToBlack)
+			if (fAlpha >= 1.f && !bOutOrIn )
 			{
-				bFading = false;
+				bFade = false;
 			}
 			else
 			{
 				FLinearColor FadeColor = FLinearColor::Black;
-				FadeColor.A = bToBlack ? fAlpha : 1 - fAlpha;
+				// true면 페이드 아웃, false 면 페이드 인
+				FadeColor.A = bOutOrIn ? fAlpha : 1 - fAlpha;
 				Canvas->DrawColor = FadeColor.ToFColor(true);
+				//Tex : 새로 그릴 텍스처
+				//X, Y : 타일 시작지점(좌상단)의 좌표
+				//XL, YL : 타일의 폭과 높이
+				//U, V : 텍스처 시작지점(좌상단)의 좌표
+				//UL, VL : 그릴 텍스처의 폭과 높이
 				Canvas->DrawTile(Canvas->DefaultTexture, 0, 0, Canvas->ClipX, Canvas->ClipY, 0, 0, Canvas->DefaultTexture->GetSizeX(), Canvas->DefaultTexture->GetSizeY());
 			}
 		}

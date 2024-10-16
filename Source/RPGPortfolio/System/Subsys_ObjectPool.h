@@ -32,12 +32,12 @@ class RPGPORTFOLIO_API USubsys_ObjectPool : public UWorldSubsystem
 	GENERATED_BODY()
 	
 private:
+	TMap<EPlayerStateType, TUniquePtr<StateMachine>> StatePool;
+
 	/* TMap 안에 TArray를 넣으면 UPROPERTY 리플렉션을 달 수 없으므로
 	구조체에 TArray 객체를 넣고 TMap에 구조체를 넣어 구현한다. */
 	UPROPERTY()
 	TMap<UClass*, FObjectPoolArr> ObjPools;
-
-	TMap<EPlayerStateType, TUniquePtr<StateMachine>> StatePool;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;

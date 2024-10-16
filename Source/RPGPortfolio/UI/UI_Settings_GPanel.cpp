@@ -61,8 +61,6 @@ void UUI_Settings_GPanel::GameSettingsVisibilityChanged(ESlateVisibility _Visibi
 
 void UUI_Settings_GPanel::ApplyBtnClicked()
 {
-	//FString sini = GIsEditor ? GEditorSettingsIni : GGameUserSettingsIni;
-	//FString IniFileLocation = FPaths::GeneratedConfigDir() + UGameplayStatics::GetPlatformName() + "/" + GGameUserSettingsIni + ".ini";
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
 	// 윈도우모드에 따라 렌더링 방식이 다르다
 	// 전체화면 : GPU 리소스를 직접 제어하는 독점적 모드 사용

@@ -29,7 +29,7 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 		return;
 	}
 
-	FVector vOffset = pPlayer->GetActorLocation() - pBoss->GetActorLocation();
+	FVector vOffset = (pPlayer->GetActorLocation() - pBoss->GetActorLocation()).GetSafeNormal();
 	float fDot = FVector::DotProduct(pBoss->GetActorForwardVector(), vOffset);
 	float fAngle = FMath::Acos(fDot);
 	fAngle = FMath::RadiansToDegrees(fAngle);
@@ -38,7 +38,7 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	{
 		fAngle *= -1;
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("Player Angle : %f"), fAngle);
 	// 몬스터 기준 왼쪽
 	if ( fAngle <= -30.f )
 	{

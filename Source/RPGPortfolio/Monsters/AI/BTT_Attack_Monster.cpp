@@ -16,10 +16,11 @@ EBTNodeResult::Type UBTT_Attack_Monster::ExecuteTask(UBehaviorTreeComponent& Own
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	AAIController* pController = Cast<AAIController>(OwnerComp.GetAIOwner());
-
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
-
-	pMonster->MonsterAttackNormal();
+	if ( pMonster != nullptr )
+	{
+		pMonster->MonsterAttackNormal();
+	}
 
 	return EBTNodeResult::Succeeded;
 }

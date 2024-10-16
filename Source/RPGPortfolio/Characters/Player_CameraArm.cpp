@@ -146,16 +146,12 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetSelectedTarget()
 			{
 				ClosestToCenter = fAngle;
 				TargetComponent = Target;
-				continue;
 			}
 		}
-		else
+		else if ( fAngle < ClosestToCenter )
 		{
-			if ( fAngle < ClosestToCenter )
-			{
-				ClosestToCenter = fDot;
-				TargetComponent = Target;
-			}
+			ClosestToCenter = fAngle;
+			TargetComponent = Target;
 		}
 	}
 
@@ -168,14 +164,12 @@ void UPlayer_CameraArm::SwitchTarget(ELockOnDirection _Direction)
 	{
 		return;
 	}
-
 	TArray<ULockOnTargetComponent*> DetectedTargets = GetDetectedTargets();
 	// 한 개일 경우 현재 락온중인 컴포넌트이므로
 	if ( DetectedTargets.Num() < 2 )
 	{
 		return;
 	}
-
 	FVector vCurTargetDir = ( m_Target->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal();
 	ULockOnTargetComponent* TargetComponent = nullptr;
 	float fClosestDot = 0.f;
@@ -185,14 +179,12 @@ void UPlayer_CameraArm::SwitchTarget(ELockOnDirection _Direction)
 		{
 			continue;
 		}
-
 		FVector vTargetDir = ( Target->GetComponentLocation() - GetComponentLocation() ).GetSafeNormal();
 		FVector vCross = FVector::CrossProduct(vCurTargetDir, vTargetDir);
 		// 언리얼은 왼손 좌표계를 사용하기 때문에 기존 타겟의 방향을 X, 교체할 타겟의 방향을 Y라고 했을 때
 		// 교체할 타겟이 기존 타겟의 왼쪽에 있으면 외적의 Z는 아래를 가리키고, 오른쪽에 있으면 위를 가리킨다.
 		if ( ( _Direction == ELockOnDirection::Left && vCross.Z < 0.f ) || ( _Direction == ELockOnDirection::Right && vCross.Z > 0.f ) )
 		{
-
 			float TargetDot = FVector::DotProduct(vCurTargetDir, vTargetDir);
 			if ( TargetDot > fClosestDot )
 			{
@@ -205,7 +197,6 @@ void UPlayer_CameraArm::SwitchTarget(ELockOnDirection _Direction)
 	{
 		return;
 	}
-
 	m_Target->SetLockOn(false);
 	m_Target = nullptr;
 	LockOnTarget(TargetComponent);

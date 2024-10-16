@@ -27,5 +27,4 @@ void State_Dodge::Update(APlayer_Base_Knight* Character, float DeltaTime)
 void State_Dodge::Exit(APlayer_Base_Knight* Character)
 {
 	Character->GetMesh()->GetAnimInstance()->StopAllMontages(0.25f);
-	Character->GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }

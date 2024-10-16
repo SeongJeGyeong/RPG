@@ -15,8 +15,8 @@ class RPGPORTFOLIO_API UFadeViewportClient : public UGameViewportClient
 	GENERATED_BODY()
 	
 private:
-    bool bFading = false;
-    bool bToBlack = false;
+    bool bFade = false;
+    bool bOutOrIn = false;
     float fFadeAlpha;
     float fFadeStartTime;
     float fFadeDuration;
@@ -29,8 +29,8 @@ public:
     // 페이딩 상태 초기화
     virtual void ClearFade();
 
-    // 페이드 인/아웃 설정
-    virtual void Fade(const float _Duration, const bool _ToBlack);
+    // 페이드 인/아웃 설정 (true : 아웃, false : 인)
+    virtual void Fade(const float _Duration, const bool _OutOrIn);
 
 private:
     // 스크린에 페이드 효과 적용

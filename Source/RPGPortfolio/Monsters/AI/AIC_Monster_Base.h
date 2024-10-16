@@ -43,4 +43,9 @@ public:
 	// void OnTargetPerceived(AActor* _Actor, FAIStimulus const _Stimulus);
 
 	static const FName PatternNumber;
+
+	void SetAISightRadius(const float& _Radius);
+	void SetAILoseSightRadius(const float& _Radius);
+	void SetAIVisionAngle(const float& _Degree);
+	void SaveAIConfigureSense();
 };

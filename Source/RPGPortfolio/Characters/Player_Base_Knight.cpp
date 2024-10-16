@@ -437,8 +437,6 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	// 서 있거나 이동, 달리기 중에만 회피 가능
-	// 공격중일 때 다음 공격 시작 구간이면 회피로 전환 가능
 	if ( !IsPossibleStateTransition(EPlayerStateType::DODGE) )
 	{
 		return;
@@ -704,7 +702,6 @@ void APlayer_Base_Knight::PlayerDead()
 		}
 	)
 	, 0.01f, true);
-
 }
 
 float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -729,9 +726,9 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	{
 		vOffset = ( PointDamageEvent->HitInfo.ImpactPoint - GetActorLocation() ).GetSafeNormal();
 	}
+
 	// 공격 방향 구하기
 	uint8 HitDir = GetHitDirection(vOffset);
-
 	UDamageType_Base* pDamageType = Cast<UDamageType_Base>(DamageEvent.DamageTypeClass->GetDefaultObject());
 	// 플레이어가 가드중이고 공격이 정면에서 오고 있을때
 	if ( bHoldGuard && HitDir == 1 )
@@ -776,6 +773,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		bDead = true;
 		// 사망처리
 		DisableInput(NULL);
+		BreakLockOn();
 		Play_PlayerMontage(EPlayerMontage::DIE);
 		Play_PlayerSound(EPlayerSound::DIE);
 		return 0.f;
@@ -954,13 +952,12 @@ uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
 {
 	// 내적을 이용해 각도를 판별
 	float fDot = FVector::DotProduct(GetActorForwardVector(), _MonVec);	// 벡터의 내적으로 코사인세타를 구함
-	float fAngle = FMath::Acos(fDot);			// 아크코사인 함수로 세타만 구함
-	fAngle = FMath::RadiansToDegrees(fAngle);	// 라디안 각도를 디그리로 변환
+	float fAngle = FMath::Acos(fDot);									// 아크코사인 함수로 세타만 구함
+	fAngle = FMath::RadiansToDegrees(fAngle);							// 라디안 각도를 디그리로 변환
 
 	// 외적을 이용해 방향을 판별
 	FVector vCross = FVector::CrossProduct(GetActorForwardVector(), _MonVec);
 
-	UE_LOG(LogTemp, Warning, TEXT("Cross X : %f, Y : %f, Z : %f"), vCross.X, vCross.Y, vCross.Z);
 	if ( vCross.Z < 0.f )
 	{
 		// 적이 왼쪽에 있을 경우 각도가 음수가 되도록 만듬
@@ -1182,7 +1179,7 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 		} 
 		else
 		{
-			// 락온 대상과의 거리가 3m 보다 크면 translation off
+			// 락온 대상과의 거리가 2m 보다 크면 translation off
 			// 루트모션의 기본 이동거리를 유지한다.
 			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
 		}

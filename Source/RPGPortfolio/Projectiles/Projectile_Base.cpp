@@ -21,6 +21,10 @@ void AProjectile_Base::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AProjectile_Base::LaunchMotion(FVector _LaunchVec)
+{
+}
+
 void AProjectile_Base::PlayHitEffect(bool _HittedActor, FVector _HitLocation, FRotator _EffectRotation)
 {
 	UFXSystemAsset* _EffectSystem = _HittedActor ? m_HitEffect_Actor : m_HitEffect_Wall;

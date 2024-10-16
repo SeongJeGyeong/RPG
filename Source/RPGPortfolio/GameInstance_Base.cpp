@@ -130,6 +130,8 @@ void UGameInstance_Base::BeginLoadingScreen(const FString& MapName)
 {
 	FLoadingScreenAttributes LoadingScreen;
 	LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
+	LoadingScreen.MinimumLoadingScreenDisplayTime = 1.f;
+	LoadingScreen.bMoviesAreSkippable = false;
 	UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), m_LoadingScreenClass);
 	LoadingScreen.WidgetLoadingScreen = Widget->TakeWidget();
 
@@ -138,16 +140,9 @@ void UGameInstance_Base::BeginLoadingScreen(const FString& MapName)
 
 void UGameInstance_Base::EndLoadingScreen(UWorld* InLoadedWorld)
 {
-	//ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	//if ( IsValid(GameMode) )
-	//{
-	//	GameMode->GetFadeUI()->FadeIn(2.f);
-	//}
-
-	const UWorld* World = GetWorld();
-	if ( World )
+	if ( InLoadedWorld )
 	{
-		UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(World->GetGameViewport());
+		UFadeViewportClient* GameViewportClient = Cast<UFadeViewportClient>(InLoadedWorld->GetGameViewport());
 		if ( GameViewportClient )
 		{
 			GameViewportClient->Fade(1.f, false);

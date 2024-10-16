@@ -22,6 +22,8 @@
 #include "../Manager/Inventory_Mgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
 #include "../Manager/GISubsystem_MonAssetMgr.h"
+#include "Perception/AIPerceptionComponent.h"
+
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -112,8 +114,7 @@ void AMonster_Base::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	AAIController* pAIController = Cast<AAIController>(GetController());
-
+	AAIC_Monster_Base* pAIController = Cast<AAIC_Monster_Base>(GetController());
 	if (IsValid(pAIController))
 	{
 		// 블랙보드에 몬스터정보 전달
@@ -121,7 +122,10 @@ void AMonster_Base::BeginPlay()
 		{
 			pAIController->GetBlackboardComponent()->SetValueAsVector(FName("SpawnPosition"), GetActorLocation());
 			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("AtkRange"), m_AtkRange);
-			pAIController->GetBlackboardComponent()->SetValueAsFloat(FName("DetectRange"), m_DetectRange);
+			pAIController->SetAISightRadius(m_DetectRange);				// 시야 반경
+			pAIController->SetAILoseSightRadius(m_DetectRange * 1.5f);	// 포착한 대상을 상실하는 시야 반경
+			pAIController->SetAIVisionAngle(45.f);						// 시야각 : 설정치수로 각각 왼쪽, 오른쪽의 시야각을 설정. 45의 경우 총 90도의 시야각을 가짐
+			pAIController->SaveAIConfigureSense();
 		}
 		m_AnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
@@ -311,8 +315,6 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 	pPlayer->GainMonsterSoul(m_Info.Dropped_Soul);
 
 	FActorSpawnParameters SpawnParams;
-	// 스폰한 위치에 충돌이 발생할 경우 충돌이 발생하지 않는 가장 가까운 위치에 스폰
-	// 스폰할 위치를 찾지 못하면 충돌 상관없이 원래 위치에 스폰
 	TSubclassOf<AItem_Dropped_Base> Item = AItem_Dropped_Base::StaticClass();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	FRotator Rotator;
@@ -531,7 +533,8 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 
 void AMonster_Base::TimelineStep(FVector _Value)
 {
-	GetMesh()->SetRelativeLocation(FVector(GetMesh()->GetRelativeLocation().X + (_Value.X * 10.f), GetMesh()->GetRelativeLocation().Y + (_Value.Y * 10.f), GetMesh()->GetRelativeLocation().Z));
+	GetMesh()->SetRelativeLocation(
+		FVector(GetMesh()->GetRelativeLocation().X + (_Value.X * 10.f), GetMesh()->GetRelativeLocation().Y + (_Value.Y * 10.f), GetMesh()->GetRelativeLocation().Z));
 }
 
 void AMonster_Base::TimelineFinished()

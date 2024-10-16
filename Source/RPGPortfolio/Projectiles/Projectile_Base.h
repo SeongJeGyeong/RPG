@@ -11,8 +11,7 @@
 
 class UFXSystemAsset;
 
-// 추상클래스로 선언
-UCLASS(Abstract)
+UCLASS()
 class RPGPORTFOLIO_API AProjectile_Base : public AActor, public IPoolableObj
 {
 	GENERATED_BODY()
@@ -56,8 +55,7 @@ public:
 	void SetProjType(EProjectileType _ProjType) { m_ProjType = _ProjType; }
 
 public:
-	// PURE_VIRTUAL : 순수 가상함수 선언 매크로. 추상클래스로 선언된 UClass에서만 가능. 파라미터는 가상함수로 선언할 함수와 디폴트 리턴값. 
-	virtual void LaunchMotion(FVector _LaunchVec) PURE_VIRTUAL(AProjectile_Base::LaunchMotion, );
+	virtual void LaunchMotion(FVector _LaunchVec);
 
 	void PlayHitEffect(bool _HittedActor, FVector _HitLocation, FRotator _EffectRotation = FRotator::ZeroRotator);
 
