@@ -7,4 +7,4 @@
 + 개발 인원 : 1
 
 # 시연 영상
-[![Video Label](http://img.youtube.com/vi/7MU7Xy-_0Ls/0.jpg)](https://youtu.be/7MU7Xy-_0Ls)
+[![Video Label](http://img.youtube.com/vi/HorUYzrwmZI/0.jpg)](https://youtu.be/HorUYzrwmZI)
