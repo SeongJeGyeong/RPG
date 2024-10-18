@@ -63,7 +63,7 @@ void ABoss_GreaterSpider::BeginPlay()
 		USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
 		if ( !PoolSubsystem->PreLoadObjFromPool<AProj_GS_Spiderling>(m_GSProj, 2, GetOwner()) )
 		{
-			UE_LOG(LogTemp, Error, TEXT("스킬 투사체 풀링 실패"));
+			UE_LOG(LogTemp, Error, TEXT("스킬 투사체 프리로드 실패"));
 		}
 	}
 

@@ -85,13 +85,11 @@ private:
 
 	bool bItemDelay;		// 아이템 사용 딜레이 체크용
 
-	// 방패 방어 상태(가드를 완전히 올린 상태에서만 true)
-	bool bInputGuard;
-	bool bHoldGuard;
-	float fGuardWeight;
+	bool bInputGuard;		// 가드 키 입력 상태
+	bool bHoldGuard;		// 방패 방어 상태(가드를 완전히 올린 상태에서만 true)
+	float fGuardWeight;		// 가드 애니메이션 블렌드 웨이트
 
-	// 공격 관련
-	uint8 CurrentCombo;
+	uint8 CurrentCombo;		// 현재 공격 콤보
 
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
 	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
@@ -124,13 +122,12 @@ public:
 	bool GetbInputGuard() const { return bInputGuard; }
 	void SetbInputGuard(const bool& _InputGuard) { bInputGuard = _InputGuard; }
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
-	//bool GetbHoldGuard() const { return bHoldGuard; }
 	void SetbHoldGuard(const bool& _HoldGuard);
 	float GetfGuardWeight() const { return fGuardWeight; }
 	void SetfGuardWeight(const float& _GuardWeight) { fGuardWeight = _GuardWeight; }
 
 	UCameraComponent* GetCamera() const { return m_Cam; }
-	//UPlayer_CameraArm* GetCameraArm() const { return m_SArm; }
+
 	// 락온 토글 상태 확인
 	bool GetbIsLockOn() const;
 	ULockOnTargetComponent* GetLockOnTarget() const;
@@ -172,7 +169,6 @@ private:
 	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
 	void UseSkill_1(const FInputActionInstance& _Instance);
 
-	//void AttackMove();				// 공격 모션 중 이동
 	void JumpAttack();
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
 

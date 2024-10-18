@@ -138,6 +138,7 @@ ULockOnTargetComponent* UPlayer_CameraArm::GetSelectedTarget()
 			TargetComponent = Target;
 			continue;
 		}
+		// 정면 50도 이내에 있는 대상은 거리가 더 가까운 대상을 우선적으로 락온
 		if ( fAngle < 25.f )
 		{
 			float ex_distance = ( TargetComponent->GetComponentLocation() - GetComponentLocation() ).Size();

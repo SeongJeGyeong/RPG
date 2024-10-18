@@ -1201,7 +1201,18 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 	else
 	{
 		const FRotator TargetRot = FRotationMatrix::MakeFromX(InputVector).Rotator();
-		URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
+		URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(
+			m_MWComponent, 
+			_Anim, 
+			0.f, 
+			_EndTime, 
+			TEXT("AttackWarp"), 
+			EWarpPointAnimProvider::None, 
+			FTransform(), 
+			TEXT("None"), 
+			false, 
+			true, 
+			true);
 		m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("AttackWarp"), PlayerLoc + GetActorForwardVector() * 60.f, TargetRot);
 	}
 }
