@@ -22,8 +22,9 @@
 #include "EnhancedInputComponent.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
-#include "../Manager/GISubsystem_StatMgr.h"
+//#include "../Manager/GISubsystem_StatMgr.h"
 #include "Player_SkillComponent.h"
+#include "Player_StatComponent.h"
 #include "../System/Subsys_ObjectPool.h"
 #include "MotionWarpingComponent.h"
 #include "RootMotionModifier_SkewWarp.h"
@@ -58,6 +59,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_Cam->bUsePawnControlRotation = false; // 폰과 카메라의 회전분리
 
 	m_SkillComponent = CreateDefaultSubobject<UPlayer_SkillComponent>(TEXT("SkillComp"));
+	m_StatComponent = CreateDefaultSubobject<UPlayer_StatComponent>(TEXT("StatComp"));
 	m_MWComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarp"));
 
 	HitCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCollision"));
@@ -366,9 +368,8 @@ void APlayer_Base_Knight::SprintAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 스테미너가 0일 경우 달리기 불가
-	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
+	if ( m_StatComponent->IsStaminaZero() )
 	{
 		return;
 	}
@@ -442,13 +443,14 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
+	float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
 	// 현재 스태미나가 소비량보다 적을 경우 회피 불가
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	if ( !ConsumeStaminaForMontage(EPlayerMontage::DODGE_FW) )
+	if ( !m_StatComponent->IsEnoughStamina(fConsumption))
 	{
 		return;
 	}
 
+	m_StatComponent->DecreasePlayerStamina(fConsumption);
 	SetState(EPlayerStateType::DODGE);
 }
 
@@ -607,14 +609,13 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 	}
 	FSkillAsset* Skill = m_SkillComponent->GetEquippedSkill();
 
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	if ( StatMgr->GetPlayerBasePower().CurMP < Skill->MP_Consumption || StatMgr->GetPlayerBasePower().CurStamina < Skill->Stamina_Consumption )
+	if ( !m_StatComponent->IsEnoughStamina(Skill->Stamina_Consumption) || !m_StatComponent->IsEnoughMP(Skill->MP_Consumption))
 	{
 		return;
 	}
 
-	ConsumeMP(Skill->MP_Consumption);
-	ConsumeStamina(Skill->Stamina_Consumption);
+	m_StatComponent->DecreasePlayerMP(Skill->MP_Consumption);
+	m_StatComponent->DecreasePlayerStamina(Skill->Stamina_Consumption);
 	m_AnimInst->Montage_Play(Skill->Animation);
 	SetState(EPlayerStateType::USESKILL_1);
 	// ShotProjectile로
@@ -646,26 +647,7 @@ void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 	},
 	0.1f, false);
 
-	float iDamage = 0.f;
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-
-	switch (_AtkType)
-	{
-	case EATTACK_TYPE::PHYSIC_MELEE:
-	case EATTACK_TYPE::PHYSIC_RANGE:
-		iDamage = StatMgr->GetPlayerBasePower().PhysicAtk;
-		if (_AtkMontage == EPlayerMontage::HEAVYATTACK)
-		{
-			iDamage = iDamage * 1.5f;
-		}
-		break;
-	case EATTACK_TYPE::MAGIC_MELEE:
-	case EATTACK_TYPE::MAGIC_RANGE:
-		iDamage = StatMgr->GetPlayerBasePower().MagicAtk;
-		break;
-	default:
-		break;
-	}
+	float iDamage = m_StatComponent->CalculApplyDamage(_AtkType, _AtkMontage);
 
 	TSubclassOf<UDamageType_Base> DamageTypeBase = UDamageType_Base::StaticClass();
 	DamageTypeBase.GetDefaultObject()->SetAtkType(_AtkType);
@@ -746,29 +728,8 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		return 0.f;
 	}
 
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	// 받은 공격타입에 따라 몬스터의 방어력 설정
-	float fPlayerDef = 0.f;
-	switch (pDamageType->GetAtkType())
-	{
-	case EATTACK_TYPE::PHYSIC_MELEE:
-	case EATTACK_TYPE::PHYSIC_RANGE:
-		fPlayerDef = StatMgr->GetPlayerBasePower().PhysicDef;
-		break;
-	case EATTACK_TYPE::MAGIC_MELEE:
-	case EATTACK_TYPE::MAGIC_RANGE:
-		fPlayerDef = StatMgr->GetPlayerBasePower().MagicDef;
-		break;
-	default:
-		break;
-	}
-
-	FinalDamage = FMath::Clamp(FinalDamage - fPlayerDef, 0.f, FinalDamage);
-	int32 iCurHP = StatMgr->GetPlayerBasePower().CurHP;
-	iCurHP = FMath::Clamp(iCurHP - FinalDamage, 0.f, StatMgr->GetPlayerBasePower().MaxHP);
-	StatMgr->SetPlayerCurrentHP(iCurHP);
-
-	if ( iCurHP <= 0.f && !bDead )
+	m_StatComponent->DecreasePlayerHP(pDamageType->GetAtkType(), FinalDamage);
+	if ( m_StatComponent->IsHPZero() && !bDead )
 	{
 		bDead = true;
 		// 사망처리
@@ -858,9 +819,11 @@ void APlayer_Base_Knight::AttackStart()
 	{
 		if ( GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
 		{
-			bIsAttacking = ConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
+			float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
+			bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
 			if ( bIsAttacking )
 			{
+				m_StatComponent->DecreasePlayerStamina(fConsumption);
 				SetState(EPlayerStateType::JUMPATTACK);
 			}
 		}
@@ -869,25 +832,29 @@ void APlayer_Base_Knight::AttackStart()
 	{
 		if ( bHeavyHold )
 		{
-			bIsAttacking = ConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
+			float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
+			bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
 			if ( bIsAttacking )
 			{
+				m_StatComponent->DecreasePlayerStamina(fConsumption);
 				SetState(EPlayerStateType::HEAVYATTACK);
 			}
 		}
 		else
 		{
-			bIsAttacking = ConsumeStaminaForMontage(EPlayerMontage::ATTACK);
+			float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::ATTACK);
+			bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
 			if ( bIsAttacking )
 			{
 				// 약공격
+				m_StatComponent->DecreasePlayerStamina(fConsumption);
 				SetState(EPlayerStateType::ATTACK);
 			}
 		}
 	}
 }
 
-bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
+float APlayer_Base_Knight::GetConsumeStaminaForMontage(EPlayerMontage _Montage)
 {
 	float fConsumption = 0.f;
 	switch ( _Montage )
@@ -911,41 +878,7 @@ bool APlayer_Base_Knight::ConsumeStaminaForMontage(EPlayerMontage _Montage)
 		break;
 	}
 
-	return ConsumeStamina(fConsumption);
-}
-
-bool APlayer_Base_Knight::ConsumeStamina(float _Consumption)
-{
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	if ( !IsValid(StatMgr) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("스탯 매니저 가져오기 실패"));
-		return false;
-	}
-	if ( StatMgr->GetPlayerBasePower().CurStamina < _Consumption )
-	{
-		return false;
-	}
-
-	StatMgr->SetPlayerCurrentStamina(StatMgr->GetPlayerBasePower().CurStamina - _Consumption);
-	return true;
-}
-
-bool APlayer_Base_Knight::ConsumeMP(float _Consumption)
-{
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	if ( !IsValid(StatMgr) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("스탯 매니저 가져오기 실패"));
-		return false;
-	}
-	if ( StatMgr->GetPlayerBasePower().CurMP < _Consumption )
-	{
-		return false;
-	}
-
-	StatMgr->SetPlayerCurrentMP(StatMgr->GetPlayerBasePower().CurMP - _Consumption);
-	return true;
+	return fConsumption;
 }
 
 uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
@@ -984,10 +917,9 @@ uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
 
 bool APlayer_Base_Knight::GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType)
 {
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	// 몬스터의 공격력의 10분의 1 만큼 스태미나 감소
-	StatMgr->SetPlayerCurrentStamina(FMath::Clamp(StatMgr->GetPlayerBasePower().CurStamina - _Damage * 0.1f, 0.f, StatMgr->GetPlayerBasePower().CurStamina));
-	if ( StatMgr->GetPlayerBasePower().CurStamina <= 0.f )
+	m_StatComponent->DecreasePlayerStamina(_Damage * 0.1f);
+	if (m_StatComponent->IsStaminaZero())
 	{
 		// 방어 풀리고 경직상태 되도록
 		SetState(EPlayerStateType::GUARDBREAK);
@@ -1034,23 +966,21 @@ void APlayer_Base_Knight::ShotProjectile()
 
 void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
-
 	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_ID);
 	if ( pItemInfo->Restore_HP >= 0 )
 	{
-		StatMgr->SetPlayerCurrentHP(FMath::Clamp(StatMgr->GetPlayerBasePower().CurHP + pItemInfo->Restore_HP, 0.f, StatMgr->GetPlayerBasePower().MaxHP));
+		m_StatComponent->RestorePlayerHP(pItemInfo->Restore_HP);
 		SoundEnum = EPlayerSound::USERESTORE;
 	}
 	if ( pItemInfo->Restore_MP >= 0 )
 	{
-		StatMgr->SetPlayerCurrentMP(FMath::Clamp(StatMgr->GetPlayerBasePower().CurMP + pItemInfo->Restore_MP, 0.f, StatMgr->GetPlayerBasePower().MaxMP));
+		m_StatComponent->RestorePlayerMP(pItemInfo->Restore_MP);
 		SoundEnum = EPlayerSound::USERESTORE;
 	}
 	if ( pItemInfo->Gained_Soul >= 0 )
 	{
-		GainMonsterSoul(pItemInfo->Gained_Soul);
+		m_StatComponent->GainSoul(pItemInfo->Gained_Soul);
 		SoundEnum = EPlayerSound::USESOUL;
 	}
 
@@ -1098,13 +1028,6 @@ void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
 			}
 		})
 	,0.01f, true);
-}
-
-void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
-{
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	StatMgr->PlayerGainSoul(_GainedSoul);
-	m_MainUI->RenewAmountSoul(_GainedSoul);
 }
 
 void APlayer_Base_Knight::CloseMenuUI()
@@ -1283,6 +1206,11 @@ void APlayer_Base_Knight::PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight)
 	}
 }
 
+void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
+{
+	m_StatComponent->GainSoul(_GainedSoul);
+}
+
 // 무적시간 동안 데미지 안받도록 설정
 void APlayer_Base_Knight::InvincibleCheck(bool _Invinc)
 {
@@ -1432,12 +1360,7 @@ void APlayer_Base_Knight::SetbHoldGuard(const bool& _ToggleGuard)
 	{
 		return;
 	}
-
-	UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-	if ( IsValid(StatMgr) )
-	{
-		StatMgr->SetbSTRecovSlowly(_ToggleGuard);
-	}
+	m_StatComponent->HoldGuard(_ToggleGuard);
 }
 
 ULockOnTargetComponent* APlayer_Base_Knight::GetLockOnTarget() const

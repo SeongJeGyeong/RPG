@@ -38,7 +38,7 @@ void UBTS_GS_AttackPattern::OnBecomeRelevant(UBehaviorTreeComponent& _OwnComp, u
 	{
 		fAngle *= -1;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Player Angle : %f"), fAngle);
+
 	// 몬스터 기준 왼쪽
 	if ( fAngle <= -30.f )
 	{

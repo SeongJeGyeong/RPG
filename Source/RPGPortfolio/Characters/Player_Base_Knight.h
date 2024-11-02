@@ -17,6 +17,7 @@
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
 class UPlayer_SkillComponent;
+class UPlayer_StatComponent;
 class ULockOnTargetComponent;
 class UMotionWarpingComponent;
 class UUI_Base;
@@ -40,6 +41,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_SkillComponent* m_SkillComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPlayer_StatComponent* m_StatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UMotionWarpingComponent* m_MWComponent;
@@ -104,6 +108,7 @@ private:
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
 	UDA_PlayerSound* GetSoundDA() const { return m_PlayerSound; }
+	UPlayer_StatComponent* GetStatComp() const { return m_StatComponent; }
 
 	bool GetbIsAttacking() const { return bIsAttacking; }
 	void SetbIsAttacking(const bool& _IsAttacking) { bIsAttacking = _IsAttacking; }
@@ -180,9 +185,7 @@ public:
 	void AttackHitCheck();				// 어택 트레이스용
 	void AttackStart();
 
-	bool ConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
-	bool ConsumeStamina(float _Consumption);
-	bool ConsumeMP(float _Consumption);
+	float GetConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	uint8 GetHitDirection(FVector _MonVec);
 	bool GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType); // 적 공격 방어
 	void BreakLockOn();
@@ -191,7 +194,6 @@ public:
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	UFUNCTION()
 	void ItemDelaytime(float _DelayPercent);
-	void GainMonsterSoul(int32 _GainedSoul);
 	void CloseMenuUI();
 
 	void ResetVarsOnHitState();
@@ -203,6 +205,8 @@ public:
 	void Play_PlayerMontage(EPlayerMontage _MontageType);
 	void Play_PlayerSound(EPlayerSound _SoundType);
 	void PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight);
+
+	void GainMonsterSoul(int32 _GainedSoul);
 
 private:
 	void InvincibleCheck(bool _Invinc);	// 무적시간 체크

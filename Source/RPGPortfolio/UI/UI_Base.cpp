@@ -11,6 +11,7 @@
 #include "UI_Message_Item.h"
 #include "Components/Image.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_StatMgr.h"
 
 void UUI_Base::NativeConstruct()
 {
@@ -61,6 +62,14 @@ void UUI_Base::NativeConstruct()
 	}
 
 	Super::NativeConstruct();
+}
+
+void UUI_Base::BindStatManager(UGISubsystem_StatMgr* _StatMgr)
+{
+	_StatMgr->OnRenewAmountSoul.AddUObject(this, &UUI_Base::RenewAmountSoul);
+	_StatMgr->OnRenewHP.AddUObject(this, &UUI_Base::RenewUI_HP);
+	_StatMgr->OnRenewMP.AddUObject(this, &UUI_Base::RenewUI_MP);
+	_StatMgr->OnRenewST.AddUObject(this, &UUI_Base::RenewUI_ST);
 }
 
 void UUI_Base::MenuVisibility(ESlateVisibility _Visibility)
@@ -114,6 +123,21 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 void UUI_Base::RenewAmountSoul(int32 _GainedSoul)
 {
 	m_UI_Soul->RenewAmountOfSoul(_GainedSoul);
+}
+
+void UUI_Base::RenewUI_HP(float _CurRatio)
+{
+	m_UI_PlayerBar->SetPlayerHPRatio(_CurRatio);
+}
+
+void UUI_Base::RenewUI_MP(float _CurRatio)
+{
+	m_UI_PlayerBar->SetPlayerMPRatio(_CurRatio);
+}
+
+void UUI_Base::RenewUI_ST(float _CurRatio)
+{
+	m_UI_PlayerBar->SetPlayerSTRatio(_CurRatio);
 }
 
 void UUI_Base::HUD_RenewQuickSlotUI(int32 _idx)

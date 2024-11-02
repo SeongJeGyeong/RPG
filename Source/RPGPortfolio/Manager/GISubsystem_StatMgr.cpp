@@ -4,7 +4,6 @@
 #include "GISubsystem_StatMgr.h"
 #include "../Manager/Equip_Mgr.h"
 #include "../UI/UI_Base.h"
-#include "../UI/UI_Player_Main.h"
 #include "RPGPortfolio/RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -52,7 +51,7 @@ void UGISubsystem_StatMgr::SetUIInManager()
 	if ( IsValid(GameMode) )
 	{
 		UUI_Base* pMainUI = GameMode->GetMainHUD();
-		PlayerMainUI = pMainUI->GetMainUIWidget();
+		pMainUI->BindStatManager(this);
 	}
 	else
 	{
@@ -102,20 +101,19 @@ void UGISubsystem_StatMgr::SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquipe
 void UGISubsystem_StatMgr::SetPlayerCurrentHP(float _CurHP)
 {
 	PlayerBasePower.CurHP = _CurHP;
-	PlayerMainUI->SetPlayerHPRatio(PlayerBasePower.CurHP / PlayerBasePower.MaxHP);
+	OnRenewHP.Broadcast(PlayerBasePower.CurHP / PlayerBasePower.MaxHP);
 }
 
 void UGISubsystem_StatMgr::SetPlayerCurrentMP(float _CurMP)
 {
 	PlayerBasePower.CurMP = _CurMP;
-	PlayerMainUI->SetPlayerMPRatio(PlayerBasePower.CurMP / PlayerBasePower.MaxMP);
+	OnRenewMP.Broadcast(PlayerBasePower.CurMP / PlayerBasePower.MaxMP);
 }
 
 void UGISubsystem_StatMgr::SetPlayerCurrentStamina(float _CurStamina)
 {
 	PlayerBasePower.CurStamina = _CurStamina;
-	PlayerMainUI->SetPlayerSTRatio(PlayerBasePower.CurStamina / PlayerBasePower.MaxStamina);
-
+	OnRenewST.Broadcast(PlayerBasePower.CurStamina / PlayerBasePower.MaxStamina);
 	GetWorld()->GetTimerManager().ClearTimer(RecoveryTimer);
 	
 	if (PlayerBasePower.CurStamina != PlayerBasePower.MaxStamina)
@@ -127,6 +125,7 @@ void UGISubsystem_StatMgr::SetPlayerCurrentStamina(float _CurStamina)
 void UGISubsystem_StatMgr::PlayerGainSoul(int32 _Soul)
 {
 	PlayerBasePower.AmountOfSoul += _Soul;
+	OnRenewAmountSoul.Broadcast(_Soul);
 }
 
 void UGISubsystem_StatMgr::StaminaRecoveryStart()
@@ -146,5 +145,5 @@ void UGISubsystem_StatMgr::StaminaRecoveryStart()
 		PlayerBasePower.CurStamina = FMath::Clamp(PlayerBasePower.CurStamina + 0.5f, 0.f, PlayerBasePower.MaxStamina);
 	}
 
-	PlayerMainUI->SetPlayerSTRatio(PlayerBasePower.CurStamina / PlayerBasePower.MaxStamina);
+	OnRenewST.Broadcast(PlayerBasePower.CurStamina / PlayerBasePower.MaxStamina);
 }

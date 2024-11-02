@@ -7,6 +7,11 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GISubsystem_StatMgr.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FRenewSoulDelegate, int32);	// 소지 소울 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FRenewHPDelegate, float);	// 현재 HP 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FRenewMPDelegate, float);	// 현재 MP 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FRenewSTDelegate, float);	// 현재 스태미나 갱신 델리게이트
+
 /**
  * 
  */
@@ -22,11 +27,14 @@ private:
 	FCharacterBasePower PlayerBasePower;
 	FEquipmentStat		EquipmentStat;
 
-	UPROPERTY()
-	class UUI_Player_Main*	PlayerMainUI;
-
 	ERecoveryType RecoveryType = ERecoveryType::DEFAULT;
 	FTimerHandle RecoveryTimer;
+
+public:
+	FRenewSoulDelegate OnRenewAmountSoul;
+	FRenewHPDelegate OnRenewHP;
+	FRenewMPDelegate OnRenewMP;
+	FRenewSTDelegate OnRenewST;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;

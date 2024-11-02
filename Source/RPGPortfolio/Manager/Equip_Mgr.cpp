@@ -47,12 +47,7 @@ FInvenItemRow* UEquip_Mgr::GetQSItemForIndex(int32 _Idx)
 
 int32 UEquip_Mgr::GetNextIndex()
 {
-	int32 idx = CurQuickSlotIdx;
-	if ( ++idx > 4 )
-	{
-		idx = 0;
-	}
-	return idx;
+	return CurQuickSlotIdx % 5;
 }
 
 int32 UEquip_Mgr::GetNextValidIndex()
@@ -60,15 +55,15 @@ int32 UEquip_Mgr::GetNextValidIndex()
 	int32 idx = CurQuickSlotIdx;
 	while ( ++idx )
 	{
-		if ( idx >= 5 ) idx = 0;
+		idx %= 5;
 
+		if ( GetQSItemForIndex(idx) != nullptr )
+		{
+			break;
+		}
 		if ( idx == CurQuickSlotIdx )
 		{
 			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 등록된 아이템 없음"));
-			break;
-		}
-		if ( GetQSItemForIndex(idx) != nullptr )
-		{
 			break;
 		}
 	}

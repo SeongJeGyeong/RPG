@@ -48,6 +48,8 @@ public:
 
 	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
 
+	void BindStatManager(class UGISubsystem_StatMgr* _StatMgr);
+
 	void MenuVisibility(ESlateVisibility _Visibility);
 	bool IsOpendMenu();
 
@@ -57,6 +59,9 @@ public:
 	void ShowItemMessageUI(bool _bShow);
 
 	void RenewAmountSoul(int32 _GainedSoul);
+	void RenewUI_HP(float _CurRatio);
+	void RenewUI_MP(float _CurRatio);
+	void RenewUI_ST(float _CurRatio);
 
 	void HUD_RenewQuickSlotUI(int32 _idx);
 	void SetQuickSlotUIOpacity(float _alpha, bool _UorL);
