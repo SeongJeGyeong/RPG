@@ -3,21 +3,20 @@
 #pragma once
 
 #include "../Header/Struct.h"
-
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "Inventory_Mgr.generated.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "GISubsystem_InvenMgr.generated.h"
 
 class UPaperSprite;
 
+/**
+ * 
+ */
 UCLASS()
-class RPGPORTFOLIO_API UInventory_Mgr : public UObject
+class RPGPORTFOLIO_API UGISubsystem_InvenMgr : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	
-private:
-	static UWorld* m_World;
-
 private:
 	UPROPERTY()
 	UDataTable* m_ItemDataTable;
@@ -30,10 +29,10 @@ private:
 	class UDA_ItemCategoryIcon* m_Icon;
 
 public:
-	// 스태틱 함수로 선언하여 객체가 생성되지 않았어도 함수 호출 가능
-	//static UInventory_Mgr* GetInst(UWorld* _World);
-	//static UInventory_Mgr* GetInst(UGameInstance* _GameInst);
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
+public:
 	void SetItemDataTable(UDataTable* _ItemDataTable);
 	void SetInventoryIcon(UDataAsset* _DataAsset);
 

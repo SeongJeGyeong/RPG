@@ -19,7 +19,7 @@ EBTNodeResult::Type UBTT_Attack_Monster::ExecuteTask(UBehaviorTreeComponent& Own
 	AMonster_Base* pMonster = Cast<AMonster_Base>(pController->GetPawn());
 	if ( pMonster != nullptr )
 	{
-		pMonster->MonsterAttackNormal();
+		//pMonster->MonsterAttackMelee();
 	}
 
 	return EBTNodeResult::Succeeded;

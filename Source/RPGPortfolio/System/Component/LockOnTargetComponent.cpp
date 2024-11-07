@@ -23,6 +23,8 @@ ULockOnTargetComponent::ULockOnTargetComponent()
 	m_LockOnMark->SetDrawSize(FVector2D(25.f, 25.f));
 	m_LockOnMark->SetWidgetSpace(EWidgetSpace::Screen);
 	m_LockOnMark->SetVisibility(false);
+
+	SphereRadius = 5.f;
 }
 
 void ULockOnTargetComponent::SetLockOnMarkVisibility(bool _Visible)

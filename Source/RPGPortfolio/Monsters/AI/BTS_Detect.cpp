@@ -45,36 +45,8 @@ void UBTS_Detect::TickNode(UBehaviorTreeComponent& _OwnComp, uint8* _NodeMemory,
 	}
 
 	float Distance = FVector::Distance(pMonster->GetActorLocation(), pPlayer->GetActorLocation());
-	if (Distance < pController->GetLoseSightRadius())
-	{
-		//bDetect = true;
-	}
-	else
+	if (Distance >= pController->GetLoseSightRadius())
 	{
 		pController->GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), nullptr);
-		//bDetect = false;
 	}
-
-//#ifdef ENABLE_DRAW_DEBUG
-//	float AtkRange = pController->GetBlackboardComponent()->GetValueAsFloat(FName("AtkRange"));
-//	if ( Distance < AtkRange )
-//	{
-//		bIsAtkRange = true;
-//	}
-//	else
-//	{
-//		bIsAtkRange = false;
-//	}
-// 
-//	if (pMonster->bDebug)
-//	{
-//		FColor color;
-//		bDetect ? color = FColor::Red : color = FColor::Green;
-//		DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().DetectRange, 40, color, false, 0.4f);
-//
-//		FColor AtkColor;
-//		bIsAtkRange ? AtkColor = FColor::Magenta : AtkColor = FColor::Cyan;
-//		DrawDebugSphere(GetWorld(), pMonster->GetActorLocation(), pMonster->GetMonsterInfo().AtkRange, 40, AtkColor, false, 0.4f);
-//	}
-//#endif
 }

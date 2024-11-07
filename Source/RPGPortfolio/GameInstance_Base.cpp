@@ -2,8 +2,6 @@
 
 
 #include "GameInstance_Base.h"
-#include "Manager/Inventory_Mgr.h"
-#include "Manager/Equip_Mgr.h"
 #include "MoviePlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "RPGPortfolioGameModeBase.h"
@@ -13,29 +11,7 @@
 #include "GameFramework/GameUserSettings.h"
 
 UGameInstance_Base::UGameInstance_Base()
-	: m_InvenMgr(nullptr)
-	, m_EquipMgr(nullptr)
 {
-	static ConstructorHelpers::FObjectFinder<UDataTable> ItemTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_ItemInfo.DT_ItemInfo'"));
-	if (ItemTable.Succeeded())
-	{
-		UInventory_Mgr::GetInst(this)->SetItemDataTable(ItemTable.Object);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("아이템 데이터테이블 찾지 못함"));
-	}
-
-	static ConstructorHelpers::FObjectFinder<UDataAsset> InvenIcon(TEXT("/Script/RPGPortfolio.DA_ItemCategoryIcon'/Game/Blueprint/DataAsset/BPC_DA_CategoryIcon.BPC_DA_CategoryIcon'"));
-	if ( InvenIcon.Succeeded() )
-	{
-		UInventory_Mgr::GetInst(this)->SetInventoryIcon(InvenIcon.Object);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("아이콘 데이터에셋 찾지 못함"));
-	}
-
 	static ConstructorHelpers::FClassFinder<UUserWidget> loadingscreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_LoadingScreen.UI_LoadingScreen_C'"));
 	if ( loadingscreen.Succeeded() )
 	{

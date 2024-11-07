@@ -2,7 +2,6 @@
 
 
 #include "GISubsystem_StatMgr.h"
-#include "../Manager/Equip_Mgr.h"
 #include "../UI/UI_Base.h"
 #include "RPGPortfolio/RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"

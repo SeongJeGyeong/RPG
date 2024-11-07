@@ -5,7 +5,6 @@
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/Inventory_Mgr.h"
 #include "UI_ItemTooltip.h"
 #include "UI_InvenItem.h"
 #include "UI_PlayerStat.h"

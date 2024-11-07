@@ -7,11 +7,11 @@
 #include "../UI/UI_Base.h"
 #include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
-#include "../Manager/Inventory_Mgr.h"
 #include "../UI/UI_Message_Item.h"
 #include "../Header/Struct.h"
 #include "../GameInstance_Base.h"
 #include "../Characters/Player_Base_Knight.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
 
 // Sets default values
 AItem_Dropped_Base::AItem_Dropped_Base()
@@ -59,7 +59,7 @@ void AItem_Dropped_Base::BeginPlay()
 
 void AItem_Dropped_Base::LoadImg()
 {
-	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
+	FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(m_IID);
 	m_Img = FSoftObjectPath(pItemInfo->IconImgPath);
 	m_Img.ToSoftObjectPath().PostLoadPath(nullptr);
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());
@@ -74,9 +74,8 @@ void AItem_Dropped_Base::Interaction(AActor* _InteractedActor)
 		UE_LOG(LogTemp, Error, TEXT("AItem_Dropped_Base : GameMode Not Found"));
 		return;
 	}
-
-	UInventory_Mgr::GetInst(GetWorld())->AddGameItem(m_IID, m_Stack);
-	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_IID);
+	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->AddGameItem(m_IID, m_Stack);
+	FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(m_IID);
 	UUI_Base* pMainUI = pGameMode->GetMainHUD();
 	pMainUI->ShowItemMessageUI(true);
 	UTexture2D* Img = m_Img.IsPending() ? m_Img.LoadSynchronous() : m_Img.Get();

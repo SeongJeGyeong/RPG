@@ -18,9 +18,6 @@ private:
 	FDataTableRowHandle	m_MonsterInfoTableRow;
 
 protected:
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
-	EMONSTER_TYPE	m_Type;
-
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBehaviorTree* m_BehaviroTree;
 
@@ -52,7 +49,6 @@ private:
 public:
 	class UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	class UBlackboardData* GetBlackboard() { return m_Blackboard; }
-	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 	class UUI_Boss* GetBossWidget() { return m_BossWidget; }
 
 	void SetBossLockedOn(const bool& _LockedOn);

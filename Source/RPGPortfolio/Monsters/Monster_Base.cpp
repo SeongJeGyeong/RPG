@@ -19,11 +19,10 @@
 #include "Curves/CurveVector.h"
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
-#include "../Manager/Inventory_Mgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
 #include "../Manager/GISubsystem_MonAssetMgr.h"
 #include "Perception/AIPerceptionComponent.h"
-
+#include "../Manager/GISubsystem_InvenMgr.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
@@ -44,17 +43,12 @@ AMonster_Base::AMonster_Base()
 	m_WidgetComponent->SetupAttachment(GetRootComponent());
 	m_WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	m_WidgetComponent->SetDrawSize(FVector2D(200.f, 200.f));
+	m_WidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, 150.f));
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> MonsterUI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Monster/BPC_UI_MonsterMain.BPC_UI_MonsterMain_C'"));
 	if ( MonsterUI.Succeeded() )
 	{
 		m_WidgetComponent->SetWidgetClass(MonsterUI.Class);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UDataTable> ItemDropTable(TEXT("/Script/Engine.DataTable'/Game/Blueprint/DataTable/DT_MonsterDropTable.DT_MonsterDropTable'"));
-	if ( ItemDropTable.Succeeded() )
-	{
-		m_ItemTable = ItemDropTable.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UCurveVector> TLCurve(TEXT("/Script/Engine.CurveVector'/Game/Blueprint/Timeline/Curve/HitTimelineCurve.HitTimelineCurve'"));
@@ -73,10 +67,6 @@ AMonster_Base::AMonster_Base()
 		m_HitTimeline->SetTimelineLength(0.3f);
 		m_HitTimeline->SetLooping(false);
 	}
-
-	GetCharacterMovement()->MaxWalkSpeed = 250.f;
-	m_DetectRange = 800.f;
-	m_AtkRange = 200.f;
 }
 
 // 에디터 상에서 호출됨(게임 실행 전)
@@ -93,18 +83,6 @@ void AMonster_Base::OnConstruction(const FTransform& _Transform)
 		if (nullptr != pInfo)
 		{
 			m_Info = *pInfo;
-		}
-	}
-
-	FString str;
-	TArray<FMonsterItemDropTable*> DropTableArr;
-	m_ItemTable->GetAllRows(str, DropTableArr);
-
-	for (int32 i = 0; i < DropTableArr.Num(); ++i)
-	{
-		if (DropTableArr[i]->Monster == m_Type)
-		{
-			m_DropItemArr.Add(*DropTableArr[i]);
 		}
 	}
 }
@@ -128,7 +106,7 @@ void AMonster_Base::BeginPlay()
 			pAIController->SaveAIConfigureSense();
 		}
 		m_AnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-		m_AnimInst->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
+		GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &AMonster_Base::OnHitMontageEnded);
 	}
 
 	if (!IsValid(m_WidgetComponent))
@@ -151,21 +129,24 @@ void AMonster_Base::BeginPlay()
 		m_Info.CurHP = m_Info.MaxHP;
 	}
 	m_WidgetComponent->SetVisibility(false);
-	m_AnimAsset = GetGameInstance()->GetSubsystem<UGISubsystem_MonAssetMgr>()->GetMonAnimAsset(m_Type);
+	m_AnimAsset = GetGameInstance()->GetSubsystem<UGISubsystem_MonAssetMgr>()->GetMonAnimAsset(m_Info.Type);
 
+	FString str;
+	TArray<FMonsterItemDropTable*> DropTableArr;
+	m_ItemTable->GetAllRows(str, DropTableArr);
 	// 랜덤으로 드롭아이템 지정
 	float fRandNum = FMath::RandRange(1.f, 100.f);
-	for ( int32 i = 0; i < m_DropItemArr.Num(); ++i )
+	for ( int32 i = 0; i < DropTableArr.Num(); ++i )
 	{
-		if ( m_DropItemArr[i].ProbabilityBottom < fRandNum && fRandNum < m_DropItemArr[i].ProbabilityTop )
+		if ( DropTableArr[i]->ProbabilityBottom < fRandNum && fRandNum < DropTableArr[i]->ProbabilityTop )
 		{
-			FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(m_DropItemArr[i].Item);
-			m_DropItemInfo.ID = m_DropItemArr[i].Item;
-			m_DropItemInfo.Stack = m_DropItemArr[i].Stack;
+			FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(DropTableArr[ i ]->Item);
+			m_DropItemInfo.ID = DropTableArr[i]->Item;
+			UE_LOG(LogTemp, Warning, TEXT("dropstack : %d"), DropTableArr[ i ]->Stack);
+			m_DropItemInfo.Stack = DropTableArr[i]->Stack;
 			break;
 		}
 	}
-	m_DropItemArr.Empty();
 	RelLoc = GetMesh()->GetRelativeLocation();
 }
 
@@ -173,11 +154,6 @@ void AMonster_Base::BeginPlay()
 void AMonster_Base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (bAtkTrace)
-	{
-		MeleeAttackHitCheck();
-	}
 }
 
 float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -219,7 +195,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	pAnimInst->Montage_Stop(1.f);
 
 	// 피격 사운드 재생
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Type)->HitSound_Normal, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Info.Type)->HitSound_Normal, GetActorLocation());
 
 	// 사망 시
 	if ( m_Info.CurHP <= 0.f && GetController() )
@@ -266,14 +242,17 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	
 	// 공격한 대상(투사체 포함)의 반대방향으로 밀려남
-	//const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
-	//FVector LaunchVec = GetActorLocation() - PointDamageEvent->HitInfo.ImpactPoint;
 	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
 	FVector LaunchForce = LaunchVec.GetSafeNormal() * 500.f;
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
 	return 0.0f;
+}
+
+void AMonster_Base::PlayAtkBlockedAnim()
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.BlockAnim);
 }
 
 void AMonster_Base::MonsterDead(AController* _EventInstigator)
@@ -323,10 +302,11 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 
 	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
 	pDropItem->SetDropItemID(m_DropItemInfo.ID);
+	UE_LOG(LogTemp, Warning, TEXT("dropstack 2 : %d"), m_DropItemInfo.Stack);
 	pDropItem->SetDropItemStack(m_DropItemInfo.Stack);
 	pDropItem->LoadImg();
 
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Type)->DeadSound, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Info.Type)->DeadSound, GetActorLocation());
 
 	TArray<TObjectPtr<USceneComponent>> AttachCompArr = GetMesh()->GetAttachChildren();
 	if ( AttachCompArr.IsEmpty() )
@@ -381,20 +361,6 @@ void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	return;
 }
 
-void AMonster_Base::OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-}
-
-void AMonster_Base::MonsterAttackNormal()
-{
-	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.AtkAnim_Melee_Nor);
-}
-
-void AMonster_Base::PlayAtkBlockedAnim()
-{
-	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.BlockAnim);
-}
-
 void AMonster_Base::SetMonLockedOn(bool _LockedOn)
 {
 	bMonLockedOn = _LockedOn;
@@ -421,81 +387,6 @@ void AMonster_Base::SetMonLockedOn(bool _LockedOn)
 	}
 }
 
-void AMonster_Base::MeleeAttackHitCheck()
-{
-	float AtkRadius = 20.f;
-	if (m_Type == EMONSTER_TYPE::UndeadAssassin)
-	{
-		AtkRadius = 10.f;
-	}
-	else if (m_Type == EMONSTER_TYPE::Barghest)
-	{
-		AtkRadius = 50.f;
-	}
-
-	FHitResult HitResult;
-	FCollisionQueryParams Params(NAME_None, false, this);
-	FVector vHitStart = GetMesh()->GetSocketLocation("Socket_HitStart");
-	FVector vHitEnd = GetMesh()->GetSocketLocation("Socket_HitEnd");
-	float fTraceHalfHeight = (vHitEnd - vHitStart).Size() * 0.5;
-	FVector vMidpoint = FMath::Lerp(vHitEnd, vHitStart, 0.5f);
-	FQuat Rot = FRotationMatrix::MakeFromZ(vHitEnd - vHitStart).ToQuat();
-	if ( PrevTraceLoc.IsZero() )
-	{
-		PrevTraceLoc = vMidpoint;
-	}
-
-	bool bResult = GetWorld()->SweepSingleByChannel
-	(
-		HitResult,
-		PrevTraceLoc,
-		vMidpoint,
-		Rot,
-		ECollisionChannel::ECC_GameTraceChannel6,
-		FCollisionShape::MakeCapsule(AtkRadius, fTraceHalfHeight),
-		Params
-	);
-
-	PrevTraceLoc = vMidpoint;
-	if ( bResult )
-	{
-		FVector const BlockingHitPoint = HitResult.Location;
-		DrawDebugCapsule(GetWorld(), BlockingHitPoint, fTraceHalfHeight, AtkRadius, Rot, FColor::Red, false, 1.f);
-	}
-
-	//if (bDebug)
-	//{
-	// 	FVector CapsuleTip = Rot.RotateVector(FVector(0, 0, fTraceHalfHeight));
-	//	DrawDebugCapsule(GetWorld(), PrevTraceLoc, fTraceHalfHeight, AtkRadius, Rot, FColor::Green, false, 1.f);
-	//	DrawDebugCapsule(GetWorld(), vMidpoint, fTraceHalfHeight, AtkRadius, Rot, FColor::Green, false, 1.f);
-	//	DrawDebugLine(GetWorld(), PrevTraceLoc + CapsuleTip, vMidpoint + CapsuleTip, FColor::Green, false, 1.f);
-	//	DrawDebugLine(GetWorld(), PrevTraceLoc - CapsuleTip, vMidpoint - CapsuleTip, FColor::Green, false, 1.f);
-	//}
-
-	if (bResult)
-	{
-		if ( HitResult.GetActor()->IsValidLowLevel() )
-		{
-			APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(HitResult.GetActor());
-
-			if (!IsValid(pPlayer))
-			{
-				UE_LOG(LogTemp, Display, TEXT("타격 상대가 플레이어가 아님"));
-				return;
-			}
-
-			// 무적 상태일 경우
-			if (!pPlayer->CanBeDamaged())
-			{
-				return;
-			}
-
-			ApplyPointDamage(HitResult, EATTACK_TYPE::PHYSIC_MELEE);
-			bAtkTrace = false;
-		}
-	}
-}
-
 void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType)
 {
 	float iDamage = 0.f;
@@ -515,10 +406,10 @@ void AMonster_Base::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _At
 	}
 
 	// 공격 적중 시 잠시 경직
-	m_AnimInst->Montage_Pause();
+	GetMesh()->GetAnimInstance()->Montage_Pause();
 	GetWorld()->GetTimerManager().SetTimer(MonHitStiffTimer, [this]()
 	{
-		m_AnimInst->Montage_Resume(NULL);
+		GetMesh()->GetAnimInstance()->Montage_Resume(NULL);
 		GetWorld()->GetTimerManager().ClearTimer(MonHitStiffTimer);
 	},
 	0.05f, false);

@@ -3,8 +3,8 @@
 
 #include "UI_Player_QuickSlot.h"
 #include "UI_Player_QuickSlotItem.h"
-#include "../Manager/Equip_Mgr.h"
 #include "Components/ProgressBar.h"
+#include "../Manager/GISubsystem_EquipMgr.h"
 
 void UUI_Player_QuickSlot::NativeConstruct()
 {
@@ -23,30 +23,31 @@ void UUI_Player_QuickSlot::NativeConstruct()
 void UUI_Player_QuickSlot::InitLowerQuickSlot()
 {
 	// 퀵슬롯에 등록된 아이템이 하나도 없을 때
-	if ( !UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr() )
+	if ( !GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->QuickSlotValidForArr() )
 	{
 		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 아이템 없음"));
 		EmptyLowerQuickSlot();
 		return;
 	}
 
-	int32 CurIdx = UEquip_Mgr::GetInst(GetWorld())->GetCurrentIndex();
-	if ( UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(CurIdx) )
+	int32 CurIdx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetCurrentIndex();
+	if ( GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->QuickSlotValidForIdx(CurIdx) )
 	{
 		RenewLowerQuickSlot(CurIdx);
 		return;
 	}
-	int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextValidIndex();
+	int32 Idx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetNextValidIndex();
 	RenewLowerQuickSlot(Idx);
 }
 
 void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 {
-	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
+	
+	FInvenItemRow* ItemData = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetQSItemForIndex(_Idx);
 	m_UI_LowerSlot->RenewQuickSlotItem(ItemData);
 
 	// 퀵슬롯에 등록된 아이템이 하나뿐일 때
-	int32 NextIdx = UEquip_Mgr::GetInst(GetWorld())->GetNextValidIndex();
+	int32 NextIdx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetNextValidIndex();
 	if(_Idx == NextIdx)
 	{
 		m_UI_NextQuickSlot->RenewNextQuickSlotItem(nullptr);
@@ -54,7 +55,7 @@ void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 	// 퀵슬롯에 아이템이 두 개 이상일 때
 	else
 	{
-		ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(NextIdx);
+		ItemData = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetQSItemForIndex(NextIdx);
 		m_UI_NextQuickSlot->RenewNextQuickSlotItem(ItemData);
 	}
 
@@ -71,7 +72,7 @@ void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
 
 void UUI_Player_QuickSlot::RenewNextQuickSlot(int32 _Idx)
 {
-	FInvenItemRow* ItemData = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(_Idx);
+	FInvenItemRow* ItemData = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetQSItemForIndex(_Idx);
 	m_UI_NextQuickSlot->RenewNextQuickSlotItem(ItemData);
 }
 

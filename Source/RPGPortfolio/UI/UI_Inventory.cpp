@@ -7,7 +7,6 @@
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/Inventory_Mgr.h"
 #include "PaperSprite.h"
 #include "Styling/SlateBrush.h"
 #include "UI_ItemTooltip.h"
@@ -15,7 +14,7 @@
 #include "UI_InvenItem.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_StatMgr.h"
-#include "../System/DataAsset/DA_ItemCategoryIcon.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -113,7 +112,7 @@ void UUI_Inventory::LeftBtnClicked()
 	{
 		int8 iCategory = static_cast<int8>(eCategory);
 		eCategory = static_cast<EITEM_TYPE>(--iCategory);
-		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
+		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
 
 		PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
@@ -130,7 +129,7 @@ void UUI_Inventory::RightBtnClicked()
 	{
 		int8 iCategory = static_cast<int8>( eCategory );
 		eCategory = static_cast<EITEM_TYPE>(++iCategory);
-		UInventory_Mgr::GetInst(GetWorld())->RenewInventoryUI(eCategory);
+		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewInventoryUI(eCategory);
 		SetCategoryUI(eCategory);
 
 		PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
@@ -214,7 +213,7 @@ void UUI_Inventory::SetCategoryUI(const EITEM_TYPE _Type)
 		break;
 	}
 
-	UPaperSprite* pSprite = UInventory_Mgr::GetInst(GetWorld())->GetCategoryIcon(_Type);
+	UPaperSprite* pSprite = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetCategoryIcon(_Type);
 	if ( IsValid(pSprite) )
 	{
 		m_Category_Img->SetBrushResourceObject(pSprite);

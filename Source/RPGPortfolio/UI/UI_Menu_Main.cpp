@@ -4,7 +4,6 @@
 #include "UI_Menu_Main.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "../Manager/Inventory_Mgr.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI_StatusMain.h"
@@ -12,6 +11,7 @@
 #include "UI_Manual.h"
 #include "UI_Settings.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_Menu_Main::NativeConstruct()
 {
@@ -80,7 +80,7 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 
 void UUI_Menu_Main::InventoryBtnClicked()
 {
-	UInventory_Mgr::GetInst(GetWorld())->ShowInventoryUI();
+	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->ShowInventoryUI();
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }

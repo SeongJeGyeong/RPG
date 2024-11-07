@@ -5,29 +5,24 @@
 #include "../Header/Struct.h"
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "Equip_Mgr.generated.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "GISubsystem_EquipMgr.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API UEquip_Mgr : public UObject
+class RPGPORTFOLIO_API UGISubsystem_EquipMgr : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-
+	
 private:
-	static UWorld* m_World;
-
 	UPROPERTY()
 	TMap<EEQUIP_SLOT, FInvenItemRow> m_EquipItemMap;
 
 	int32 CurQuickSlotIdx = 0;
 
 public:
-	//static UEquip_Mgr* GetInst(UWorld* _World);
-	//static UEquip_Mgr* GetInst(UGameInstance* _GameInst);
-
 	FInvenItemRow* GetQSItemForIndex(int32 _Idx);
 
 	void SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot);
@@ -49,4 +44,5 @@ public:
 	bool QuickSlotValidForIdx(int32 _Idx);
 
 	void DecreaseLowerSlotItem(int32 _Idx);
+
 };

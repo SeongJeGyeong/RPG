@@ -18,25 +18,13 @@ class RPGPORTFOLIO_API AMonster_Base : public ACharacter
 
 private:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
-	EMONSTER_TYPE	m_Type;
-
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = (AllowPrivateAccess = "true"))
 	FDataTableRowHandle	m_MonsterInfoTableRow;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	class UWidgetComponent* m_WidgetComponent;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	float m_DetectRange;	// 플레이어 탐지 범위
-
-	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	float m_AtkRange;		// 공격 가능범위
-
-	UPROPERTY()
 	UDataTable* m_ItemTable;
-
-	UPROPERTY()
-	TArray<struct FMonsterItemDropTable> m_DropItemArr;
 
 	UPROPERTY()
 	class UAnimInstance_Monster_Base* m_AnimInst;
@@ -50,21 +38,14 @@ private:
 	UPROPERTY()
 	class UCurveVector* m_HitCurve;
 
-	UPROPERTY()
-	FMonsterInfo	m_Info;
-	UPROPERTY()
-	FMonsterAnimAsset m_AnimAsset;
-
 	struct FDroppedItemData	m_DropItemInfo;
 
-	FVector PrevTraceLoc;
 	FVector RelLoc;
 	FOnTimelineVector HitTimelineCallback;
 	FOnTimelineEvent TimelineFinishCallback;
 
 	float fDeadEffectRatio;
 	bool bMonLockedOn;
-	bool bAtkTrace;
 	bool bMonDead;
 
 	FTimerHandle DeadTimer;
@@ -73,11 +54,25 @@ private:
 	FTimerHandle WidgetDisplayTimer;
 
 protected:
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	float m_DetectRange;	// 플레이어 탐지 범위
+
+	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info")
+	float m_AtkRange;		// 공격 가능범위
+
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBehaviorTree* m_BehaviroTree;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
 	class UBlackboardData* m_Blackboard;
+
+	UPROPERTY()
+	FMonsterAnimAsset m_AnimAsset;
+
+	FMonsterInfo	m_Info;
+
+	FVector PrevTraceLoc;
+	bool bAtkTrace;
 
 public:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "variable")
@@ -86,7 +81,6 @@ public:
 public:
 	UBehaviorTree* GetBehaviorTree() const { return m_BehaviroTree; }
 	UBlackboardData* GetBlackboard() const { return m_Blackboard; }
-	const FMonsterInfo& GetMonsterInfo() { return m_Info; }
 
 	void SetMonLockedOn(bool _LockedOn);
 	void SetbAtkTrace(bool _AtkTrace) { bAtkTrace = _AtkTrace; }
@@ -110,19 +104,13 @@ public:
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void MonsterAttackNormal();
 	void PlayAtkBlockedAnim();
-
-private:
-	void MeleeAttackHitCheck();
 
 protected:
 	void MonsterDead(AController* EventInstigator);
 
 	UFUNCTION()
 	void OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	UFUNCTION()
-	void OnBlockMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
 	void TimelineStep(FVector _Value);

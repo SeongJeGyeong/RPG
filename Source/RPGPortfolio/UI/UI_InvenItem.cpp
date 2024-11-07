@@ -8,12 +8,12 @@
 #include "Components/MenuAnchor.h"
 #include "../Item/Item_InvenData.h"
 #include "UI_Inventory.h"
-#include "../Manager/Inventory_Mgr.h"
 #include "UI_PlayerStat.h"
 #include "UI_ItemSelectMenu.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_InvenItem::NativeConstruct()
 {	
@@ -84,7 +84,7 @@ void UUI_InvenItem::ItemBtnClicked()
 	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
-		FInvenItemRow* pItemRow = UInventory_Mgr::GetInst(GetWorld())->GetInvenItemInfo(eID);
+		FInvenItemRow* pItemRow = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetInvenItemInfo(eID);
 		if (pItemRow->EquipedSlot == eSelectedSlot)
 		{
 			PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
@@ -94,8 +94,9 @@ void UUI_InvenItem::ItemBtnClicked()
 			PlaySound(GETMENUSOUND(EMenuSound::ITEM_EQUIP));
 		}
 
-		UInventory_Mgr::GetInst(GetWorld())->ChangeEquipItem(pItemRow->ID, eSelectedSlot);
-		FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(pItemRow->ID);
+
+		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->ChangeEquipItem(pItemRow->ID, eSelectedSlot);
+		FGameItemInfo* pInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(pItemRow->ID);
 		// 무기 및 방어구 교체 시
 		if ( pInfo->Type == EITEM_TYPE::WEAPON || pInfo->Type == EITEM_TYPE::ARM_HELM ||
 			pInfo->Type == EITEM_TYPE::ARM_CHEST || pInfo->Type == EITEM_TYPE::ARM_GAUNTLET ||

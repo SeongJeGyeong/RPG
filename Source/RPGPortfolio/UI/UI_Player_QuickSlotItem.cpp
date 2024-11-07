@@ -4,7 +4,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/Inventory_Mgr.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_Player_QuickSlotItem::NativeConstruct()
 {
@@ -31,7 +31,8 @@ void UUI_Player_QuickSlotItem::RenewQuickSlotItem(const FInvenItemRow* const _In
 		m_Amount->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
-	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_InvenItem->ID);
+
+	FGameItemInfo* pInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(_InvenItem->ID);
 	FString ItemImgPath = pInfo->IconImgPath;
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);
@@ -54,7 +55,7 @@ void UUI_Player_QuickSlotItem::RenewNextQuickSlotItem(const FInvenItemRow* const
 		return;
 	}
 
-	FGameItemInfo* pInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_InvenItem->ID);
+	FGameItemInfo* pInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(_InvenItem->ID);
 	FString ItemImgPath = pInfo->IconImgPath;
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
 	m_ItemImg->SetBrushFromTexture(pTex2D);

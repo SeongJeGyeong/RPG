@@ -8,11 +8,11 @@
 #include "UI_EquipItemList.h"
 #include "UI_ItemTooltip.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/Inventory_Mgr.h"
-#include "../Manager/Equip_Mgr.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../System/DataAsset/DA_ItemCategoryIcon.h"
 #include "PaperSprite.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
+#include "../Manager/GISubsystem_EquipMgr.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
@@ -21,7 +21,7 @@ void UUI_EquipItem::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("장비창 아이템 UI 로드 실패"));
 	}
 
-	UPaperSprite* pIcon = UInventory_Mgr::GetInst(GetWorld())->GetEquipSlotIcon(eSlotType);
+	UPaperSprite* pIcon = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetEquipSlotIcon(eSlotType);
 	m_BackSlotImg->SetBrushResourceObject(pIcon);
 	if (!m_EquipItemBtn->GetIsEnabled())
 	{
@@ -29,7 +29,7 @@ void UUI_EquipItem::NativeConstruct()
 	}
 	else
 	{
-		UItem_InvenData* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(eSlotType);
+		UItem_InvenData* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetEquipItemFromSlot(eSlotType);
 		if (pItemInfo != nullptr)
 		{
 			FString ItemImgPath = pItemInfo->GetItemImgPath();
@@ -162,8 +162,8 @@ void UUI_EquipItem::ItemBtnClicked()
 	default:
 		break;
 	}
-	UInventory_Mgr::GetInst(GetWorld())->RenewEquipItemListUI(Type);
-	ItemList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewEquipItemListUI(Type);
+	ItemList->SetVisibility(ESlateVisibility::Visible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
@@ -241,8 +241,7 @@ void UUI_EquipItem::ItemBtnHovered()
 		}
 	}
 
-	UItem_InvenData* pItemInfo = UEquip_Mgr::GetInst(GetWorld())->GetEquipItemFromSlot(eSlotType);
-
+	UItem_InvenData* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetEquipItemFromSlot(eSlotType);
 	if (IsValid(ItemNameText) && IsValid(pItemInfo))
 	{
 		FString sItemName = pItemInfo->GetItemName();

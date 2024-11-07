@@ -319,9 +319,6 @@ struct FMonsterItemDropTable
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMONSTER_TYPE	Monster;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EITEM_ID		Item;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -8,19 +8,12 @@
 #include "Engine/GameInstance.h"
 #include "GameInstance_Base.generated.h"
 
-class UInventory_Mgr;
-class UEquip_Mgr;
-
 UCLASS()
 class RPGPORTFOLIO_API UGameInstance_Base : public UGameInstance
 {
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY()
-	UInventory_Mgr*		m_InvenMgr;
-	UPROPERTY()
-	UEquip_Mgr*			m_EquipMgr;
 	UPROPERTY()
 	TSubclassOf<class UUserWidget>	m_LoadingScreenClass;
 
@@ -66,8 +59,4 @@ public:
 
 private:
 	void AssetLoaded(FString _AssetName);
-
-	// Inventory_Mgr에서 GameInstance의 private 멤버를 사용할 수 있음
-	friend class UInventory_Mgr;
-	friend class UEquip_Mgr;
 };

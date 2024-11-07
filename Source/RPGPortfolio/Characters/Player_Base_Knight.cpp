@@ -8,8 +8,6 @@
 #include "Player_CameraArm.h"
 #include "../UI/UI_Base.h"
 #include "../Item/Item_Dropped_Base.h"
-#include "../Manager/Inventory_Mgr.h"
-#include "../Manager/Equip_Mgr.h"
 #include "../System/Component/LockOnTargetComponent.h"
 #include "../System/DamageType_Base.h"
 #include "../Monsters/Monster_Base.h"
@@ -22,7 +20,6 @@
 #include "EnhancedInputComponent.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
-//#include "../Manager/GISubsystem_StatMgr.h"
 #include "Player_SkillComponent.h"
 #include "Player_StatComponent.h"
 #include "../System/Subsys_ObjectPool.h"
@@ -32,6 +29,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "../System/FadeViewportClient.h"
 #include "../GameInstance_Base.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
+#include "../Manager/GISubsystem_EquipMgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -560,10 +559,10 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 {
-	if (UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForArr())
+	if ( GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->QuickSlotValidForArr())
 	{
-		int32 Idx = UEquip_Mgr::GetInst(GetWorld())->GetNextValidIndex();
-		UEquip_Mgr::GetInst(GetWorld())->SetCurrentIndex(Idx);
+		int32 Idx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetNextValidIndex();
+		GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->SetCurrentIndex(Idx);
 		m_MainUI->HUD_RenewQuickSlotUI(Idx);
 	}
 }
@@ -577,10 +576,10 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 
 	if ( !bItemDelay )
 	{
-		int32 iCurIdx = UEquip_Mgr::GetInst(GetWorld())->GetCurrentIndex();
-		if ( UEquip_Mgr::GetInst(GetWorld())->QuickSlotValidForIdx(iCurIdx) )
+		int32 iCurIdx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetCurrentIndex();
+		if ( GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->QuickSlotValidForIdx(iCurIdx) )
 		{
-			FInvenItemRow* pItem = UEquip_Mgr::GetInst(GetWorld())->GetQSItemForIndex(iCurIdx);
+			FInvenItemRow* pItem = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetQSItemForIndex(iCurIdx);
 			UseItem(pItem->ID, pItem->EquipedSlot);
 		}
 		else
@@ -967,7 +966,7 @@ void APlayer_Base_Knight::ShotProjectile()
 void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
-	FGameItemInfo* pItemInfo = UInventory_Mgr::GetInst(GetWorld())->GetItemInfo(_ID);
+	FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(_ID);
 	if ( pItemInfo->Restore_HP >= 0 )
 	{
 		m_StatComponent->RestorePlayerHP(pItemInfo->Restore_HP);
@@ -991,13 +990,13 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
 	if ( _Slot == EEQUIP_SLOT::EMPTY )
 	{
-		UInventory_Mgr::GetInst(GetWorld())->DecreaseInventoryItem(_ID);
+		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->DecreaseInventoryItem(_ID);
 	}
 	// 퀵슬롯에 장착되어있을 경우 퀵슬롯을 통해 수량 감소
 	else
 	{
-		int32 idx = UEquip_Mgr::GetInst(GetWorld())->ConvertQuickSlotToIdx(_Slot);
-		UEquip_Mgr::GetInst(GetWorld())->DecreaseLowerSlotItem(idx);
+		int32 idx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->ConvertQuickSlotToIdx(_Slot);
+		GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->DecreaseLowerSlotItem(idx);
 	}
 
 	Play_PlayerMontage(EPlayerMontage::USEITEM);
