@@ -2,8 +2,6 @@
 
 
 #include "GISubsystem_StatMgr.h"
-#include "../UI/UI_Base.h"
-#include "RPGPortfolio/RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
 UGISubsystem_StatMgr::UGISubsystem_StatMgr()
@@ -41,21 +39,12 @@ void UGISubsystem_StatMgr::Initialize(FSubsystemCollectionBase& Collection)
 
 void UGISubsystem_StatMgr::Deinitialize()
 {
-	Super::Deinitialize();
-}
+	OnRenewAmountSoul.Clear();
+	OnRenewHP.Clear();
+	OnRenewMP.Clear();
+	OnRenewST.Clear();
 
-void UGISubsystem_StatMgr::SetUIInManager()
-{
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( IsValid(GameMode) )
-	{
-		UUI_Base* pMainUI = GameMode->GetMainHUD();
-		pMainUI->BindStatManager(this);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("플레이어 게임모드 캐스팅 실패"));
-	}
+	Super::Deinitialize();
 }
 
 void UGISubsystem_StatMgr::SetAtkAndDef()

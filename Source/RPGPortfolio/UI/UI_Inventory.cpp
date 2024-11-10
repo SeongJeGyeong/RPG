@@ -136,6 +136,32 @@ void UUI_Inventory::RightBtnClicked()
 	}
 }
 
+void UUI_Inventory::BindInvenMgr()
+{
+	UGISubsystem_InvenMgr* InvenManager = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+	if ( InvenManager )
+	{
+		InvenManager->OnInventoryOpen.AddUObject(this, &UUI_Inventory::InventoryOpen);
+		InvenManager->OnClearInventoryList.AddUObject(this, &UUI_Inventory::Clear);
+		InvenManager->OnAddInvenItem.AddUObject(this, &UUI_Inventory::AddInventoryItem);
+	}
+}
+
+void UUI_Inventory::InventoryOpen(bool _Open)
+{
+	if ( _Open )
+	{
+		SetStatUI();
+		SetCategoryEnum(EITEM_TYPE::ALL);
+		SetCategoryUI(EITEM_TYPE::ALL);
+		SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
+	else
+	{
+		SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void UUI_Inventory::AddInventoryItem(UObject* _ItemData)
 {
 	m_ItemTileView->AddItem(_ItemData);

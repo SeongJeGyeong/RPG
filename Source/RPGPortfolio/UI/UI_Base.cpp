@@ -12,6 +12,8 @@
 #include "Components/Image.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_StatMgr.h"
+#include "../Characters/Player_Base_Knight.h"
+#include "../Manager/GISubsystem_EquipMgr.h"
 
 void UUI_Base::NativeConstruct()
 {
@@ -64,12 +66,38 @@ void UUI_Base::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_Base::BindStatManager(UGISubsystem_StatMgr* _StatMgr)
+void UUI_Base::BindStatMgr()
 {
-	_StatMgr->OnRenewAmountSoul.AddUObject(this, &UUI_Base::RenewAmountSoul);
-	_StatMgr->OnRenewHP.AddUObject(this, &UUI_Base::RenewUI_HP);
-	_StatMgr->OnRenewMP.AddUObject(this, &UUI_Base::RenewUI_MP);
-	_StatMgr->OnRenewST.AddUObject(this, &UUI_Base::RenewUI_ST);
+	UGISubsystem_StatMgr* pStatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if ( IsValid(pStatMgr) )
+	{
+		pStatMgr->OnRenewAmountSoul.AddUObject(this, &UUI_Base::RenewAmountSoul);
+		pStatMgr->OnRenewHP.AddUObject(this, &UUI_Base::RenewUI_HP);
+		pStatMgr->OnRenewMP.AddUObject(this, &UUI_Base::RenewUI_MP);
+		pStatMgr->OnRenewST.AddUObject(this, &UUI_Base::RenewUI_ST);
+	}
+}
+
+void UUI_Base::BindEquipMgr()
+{
+	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+	if ( IsValid(pEquipMgr) )
+	{
+		pEquipMgr->OnRenewQS.AddUObject(this, &UUI_Base::HUD_RenewQuickSlotUI);
+		pEquipMgr->OnEmptyQS.AddUObject(this, &UUI_Base::EmptyQuickSlotUI);
+	}
+}
+
+void UUI_Base::BindPlayerWidget(APlayer_Base_Knight* _Character)
+{
+	_Character->OnSetHUDVisibility.AddUObject(this, &UUI_Base::SetVisibility);
+	_Character->OnMenuOpen.AddUObject(this, &UUI_Base::MenuVisibility);	
+	_Character->OnCloseItemMessageBox.AddUObject(this, &UUI_Base::SetVisibilityItemMessageUI);
+	_Character->OnBeginOverlapInteract.AddUObject(this, &UUI_Base::BeginOverlapInteract);
+	_Character->OnEndOverlapItem.AddUObject(this, &UUI_Base::EndOverlapItem);
+	_Character->OnQSDelay.AddUObject(this, &UUI_Base::SetQuickSlotUIOpacity);
+	_Character->OnQSDelayRate.AddUObject(this, &UUI_Base::SetQuickSlotUIDelay);
+	_Character->OnChangeQS.AddUObject(this, &UUI_Base::HUD_RenewQuickSlotUI);
 }
 
 void UUI_Base::MenuVisibility(ESlateVisibility _Visibility)
@@ -100,7 +128,7 @@ void UUI_Base::ShowMainMessageUI(bool _bShow)
 	}
 	else
 	{
-		if (!bDisplayRootMessage)
+		if (m_UI_MessageBox_Item->GetVisibility() == ESlateVisibility::Collapsed)
 		{
 			m_UI_MessageBox_Main->SetVisibility(ESlateVisibility::Collapsed);
 		}
@@ -109,7 +137,6 @@ void UUI_Base::ShowMainMessageUI(bool _bShow)
 
 void UUI_Base::ShowItemMessageUI(bool _bShow)
 {
-	bDisplayRootMessage = _bShow;
 	if ( _bShow )
 	{
 		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -117,6 +144,15 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 	else
 	{
 		m_UI_MessageBox_Item->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UUI_Base::SetVisibilityItemMessageUI()
+{
+	if ( m_UI_MessageBox_Item->GetVisibility() == ESlateVisibility::HitTestInvisible)
+	{
+		ShowItemMessageUI(false);
+		ShowMainMessageUI(false);
 	}
 }
 
@@ -145,12 +181,43 @@ void UUI_Base::HUD_RenewQuickSlotUI(int32 _idx)
 	m_UI_QuickSlotMain->RenewLowerQuickSlot(_idx);
 }
 
-void UUI_Base::SetQuickSlotUIOpacity(float _alpha, bool _UorL)
+void UUI_Base::EmptyQuickSlotUI()
 {
-	m_UI_QuickSlotMain->SetQuickSlotOpacity(_alpha, _UorL);
+	m_UI_QuickSlotMain->EmptyLowerQuickSlot();
+}
+
+void UUI_Base::SetQuickSlotUIOpacity(bool _IsDelay)
+{
+	if ( _IsDelay )
+	{
+		m_UI_QuickSlotMain->SetQuickSlotOpacity(0.5f, false);
+	}
+	else
+	{
+		m_UI_QuickSlotMain->SetQuickSlotOpacity(1.f, false);
+	}
 }
 
 void UUI_Base::SetQuickSlotUIDelay(float _DelayPercnet)
 {
 	m_UI_QuickSlotMain->SetLowerSlotDelay(_DelayPercnet);
+}
+
+void UUI_Base::BeginOverlapInteract(FText _Command, FText _Action)
+{
+	SetMainMessageUI(_Command, _Action);
+	ShowMainMessageUI(true);
+}
+
+void UUI_Base::EndOverlapItem()
+{
+	if ( m_UI_MessageBox_Item->GetVisibility() == ESlateVisibility::HitTestInvisible)
+	{
+		SetMainMessageUI(FText::FromString(L"F"), FText::FromString(L"확인"));
+		ShowMainMessageUI(true);
+	}
+	else
+	{
+		ShowMainMessageUI(false);
+	}
 }

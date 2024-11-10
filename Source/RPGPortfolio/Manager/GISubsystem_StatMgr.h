@@ -31,6 +31,7 @@ private:
 	FTimerHandle RecoveryTimer;
 
 public:
+	// UI_Base와 연결
 	FRenewSoulDelegate OnRenewAmountSoul;
 	FRenewHPDelegate OnRenewHP;
 	FRenewMPDelegate OnRenewMP;
@@ -39,8 +40,6 @@ public:
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
-
-	void SetUIInManager();
 
 	int32 GetPlayerLevel() const { return PlayerStat.Level; }
 	//int32 GetPlayerSoul() const { return PlayerBasePower.AmountOfSoul; }

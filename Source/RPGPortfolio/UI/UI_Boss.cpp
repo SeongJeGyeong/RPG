@@ -4,6 +4,7 @@
 #include "UI_Boss.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
+#include "../Monsters/Boss_Base.h"
 
 void UUI_Boss::NativeConstruct()
 {
@@ -17,6 +18,18 @@ void UUI_Boss::NativeConstruct()
 	}
 
 	Super::NativeConstruct();
+}
+
+void UUI_Boss::BindBossWidget(ABoss_Base* _Boss)
+{
+	_Boss->OnDamagedBossHP.AddUObject(this, &UUI_Boss::TakeDamaged);
+	_Boss->OnSetVisibilityBossWidget.AddUObject(this, &UUI_Boss::SetVisibility);
+}
+
+void UUI_Boss::TakeDamaged(float _Ratio, float _DMG)
+{
+	SetHPRatio(_Ratio);
+	DisplayDMG(_DMG);
 }
 
 void UUI_Boss::SetHPRatio(float _Ratio)

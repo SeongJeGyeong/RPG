@@ -55,11 +55,6 @@ private:
 	UPROPERTY()
 	class UAudioComponent* m_BGMComp;
 
-	UPROPERTY()
-	class USoundBase* m_BGM;
-
-	FVector PlayerSpawnLoc;
-
 public:
 	UUI_Base* GetMainHUD() { return m_MainHUD; }
 	UUI_Inventory* GetInventoryUI() { return m_InventoryUI; }
@@ -72,8 +67,6 @@ public:
 	void CloseSubMenu();
 
 	void PlayBGM(bool _Play);
-
-	void SetPlayerRespawnLoc(const FVector& _Loc);
 
 public:
 	virtual void PostInitializeComponents() override;

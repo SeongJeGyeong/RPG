@@ -85,13 +85,6 @@ void UAnimInstance_Knight::NativeInitializeAnimation()
 void UAnimInstance_Knight::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
-
-	m_Player = Cast<APlayer_Base_Knight>(GetOwningActor());
-
-	if (IsValid(m_Player))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("애님 인스턴스 : 플레이어 캐릭터 참조 성공"));
-	}
 }
 
 void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
@@ -101,28 +94,31 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 
 void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 {
-	m_Player->SetState(EPlayerStateType::ATTACK_WAIT);
+	OnSetState.Broadcast(EPlayerStateType::ATTACK_WAIT);
+	//m_Player->SetState(EPlayerStateType::ATTACK_WAIT);
 }
 
 // 다음 공격 입력 끝
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
-	m_Player->SetbEnableAtkInput(false);
-	m_Player->SetState(EPlayerStateType::IDLE);
+	OnEnableAtkInput.Broadcast(false);
+	OnSetState.Broadcast(EPlayerStateType::IDLE);
+	//m_Player->SetbEnableAtkInput(false);
+	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
-	m_Player->SetbAtkTrace(true);
-	m_Player->SetbEnableAtkInput(true);
+	OnSetAtkTrace.Broadcast(true);
+	OnEnableAtkInput.Broadcast(true);
+	//m_Player->SetbAtkTrace(true);
+	//m_Player->SetbEnableAtkInput(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 {
-	m_Player->SetbAtkTrace(false);
-	// 공격 대상 배열 초기화
-	m_Player->EmptyHitActorArr();
-	m_Player->ResetPrevTraceLoc();
+	OnSetAtkTrace.Broadcast(false);
+	//m_Player->SetbAtkTrace(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_InvincibleOn()
@@ -137,17 +133,20 @@ void UAnimInstance_Knight::AnimNotify_InvincibleOff()
 
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
-	m_Player->SetState(EPlayerStateType::IDLE);
+	OnSetState.Broadcast(EPlayerStateType::IDLE);
+	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpEnd()
 {
-	m_Player->SetState(EPlayerStateType::IDLE);
+	OnSetState.Broadcast(EPlayerStateType::IDLE);
+	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_FallStart()
 {
-	m_Player->SetState(EPlayerStateType::JUMP);
+	OnSetState.Broadcast(EPlayerStateType::JUMP);
+	//m_Player->SetState(EPlayerStateType::JUMP);
 }
 
 void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
@@ -158,17 +157,20 @@ void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
 
 void UAnimInstance_Knight::AnimNotify_JumpAtkEnd()
 {
-	m_Player->SetState(EPlayerStateType::IDLE);
+	OnSetState.Broadcast(EPlayerStateType::IDLE);
+	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 {
-	m_Player->ShotProjectile();
+	OnShotProj.Broadcast();
+	//m_Player->ShotProjectile();
 }
 
 void UAnimInstance_Knight::AnimNotify_ValidInput()
 {
-	m_Player->SetState(EPlayerStateType::IDLE);
+	OnSetState.Broadcast(EPlayerStateType::IDLE);
+	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_Dead()

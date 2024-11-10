@@ -14,6 +14,16 @@
 #include "GameFramework/Character.h"
 #include "Player_Base_Knight.generated.h"
 
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuOpenDelegate, ESlateVisibility);	// 메뉴 오픈 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHUDVisibilityDelegate, ESlateVisibility);	// HUD 표시 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnCloseItemMessageBoxDelegate);	// 아이템 메시지박스 닫기 델리게이트
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBeginOverlapInteractDelegate, FText, FText);	// 상호작용 오버랩 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnEndOverlapItemDelegate);	// 아이템 오버랩 해제 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayRateDelegate, float);	// 퀵슬롯 딜레이 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayDelegate, bool);	// 퀵슬롯 사용 대기상태 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangeQSDelegate, int32);	// 퀵슬롯 변경 델리게이트
+
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
 class UPlayer_SkillComponent;
@@ -73,9 +83,6 @@ private:
 	TArray<TScriptInterface<IPlayerInteraction>> OverlapInteractionArr;	// 오버랩된 상호작용 오브젝트 목록
 
 	UPROPERTY()
-	UUI_Base* m_MainUI;
-
-	UPROPERTY()
 	TArray<AActor*> HitActorArr;
 
 	// UObject 클래스와는 호환이 안되므로 일반 c++ 클래스를 추상클래스로 만들어 사용
@@ -105,6 +112,18 @@ private:
 	FVector PrevTraceLoc;
 
 	bool bDead;
+
+public:
+	// UI_Base와 연결
+	FOnHUDVisibilityDelegate OnSetHUDVisibility;
+	FOnMenuOpenDelegate OnMenuOpen;
+	FOnCloseItemMessageBoxDelegate OnCloseItemMessageBox;
+	FOnBeginOverlapInteractDelegate OnBeginOverlapInteract;
+	FOnEndOverlapItemDelegate OnEndOverlapItem;
+	FOnQSDelayRateDelegate OnQSDelayRate;
+	FOnQSDelayDelegate OnQSDelay;
+	FOnChangeQSDelegate OnChangeQS;
+
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
 	UDA_PlayerSound* GetSoundDA() const { return m_PlayerSound; }
@@ -114,13 +133,12 @@ public:
 	void SetbIsAttacking(const bool& _IsAttacking) { bIsAttacking = _IsAttacking; }
 
 	bool GetbAtkTrace() const { return bAtkTrace; }
-	void SetbAtkTrace(const bool& _AtkTrace) { bAtkTrace = _AtkTrace; }
-	void ResetPrevTraceLoc() { PrevTraceLoc = FVector::ZeroVector; }
+	void SetAttackTrace(const bool& _AtkTrace);
 
 	uint8 GetCurrentCombo() const { return CurrentCombo; }
 	void SetCurrentCombo(const uint8& _Combo) { CurrentCombo = _Combo; }
 
-	void SetbEnableAtkInput(const bool& _EnableAtkInput) { bEnableAtkInput = _EnableAtkInput; }
+	void SetbEnableAtkInput(const bool& _EnableAtkInput);
 	// 아이템 사용 딜레이
 	bool GetbItemDelay() const { return bItemDelay; }
 
@@ -135,12 +153,6 @@ public:
 
 	// 락온 토글 상태 확인
 	bool GetbIsLockOn() const;
-	ULockOnTargetComponent* GetLockOnTarget() const;
-
-	UAnimInstance_Knight* GetAnimInst() const { return m_AnimInst; }
-
-	// 공격 트레이스에 피격된 대상 목록 초기화
-	void EmptyHitActorArr() { HitActorArr.Empty(); }
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -194,7 +206,7 @@ public:
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	UFUNCTION()
 	void ItemDelaytime(float _DelayPercent);
-	void CloseMenuUI();
+	void SetVisibilityMenuUI(bool _Visibility);
 
 	void ResetVarsOnHitState();
 	void ClearMontageRelatedTimer(); // 몽타주 관련 타이머 clear

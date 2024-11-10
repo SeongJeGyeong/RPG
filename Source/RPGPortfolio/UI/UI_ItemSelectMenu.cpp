@@ -52,7 +52,7 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		
 		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->CloseInventoryUI();
-		pPlayer->CloseMenuUI();
+		pPlayer->SetVisibilityMenuUI(false);
 		pPlayer->UseItem(m_ID, m_Slot);
 	}
 	else

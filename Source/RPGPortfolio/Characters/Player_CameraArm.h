@@ -45,8 +45,7 @@ public:
 	void SwitchTarget(ELockOnDirection _Direction);
 
 	bool IsLockedOn();
-
-	class ULockOnTargetComponent* GetLockOnTarget() const { return m_Target; };
+	FVector GetLockOnTargetLocation() const;
 
 private:
 	void LockOnTarget(ULockOnTargetComponent* _TargetComponent);

@@ -230,7 +230,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		if (!PointDamageEvent->HitInfo.BoneName.IsNone())
 		{
-			UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::AutoRelease);
+			UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::None);
 		}
 	}
 

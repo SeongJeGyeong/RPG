@@ -44,10 +44,10 @@ void UANS_AtkMove::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 		{
 			if ( m_Player->GetbIsLockOn() )
 			{
-				FVector TargetVect = m_Player->GetLockOnTarget()->GetComponentLocation() - m_Player->GetActorLocation();
-				rAtkRot = UKismetMathLibrary::MakeRotFromX(TargetVect.GetSafeNormal());
-				rAtkRot.Pitch = 0.f;
-				rAtkRot.Roll = 0.f;
+				//FVector TargetVect = m_Player->GetLockOnTarget()->GetComponentLocation() - m_Player->GetActorLocation();
+				//rAtkRot = UKismetMathLibrary::MakeRotFromX(TargetVect.GetSafeNormal());
+				//rAtkRot.Pitch = 0.f;
+				//rAtkRot.Roll = 0.f;
 				return;
 			}
 

@@ -42,6 +42,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
+	void BindEquipMgr();
 	void RenewStatusUI();
 
 };

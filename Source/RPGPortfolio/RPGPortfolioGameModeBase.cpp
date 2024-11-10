@@ -98,9 +98,8 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		if (IsValid(m_MainHUD))
 		{
 			m_MainHUD->AddToViewport(1);
-
-			UGISubsystem_StatMgr* StatMgr = pGameInst->GetSubsystem<UGISubsystem_StatMgr>();
-			StatMgr->SetUIInManager();
+			m_MainHUD->BindStatMgr();
+			m_MainHUD->BindEquipMgr();
 			m_MainHUD->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else
@@ -117,6 +116,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		{
 			m_InventoryUI->AddToViewport(5);
 			m_InventoryUI->SetVisibility(ESlateVisibility::Collapsed);
+			m_InventoryUI->BindInvenMgr();
 		}
 		else
 		{
@@ -142,6 +142,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		{
 			m_EquipUI->AddToViewport(5);
 			m_EquipUI->SetVisibility(ESlateVisibility::Collapsed);
+			m_EquipUI->BindInvenMgr();
 		}
 	}
 
@@ -247,9 +248,4 @@ void ARPGPortfolioGameModeBase::PlayBGM(bool _Play)
 	{
 		m_BGMComp->Stop();
 	}
-}
-
-void ARPGPortfolioGameModeBase::SetPlayerRespawnLoc(const FVector& _Loc)
-{
-	PlayerSpawnLoc = _Loc;
 }

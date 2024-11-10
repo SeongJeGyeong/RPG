@@ -82,7 +82,6 @@ bool UPlayer_CameraArm::ToggleCameraLockOn(const bool& _ToggleLockOn)
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -236,4 +235,9 @@ TArray<class ULockOnTargetComponent*> UPlayer_CameraArm::GetDetectedTargets()
 bool UPlayer_CameraArm::IsLockedOn()
 {
 	return m_Target != nullptr;
+}
+
+FVector UPlayer_CameraArm::GetLockOnTargetLocation() const
+{
+	return m_Target->GetComponentLocation();
 }

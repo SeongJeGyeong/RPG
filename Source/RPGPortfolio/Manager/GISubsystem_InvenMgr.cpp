@@ -2,20 +2,6 @@
 
 
 #include "GISubsystem_InvenMgr.h"
-#include "../GameInstance_Base.h"
-#include "../UI/UI_Inventory.h"
-#include "../UI/UI_EquipMain.h"
-#include "../UI/UI_EquipItemList.h"
-#include "../RPGPortfolioGameModeBase.h"
-#include "Kismet/GameplayStatics.h"
-#include "../UI/UI_Base.h"
-#include "../UI/UI_Player_Main.h"
-#include "../UI/UI_Player_Soul.h"
-#include "../Item/Item_InvenData.h"
-//#include "Equip_Mgr.h"
-#include "../Characters/Player_Base_Knight.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
 #include "../Manager/GISubsystem_StatMgr.h"
 #include "../System/DataAsset/DA_ItemCategoryIcon.h"
 #include "../Manager/GISubsystem_EquipMgr.h"
@@ -38,6 +24,13 @@ void UGISubsystem_InvenMgr::Initialize(FSubsystemCollectionBase& Collection)
 
 void UGISubsystem_InvenMgr::Deinitialize()
 {
+	OnInventoryOpen.Clear();
+	OnClearInventoryList.Clear();
+	OnAddInvenItem.Clear();
+	OnRenewEquipItem.Clear();
+	OnClearEquipList.Clear();
+	OnAddEquipItemList.Clear();
+
 	Super::Deinitialize();
 }
 
@@ -110,6 +103,17 @@ void UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 	else
 	{
 		ItemRow->Stack += _Stack;
+		// 퀵슬롯에 등록된 아이템이 추가되었을 경우 퀵슬롯의 아이템 개수를 갱신
+		if ( pItemInfo->Type == EITEM_TYPE::CONSUMABLE && ItemRow->EquipedSlot != EEQUIP_SLOT::EMPTY )
+		{
+			UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+			if ( IsValid(pEquipMgr) )
+			{
+				int32 idx = pEquipMgr->ConvertQuickSlotToIdx(ItemRow->EquipedSlot);
+				pEquipMgr->AddStackQuickSlot(ItemRow->EquipedSlot, _Stack);
+				pEquipMgr->RenewQuickSlotUI(idx);
+			}
+		}
 	}
 }
 
@@ -142,46 +146,20 @@ void UGISubsystem_InvenMgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
 
 void UGISubsystem_InvenMgr::ShowInventoryUI()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("ShowInventoryUI 게임모드 캐스팅 실패"));
-		return;
-	}
-
-	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
-	InventoryUI->SetStatUI();
-	InventoryUI->SetCategoryEnum(EITEM_TYPE::ALL);
-	InventoryUI->SetCategoryUI(EITEM_TYPE::ALL);
+	OnInventoryOpen.Broadcast(true);
 	RenewInventoryUI(EITEM_TYPE::ALL);
-	InventoryUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UGISubsystem_InvenMgr::CloseInventoryUI()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("CloseInventoryUI 게임모드 캐스팅 실패"));
-		return;
-	}
-
-	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
-	InventoryUI->SetVisibility(ESlateVisibility::Collapsed);
+	OnInventoryOpen.Broadcast(false);
 }
 
 void UGISubsystem_InvenMgr::RenewInventoryUI(EITEM_TYPE _Type)
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(GameMode) )
-	{
-		return;
-	}
-	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
 	// 인벤토리 위젯 내용 초기화
-	InventoryUI->Clear();
+	OnClearInventoryList.Broadcast();
+
 	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
 	// 전체아이템 인벤토리일 경우
 	if ( _Type == EITEM_TYPE::ALL )
@@ -191,7 +169,7 @@ void UGISubsystem_InvenMgr::RenewInventoryUI(EITEM_TYPE _Type)
 			for ( auto Iter = m_InvenStorage[ i ].StorageMap.CreateConstIterator(); Iter; ++Iter )
 			{
 				UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
-				InventoryUI->AddInventoryItem(pItemData);
+				OnAddInvenItem.Broadcast(pItemData);
 			}
 		}
 	}
@@ -201,49 +179,19 @@ void UGISubsystem_InvenMgr::RenewInventoryUI(EITEM_TYPE _Type)
 		for ( auto Iter = m_InvenStorage[ (int32)_Type ].StorageMap.CreateConstIterator(); Iter; ++Iter )
 		{
 			UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
-			InventoryUI->AddInventoryItem(pItemData);
+			OnAddInvenItem.Broadcast(pItemData);
 		}
 	}
 }
 
 void UGISubsystem_InvenMgr::RenewEquipItemListUI(EITEM_TYPE _Type)
 {
-	if ( !IsValid(GetWorld()) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("인벤토리 World 객체 null"));
-		return;
-	}
-
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("RenewEquipItemListUI 게임모드 캐스팅 실패"));
-		return;
-	}
-	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
-
-	UUI_EquipItemList* EquipItemListUI = EquipMainUI->GetItemList();
-	EquipItemListUI->ClearTileView();
-
+	OnClearEquipList.Broadcast();
 	for ( auto Iter = m_InvenStorage[ (int32)_Type ].StorageMap.CreateConstIterator(); Iter; ++Iter )
 	{
 		UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
-		EquipItemListUI->AddEquipItemList(pItemData);
+		OnAddEquipItemList.Broadcast(pItemData);
 	}
-}
-
-bool UGISubsystem_InvenMgr::CheckInventoryOpened()
-{
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("CheckInventoryOpened 게임모드 캐스팅 실패"));
-		return false;
-	}
-	UUI_Inventory* InventoryUI = GameMode->GetInventoryUI();
-
-	return InventoryUI->IsInventoryOpened();
 }
 
 void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
@@ -312,11 +260,16 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		{
 			RenewEquipItemUI(_Slot, nullptr);
 
-			GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->SetEquipSlotMap(nullptr, _Slot);
+			UGISubsystem_EquipMgr* EquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+			if(IsValid(EquipMgr)) EquipMgr->SetEquipSlotMap(nullptr, _Slot);
+
 			UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-			FGameItemInfo* pInfo = GetItemInfo(_ID);
-			StatMgr->SetEquipFigure(pInfo, false);
-			StatMgr->SetAtkAndDef();
+			if ( IsValid(StatMgr) )
+			{
+				FGameItemInfo* pInfo = GetItemInfo(_ID);
+				StatMgr->SetEquipFigure(pInfo, false);
+				StatMgr->SetAtkAndDef();
+			}
 		}
 
 		return;
@@ -370,63 +323,46 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	{
 		RenewEquipItemUI(_Slot, pItemRow);
 
-		GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->SetEquipSlotMap(pItemRow, _Slot);
-		UGISubsystem_StatMgr* StatMgr = GetWorld()->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-		FGameItemInfo* pInfo = GetItemInfo(_ID);
-		StatMgr->SetEquipFigure(pInfo, true);
-		StatMgr->SetAtkAndDef();
+		UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+		if(IsValid(pEquipMgr)) pEquipMgr->SetEquipSlotMap(pItemRow, _Slot);
+
+		UGISubsystem_StatMgr* pStatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+		if ( IsValid(pStatMgr) )
+		{
+			FGameItemInfo* pInfo = GetItemInfo(_ID);
+			pStatMgr->SetEquipFigure(pInfo, true);
+			pStatMgr->SetAtkAndDef();
+		}
 	}
 }
 
 void UGISubsystem_InvenMgr::EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow)
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("RenewEquipConsumeUI 게임모드 캐스팅 실패"));
-		return;
-	}
-	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
-
 	UItem_InvenData* pItemData = GetInvenDataToItemRow(_ItemRow);
-	EquipMainUI->RenewEquipItem(_Slot, pItemData);
+	OnRenewEquipItem.Broadcast(_Slot, pItemData);
 
-	GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->EquipQuickSlotArray(_ItemRow, _Slot);
+	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+	if ( IsValid(pEquipMgr) ) pEquipMgr->EquipQuickSlotArray(_ItemRow, _Slot);
 }
 
 void UGISubsystem_InvenMgr::UnEquipConsumeUI(EEQUIP_SLOT _Slot)
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("UnEquipConsumeUI : 게임모드 캐스팅 실패"));
-		return;
-	}
-	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
-	EquipMainUI->RenewEquipItem(_Slot);
+	OnRenewEquipItem.Broadcast(_Slot, nullptr);
 
-	GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->UnEquipQuickSlotArray(_Slot);
+	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+	if ( IsValid(pEquipMgr) ) pEquipMgr->UnEquipQuickSlotArray(_Slot);
 }
 
 void UGISubsystem_InvenMgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("RenewEquipItemUI 게임모드 캐스팅 실패"));
-		return;
-	}
-	UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
-
 	if ( _ItemRow == nullptr )
 	{
-		EquipMainUI->RenewEquipItem(_Slot);
+		OnRenewEquipItem.Broadcast(_Slot, nullptr);
 		return;
 	}
 
 	UItem_InvenData* pItemData = GetInvenDataToItemRow(*_ItemRow);
-	EquipMainUI->RenewEquipItem(_Slot, pItemData);
+	OnRenewEquipItem.Broadcast(_Slot, pItemData);
 }
 
 void UGISubsystem_InvenMgr::DecreaseInventoryItem(EITEM_ID _ID)

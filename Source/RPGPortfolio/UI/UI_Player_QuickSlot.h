@@ -32,7 +32,6 @@ public:
 
 	void InitLowerQuickSlot();
 	void RenewLowerQuickSlot(int32 _Idx);
-	void RenewNextQuickSlot(int32 _Idx);
 	void EmptyLowerQuickSlot();
 
 	/*	false면 아래쪽 슬롯 투명도 세팅

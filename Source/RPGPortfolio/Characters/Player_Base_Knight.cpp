@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Player_Base_Knight.h"
 #include "../Header/Enum.h"
 #include "../RPGPortfolioGameModeBase.h"
@@ -8,11 +7,9 @@
 #include "Player_CameraArm.h"
 #include "../UI/UI_Base.h"
 #include "../Item/Item_Dropped_Base.h"
-#include "../System/Component/LockOnTargetComponent.h"
 #include "../System/DamageType_Base.h"
 #include "../Monsters/Monster_Base.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/WidgetComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,9 +22,7 @@
 #include "../System/Subsys_ObjectPool.h"
 #include "MotionWarpingComponent.h"
 #include "RootMotionModifier_SkewWarp.h"
-#include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "../System/FadeViewportClient.h"
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
 #include "../Manager/GISubsystem_EquipMgr.h"
@@ -96,6 +91,11 @@ void APlayer_Base_Knight::PostInitializeComponents()
 		m_AnimInst->OnInvincibleState.AddUObject(this, &APlayer_Base_Knight::InvincibleCheck);
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
 		m_AnimInst->OnDead.AddUObject(this, &APlayer_Base_Knight::PlayerDead);
+		m_AnimInst->OnShotProj.AddUObject(this, &APlayer_Base_Knight::ShotProjectile);
+		m_AnimInst->OnSetState.AddUObject(this, &APlayer_Base_Knight::SetState);
+		m_AnimInst->OnEnableAtkInput.AddUObject(this, &APlayer_Base_Knight::SetbEnableAtkInput);
+		m_AnimInst->OnSetAtkTrace.AddUObject(this, &APlayer_Base_Knight::SetAttackTrace);
+
 		m_AnimInst->OnMontageEnded.AddDynamic(this, &APlayer_Base_Knight::MontageEnded);
 	}
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
@@ -121,13 +121,10 @@ void APlayer_Base_Knight::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
-	// 위젯은 BeginPlay 시점에 초기화됨
-	m_MainUI = pGameMode->GetMainHUD();
 
-	if ( !IsValid(m_MainUI) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("메인 UI 로드 실패"));
-	}
+	// 위젯은 BeginPlay 시점에 초기화됨
+	pGameMode->GetMainHUD()->BindPlayerWidget(this);
+
 	if ( !IsValid(m_PlayerMontage) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 몽타주 데이터에셋 로드 실패"));
@@ -139,7 +136,10 @@ void APlayer_Base_Knight::BeginPlay()
 	}
 
 	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-	CurrentState = PoolSubsystem->GetStateFromPool(EPlayerStateType::IDLE);
+	if (IsValid(PoolSubsystem))
+	{
+		CurrentState = PoolSubsystem->GetStateFromPool(EPlayerStateType::IDLE);
+	}
 	if ( CurrentState != nullptr )
 	{
 		CurrentState->Enter(this);
@@ -245,6 +245,12 @@ void APlayer_Base_Knight::SetState(EPlayerStateType _StateType)
 	CurrentState->Exit(this);
 	StateMachine* ReturnState = CurrentState.Release();
 	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
+	if ( !IsValid(PoolSubsystem) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("스테이트 풀 가져오기 실패"));
+		return;
+	}
+
 	PoolSubsystem->ReturnStateToPool(ReturnState->GetStateType(), ReturnState);
 	TUniquePtr<StateMachine> NewState = PoolSubsystem->GetStateFromPool(_StateType);
 	if (NewState != nullptr)
@@ -505,22 +511,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	if (m_MainUI->IsOpendMenu())
-	{
-		CloseMenuUI();
-	}
-	else
-	{
-		FInputModeGameAndUI GAU;
-		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
-		GAU.SetHideCursorDuringCapture(false);
-		pController->SetInputMode(GAU);
-
-		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_OPEN));
-		m_MainUI->MenuVisibility(ESlateVisibility::SelfHitTestInvisible);
-		pController->bShowMouseCursor = true;
-		pController->SetPause(true);
-	}
+	SetVisibilityMenuUI(!pGameMode->GetMainHUD()->IsOpendMenu());
 }
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
@@ -534,6 +525,7 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 	{
 		return;
 	}
+
 	if (!OverlapInteractionArr.IsEmpty())
 	{
 		if ( OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->_getUObject()->IsA(AItem_Dropped_Base::StaticClass()) )
@@ -550,20 +542,20 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction(this);
 	}
 	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때
-	else if (m_MainUI->GetRootMessageDisplayed())
+	else
 	{
-		m_MainUI->ShowItemMessageUI(false);
-		m_MainUI->ShowMainMessageUI(false);
+		OnCloseItemMessageBox.Broadcast();
 	}
 }
 
 void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 {
-	if ( GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->QuickSlotValidForArr())
+	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+	if ( IsValid(pEquipMgr) && pEquipMgr->QuickSlotValidForArr() )
 	{
-		int32 Idx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetNextValidIndex();
-		GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->SetCurrentIndex(Idx);
-		m_MainUI->HUD_RenewQuickSlotUI(Idx);
+		int32 Idx = pEquipMgr->GetNextValidIndex();
+		pEquipMgr->SetCurrentIndex(Idx);
+		OnChangeQS.Broadcast(Idx);
 	}
 }
 
@@ -576,16 +568,20 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 
 	if ( !bItemDelay )
 	{
-		int32 iCurIdx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetCurrentIndex();
-		if ( GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->QuickSlotValidForIdx(iCurIdx) )
+		UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+		if ( IsValid(pEquipMgr) )
 		{
-			FInvenItemRow* pItem = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetQSItemForIndex(iCurIdx);
-			UseItem(pItem->ID, pItem->EquipedSlot);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
-			return;
+			int32 iCurIdx = pEquipMgr->GetCurrentIndex();
+			if ( pEquipMgr->QuickSlotValidForIdx(iCurIdx) )
+			{
+				FInvenItemRow* pItem = pEquipMgr->GetQSItemForIndex(iCurIdx);
+				UseItem(pItem->ID, pItem->EquipedSlot);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
+				return;
+			}
 		}
 	}
 }
@@ -657,7 +653,7 @@ void APlayer_Base_Knight::ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TY
 void APlayer_Base_Knight::PlayerDead()
 {
 	m_AnimInst->Montage_Pause();
-	m_MainUI->SetVisibility(ESlateVisibility::Collapsed);
+	OnSetHUDVisibility.Broadcast(ESlateVisibility::Collapsed);
 
 	TSubclassOf<UUserWidget> DeadUIClass = LoadClass<UUserWidget>(nullptr, TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/UI_DeadScreen.UI_DeadScreen_C'"));
 	if ( !IsValid(DeadUIClass) )
@@ -741,8 +737,11 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	// 피격 이펙트 스폰
 	UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
-	UParticleSystem* Particle = EffectMgr->GetHitEffect();
-	UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
+	if ( IsValid(EffectMgr) )
+	{
+		UParticleSystem* Particle = EffectMgr->GetHitEffect();
+		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
+	}
 
 	// 피격 몽타주 재생
 	SetState(EPlayerStateType::HIT);
@@ -966,7 +965,15 @@ void APlayer_Base_Knight::ShotProjectile()
 void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
-	FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(_ID);
+
+	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+	if ( !IsValid(pInvenMgr) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("UseItem : 인벤토리 매니저 가져오기 실패"));
+		return;
+	}
+
+	FGameItemInfo* pItemInfo = pInvenMgr->GetItemInfo(_ID);
 	if ( pItemInfo->Restore_HP >= 0 )
 	{
 		m_StatComponent->RestorePlayerHP(pItemInfo->Restore_HP);
@@ -984,19 +991,27 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	}
 
 	UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
-	EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
+	if ( IsValid(EffectMgr) )
+	{
+		EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
+	}
+
 	Play_PlayerSound(SoundEnum);
 
 	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
 	if ( _Slot == EEQUIP_SLOT::EMPTY )
 	{
-		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->DecreaseInventoryItem(_ID);
+		pInvenMgr->DecreaseInventoryItem(_ID);
 	}
 	// 퀵슬롯에 장착되어있을 경우 퀵슬롯을 통해 수량 감소
 	else
 	{
-		int32 idx = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->ConvertQuickSlotToIdx(_Slot);
-		GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->DecreaseLowerSlotItem(idx);
+		UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+		if ( IsValid(pEquipMgr) )
+		{
+			int32 idx = pEquipMgr->ConvertQuickSlotToIdx(_Slot);
+			pEquipMgr->DecreaseLowerSlotItem(idx);
+		}
 	}
 
 	Play_PlayerMontage(EPlayerMontage::USEITEM);
@@ -1009,27 +1024,26 @@ void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
 {
 	GetWorldTimerManager().ClearTimer(ItemDelayTimer);
 	bItemDelay = true;
-	m_MainUI->SetQuickSlotUIOpacity(0.5f, false);
-	m_MainUI->SetQuickSlotUIDelay(1.f);
+	OnQSDelay.Broadcast(true);
+	OnQSDelayRate.Broadcast(1.f);
 	fDelayRate = _DelayPercent;
 
 	GetWorldTimerManager().SetTimer(ItemDelayTimer, FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
 		{
 			fDelayRate -= 0.01f;
 			float UIRate = FMath::Clamp(fDelayRate / _DelayPercent, 0.f, _DelayPercent);
-			UE_LOG(LogTemp, Warning, TEXT("DelayRate : %f"), UIRate);
-			m_MainUI->SetQuickSlotUIDelay(UIRate);
+			OnQSDelayRate.Broadcast(UIRate);
 			if ( fDelayRate <= 0.f )
 			{
 				bItemDelay = false;
-				m_MainUI->SetQuickSlotUIOpacity(1.f, false);
+				OnQSDelay.Broadcast(false);
 				GetWorldTimerManager().ClearTimer(ItemDelayTimer);
 			}
 		})
 	,0.01f, true);
 }
 
-void APlayer_Base_Knight::CloseMenuUI()
+void APlayer_Base_Knight::SetVisibilityMenuUI(bool _Visibility)
 {
 	APlayerController* pController = Cast<APlayerController>(GetController());
 	if ( !IsValid(pController) )
@@ -1038,13 +1052,28 @@ void APlayer_Base_Knight::CloseMenuUI()
 		return;
 	}
 
-	FInputModeGameOnly GameOnly;
-	pController->SetInputMode(GameOnly);
-	pController->bShowMouseCursor = false;
-	pController->SetPause(false);
+	if ( _Visibility )
+	{
+		FInputModeGameAndUI GAU;
+		GAU.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
+		GAU.SetHideCursorDuringCapture(false);
+		pController->SetInputMode(GAU);
 
-	m_MainUI->MenuVisibility(ESlateVisibility::Collapsed);
-	UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
+		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_OPEN));
+		OnMenuOpen.Broadcast(ESlateVisibility::SelfHitTestInvisible);
+		pController->bShowMouseCursor = true;
+		pController->SetPause(true);
+	}
+	else
+	{
+		FInputModeGameOnly GameOnly;
+		pController->SetInputMode(GameOnly);
+
+		UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
+		OnMenuOpen.Broadcast(ESlateVisibility::Collapsed);
+		pController->bShowMouseCursor = false;
+		pController->SetPause(false);
+	}
 }
 
 void APlayer_Base_Knight::ResetVarsOnHitState()
@@ -1079,7 +1108,7 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 	m_AnimInst->RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
 	if ( GetbIsLockOn() )
 	{
-		const FVector TargetLoc = GetLockOnTarget()->GetComponentLocation();
+		const FVector TargetLoc = m_SArm->GetLockOnTargetLocation();
 		float Distance = ( TargetLoc - PlayerLoc ).Size();
 
 		FVector MoveLoc = PlayerLoc + (TargetLoc - PlayerLoc).GetSafeNormal() * 60.f;
@@ -1233,8 +1262,9 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 		if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
 		{
 			TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
-			m_MainUI->SetMainMessageUI(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
-			m_MainUI->ShowMainMessageUI(true);
+
+			OnBeginOverlapInteract.Broadcast(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
+			//m_MainUI->SetMainMessageUI(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
 			OverlapInteractionArr.Emplace(Interaction);
 		}
 	}
@@ -1261,15 +1291,7 @@ void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _Primitiv
 			if ( OverlapInteractionArr.IsEmpty() )
 			{
 				// 아이템 습득 메시지가 표시중일 때
-				if ( m_MainUI->GetRootMessageDisplayed() )
-				{
-					m_MainUI->SetMainMessageUI(FText::FromString(L"F"), FText::FromString(L"확인"));
-					m_MainUI->ShowMainMessageUI(true);
-				}
-				else
-				{
-					m_MainUI->ShowMainMessageUI(false);
-				}
+				OnEndOverlapItem.Broadcast();
 			}
 		}
 	}
@@ -1362,12 +1384,22 @@ void APlayer_Base_Knight::SetbHoldGuard(const bool& _ToggleGuard)
 	m_StatComponent->HoldGuard(_ToggleGuard);
 }
 
-ULockOnTargetComponent* APlayer_Base_Knight::GetLockOnTarget() const
-{
-	return m_SArm->GetLockOnTarget();
-}
-
 bool APlayer_Base_Knight::GetbIsLockOn() const
 {
 	return m_SArm->IsLockedOn();
+}
+
+void APlayer_Base_Knight::SetAttackTrace(const bool& _AtkTrace)
+{
+	bAtkTrace = _AtkTrace;
+	if ( !_AtkTrace )
+	{
+		HitActorArr.Empty();
+		PrevTraceLoc = FVector::ZeroVector;
+	}
+}
+
+void APlayer_Base_Knight::SetbEnableAtkInput(const bool& _EnableAtkInput)
+{
+	bEnableAtkInput = _EnableAtkInput;
 }

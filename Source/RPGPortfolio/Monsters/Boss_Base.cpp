@@ -79,10 +79,11 @@ void ABoss_Base::BeginPlay()
 		return;
 	}
 	UUI_Base* pMainUI = pGameMode->GetMainHUD();
-	m_BossWidget = pMainUI->GetBossUI();
-	m_BossWidget->SetName(m_Info.Name);
-	m_BossWidget->SetHPRatio(1.f);
-	m_BossWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	UUI_Boss* BossWidget = pMainUI->GetBossUI();
+	BossWidget->BindBossWidget(this);
+	BossWidget->SetName(m_Info.Name);
+	BossWidget->SetHPRatio(1.f);
+	BossWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void ABoss_Base::MonsterDead()
@@ -107,7 +108,7 @@ void ABoss_Base::MonsterDead()
 		if (fDeadEffectRatio > 0.7f)
 		{
 			GetWorld()->GetTimerManager().ClearTimer(DeadTimer);
-			m_BossWidget->SetVisibility(ESlateVisibility::Hidden);
+			OnSetVisibilityBossWidget.Broadcast(ESlateVisibility::Hidden);
 			Destroy();
 		}
 	},

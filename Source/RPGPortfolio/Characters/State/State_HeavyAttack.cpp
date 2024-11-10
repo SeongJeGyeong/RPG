@@ -48,5 +48,5 @@ void State_HeavyAttack::Update(APlayer_Base_Knight* Character, float DeltaTime)
 
 void State_HeavyAttack::Exit(APlayer_Base_Knight* Character)
 {
-	Character->SetbAtkTrace(false);
+	Character->SetAttackTrace(false);
 }

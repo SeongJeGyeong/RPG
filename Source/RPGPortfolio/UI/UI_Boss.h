@@ -31,8 +31,11 @@ private:
 
 public:
 	virtual void NativeConstruct() override;
+	void BindBossWidget(class ABoss_Base* _Boss);
 
 public:
+	void TakeDamaged(float _Ratio, float _DMG);
+
 	void SetHPRatio(float _Ratio);
 	void SetName(const FString& _Name);
 	void DisplayDMG(const float _DMG);

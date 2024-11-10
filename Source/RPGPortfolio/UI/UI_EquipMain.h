@@ -33,11 +33,13 @@ public:
 	virtual void NativeConstruct() override;
 
 	void ListVisibilityChanged(ESlateVisibility _Visibility);
+	void BindInvenMgr();
 
 public:
 	UUI_EquipItemList* GetItemList() { return m_Equip_ItemListUI; }
 	bool GetItemListVisibility();
 	void CloseItemList();
+	void ClearEquipItemList();
+	void AddItemInEquipList(UObject* _Data);
 	void RenewEquipItem(EEQUIP_SLOT _Slot, class UItem_InvenData* _ItemData = nullptr);
-	void RenewEquipItemStack(EEQUIP_SLOT _Slot, uint16 _Stack);
 };

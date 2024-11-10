@@ -36,8 +36,6 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UUI_Message_Item*		m_UI_MessageBox_Item;
 
-	bool bDisplayRootMessage = false;
-
 public:
 	class UUI_Player_Main* GetMainUIWidget() { return m_UI_PlayerBar; }
 	class UUI_Message_Main* GetMainMessageUI() { return m_UI_MessageBox_Main; }
@@ -46,9 +44,9 @@ public:
 	class UUI_Player_Soul* GetSoulUI() { return m_UI_Soul; }
 	class UUI_Boss* GetBossUI() { return m_UI_Boss; }
 
-	bool GetRootMessageDisplayed() { return bDisplayRootMessage; }
-
-	void BindStatManager(class UGISubsystem_StatMgr* _StatMgr);
+	void BindStatMgr();
+	void BindEquipMgr();
+	void BindPlayerWidget(class APlayer_Base_Knight* _Character);
 
 	void MenuVisibility(ESlateVisibility _Visibility);
 	bool IsOpendMenu();
@@ -58,14 +56,21 @@ public:
 
 	void ShowItemMessageUI(bool _bShow);
 
+	void SetVisibilityItemMessageUI();
+
 	void RenewAmountSoul(int32 _GainedSoul);
 	void RenewUI_HP(float _CurRatio);
 	void RenewUI_MP(float _CurRatio);
 	void RenewUI_ST(float _CurRatio);
 
+
 	void HUD_RenewQuickSlotUI(int32 _idx);
-	void SetQuickSlotUIOpacity(float _alpha, bool _UorL);
+	void EmptyQuickSlotUI();
+	void SetQuickSlotUIOpacity(bool _IsDelay);
 	void SetQuickSlotUIDelay(float _DelayPercnet);
+
+	void BeginOverlapInteract(FText _Command, FText _Action);
+	void EndOverlapItem();
 
 public:
 	virtual void NativeConstruct() override;

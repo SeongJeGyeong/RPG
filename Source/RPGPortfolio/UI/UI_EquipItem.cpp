@@ -163,7 +163,7 @@ void UUI_EquipItem::ItemBtnClicked()
 		break;
 	}
 	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewEquipItemListUI(Type);
-	ItemList->SetVisibility(ESlateVisibility::Visible);
+	ItemList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 

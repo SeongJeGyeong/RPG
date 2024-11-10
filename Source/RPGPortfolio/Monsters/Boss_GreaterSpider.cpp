@@ -61,7 +61,7 @@ void ABoss_GreaterSpider::BeginPlay()
 	if ( m_GSProj != nullptr )
 	{
 		USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-		if ( !PoolSubsystem->PreLoadObjFromPool<AProj_GS_Spiderling>(m_GSProj, 2, GetOwner()) )
+		if (!IsValid(PoolSubsystem) || !PoolSubsystem->PreLoadObjFromPool<AProj_GS_Spiderling>(m_GSProj, 2, GetOwner()) )
 		{
 			UE_LOG(LogTemp, Error, TEXT("스킬 투사체 프리로드 실패"));
 		}
@@ -397,8 +397,10 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	// 몬스터의 방어력만큼 데미지 감소 후 몬스터 hp바 위젯에 반영
 	FinalDamage = FMath::Clamp(FinalDamage - fMonsterDef, 0.f, FinalDamage);
 	m_Info.CurHP = FMath::Clamp(m_Info.CurHP - FinalDamage, 0.f, m_Info.MaxHP);
-	GetBossWidget()->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
-	GetBossWidget()->DisplayDMG(FinalDamage);
+	OnDamagedBossHP.Broadcast(m_Info.CurHP / m_Info.MaxHP, FinalDamage);
+	//GetBossWidget()->SetHPRatio(m_Info.CurHP / m_Info.MaxHP);
+	//GetBossWidget()->DisplayDMG(FinalDamage);
+	
 	// 사망 시
 	if ( m_Info.CurHP <= 0.f && GetController() )
 	{

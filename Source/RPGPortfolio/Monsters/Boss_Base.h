@@ -8,6 +8,9 @@
 #include "GameFramework/Character.h"
 #include "Boss_Base.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDamagedBossHPDelegate, float, float); // 보스 체력 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetVisibilityBossWidgetDelegate, ESlateVisibility); // 보스 위젯 표시 델리게이트
+
 UCLASS()
 class RPGPORTFOLIO_API ABoss_Base : public ACharacter
 {
@@ -30,8 +33,8 @@ protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( DisplayName = "원거리 공격 가능 범위" ))
 	float m_RangedAtkRange; // 원거리 공격 거리
 
-	UPROPERTY()
-	class UUI_Boss* m_BossWidget;
+	//UPROPERTY()
+	//class UUI_Boss* m_BossWidget;
 
 	FMonsterInfo	m_Info;	
 	float StaggerGauge = 0.f;
@@ -47,9 +50,13 @@ private:
 	int32 iTurnDir;	// 포즈 블렌딩용 변수
 
 public:
+	FOnDamagedBossHPDelegate OnDamagedBossHP;
+	FOnSetVisibilityBossWidgetDelegate OnSetVisibilityBossWidget;
+
+public:
 	class UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	class UBlackboardData* GetBlackboard() { return m_Blackboard; }
-	class UUI_Boss* GetBossWidget() { return m_BossWidget; }
+	//class UUI_Boss* GetBossWidget() { return m_BossWidget; }
 
 	void SetBossLockedOn(const bool& _LockedOn);
 

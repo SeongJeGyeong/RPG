@@ -35,7 +35,7 @@ void UPlayer_SkillComponent::BeginPlay()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("스킬 풀링"));
 				USubsys_ObjectPool* PoolSubsystem = GetOwner()->GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-				if ( !PoolSubsystem->PreLoadObjFromPool<AProj_Player_Cutter>(m_Skill->Projectile, 2, GetOwner()) )
+				if ( !IsValid(PoolSubsystem) || !PoolSubsystem->PreLoadObjFromPool<AProj_Player_Cutter>(m_Skill->Projectile, 2, GetOwner()) )
 				{
 					UE_LOG(LogTemp, Error, TEXT("스킬 투사체 풀링 실패"));
 				}
@@ -56,7 +56,7 @@ void UPlayer_SkillComponent::ShotSkillProj(FVector _SpawnLoc, FRotator _SpawnRot
 	if ( IsValid(pProjectile) )
 	{
 		UGISubsystem_StatMgr* StatMgr = GetOwner()->GetWorld()->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-		pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, StatMgr->GetPlayerBasePower().MagicAtk);
+		if(IsValid(StatMgr)) pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, StatMgr->GetPlayerBasePower().MagicAtk);
 		pProjectile->LaunchMotion(_ShotVec);
 	}
 	else

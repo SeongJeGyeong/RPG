@@ -40,6 +40,8 @@ private:
 	EITEM_TYPE			eCategory;
 
 public:
+	void BindInvenMgr();
+	void InventoryOpen(bool _Open);
 	void AddInventoryItem(UObject* _ItemData);
 	void Clear();
 	bool IsInventoryOpened();

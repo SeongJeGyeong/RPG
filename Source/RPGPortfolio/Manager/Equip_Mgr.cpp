@@ -114,14 +114,6 @@ void UEquip_Mgr::DecreaseLowerSlotItem(int32 _Idx)
 		if( pItem->Stack > 0 )
 		{
 			RenewQuickSlotUI(_Idx);
-			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-			if ( !IsValid(GameMode) )
-			{
-				UE_LOG(LogTemp, Error, TEXT("DecreaseLowerSlotItem 게임모드 캐스팅 실패"));
-				return;
-			}
-			UUI_EquipMain* EquipMainUI = GameMode->GetEquipUI();
-			EquipMainUI->RenewEquipItemStack(pItem->EquipedSlot, pItem->Stack);
 		}
 	}
 }
@@ -210,19 +202,6 @@ void UEquip_Mgr::RenewQuickSlotUI(int32 _Idx)
 
 	MainUI->GetQuickSlotUI()->RenewLowerQuickSlot(_Idx);
 }
-
-//void UEquip_Mgr::RenewNextQuickSlotUI(int32 _Idx)
-//{
-//	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(m_World));
-//	if ( !IsValid(GameMode) )
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("RenewNextQuickSlotUI 게임모드 캐스팅 실패"));
-//		return;
-//	}
-//	UUI_Base* MainUI = GameMode->GetMainHUD();
-//
-//	MainUI->GetQuickSlotUI()->RenewNextQuickSlot(_Idx);
-//}
 
 void UEquip_Mgr::EmptyQuickSlotUI()
 {

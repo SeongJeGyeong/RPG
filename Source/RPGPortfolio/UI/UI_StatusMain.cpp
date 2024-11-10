@@ -5,6 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Manager/GISubsystem_StatMgr.h"
+#include "../Manager/GISubsystem_EquipMgr.h"
 
 void UUI_StatusMain::NativeConstruct()
 {
@@ -32,6 +33,15 @@ void UUI_StatusMain::NativeConstruct()
 	m_MagicDef = Cast<UTextBlock>(GetWidgetFromName(TEXT("MagicDef")));
 
 	RenewStatusUI();
+}
+
+void UUI_StatusMain::BindEquipMgr()
+{
+	UGISubsystem_EquipMgr* EquipManager = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
+	if (EquipManager)
+	{
+		EquipManager->OnRenewStatus.AddUObject(this, &UUI_StatusMain::RenewStatusUI);
+	}
 }
 
 void UUI_StatusMain::RenewStatusUI()
