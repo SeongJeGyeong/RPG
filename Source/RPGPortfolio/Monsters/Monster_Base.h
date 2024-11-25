@@ -2,14 +2,19 @@
 
 #pragma once
 
-
 #include "../Header/Struct.h"
 #include "Components/TimelineComponent.h"
-#include "../System/DataAsset/PDA_MonsterAssets.h"
-#include "../System/DataAsset/DA_MonsterInfo.h"
+#include "../System/DataAsset/DA_MonsterAnim.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Monster_Base.generated.h"
+
+class UBehaviorTree;
+class UBlackboardData;
+class UWidgetComponent;
+class UAnimInstance_Monster_Base;
+class UUI_Monster;
+class UCurveVector;
 
 UCLASS()
 class RPGPORTFOLIO_API AMonster_Base : public ACharacter
@@ -21,22 +26,22 @@ private:
 	FDataTableRowHandle	m_MonsterInfoTableRow;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
-	class UWidgetComponent* m_WidgetComponent;
+	UWidgetComponent* m_WidgetComponent;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( AllowPrivateAccess = "true" ))
 	UDataTable* m_ItemTable;
 
 	UPROPERTY()
-	class UAnimInstance_Monster_Base* m_AnimInst;
+	UAnimInstance_Monster_Base* m_AnimInst;
 
 	UPROPERTY()
-	class UUI_Monster* m_MonsterWidget;
+	UUI_Monster* m_MonsterWidget;
 	
 	UPROPERTY()
 	UTimelineComponent* m_HitTimeline;
 
 	UPROPERTY()
-	class UCurveVector* m_HitCurve;
+	UCurveVector* m_HitCurve;
 
 	struct FDroppedItemData	m_DropItemInfo;
 
@@ -61,13 +66,13 @@ protected:
 	float m_AtkRange;		// 공격 가능범위
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
-	class UBehaviorTree* m_BehaviroTree;
+	UBehaviorTree* m_BehaviroTree;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
-	class UBlackboardData* m_Blackboard;
+	UBlackboardData* m_Blackboard;
 
-	UPROPERTY()
-	FMonsterAnimAsset m_AnimAsset;
+	UPROPERTY(EditAnywhere, Category = "Animation", meta = ( AllowPrivateAccess = "true" ))
+	UDA_MonsterAnim* m_AnimDA;
 
 	FMonsterInfo	m_Info;
 

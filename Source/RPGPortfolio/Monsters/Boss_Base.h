@@ -9,7 +9,9 @@
 #include "Boss_Base.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDamagedBossHPDelegate, float, float); // 보스 체력 갱신 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetVisibilityBossWidgetDelegate, ESlateVisibility); // 보스 위젯 표시 델리게이트
+
+class UBehaviorTree;
+class UBlackboardData;
 
 UCLASS()
 class RPGPORTFOLIO_API ABoss_Base : public ACharacter
@@ -22,10 +24,10 @@ private:
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
-	class UBehaviorTree* m_BehaviroTree;
+	UBehaviorTree* m_BehaviroTree;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "AI")
-	class UBlackboardData* m_Blackboard;
+	UBlackboardData* m_Blackboard;
 
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( DisplayName = "공격 가능 범위" ))
 	float m_AtkRange;		// 공격 가능범위
@@ -33,10 +35,8 @@ protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite, Category = "Info", meta = ( DisplayName = "원거리 공격 가능 범위" ))
 	float m_RangedAtkRange; // 원거리 공격 거리
 
-	//UPROPERTY()
-	//class UUI_Boss* m_BossWidget;
+	FMonsterInfo m_Info;
 
-	FMonsterInfo	m_Info;	
 	float StaggerGauge = 0.f;
 	float fPhysicsWeight = 1.f;
 	FTimerHandle HitReactTimer;
@@ -51,12 +51,10 @@ private:
 
 public:
 	FOnDamagedBossHPDelegate OnDamagedBossHP;
-	FOnSetVisibilityBossWidgetDelegate OnSetVisibilityBossWidget;
 
 public:
 	class UBehaviorTree* GetBehaviorTree() { return m_BehaviroTree; }
 	class UBlackboardData* GetBlackboard() { return m_Blackboard; }
-	//class UUI_Boss* GetBossWidget() { return m_BossWidget; }
 
 	void SetBossLockedOn(const bool& _LockedOn);
 
@@ -76,7 +74,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void MonsterDead();
-
+	void DestroyBoss();
 public:
 	void StopBoneHitReaction(FName _BoneName);
 };

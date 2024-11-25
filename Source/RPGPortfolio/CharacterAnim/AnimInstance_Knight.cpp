@@ -95,7 +95,6 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 {
 	OnSetState.Broadcast(EPlayerStateType::ATTACK_WAIT);
-	//m_Player->SetState(EPlayerStateType::ATTACK_WAIT);
 }
 
 // 다음 공격 입력 끝
@@ -103,22 +102,17 @@ void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
 	OnEnableAtkInput.Broadcast(false);
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
-	//m_Player->SetbEnableAtkInput(false);
-	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
 	OnSetAtkTrace.Broadcast(true);
 	OnEnableAtkInput.Broadcast(true);
-	//m_Player->SetbAtkTrace(true);
-	//m_Player->SetbEnableAtkInput(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 {
 	OnSetAtkTrace.Broadcast(false);
-	//m_Player->SetbAtkTrace(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_InvincibleOn()
@@ -134,19 +128,16 @@ void UAnimInstance_Knight::AnimNotify_InvincibleOff()
 void UAnimInstance_Knight::AnimNotify_DodgeAnimEnd()
 {
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
-	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_JumpEnd()
 {
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
-	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_FallStart()
 {
 	OnSetState.Broadcast(EPlayerStateType::JUMP);
-	//m_Player->SetState(EPlayerStateType::JUMP);
 }
 
 void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
@@ -158,19 +149,16 @@ void UAnimInstance_Knight::AnimNotify_Pause_JumpAtk()
 void UAnimInstance_Knight::AnimNotify_JumpAtkEnd()
 {
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
-	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_ShotProjectile()
 {
 	OnShotProj.Broadcast();
-	//m_Player->ShotProjectile();
 }
 
 void UAnimInstance_Knight::AnimNotify_ValidInput()
 {
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
-	//m_Player->SetState(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_Dead()

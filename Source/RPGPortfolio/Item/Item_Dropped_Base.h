@@ -55,9 +55,6 @@ public:
 	const int32 GetDropItemStack() { return m_Stack; }
 	void SetDropItemStack(const int32& _Stack) { m_Stack = _Stack; }
 
-	void SetDropItemImg(const TObjectPtr<UTexture2D> _Img) { m_Img = _Img; }
-	void SetDropItemImg(const TSoftObjectPtr<UTexture2D> _Img) { m_Img = _Img.IsPending() ? _Img.LoadSynchronous() : _Img.Get(); }
-
 	void LoadImg();
 
 	virtual FText GetCommand_Key() const override { return tCommand_Key; }

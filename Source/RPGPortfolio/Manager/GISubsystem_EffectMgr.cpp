@@ -39,6 +39,11 @@ UParticleSystem* UGISubsystem_EffectMgr::GetHitEffect() const
 	return m_HitParticle.Get();
 }
 
+void UGISubsystem_EffectMgr::SpawnHitEffect(USceneComponent* AttachToComponent, FName AttachPointName, FVector Location, FRotator Rotation, FVector Scale)
+{
+	UGameplayStatics::SpawnEmitterAttached(GetHitEffect(), AttachToComponent, AttachPointName, Location, Rotation, Scale, EAttachLocation::KeepRelativeOffset, true);
+}
+
 void UGISubsystem_EffectMgr::SpawnEffectAtLocation(const UObject* WorldContextObject, UFXSystemAsset* SystemTemplate, FVector Location, FRotator Rotation, FVector Scale, bool bAutoDestroy, bool bAutoActivate, ENCPoolMethod PoolingMethod, bool bPreCullCheck)
 {
 	if ( ( SystemTemplate )->IsA(UNiagaraSystem::StaticClass()) )

@@ -49,9 +49,6 @@ private:
 	UPROPERTY()
 	UUI_Settings* m_SettingsUI;
 
-	//UPROPERTY()
-	//UUI_FadeScreen* m_FadeScreenUI;
-
 	UPROPERTY()
 	class UAudioComponent* m_BGMComp;
 
@@ -62,7 +59,6 @@ public:
 	UUI_EquipMain* GetEquipUI() { return m_EquipUI; }
 	UUI_Manual* GetManualUI() { return m_ManualUI; }
 	UUI_Settings* GetSettingsUI() { return m_SettingsUI; }
-	//UUI_FadeScreen* GetFadeUI() { return m_FadeScreenUI; }
 	bool IsSubMenuUIOpened();
 	void CloseSubMenu();
 

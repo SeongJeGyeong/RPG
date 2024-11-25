@@ -20,14 +20,12 @@
 #include "../GameInstance_Base.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
-#include "../Manager/GISubsystem_MonAssetMgr.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
 
 // Sets default values
 AMonster_Base::AMonster_Base()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;	// false일 경우 TickFunction 자체가 레벨에 등록되지 않기 때문에 true로 처리
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
@@ -67,6 +65,9 @@ AMonster_Base::AMonster_Base()
 		m_HitTimeline->SetTimelineLength(0.3f);
 		m_HitTimeline->SetLooping(false);
 	}
+
+	GetMesh()->SetCustomDepthStencilValue(2);
+	GetMesh()->SetRenderCustomDepth(false);
 }
 
 // 에디터 상에서 호출됨(게임 실행 전)
@@ -129,7 +130,6 @@ void AMonster_Base::BeginPlay()
 		m_Info.CurHP = m_Info.MaxHP;
 	}
 	m_WidgetComponent->SetVisibility(false);
-	m_AnimAsset = GetGameInstance()->GetSubsystem<UGISubsystem_MonAssetMgr>()->GetMonAnimAsset(m_Info.Type);
 
 	FString str;
 	TArray<FMonsterItemDropTable*> DropTableArr;
@@ -191,8 +191,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	m_MonsterWidget->DisplayDMG(FinalDamage);
 
 	// 피격 시 모든 애니메이션 중지
-	UAnimInstance_Monster_Base* pAnimInst = Cast<UAnimInstance_Monster_Base>(GetMesh()->GetAnimInstance());
-	pAnimInst->Montage_Stop(1.f);
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.5f);
 
 	// 피격 사운드 재생
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), GETMONSOUNDMAP(m_Info.Type)->HitSound_Normal, GetActorLocation());
@@ -221,8 +220,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	// 피격 시 몸체 진동
 	m_HitTimeline->PlayFromStart();
-
-	pAnimInst->Montage_Play(m_AnimAsset.HitAnim_Nor);
+	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimDA->GetMonsterMontage(EMON_MONTAGE::HIT));
 
 	// 피격 이펙트 스폰
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -230,10 +228,15 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		if (!PointDamageEvent->HitInfo.BoneName.IsNone())
 		{
-			UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::None);
+			UGISubsystem_EffectMgr* pEffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
+			if ( IsValid(pEffectMgr) )
+			{
+				pEffectMgr->SpawnHitEffect(GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f));
+			}
 		}
 	}
 
+	// 락온 상태가 아닐 경우 일시적으로 몬스터 위젯 표시되도록
 	if (!bMonLockedOn)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(WidgetDisplayTimer);
@@ -243,7 +246,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	
 	// 공격한 대상(투사체 포함)의 반대방향으로 밀려남
 	FVector LaunchVec = GetActorLocation() - DamageCauser->GetActorLocation();
-	FVector LaunchForce = LaunchVec.GetSafeNormal() * 500.f;
+	FVector LaunchForce = LaunchVec.GetSafeNormal() * 800.f;
 	LaunchForce.Z = 0.f;
 	LaunchCharacter(LaunchForce, false, false);
 
@@ -252,7 +255,7 @@ float AMonster_Base::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 void AMonster_Base::PlayAtkBlockedAnim()
 {
-	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.BlockAnim);
+	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimDA->GetMonsterMontage(EMON_MONTAGE::BLOCKED));
 }
 
 void AMonster_Base::MonsterDead(AController* _EventInstigator)
@@ -339,7 +342,7 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 // 경직상태가 되는 몽타주들 재생 종료시
 void AMonster_Base::OnHitMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if( Montage == m_AnimAsset.HitAnim_Nor )
+	if( Montage == m_AnimDA->GetMonsterMontage(EMON_MONTAGE::HIT) )
 	{
 		// 피격 몽타주 재생 종료 후 1초 뒤 비헤이비어트리 재시작
 		GetWorld()->GetTimerManager().ClearTimer(HitEndTimer);

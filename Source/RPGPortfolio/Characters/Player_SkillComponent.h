@@ -21,14 +21,10 @@ public:
 private:
 	UPROPERTY()
 	ESkillName m_SkillName;
-
-	FSkillAsset* m_Skill;
-
 	UPROPERTY()
 	class UDA_PlayerSkill* m_SkillDA;
 
-	/*UPROPERTY(EditAnywhere, Category = "Projectile", meta = ( AllowPrivateAccess = "true" ))
-	TSubclassOf<AProj_Player_Cutter> ProjSubclass;*/
+	FSkillAsset* m_Skill;
 
 protected:
 	// Called when the game starts

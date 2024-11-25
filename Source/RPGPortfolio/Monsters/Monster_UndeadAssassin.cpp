@@ -24,7 +24,7 @@ void AMonster_UndeadAssassin::Tick(float DeltaTime)
 
 void AMonster_UndeadAssassin::MonsterAttackMelee()
 {
-	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimAsset.AtkAnim_Melee_Nor);
+	GetMesh()->GetAnimInstance()->Montage_Play(m_AnimDA->GetMonsterMontage(EMON_MONTAGE::ATTACK));
 }
 
 void AMonster_UndeadAssassin::MeleeAttackHitCheck()

@@ -7,7 +7,7 @@
 #include "Anim_Griffon.generated.h"
 
 /**
- * 
+ *	사용안함
  */
 UCLASS()
 class RPGPORTFOLIO_API UAnim_Griffon : public UAnimInstance_Boss_Base

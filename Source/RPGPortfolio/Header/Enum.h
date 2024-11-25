@@ -135,6 +135,15 @@ enum class EMONSTER_STATE : uint8
 };
 
 UENUM(BlueprintType)
+enum class EMON_MONTAGE : uint8
+{
+	EMPTY,
+	ATTACK,
+	BLOCKED,
+	HIT,
+};
+
+UENUM(BlueprintType)
 enum class EBOSS_STATE : uint8
 {
 	DEFAULT,

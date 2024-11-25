@@ -21,7 +21,13 @@ void UUI_EquipItem::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("장비창 아이템 UI 로드 실패"));
 	}
 
-	UPaperSprite* pIcon = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetEquipSlotIcon(eSlotType);
+	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+	if ( !IsValid(pInvenMgr) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("UUI_EquipItem : InvenMgr 가져오기 실패"));
+	}
+
+	UPaperSprite* pIcon = pInvenMgr->GetEquipSlotIcon(eSlotType);
 	m_BackSlotImg->SetBrushResourceObject(pIcon);
 	if (!m_EquipItemBtn->GetIsEnabled())
 	{
@@ -29,7 +35,7 @@ void UUI_EquipItem::NativeConstruct()
 	}
 	else
 	{
-		UItem_InvenData* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetEquipItemFromSlot(eSlotType);
+		UItem_InvenData* pItemInfo = pInvenMgr->GetEquipItemFromSlot(eSlotType);
 		if (pItemInfo != nullptr)
 		{
 			FString ItemImgPath = pItemInfo->GetItemImgPath();
@@ -241,7 +247,7 @@ void UUI_EquipItem::ItemBtnHovered()
 		}
 	}
 
-	UItem_InvenData* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>()->GetEquipItemFromSlot(eSlotType);
+	UItem_InvenData* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetEquipItemFromSlot(eSlotType);
 	if (IsValid(ItemNameText) && IsValid(pItemInfo))
 	{
 		FString sItemName = pItemInfo->GetItemName();

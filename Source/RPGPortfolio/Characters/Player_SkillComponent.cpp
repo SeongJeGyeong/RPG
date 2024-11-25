@@ -12,7 +12,7 @@ UPlayer_SkillComponent::UPlayer_SkillComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static  ConstructorHelpers::FObjectFinder<UDA_PlayerSkill> skillda(TEXT("/Script/RPGPortfolio.DA_PlayerSkill'/Game/Blueprint/DataAsset/BPC_DA_PlayerSkill.BPC_DA_PlayerSkill'"));
+	static ConstructorHelpers::FObjectFinder<UDA_PlayerSkill> skillda(TEXT("/Script/RPGPortfolio.DA_PlayerSkill'/Game/Blueprint/DataAsset/BPC_DA_PlayerSkill.BPC_DA_PlayerSkill'"));
 	if ( skillda.Succeeded() )
 	{
 		m_SkillDA = skillda.Object;
@@ -26,7 +26,16 @@ void UPlayer_SkillComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	m_Skill = m_SkillDA->GetPlayerSkill(m_SkillName);
+	if ( !m_SkillDA || !m_SkillDA->IsValidLowLevel() )
+	{
+		UE_LOG(LogTemp, Error, TEXT("m_SkillDA 로드 실패"));
+		return;
+	}
+	else
+	{
+		m_Skill = m_SkillDA->GetPlayerSkill(m_SkillName);
+	}
+
 	if ( m_Skill->Projectile != nullptr )
 	{
 		if (IsValid(GetOwner()))

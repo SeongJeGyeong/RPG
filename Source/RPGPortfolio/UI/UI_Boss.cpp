@@ -23,7 +23,11 @@ void UUI_Boss::NativeConstruct()
 void UUI_Boss::BindBossWidget(ABoss_Base* _Boss)
 {
 	_Boss->OnDamagedBossHP.AddUObject(this, &UUI_Boss::TakeDamaged);
-	_Boss->OnSetVisibilityBossWidget.AddUObject(this, &UUI_Boss::SetVisibility);
+}
+
+void UUI_Boss::UnBindBossWidget(ABoss_Base* _Boss)
+{
+	_Boss->OnDamagedBossHP.RemoveAll(this);
 }
 
 void UUI_Boss::TakeDamaged(float _Ratio, float _DMG)

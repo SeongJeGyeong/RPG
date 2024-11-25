@@ -6,9 +6,8 @@
 
 UPlayer_StatComponent::UPlayer_StatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
-
 
 // Called when the game starts
 void UPlayer_StatComponent::BeginPlay()
@@ -16,15 +15,6 @@ void UPlayer_StatComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	m_StatMgr = GetOwner()->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-}
-
-
-// Called every frame
-void UPlayer_StatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 bool UPlayer_StatComponent::IsHPZero()

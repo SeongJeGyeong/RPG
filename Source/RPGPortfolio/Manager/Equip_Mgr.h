@@ -9,7 +9,7 @@
 #include "Equip_Mgr.generated.h"
 
 /**
- * 
+ *	사용안함
  */
 UCLASS()
 class RPGPORTFOLIO_API UEquip_Mgr : public UObject

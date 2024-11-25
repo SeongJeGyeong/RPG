@@ -433,7 +433,12 @@ float ABoss_GreaterSpider::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		fPhysicsWeight = 1.f;
 
 		// 피격 이펙트 스폰
-		UGameplayStatics::SpawnEmitterAttached(GETHITEFFECT, GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f), EAttachLocation::KeepRelativeOffset, true, EPSCPoolMethod::AutoRelease);
+		UGISubsystem_EffectMgr* pEffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
+		if ( IsValid(pEffectMgr) )
+		{
+			pEffectMgr->SpawnHitEffect(GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.5f));
+		}
+
 		// 피격 부위가 메쉬나 Pelvis가 아닐경우(피직스 에셋 오류 방지를 위해)
 		if (!PointDamageEvent->HitInfo.BoneName.IsEqual(FName("Pelvis")) && !PointDamageEvent->HitInfo.BoneName.IsEqual(FName("None")))
 		{

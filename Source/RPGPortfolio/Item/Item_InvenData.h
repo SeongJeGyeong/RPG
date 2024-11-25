@@ -8,7 +8,7 @@
 #include "Item_InvenData.generated.h"
 
 /**
- * 
+ *	아이템 정보 TileView 위젯에 표시용 클래스
  */
 UCLASS()
 class RPGPORTFOLIO_API UItem_InvenData : public UObject

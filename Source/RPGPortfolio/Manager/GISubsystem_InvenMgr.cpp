@@ -36,17 +36,15 @@ void UGISubsystem_InvenMgr::Deinitialize()
 
 void UGISubsystem_InvenMgr::SetItemDataTable(UDataTable* _ItemDataTable)
 {
-	m_ItemDataTable = _ItemDataTable;
-
 	//데이터 테이블의 정보를 TArray에 넣는다
 	FString str;
 	TArray<FGameItemInfo*> arrTableData;
-	m_ItemDataTable->GetAllRows<FGameItemInfo>(str, arrTableData);
+	_ItemDataTable->GetAllRows<FGameItemInfo>(str, arrTableData);
 
 	// 아이템 정보를 아이템 ID를 키값으로 하는 TMap에 넣는다
 	for ( int32 i = 0; i < arrTableData.Num(); ++i )
 	{
-		m_MapItemInfo.Add(arrTableData[ i ]->ID, *arrTableData[ i ]);
+		m_MapItemInfo.Add(arrTableData[i]->ID, *arrTableData[i]);
 	}
 	// 인벤토리 배열 크기 초기화
 	FInvenItemMap InvenStorage;
@@ -85,6 +83,18 @@ FInvenItemRow* UGISubsystem_InvenMgr::GetInvenItemInfo(EITEM_ID _ID)
 	}
 
 	return pInvenItemRow;
+}
+
+UItem_InvenData* UGISubsystem_InvenMgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
+{
+	FInvenItemRow* pItemRow = m_EquipItemMap.Find(_Slot);
+	if ( pItemRow == nullptr )
+	{
+		return nullptr;
+	}
+
+	UItem_InvenData* pItemData = GetInvenDataToItemRow(*pItemRow);
+	return pItemData;
 }
 
 void UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
@@ -159,14 +169,13 @@ void UGISubsystem_InvenMgr::RenewInventoryUI(EITEM_TYPE _Type)
 {
 	// 인벤토리 위젯 내용 초기화
 	OnClearInventoryList.Broadcast();
-
 	// 인벤토리 매니저에서 보유중인 아이템목록을 인벤토리 위젯에 입력
 	// 전체아이템 인벤토리일 경우
 	if ( _Type == EITEM_TYPE::ALL )
 	{
 		for ( int32 i = 1; i < (int32)EITEM_TYPE::END; ++i )
 		{
-			for ( auto Iter = m_InvenStorage[ i ].StorageMap.CreateConstIterator(); Iter; ++Iter )
+			for ( auto Iter = m_InvenStorage[i].StorageMap.CreateConstIterator(); Iter; ++Iter )
 			{
 				UItem_InvenData* pItemData = GetInvenDataToItemRow(Iter.Value());
 				OnAddInvenItem.Broadcast(pItemData);
@@ -251,7 +260,8 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	{
 		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
 		RenewEquipItemListUI(_Type);
-		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다. 
+		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다.
+		SetEquipSlotMap(nullptr, _Slot);
 		if ( _Type == EITEM_TYPE::CONSUMABLE )
 		{
 			UnEquipConsumeUI(_Slot);
@@ -259,9 +269,6 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		else
 		{
 			RenewEquipItemUI(_Slot, nullptr);
-
-			UGISubsystem_EquipMgr* EquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-			if(IsValid(EquipMgr)) EquipMgr->SetEquipSlotMap(nullptr, _Slot);
 
 			UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 			if ( IsValid(StatMgr) )
@@ -274,47 +281,46 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 		return;
 	}
-
-	for ( auto Iter = m_InvenStorage[ (int32)_Type ].StorageMap.CreateIterator(); Iter; ++Iter )
+	// 장비슬롯에 아이템이 장착되는 경우
+	else
 	{
-		FGameItemInfo* pInfo = GetItemInfo(Iter.Key());
-		// 해당 장비슬롯에 다른 아이템이 장비되어있을 경우 기존에 장비되어있던 아이템의 장비슬롯을 EMPTY로 바꾼다.
-		if ( Iter.Key() != _ID && Iter.Value().EquipedSlot == _Slot )
+		FGameItemInfo* pInfo = GetItemInfo(pItemRow->ID);
+		// 해당 장비슬롯에 다른 아이템이 장착되어있을 경우 기존에 장착되어있던 아이템의 장비슬롯을 EMPTY로 바꾼다.
+		FInvenItemRow* pSlotItemRow = m_EquipItemMap.Find(_Slot);
+		if ( pSlotItemRow != nullptr )
 		{
+			FInvenItemRow* pEquipedItemRow = m_InvenStorage[ (int32)_Type ].StorageMap.Find(pSlotItemRow->ID);
 			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
 			{
 				// 기존에 장비되어있던 아이템 퀵슬롯에서 해제
-				UnEquipConsumeUI(Iter.Value().EquipedSlot);
+				UnEquipConsumeUI(pEquipedItemRow->EquipedSlot);
 			}
 			else
 			{
-				RenewEquipItemUI(Iter.Value().EquipedSlot, nullptr);
+				RenewEquipItemUI(pEquipedItemRow->EquipedSlot, nullptr);
 			}
 
-			Iter.Value().EquipedSlot = EEQUIP_SLOT::EMPTY;
-			continue;
+			pEquipedItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
 		}
 
-		if ( Iter.Key() == _ID )
+		// 장착할 아이템이 다른 장비슬롯에 장비되어있을 경우 해당 장비슬롯에서 장착해제 처리한다.
+		if ( pItemRow->EquipedSlot != EEQUIP_SLOT::EMPTY )
 		{
-			// 장착할 아이템이 다른 장비슬롯에 장비되어있을 경우 해당 장비슬롯에서 장착해제 처리한다.
-			if ( Iter.Value().EquipedSlot != EEQUIP_SLOT::EMPTY )
+			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
 			{
-				if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
-				{
-					UnEquipConsumeUI(Iter.Value().EquipedSlot);
-				}
-				else
-				{
-					RenewEquipItemUI(Iter.Value().EquipedSlot, nullptr);
-				}
+				UnEquipConsumeUI(pItemRow->EquipedSlot);
 			}
-
-			Iter.Value().EquipedSlot = _Slot;
+			else
+			{
+				RenewEquipItemUI(pItemRow->EquipedSlot, nullptr);
+			}
 		}
+		pItemRow->EquipedSlot = _Slot;
 	}
+
 	RenewEquipItemListUI(_Type);
 
+	SetEquipSlotMap(pItemRow, _Slot);
 	if ( _Type == EITEM_TYPE::CONSUMABLE )
 	{
 		EquipConsumeUI(_Slot, *pItemRow);
@@ -322,9 +328,6 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	else
 	{
 		RenewEquipItemUI(_Slot, pItemRow);
-
-		UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-		if(IsValid(pEquipMgr)) pEquipMgr->SetEquipSlotMap(pItemRow, _Slot);
 
 		UGISubsystem_StatMgr* pStatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 		if ( IsValid(pStatMgr) )
@@ -358,11 +361,25 @@ void UGISubsystem_InvenMgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _
 	if ( _ItemRow == nullptr )
 	{
 		OnRenewEquipItem.Broadcast(_Slot, nullptr);
-		return;
-	}
 
-	UItem_InvenData* pItemData = GetInvenDataToItemRow(*_ItemRow);
-	OnRenewEquipItem.Broadcast(_Slot, pItemData);
+	}
+	else
+	{
+		UItem_InvenData* pItemData = GetInvenDataToItemRow(*_ItemRow);
+		OnRenewEquipItem.Broadcast(_Slot, pItemData);
+	}
+}
+
+void UGISubsystem_InvenMgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot)
+{
+	if ( _InvenItem == nullptr )
+	{
+		m_EquipItemMap.Remove(_Slot);
+	}
+	else
+	{
+		m_EquipItemMap.Emplace(_Slot, *_InvenItem);
+	}
 }
 
 void UGISubsystem_InvenMgr::DecreaseInventoryItem(EITEM_ID _ID)

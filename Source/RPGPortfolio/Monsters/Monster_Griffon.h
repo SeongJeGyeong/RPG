@@ -7,7 +7,7 @@
 #include "Monster_Griffon.generated.h"
 
 /**
- * 
+ * 사용안함
  */
 UCLASS()
 class RPGPORTFOLIO_API AMonster_Griffon : public AMonster_Base

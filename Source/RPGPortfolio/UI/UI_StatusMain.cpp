@@ -5,7 +5,6 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Manager/GISubsystem_StatMgr.h"
-#include "../Manager/GISubsystem_EquipMgr.h"
 
 void UUI_StatusMain::NativeConstruct()
 {
@@ -35,12 +34,12 @@ void UUI_StatusMain::NativeConstruct()
 	RenewStatusUI();
 }
 
-void UUI_StatusMain::BindEquipMgr()
+void UUI_StatusMain::BindStatMgr()
 {
-	UGISubsystem_EquipMgr* EquipManager = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-	if (EquipManager)
+	UGISubsystem_StatMgr* StatManager = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if ( StatManager )
 	{
-		EquipManager->OnRenewStatus.AddUObject(this, &UUI_StatusMain::RenewStatusUI);
+		StatManager->OnRenewStatus.AddUObject(this, &UUI_StatusMain::RenewStatusUI);
 	}
 }
 

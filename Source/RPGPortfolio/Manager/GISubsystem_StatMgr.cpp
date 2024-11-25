@@ -53,6 +53,8 @@ void UGISubsystem_StatMgr::SetAtkAndDef()
 	PlayerBasePower.MagicAtk = ( PlayerStat.Intelligence * 20.f ) + EquipmentStat.Wea_MagAtk;
 	PlayerBasePower.PhysicDef = ( ( PlayerStat.Strength + PlayerStat.Dexterity ) * 5.f ) + ( EquipmentStat.Helm_PhyDef + EquipmentStat.Chest_PhyDef + EquipmentStat.Gaunt_PhyDef + EquipmentStat.Leg_PhyDef );
 	PlayerBasePower.MagicDef = ( ( PlayerStat.Attunement + PlayerStat.Intelligence ) * 5.f ) + ( EquipmentStat.Helm_MagDef + EquipmentStat.Chest_MagDef + EquipmentStat.Gaunt_MagDef + EquipmentStat.Leg_MagDef );
+
+	OnRenewStatus.Broadcast();
 }
 
 void UGISubsystem_StatMgr::SetEquipFigure(FGameItemInfo* _ItemInfo, bool bEquiped)

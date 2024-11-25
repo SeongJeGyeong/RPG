@@ -15,14 +15,14 @@
 #include "Player_Base_Knight.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuOpenDelegate, ESlateVisibility);	// 메뉴 오픈 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHUDVisibilityDelegate, ESlateVisibility);	// HUD 표시 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnCloseItemMessageBoxDelegate);	// 아이템 메시지박스 닫기 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuOpenDelegate, ESlateVisibility);				// 메뉴 오픈 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHUDVisibilityDelegate, ESlateVisibility);		// HUD 표시 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnCloseItemMessageBoxDelegate);								// 아이템 메시지박스 닫기 델리게이트
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBeginOverlapInteractDelegate, FText, FText);	// 상호작용 오버랩 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnEndOverlapItemDelegate);	// 아이템 오버랩 해제 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayRateDelegate, float);	// 퀵슬롯 딜레이 갱신 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayDelegate, bool);	// 퀵슬롯 사용 대기상태 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangeQSDelegate, int32);	// 퀵슬롯 변경 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnEndOverlapItemDelegate);									// 아이템 오버랩 해제 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayRateDelegate, float);						// 퀵슬롯 딜레이 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayDelegate, bool);							// 퀵슬롯 사용 대기상태 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangeQSDelegate, int32);						// 퀵슬롯 변경 델리게이트
 
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
@@ -110,7 +110,6 @@ private:
 
 	float fDelayRate;
 	FVector PrevTraceLoc;
-
 	bool bDead;
 
 public:
@@ -194,7 +193,7 @@ private:
 public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void AttackHitCheck();				// 어택 트레이스용
+	void AttackHitCheck();	// 어택 트레이스용
 	void AttackStart();
 
 	float GetConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
@@ -204,7 +203,6 @@ public:
 	void ResetCamera(FRotator _Rotate);
 	void ShotProjectile();
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
-	UFUNCTION()
 	void ItemDelaytime(float _DelayPercent);
 	void SetVisibilityMenuUI(bool _Visibility);
 
@@ -222,9 +220,6 @@ public:
 
 private:
 	void InvincibleCheck(bool _Invinc);	// 무적시간 체크
-
-	UFUNCTION()
-	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
 	void ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult);

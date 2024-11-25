@@ -55,12 +55,6 @@ ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 		m_WidgetClassArr.Add(Settings.Class);
 	}
 
-	/*ConstructorHelpers::FClassFinder<UUserWidget> FadeScreen(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/BPC_UI_FadeScreen.BPC_UI_FadeScreen_C'"));
-	if ( FadeScreen.Succeeded() )
-	{
-		m_WidgetClassArr.Add(FadeScreen.Class);
-	}*/
-
 	m_BGMComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	m_BGMComp->SetupAttachment(GetRootComponent());
 	m_BGMComp->bAutoActivate = false;
@@ -167,17 +161,6 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 			m_SettingsUI->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
-
-	/*if ( IsValid(m_WidgetClassArr[6]) )
-	{
-		m_FadeScreenUI = Cast<UUI_FadeScreen>(CreateWidget(GetWorld(), m_WidgetClassArr[6]));
-
-		if ( IsValid(m_FadeScreenUI) )
-		{
-			m_FadeScreenUI->AddToViewport(6);
-			m_FadeScreenUI->SetVisibility(ESlateVisibility::Hidden);
-		}
-	}*/
 
 	APlayerController* pController = GetWorld()->GetFirstPlayerController();
 

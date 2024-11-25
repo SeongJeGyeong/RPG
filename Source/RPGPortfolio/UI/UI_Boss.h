@@ -32,6 +32,7 @@ private:
 public:
 	virtual void NativeConstruct() override;
 	void BindBossWidget(class ABoss_Base* _Boss);
+	void UnBindBossWidget(class ABoss_Base* _Boss);
 
 public:
 	void TakeDamaged(float _Ratio, float _DMG);

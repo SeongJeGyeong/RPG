@@ -95,8 +95,6 @@ void APlayer_Base_Knight::PostInitializeComponents()
 		m_AnimInst->OnSetState.AddUObject(this, &APlayer_Base_Knight::SetState);
 		m_AnimInst->OnEnableAtkInput.AddUObject(this, &APlayer_Base_Knight::SetbEnableAtkInput);
 		m_AnimInst->OnSetAtkTrace.AddUObject(this, &APlayer_Base_Knight::SetAttackTrace);
-
-		m_AnimInst->OnMontageEnded.AddDynamic(this, &APlayer_Base_Knight::MontageEnded);
 	}
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerEndOverlap);
@@ -736,11 +734,10 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	}
 
 	// 피격 이펙트 스폰
-	UGISubsystem_EffectMgr* EffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
-	if ( IsValid(EffectMgr) )
+	UGISubsystem_EffectMgr* pEffectMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EffectMgr>();
+	if ( IsValid(pEffectMgr) )
 	{
-		UParticleSystem* Particle = EffectMgr->GetHitEffect();
-		UParticleSystemComponent* PSC = UGameplayStatics::SpawnEmitterAttached(Particle, GetMesh(), PointDamageEvent->HitInfo.BoneName);
+		pEffectMgr->SpawnHitEffect(GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.f));
 	}
 
 	// 피격 몽타주 재생
@@ -1105,32 +1102,32 @@ void APlayer_Base_Knight::PlayerMotionWarping(EPlayerMontage _MontageType, float
 void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _EndTime)
 {
 	FVector PlayerLoc = GetActorLocation();
-	m_AnimInst->RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
+	//m_AnimInst->RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
 	if ( GetbIsLockOn() )
 	{
 		const FVector TargetLoc = m_SArm->GetLockOnTargetLocation();
 		float Distance = ( TargetLoc - PlayerLoc ).Size();
+		FVector MoveLoc = FVector::ZeroVector;
 
-		FVector MoveLoc = PlayerLoc + (TargetLoc - PlayerLoc).GetSafeNormal() * 60.f;
-		if ( Distance <= 200.f )
+		if ( Distance <= 250.f )
 		{
-			if ( Distance >= 100.f )
+			if ( Distance >= 200.f )
 			{
-				// 락온 대상과의 거리가 1m 이상 2m 이하면 translation on
+				// 락온 대상과의 거리가 2m 이상 2.5m 이하면 translation on
 				// 캐릭터가 대상 앞 1m 거리로 워프하도록 하여 공격 모션의 이동 거리 때문에 적의 뒤까지 이동하지 않도록
-				MoveLoc = ( ( PlayerLoc - TargetLoc ).GetSafeNormal() * 100.f ) + TargetLoc;
+				MoveLoc = ( ( PlayerLoc - TargetLoc ).GetSafeNormal() * 200.f ) + TargetLoc;
 			}
 			else
 			{
-				// 락온 대상과의 거리가 1m 미만이면 앞으로 이동하지 않고 현재 위치에 멈추도록 설정
+				// 락온 대상과의 거리가 2m 미만이면 앞으로 이동하지 않고 현재 위치에 멈추도록 설정
+				// 완전히 멈추지는 않고 조금 전진함
 				MoveLoc = PlayerLoc;
-				m_AnimInst->RootMotionMode = ERootMotionMode::IgnoreRootMotion;
 			}
 			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), true, true, true);
 		} 
 		else
 		{
-			// 락온 대상과의 거리가 2m 보다 크면 translation off
+			// 락온 대상과의 거리가 2.5m 보다 크면 translation off
 			// 루트모션의 기본 이동거리를 유지한다.
 			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
 		}
@@ -1139,21 +1136,21 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 		TargetRot.Pitch = 0.f;
 		TargetRot.Roll = 0.f;
 		m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("AttackWarp"), MoveLoc, TargetRot);
-
-		return;
-	}
-
-	// 입력받은 이동 방향으로 공격 중 회전
-	const FVector InputVector = GetLastMovementInputVector();
-	if ( InputVector.IsZero() )
-	{
-		m_MWComponent->RemoveWarpTarget(TEXT("AttackWarp"));
 	}
 	else
 	{
-		const FRotator TargetRot = FRotationMatrix::MakeFromX(InputVector).Rotator();
-		URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
-		m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("AttackWarp"), PlayerLoc + GetActorForwardVector() * 60.f, TargetRot);
+		// 입력받은 이동 방향으로 공격 중 회전
+		const FVector InputVector = GetLastMovementInputVector();
+		if ( InputVector.IsZero() )
+		{
+			m_MWComponent->RemoveWarpTarget(TEXT("AttackWarp"));
+		}
+		else
+		{
+			const FRotator TargetRot = FRotationMatrix::MakeFromX(InputVector).Rotator();
+			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
+			m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("AttackWarp"), FVector::ZeroVector, TargetRot);
+		}
 	}
 }
 
@@ -1167,7 +1164,6 @@ void APlayer_Base_Knight::MotionWarping_Dodge(UAnimSequenceBase* _Anim, float _E
 	else
 	{
 		const FRotator TargetRot = FRotationMatrix::MakeFromX(InputVector).Rotator();
-		// 락온 중이 아닐 때는 translation off
 		URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("DodgeWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
 		m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("DodgeWarp"), FVector::ZeroVector, TargetRot);
 	}
@@ -1245,15 +1241,6 @@ void APlayer_Base_Knight::InvincibleCheck(bool _Invinc)
 	SetCanBeDamaged(!_Invinc);
 }
 
-void APlayer_Base_Knight::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	//if ( Montage == m_PlayerMontage->GetPlayerMontage(EPlayerMontage::HIT) )
-	//{
-	//	SetState(EPlayerStateType::IDLE);
-	//	return;
-	//}
-}
-
 void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
 {
 	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
@@ -1264,7 +1251,6 @@ void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _Primit
 			TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
 
 			OnBeginOverlapInteract.Broadcast(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
-			//m_MainUI->SetMainMessageUI(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
 			OverlapInteractionArr.Emplace(Interaction);
 		}
 	}
@@ -1321,9 +1307,6 @@ void APlayer_Base_Knight::DrawDebugAttackTrace(const UWorld* World, const FVecto
 		DrawDebugBox(World, StartBox.GetCenter(), StartBox.GetExtent(), Rot, TraceColor.ToFColor(true), false, DrawTime);
 		DrawDebugBox(World, EndBox.GetCenter(), EndBox.GetExtent(), Rot, TraceColor.ToFColor(true), false, DrawTime);
 
-		// connect the vertices of start box with end box
-		// since start_box and end_box are already translated applying rotation will lead to rotating translated box around origin.
-		// so construct each vertices of the box as if the center of box is at origin and rotate the point and then translate it back to start and end positions.
 		// 시작 상자부터 끝 상자까지 각 8개의 꼭지점의 좌표에서 라인을 쏜다.
 		FTransform const box_transform(Rot);
 		// (-1, -1, 1)

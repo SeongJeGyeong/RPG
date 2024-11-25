@@ -11,6 +11,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FRenewSoulDelegate, int32);	// 소지 소울
 DECLARE_MULTICAST_DELEGATE_OneParam(FRenewHPDelegate, float);	// 현재 HP 갱신 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FRenewMPDelegate, float);	// 현재 MP 갱신 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FRenewSTDelegate, float);	// 현재 스태미나 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnRenewStatusDelegate);				// 스테이터스 갱신 델리게이트
 
 /**
  * 
@@ -36,6 +37,8 @@ public:
 	FRenewHPDelegate OnRenewHP;
 	FRenewMPDelegate OnRenewMP;
 	FRenewSTDelegate OnRenewST;
+	// UI_StatusMain
+	FOnRenewStatusDelegate OnRenewStatus;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;

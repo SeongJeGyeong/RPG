@@ -11,13 +11,13 @@
 class APlayer_Base_Knight;
 class UCharacterMovementComponent;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnInvincibleDelegate, bool);	// 무적시간 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInvincibleDelegate, bool);				// 무적시간 체크 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnableAtkInputDelegate, const bool&);	// 공격입력 유효성 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetAtkTraceDelegate, const bool&);	// 공격 트레이스 활성화 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate);							// 점프공격 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetAtkTraceDelegate, const bool&);		// 공격 트레이스 활성화 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate);									// 점프공격 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnDeadDelegate);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetStateDelegate, EPlayerStateType);	// 플레이어 스테이트 변경 델리게이트
-DECLARE_MULTICAST_DELEGATE(FOnShotProjDelegate);	// 투사체 발사 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetStateDelegate, EPlayerStateType);		// 플레이어 스테이트 변경 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnShotProjDelegate);								// 투사체 발사 델리게이트
 
 USTRUCT(BlueprintType)
 struct RPGPORTFOLIO_API FAnimInstanceProxy_Knight : public FAnimInstanceProxy
@@ -26,11 +26,8 @@ struct RPGPORTFOLIO_API FAnimInstanceProxy_Knight : public FAnimInstanceProxy
 
 protected:
 	virtual void InitializeObjects(UAnimInstance* _InAnimInstance) override;
-
 	virtual void PreUpdate(UAnimInstance* _InAnimInstance, float _DeltaSeconds) override;
-
 	virtual void Update(float _DeltaSeconds) override;
-
 	virtual void PostUpdate(UAnimInstance* _InAnimInstance) const override;
 
 	UPROPERTY()

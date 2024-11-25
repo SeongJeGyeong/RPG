@@ -15,6 +15,7 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
 #include "../UI/UI_Boss.h"
+
 // Sets default values
 ABoss_Base::ABoss_Base()
 {
@@ -108,11 +109,26 @@ void ABoss_Base::MonsterDead()
 		if (fDeadEffectRatio > 0.7f)
 		{
 			GetWorld()->GetTimerManager().ClearTimer(DeadTimer);
-			OnSetVisibilityBossWidget.Broadcast(ESlateVisibility::Hidden);
-			Destroy();
+			DestroyBoss();
 		}
 	},
 	0.01f, true, 5.f);
+}
+
+void ABoss_Base::DestroyBoss()
+{
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+	UUI_Base* pMainUI = pGameMode->GetMainHUD();
+	UUI_Boss* BossWidget = pMainUI->GetBossUI();
+	BossWidget->SetVisibility(ESlateVisibility::Collapsed);
+	BossWidget->UnBindBossWidget(this);
+
+	Destroy();
 }
 
 void ABoss_Base::StopBoneHitReaction(FName _BoneName)
