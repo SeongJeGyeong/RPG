@@ -58,4 +58,6 @@ public:
 	void ItemBtnHovered();
 	UFUNCTION()
 	void ItemBtnUnHovered();
+
+	FString GetSlotText(EEQUIP_SLOT _Slot);
 };

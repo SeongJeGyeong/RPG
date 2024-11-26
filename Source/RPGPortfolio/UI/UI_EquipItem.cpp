@@ -12,7 +12,6 @@
 #include "../System/DataAsset/DA_ItemCategoryIcon.h"
 #include "PaperSprite.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
-#include "../Manager/GISubsystem_EquipMgr.h"
 
 void UUI_EquipItem::NativeConstruct()
 {
@@ -78,185 +77,41 @@ void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
 void UUI_EquipItem::ItemBtnClicked()
 {
 	ItemList->SetSlotCategory(eSlotType);
-	EITEM_TYPE Type = EITEM_TYPE::ALL;
-	switch ( eSlotType )
+	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+	if ( IsValid(pInvenMgr) )
 	{
-	case EEQUIP_SLOT::WEAPON_1:
-		ItemList->SetCategoryText(FText::FromString(L"무기 1"));
-		Type = EITEM_TYPE::WEAPON;
-		break;
-	case EEQUIP_SLOT::WEAPON_2:
-		ItemList->SetCategoryText(FText::FromString(L"무기 2"));
-		Type = EITEM_TYPE::WEAPON;
-		break;
-	case EEQUIP_SLOT::WEAPON_3:
-		ItemList->SetCategoryText(FText::FromString(L"무기 3"));
-		Type = EITEM_TYPE::WEAPON;
-		break;
-	case EEQUIP_SLOT::SHIELD_1:
-		ItemList->SetCategoryText(FText::FromString(L"방패 1"));
-		Type = EITEM_TYPE::SHIELD;
-		break;
-	case EEQUIP_SLOT::SHIELD_2:
-		ItemList->SetCategoryText(FText::FromString(L"방패 2"));
-		Type = EITEM_TYPE::SHIELD;
-		break;
-	case EEQUIP_SLOT::SHIELD_3:
-		ItemList->SetCategoryText(FText::FromString(L"방패 3"));
-		Type = EITEM_TYPE::SHIELD;
-		break;
-	case EEQUIP_SLOT::ARROW:
-		ItemList->SetCategoryText(FText::FromString(L"화살"));
-		Type = EITEM_TYPE::ARROWS;
-		break;
-	case EEQUIP_SLOT::BOLT:
-		ItemList->SetCategoryText(FText::FromString(L"볼트"));
-		Type = EITEM_TYPE::ARROWS;
-		break;
-	case EEQUIP_SLOT::HELM:
-		ItemList->SetCategoryText(FText::FromString(L"투구"));
-		Type = EITEM_TYPE::ARM_HELM;
-		break;
-	case EEQUIP_SLOT::CHEST:
-		ItemList->SetCategoryText(FText::FromString(L"갑옷"));
-		Type = EITEM_TYPE::ARM_CHEST;
-		break;
-	case EEQUIP_SLOT::GAUNTLET:
-		ItemList->SetCategoryText(FText::FromString(L"장갑"));
-		Type = EITEM_TYPE::ARM_GAUNTLET;
-		break;
-	case EEQUIP_SLOT::LEGGINGS:
-		ItemList->SetCategoryText(FText::FromString(L"각반"));
-		Type = EITEM_TYPE::ARM_LEGGINGS;
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_1:
-		ItemList->SetCategoryText(FText::FromString(L"악세사리 1"));
-		Type = EITEM_TYPE::ACCESSORIE;
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_2:
-		ItemList->SetCategoryText(FText::FromString(L"악세사리 2"));
-		Type = EITEM_TYPE::ACCESSORIE;
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_3:
-		ItemList->SetCategoryText(FText::FromString(L"악세사리 3"));
-		Type = EITEM_TYPE::ACCESSORIE;
-		break;
-	case EEQUIP_SLOT::ACCESSORIE_4:
-		ItemList->SetCategoryText(FText::FromString(L"악세사리 4"));
-		Type = EITEM_TYPE::ACCESSORIE;
-		break;
-	case EEQUIP_SLOT::CONSUMABLE_1:
-		ItemList->SetCategoryText(FText::FromString(L"소비아이템 1"));
-		Type = EITEM_TYPE::CONSUMABLE;
-		break;
-	case EEQUIP_SLOT::CONSUMABLE_2:
-		ItemList->SetCategoryText(FText::FromString(L"소비아이템 2"));
-		Type = EITEM_TYPE::CONSUMABLE;
-		break;
-	case EEQUIP_SLOT::CONSUMABLE_3:
-		ItemList->SetCategoryText(FText::FromString(L"소비아이템 3"));
-		Type = EITEM_TYPE::CONSUMABLE;
-		break;
-	case EEQUIP_SLOT::CONSUMABLE_4:
-		ItemList->SetCategoryText(FText::FromString(L"소비아이템 4"));
-		Type = EITEM_TYPE::CONSUMABLE;
-		break;
-	case EEQUIP_SLOT::CONSUMABLE_5:
-		ItemList->SetCategoryText(FText::FromString(L"소비아이템 5"));
-		Type = EITEM_TYPE::CONSUMABLE;
-		break;
-	default:
-		break;
+		EITEM_TYPE Type = pInvenMgr->GetItemTypeFromSlot(eSlotType);
+		FString SlotName = GetSlotText(eSlotType);
+		ItemList->SetCategoryText(FText::FromString(SlotName));
+
+		pInvenMgr->RenewEquipItemListUI(Type);
+		ItemList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 	}
-	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewEquipItemListUI(Type);
-	ItemList->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
 
 void UUI_EquipItem::ItemBtnHovered()
 {
 	if (IsValid(ItemSlotText))
 	{
-		switch ( eSlotType )
-		{
-		case EEQUIP_SLOT::WEAPON_1:
-			ItemSlotText->SetText(FText::FromString(L"무기 1"));
-			break;
-		case EEQUIP_SLOT::WEAPON_2:
-			ItemSlotText->SetText(FText::FromString(L"무기 2"));
-			break;
-		case EEQUIP_SLOT::WEAPON_3:
-			ItemSlotText->SetText(FText::FromString(L"무기 3"));
-			break;
-		case EEQUIP_SLOT::SHIELD_1:
-			ItemSlotText->SetText(FText::FromString(L"방패 1"));
-			break;
-		case EEQUIP_SLOT::SHIELD_2:
-			ItemSlotText->SetText(FText::FromString(L"방패 2"));
-			break;
-		case EEQUIP_SLOT::SHIELD_3:
-			ItemSlotText->SetText(FText::FromString(L"방패 3"));
-			break;
-		case EEQUIP_SLOT::ARROW:
-			ItemSlotText->SetText(FText::FromString(L"화살"));
-			break;
-		case EEQUIP_SLOT::BOLT:
-			ItemSlotText->SetText(FText::FromString(L"볼트"));
-			break;
-		case EEQUIP_SLOT::HELM:
-			ItemSlotText->SetText(FText::FromString(L"투구"));
-			break;
-		case EEQUIP_SLOT::CHEST:
-			ItemSlotText->SetText(FText::FromString(L"갑옷"));
-			break;
-		case EEQUIP_SLOT::GAUNTLET:
-			ItemSlotText->SetText(FText::FromString(L"장갑"));
-			break;
-		case EEQUIP_SLOT::LEGGINGS:
-			ItemSlotText->SetText(FText::FromString(L"각반"));
-			break;
-		case EEQUIP_SLOT::ACCESSORIE_1:
-			ItemSlotText->SetText(FText::FromString(L"악세사리 1"));
-			break;
-		case EEQUIP_SLOT::ACCESSORIE_2:
-			ItemSlotText->SetText(FText::FromString(L"악세사리 2"));
-			break;
-		case EEQUIP_SLOT::ACCESSORIE_3:
-			ItemSlotText->SetText(FText::FromString(L"악세사리 3"));
-			break;
-		case EEQUIP_SLOT::ACCESSORIE_4:
-			ItemSlotText->SetText(FText::FromString(L"악세사리 4"));
-			break;
-		case EEQUIP_SLOT::CONSUMABLE_1:
-			ItemSlotText->SetText(FText::FromString(L"소비아이템 1"));
-			break;
-		case EEQUIP_SLOT::CONSUMABLE_2:
-			ItemSlotText->SetText(FText::FromString(L"소비아이템 2"));
-			break;
-		case EEQUIP_SLOT::CONSUMABLE_3:
-			ItemSlotText->SetText(FText::FromString(L"소비아이템 3"));
-			break;
-		case EEQUIP_SLOT::CONSUMABLE_4:
-			ItemSlotText->SetText(FText::FromString(L"소비아이템 4"));
-			break;
-		case EEQUIP_SLOT::CONSUMABLE_5:
-			ItemSlotText->SetText(FText::FromString(L"소비아이템 5"));
-			break;
-		default:
-			break;
-		}
+		FString SlotName = GetSlotText(eSlotType);
+		ItemSlotText->SetText(FText::FromString(SlotName));
 	}
 
-	UItem_InvenData* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetEquipItemFromSlot(eSlotType);
-	if (IsValid(ItemNameText) && IsValid(pItemInfo))
+	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+	if ( IsValid(pInvenMgr) )
 	{
-		FString sItemName = pItemInfo->GetItemName();
-		ItemNameText->SetText(FText::FromString(sItemName));
-		m_Tooltip->SetTooltipUI(pItemInfo);
-		m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);
+		UItem_InvenData* pItemInfo = pInvenMgr->GetEquipItemFromSlot(eSlotType);
+		if ( IsValid(ItemNameText) && IsValid(pItemInfo) )
+		{
+			FString sItemName = pItemInfo->GetItemName();
+			ItemNameText->SetText(FText::FromString(sItemName));
+			m_Tooltip->SetTooltipUI(pItemInfo);
+			m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);
+		}
+
+		PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 	}
-	
-	PlaySound(GETMENUSOUND(EMenuSound::MENU_CHANGE));
 }
 
 void UUI_EquipItem::ItemBtnUnHovered()
@@ -273,4 +128,80 @@ void UUI_EquipItem::ItemBtnUnHovered()
 	{
 		m_Tooltip->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+FString UUI_EquipItem::GetSlotText(EEQUIP_SLOT _Slot)
+{
+	FString SlotName = L"전체";
+
+	switch ( eSlotType )
+	{
+	case EEQUIP_SLOT::WEAPON_1:
+		SlotName = L"무기 1";
+		break;
+	case EEQUIP_SLOT::WEAPON_2:
+		SlotName = L"무기 2";
+		break;
+	case EEQUIP_SLOT::WEAPON_3:
+		SlotName = L"무기 3";
+		break;
+	case EEQUIP_SLOT::SHIELD_1:
+		SlotName = L"방패 1";
+		break;
+	case EEQUIP_SLOT::SHIELD_2:
+		SlotName = L"방패 2";
+		break;
+	case EEQUIP_SLOT::SHIELD_3:
+		SlotName = L"방패 3";
+		break;
+	case EEQUIP_SLOT::ARROW:
+		SlotName = L"화살";
+		break;
+	case EEQUIP_SLOT::BOLT:
+		SlotName = L"볼트";
+		break;
+	case EEQUIP_SLOT::HELM:
+		SlotName = L"투구";
+		break;
+	case EEQUIP_SLOT::CHEST:
+		SlotName = L"갑옷";
+		break;
+	case EEQUIP_SLOT::GAUNTLET:
+		SlotName = L"장갑";
+		break;
+	case EEQUIP_SLOT::LEGGINGS:
+		SlotName = L"각반";
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_1:
+		SlotName = L"악세사리 1";
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_2:
+		SlotName = L"악세사리 2";
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_3:
+		SlotName = L"악세사리 3";
+		break;
+	case EEQUIP_SLOT::ACCESSORIE_4:
+		SlotName = L"악세사리 4";
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_1:
+		SlotName = L"소비아이템 1";
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_2:
+		SlotName = L"소비아이템 2";
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_3:
+		SlotName = L"소비아이템 3";
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_4:
+		SlotName = L"소비아이템 4";
+		break;
+	case EEQUIP_SLOT::CONSUMABLE_5:
+		SlotName = L"소비아이템 5";
+		break;
+	default:
+		break;
+	}
+
+	return SlotName;
 }

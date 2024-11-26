@@ -9,6 +9,7 @@
 
 class UImage;
 class UTextBlock;
+class UItem_InvenData;
 
 /**
  * 
@@ -31,7 +32,6 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void RenewQuickSlotItem(const FInvenItemRow* const _InvenItem);
-	void RenewNextQuickSlotItem(const FInvenItemRow* const _InvenItem);
-
+	void RenewQuickSlotItem(UItem_InvenData* const _InvenItem);
+	void RenewNextQuickSlotItem(UItem_InvenData* const _InvenItem);
 };

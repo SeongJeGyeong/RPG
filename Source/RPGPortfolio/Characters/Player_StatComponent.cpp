@@ -15,6 +15,10 @@ void UPlayer_StatComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	m_StatMgr = GetOwner()->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
+	if ( !IsValid(m_StatMgr) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("UPlayer_StatComponent : 스탯 매니저 로드 실패"));
+	}
 }
 
 bool UPlayer_StatComponent::IsHPZero()

@@ -15,6 +15,7 @@
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_StatMgr.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
+#include "../Characters/Player_InvenComponent.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -75,7 +76,7 @@ void UUI_Inventory::NativeConstruct()
 
 	eCategory = EITEM_TYPE::ALL;
 	SetCategoryUI(eCategory);
-
+	
 	Super::NativeConstruct();
 }
 
@@ -141,10 +142,14 @@ void UUI_Inventory::BindInvenMgr()
 	UGISubsystem_InvenMgr* InvenManager = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
 	if ( InvenManager )
 	{
-		InvenManager->OnInventoryOpen.AddUObject(this, &UUI_Inventory::InventoryOpen);
 		InvenManager->OnClearInventoryList.AddUObject(this, &UUI_Inventory::Clear);
 		InvenManager->OnAddInvenItem.AddUObject(this, &UUI_Inventory::AddInventoryItem);
 	}
+}
+
+void UUI_Inventory::BindInvenComponent(UPlayer_InvenComponent* _InvenComp)
+{
+	_InvenComp->OnInventoryOpen.AddUObject(this, &UUI_Inventory::InventoryOpen);
 }
 
 void UUI_Inventory::InventoryOpen(bool _Open)
@@ -154,6 +159,11 @@ void UUI_Inventory::InventoryOpen(bool _Open)
 		SetStatUI();
 		SetCategoryEnum(EITEM_TYPE::ALL);
 		SetCategoryUI(EITEM_TYPE::ALL);
+		UGISubsystem_InvenMgr* InvenManager = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+		if ( IsValid(InvenManager) )
+		{
+			InvenManager->RenewInventoryUI(EITEM_TYPE::ALL);
+		}
 		SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 	else

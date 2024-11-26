@@ -4,7 +4,7 @@
 #include "UI_Player_QuickSlot.h"
 #include "UI_Player_QuickSlotItem.h"
 #include "Components/ProgressBar.h"
-#include "../Manager/GISubsystem_EquipMgr.h"
+#include "../Item/Item_InvenData.h"
 
 void UUI_Player_QuickSlot::NativeConstruct()
 {
@@ -12,81 +12,34 @@ void UUI_Player_QuickSlot::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Error, TEXT("퀵슬롯 UI 캐스팅 실패"));
 	}
-	else
-	{
-		InitLowerQuickSlot();
-	}
 
 	Super::NativeConstruct();
 }
 
-void UUI_Player_QuickSlot::InitLowerQuickSlot()
+void UUI_Player_QuickSlot::InitLowerQuickSlot(UItem_InvenData* _CurItem, UItem_InvenData* _NextItem)
 {
-	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-	if ( !IsValid(pEquipMgr) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("InitLowerQuickSlot : 장비 매니저 가져오기 실패"));
-		return;
-	}
-
-	// 퀵슬롯에 등록된 아이템이 하나도 없을 때
-	if ( !pEquipMgr->QuickSlotValidForArr() )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 아이템 없음"));
-		EmptyLowerQuickSlot();
-		return;
-	}
-
-	int32 CurIdx = pEquipMgr->GetCurrentIndex();
-	if ( pEquipMgr->QuickSlotValidForIdx(CurIdx) )
-	{
-		RenewLowerQuickSlot(CurIdx);
-		return;
-	}
-	int32 Idx = pEquipMgr->GetNextValidIndex();
-	RenewLowerQuickSlot(Idx);
+	m_UI_LowerSlot->RenewQuickSlotItem(_CurItem);
+	m_UI_NextQuickSlot->RenewNextQuickSlotItem(_NextItem);
 }
 
-void UUI_Player_QuickSlot::RenewLowerQuickSlot(int32 _Idx)
+void UUI_Player_QuickSlot::RenewLowerQuickSlot(UItem_InvenData* _InvenItem)
 {
-	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-	if ( !IsValid(pEquipMgr) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("RenewLowerQuickSlot : 장비 매니저 가져오기 실패"));
-		return;
-	}
-
-	FInvenItemRow* ItemData = pEquipMgr->GetQSItemForIndex(_Idx);
-	m_UI_LowerSlot->RenewQuickSlotItem(ItemData);
-
-	// 퀵슬롯에 등록된 아이템이 하나뿐일 때
-	int32 NextIdx = pEquipMgr->GetNextValidIndex();
-	if(_Idx == NextIdx)
-	{
-		m_UI_NextQuickSlot->RenewNextQuickSlotItem(nullptr);
-	}
-	// 퀵슬롯에 아이템이 두 개 이상일 때
-	else
-	{
-		ItemData = pEquipMgr->GetQSItemForIndex(NextIdx);
-		m_UI_NextQuickSlot->RenewNextQuickSlotItem(ItemData);
-	}
+	m_UI_LowerSlot->RenewQuickSlotItem(_InvenItem);
 
 	UWidgetBlueprintGeneratedClass* pWidgetClass = GetWidgetTreeOwningClass();
-	for (int32 i = 0; i < pWidgetClass->Animations.Num(); ++i)
+	for ( int32 i = 0; i < pWidgetClass->Animations.Num(); ++i )
 	{
-		if (pWidgetClass->Animations[i].GetName() == TEXT("LowerSlotChangeAnim_INST"))
+		if ( pWidgetClass->Animations[ i ].GetName() == TEXT("LowerSlotChangeAnim_INST") )
 		{
-			PlayAnimation(pWidgetClass->Animations[i]);
+			PlayAnimation(pWidgetClass->Animations[ i ]);
 			break;
 		}
 	}
 }
 
-void UUI_Player_QuickSlot::EmptyLowerQuickSlot()
+void UUI_Player_QuickSlot::RenewNextLowerQuickSlot(UItem_InvenData* _InvenItem)
 {
-	m_UI_LowerSlot->RenewQuickSlotItem(nullptr);
-	m_UI_NextQuickSlot->RenewNextQuickSlotItem(nullptr);
+	m_UI_NextQuickSlot->RenewNextQuickSlotItem(_InvenItem);
 }
 
 void UUI_Player_QuickSlot::SetQuickSlotOpacity(float Alpha, bool UorL)

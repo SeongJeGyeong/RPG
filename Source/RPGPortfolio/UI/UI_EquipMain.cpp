@@ -157,6 +157,10 @@ void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, UItem_InvenData* _ItemData
 	default:
 		break;
 	}
-
+	if ( pEquipItem == nullptr )
+	{
+		UE_LOG(LogTemp, Error, TEXT("RenewEquipItem : 위젯 할당 실패"));
+		return;
+	}
 	pEquipItem->SetEquipItem(_ItemData);
 }

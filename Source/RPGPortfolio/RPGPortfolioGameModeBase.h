@@ -12,8 +12,7 @@ class UUI_StatusMain;
 class UUI_EquipMain;
 class UUI_Manual;
 class UUI_Settings;
-class UUI_FadeScreen;
-
+class UUI_Menu_Main;
 
 /**
  * 
@@ -61,6 +60,14 @@ public:
 	UUI_Settings* GetSettingsUI() { return m_SettingsUI; }
 	bool IsSubMenuUIOpened();
 	void CloseSubMenu();
+
+	void EquipUI_SetVisibility(bool _IsOpen);
+	void InventoryUI_SetVisibility(bool _IsOpen);
+	void StatusUI_SetVisibility(bool _IsOpen);
+	void ManualUI_SetVisibility(bool _IsOpen);
+	void SettingsUI_SetVisibility(bool _IsOpen);
+
+	void BindMenuUI(UUI_Menu_Main* _MenuUI);
 
 	void PlayBGM(bool _Play);
 

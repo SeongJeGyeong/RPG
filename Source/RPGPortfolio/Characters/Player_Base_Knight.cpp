@@ -19,13 +19,12 @@
 #include "../Manager/GISubsystem_EffectMgr.h"
 #include "Player_SkillComponent.h"
 #include "Player_StatComponent.h"
+#include "Player_InvenComponent.h"
 #include "../System/Subsys_ObjectPool.h"
 #include "MotionWarpingComponent.h"
 #include "RootMotionModifier_SkewWarp.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "../GameInstance_Base.h"
-#include "../Manager/GISubsystem_InvenMgr.h"
-#include "../Manager/GISubsystem_EquipMgr.h"
 
 // Sets default values
 APlayer_Base_Knight::APlayer_Base_Knight()
@@ -54,6 +53,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 
 	m_SkillComponent = CreateDefaultSubobject<UPlayer_SkillComponent>(TEXT("SkillComp"));
 	m_StatComponent = CreateDefaultSubobject<UPlayer_StatComponent>(TEXT("StatComp"));
+	m_InvenComponent = CreateDefaultSubobject<UPlayer_InvenComponent>(TEXT("InventoryComp"));
 	m_MWComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarp"));
 
 	HitCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCollision"));
@@ -548,13 +548,7 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 
 void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
 {
-	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-	if ( IsValid(pEquipMgr) && pEquipMgr->QuickSlotValidForArr() )
-	{
-		int32 Idx = pEquipMgr->GetNextValidIndex();
-		pEquipMgr->SetCurrentIndex(Idx);
-		OnChangeQS.Broadcast(Idx);
-	}
+	m_InvenComponent->ChangeQuickSlot();
 }
 
 void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instance)
@@ -566,20 +560,14 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 
 	if ( !bItemDelay )
 	{
-		UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-		if ( IsValid(pEquipMgr) )
+		FInvenItemRow* pItem = m_InvenComponent->GetQuickSlotItem();
+		if ( pItem == nullptr )
 		{
-			int32 iCurIdx = pEquipMgr->GetCurrentIndex();
-			if ( pEquipMgr->QuickSlotValidForIdx(iCurIdx) )
-			{
-				FInvenItemRow* pItem = pEquipMgr->GetQSItemForIndex(iCurIdx);
-				UseItem(pItem->ID, pItem->EquipedSlot);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
-				return;
-			}
+			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
+		}
+		else
+		{
+			UseItem(pItem->ID, pItem->EquipedSlot);
 		}
 	}
 }
@@ -963,14 +951,13 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
 
-	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
-	if ( !IsValid(pInvenMgr) )
+	FGameItemInfo* pItemInfo = m_InvenComponent->GetItemInfo(_ID);
+	if ( pItemInfo == nullptr )
 	{
-		UE_LOG(LogTemp, Error, TEXT("UseItem : 인벤토리 매니저 가져오기 실패"));
+		UE_LOG(LogTemp, Error, TEXT("UseItem : 존재하지 않는 아이템"));
 		return;
 	}
 
-	FGameItemInfo* pItemInfo = pInvenMgr->GetItemInfo(_ID);
 	if ( pItemInfo->Restore_HP >= 0 )
 	{
 		m_StatComponent->RestorePlayerHP(pItemInfo->Restore_HP);
@@ -993,24 +980,9 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	}
 
+	m_InvenComponent->DecreaseInventoryItem(_ID, _Slot);
+
 	Play_PlayerSound(SoundEnum);
-
-	// 퀵슬롯에 장착된 아이템이 아닐경우 인벤토리에서 자체적으로 수량 감소
-	if ( _Slot == EEQUIP_SLOT::EMPTY )
-	{
-		pInvenMgr->DecreaseInventoryItem(_ID);
-	}
-	// 퀵슬롯에 장착되어있을 경우 퀵슬롯을 통해 수량 감소
-	else
-	{
-		UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-		if ( IsValid(pEquipMgr) )
-		{
-			int32 idx = pEquipMgr->ConvertQuickSlotToIdx(_Slot);
-			pEquipMgr->DecreaseLowerSlotItem(idx);
-		}
-	}
-
 	Play_PlayerMontage(EPlayerMontage::USEITEM);
 	SetState(EPlayerStateType::ACTION);
 	// 아이템 사용후 대기시간 on
@@ -1233,6 +1205,11 @@ void APlayer_Base_Knight::PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight)
 void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
 {
 	m_StatComponent->GainSoul(_GainedSoul);
+}
+
+void APlayer_Base_Knight::CloseInventory()
+{
+	m_InvenComponent->CloseInventory();
 }
 
 // 무적시간 동안 데미지 안받도록 설정

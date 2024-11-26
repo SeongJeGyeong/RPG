@@ -10,6 +10,7 @@
 class UTextBlock;
 class UButton;
 class UImage;
+class UPlayer_InvenComponent;
 
 /**
  * 
@@ -41,6 +42,7 @@ private:
 
 public:
 	void BindInvenMgr();
+	void BindInvenComponent(UPlayer_InvenComponent* _InvenComp);
 	void InventoryOpen(bool _Open);
 	void AddInventoryItem(UObject* _ItemData);
 	void Clear();

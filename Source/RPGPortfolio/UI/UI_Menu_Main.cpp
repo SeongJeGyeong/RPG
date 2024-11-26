@@ -6,10 +6,6 @@
 #include "Components/TextBlock.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "UI_StatusMain.h"
-#include "UI_EquipMain.h"
-#include "UI_Manual.h"
-#include "UI_Settings.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
 
@@ -47,21 +43,22 @@ void UUI_Menu_Main::NativeConstruct()
 		UE_LOG(LogTemp, Error, TEXT("Menu Text Load Failed"));
 	}
 
+	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( IsValid(GameMode) )
+	{
+		GameMode->BindMenuUI(this);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
+	}
+
 	Super::NativeConstruct();
 }
 
 void UUI_Menu_Main::EquipBtnClicked()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
-		return;
-	}
-
-	UUI_EquipMain* EquipUI = GameMode->GetEquipUI();
-	EquipUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	OnEquipUIOpen.Broadcast(true);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
@@ -80,7 +77,8 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 
 void UUI_Menu_Main::InventoryBtnClicked()
 {
-	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->ShowInventoryUI();
+	OnInventoryUIOpen.Broadcast(true);
+	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewInventoryUI(EITEM_TYPE::ALL);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
@@ -98,17 +96,7 @@ void UUI_Menu_Main::InventoryBtnUnHovered()
 
 void UUI_Menu_Main::StatusBtnClicked()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
-		return;
-	}
-
-	UUI_StatusMain* StatusUI = GameMode->GetStatusUI();
-	StatusUI->SetVisibility(ESlateVisibility::HitTestInvisible);
-	StatusUI->RenewStatusUI();
+	OnStatusUIOpen.Broadcast(true);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
@@ -126,16 +114,7 @@ void UUI_Menu_Main::StatusBtnUnHovered()
 
 void UUI_Menu_Main::ManualBtnClicked()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
-		return;
-	}
-
-	UUI_Manual* ManualUI = GameMode->GetManualUI();
-	ManualUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+	OnManualUIOpen.Broadcast(true);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }
@@ -153,16 +132,7 @@ void UUI_Menu_Main::ManualBtnUnHovered()
 
 void UUI_Menu_Main::SettingsBtnClicked()
 {
-	ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if ( !IsValid(GameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("게임모드 캐스팅 실패"));
-		return;
-	}
-
-	UUI_Settings* SettingsUI = GameMode->GetSettingsUI();
-	SettingsUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	OnSettingsUIOpen.Broadcast(true);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }

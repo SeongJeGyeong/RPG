@@ -4,10 +4,8 @@
 #include "UI_ItemSelectMenu.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "../Item/Item_InvenData.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
-#include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_ItemSelectMenu::NativeConstruct()
 {
@@ -33,9 +31,10 @@ void UUI_ItemSelectMenu::NativeConstruct()
 
 	if (m_ID != EITEM_ID::END)
 	{
-		FGameItemInfo* pInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(m_ID);
-		if (pInfo->Type != EITEM_TYPE::CONSUMABLE)
+		if ( m_Type != EITEM_TYPE::CONSUMABLE )
 		{
+			UE_LOG(LogTemp, Warning, TEXT("메뉴 앵커 : 소비아이템 아님"));
+
 			m_Txt_Use->SetColorAndOpacity(FLinearColor::FLinearColor(0.5f, 0.5f, 0.5f, 0.5f));
 			m_Btn_Use->SetIsEnabled(false);
 		}
@@ -46,12 +45,10 @@ void UUI_ItemSelectMenu::NativeConstruct()
 
 void UUI_ItemSelectMenu::UseBtnClicked()
 {
-	FGameItemInfo* pInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(m_ID);
-	if (pInfo->Type == EITEM_TYPE::CONSUMABLE)
+	if ( m_Type == EITEM_TYPE::CONSUMABLE )
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		
-		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->CloseInventoryUI();
+		pPlayer->CloseInventory();
 		pPlayer->SetVisibilityMenuUI(false);
 		pPlayer->UseItem(m_ID, m_Slot);
 	}
@@ -59,5 +56,4 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("인벤토리 앵커 데이터 오류"));
 	}
-
 }

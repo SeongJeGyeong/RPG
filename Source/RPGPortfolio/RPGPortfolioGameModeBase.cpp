@@ -16,6 +16,7 @@
 #include "GameInstance_Base.h"
 #include "Manager/GISubsystem_SoundMgr.h"
 #include "Manager/GISubsystem_StatMgr.h"
+#include "UI/UI_Menu_Main.h"
 
 ARPGPortfolioGameModeBase::ARPGPortfolioGameModeBase()
 {
@@ -93,7 +94,7 @@ void ARPGPortfolioGameModeBase::BeginPlay()
 		{
 			m_MainHUD->AddToViewport(1);
 			m_MainHUD->BindStatMgr();
-			m_MainHUD->BindEquipMgr();
+			m_MainHUD->BindInvenMgr();
 			m_MainHUD->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else
@@ -218,6 +219,53 @@ void ARPGPortfolioGameModeBase::CloseSubMenu()
 
 	m_MainHUD->MenuVisibility(ESlateVisibility::SelfHitTestInvisible);
 	UGameplayStatics::PlaySound2D(GetWorld(), GETMENUSOUND(EMenuSound::MENU_CLOSE));
+}
+
+void ARPGPortfolioGameModeBase::EquipUI_SetVisibility(bool _IsOpen)
+{
+	if ( _IsOpen )
+	{
+		m_EquipUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
+}
+
+void ARPGPortfolioGameModeBase::InventoryUI_SetVisibility(bool _IsOpen)
+{
+	m_InventoryUI->InventoryOpen(_IsOpen);
+}
+
+void ARPGPortfolioGameModeBase::StatusUI_SetVisibility(bool _IsOpen)
+{
+	if ( _IsOpen )
+	{
+		m_StatusUI->RenewStatusUI();
+		m_StatusUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+}
+
+void ARPGPortfolioGameModeBase::ManualUI_SetVisibility(bool _IsOpen)
+{
+	if ( _IsOpen )
+	{
+		m_ManualUI->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+}
+
+void ARPGPortfolioGameModeBase::SettingsUI_SetVisibility(bool _IsOpen)
+{
+	if ( _IsOpen )
+	{
+		m_SettingsUI->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
+}
+
+void ARPGPortfolioGameModeBase::BindMenuUI(UUI_Menu_Main* _MenuUI)
+{
+	_MenuUI->OnEquipUIOpen.AddUObject(this, &ARPGPortfolioGameModeBase::EquipUI_SetVisibility);
+	_MenuUI->OnInventoryUIOpen.AddUObject(this, &ARPGPortfolioGameModeBase::InventoryUI_SetVisibility);
+	_MenuUI->OnStatusUIOpen.AddUObject(this, &ARPGPortfolioGameModeBase::StatusUI_SetVisibility);
+	_MenuUI->OnManualUIOpen.AddUObject(this, &ARPGPortfolioGameModeBase::ManualUI_SetVisibility);
+	_MenuUI->OnSettingsUIOpen.AddUObject(this, &ARPGPortfolioGameModeBase::SettingsUI_SetVisibility);
 }
 
 void ARPGPortfolioGameModeBase::PlayBGM(bool _Play)

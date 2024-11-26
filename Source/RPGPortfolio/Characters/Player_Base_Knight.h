@@ -22,12 +22,13 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBeginOverlapInteractDelegate, FText, FTe
 DECLARE_MULTICAST_DELEGATE(FOnEndOverlapItemDelegate);									// 아이템 오버랩 해제 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayRateDelegate, float);						// 퀵슬롯 딜레이 갱신 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayDelegate, bool);							// 퀵슬롯 사용 대기상태 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnChangeQSDelegate, int32);						// 퀵슬롯 변경 델리게이트
+
 
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
 class UPlayer_SkillComponent;
 class UPlayer_StatComponent;
+class UPlayer_InvenComponent;
 class ULockOnTargetComponent;
 class UMotionWarpingComponent;
 class UUI_Base;
@@ -54,6 +55,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_StatComponent* m_StatComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPlayer_InvenComponent* m_InvenComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UMotionWarpingComponent* m_MWComponent;
@@ -121,7 +125,6 @@ public:
 	FOnEndOverlapItemDelegate OnEndOverlapItem;
 	FOnQSDelayRateDelegate OnQSDelayRate;
 	FOnQSDelayDelegate OnQSDelay;
-	FOnChangeQSDelegate OnChangeQS;
 
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
@@ -217,6 +220,8 @@ public:
 	void PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight);
 
 	void GainMonsterSoul(int32 _GainedSoul);
+
+	void CloseInventory();
 
 private:
 	void InvincibleCheck(bool _Invinc);	// 무적시간 체크

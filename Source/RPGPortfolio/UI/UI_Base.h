@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI_Base.generated.h"
 
+class UItem_InvenData;
 /**
  * 
  */
@@ -45,7 +46,7 @@ public:
 	class UUI_Boss* GetBossUI() { return m_UI_Boss; }
 
 	void BindStatMgr();
-	void BindEquipMgr();
+	void BindInvenMgr();
 	void BindPlayerWidget(class APlayer_Base_Knight* _Character);
 
 	void MenuVisibility(ESlateVisibility _Visibility);
@@ -63,9 +64,8 @@ public:
 	void RenewUI_MP(float _CurRatio);
 	void RenewUI_ST(float _CurRatio);
 
-
-	void HUD_RenewQuickSlotUI(int32 _idx);
-	void EmptyQuickSlotUI();
+	void HUD_RenewQuickSlotUI(UItem_InvenData* _InvenItem);
+	void HUD_RenewNextQuickSlotUI(UItem_InvenData* _InvenItem);
 	void SetQuickSlotUIOpacity(bool _IsDelay);
 	void SetQuickSlotUIDelay(float _DelayPercnet);
 

@@ -9,6 +9,12 @@
 class UButton;
 class UTextBlock;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipUIOpenDelegate, bool);		// 장비창 오픈 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryUIOpenDelegate, bool);	// 인벤토리 오픈 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStatusUIOpenDelegate, bool);		// 상태창 오픈 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnManualUIOpenDelegate, bool);		// 조작법 오픈 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSettingsUIOpenDelegate, bool);	// 설정 오픈 델리게이트
+
 /**
  * 
  */
@@ -32,9 +38,15 @@ private:
 	UTextBlock* m_MenuName;
 
 public:
-	virtual void NativeConstruct() override;
+	FOnEquipUIOpenDelegate OnEquipUIOpen;
+	FOnInventoryUIOpenDelegate OnInventoryUIOpen;
+	FOnStatusUIOpenDelegate OnStatusUIOpen;
+	FOnManualUIOpenDelegate OnManualUIOpen;
+	FOnSettingsUIOpenDelegate OnSettingsUIOpen;
 
 public:
+	virtual void NativeConstruct() override;
+
 	UFUNCTION()
 	void EquipBtnClicked();
 	UFUNCTION()

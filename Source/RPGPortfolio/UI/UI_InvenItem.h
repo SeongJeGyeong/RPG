@@ -32,10 +32,8 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	class UMenuAnchor* m_ItemMenuAnchor;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variable", meta = ( AllowPrivateAccess = true ))
-	//class UItem_InvenData* m_ItemData;
-
 	EITEM_ID	eID = EITEM_ID::END;
+	EITEM_TYPE eType = EITEM_TYPE::END;
 	EEQUIP_SLOT	eSelectedSlot = EEQUIP_SLOT::EMPTY;
 
 	bool bItemUseDelay;

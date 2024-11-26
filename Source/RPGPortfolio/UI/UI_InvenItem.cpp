@@ -53,6 +53,7 @@ void UUI_InvenItem::InitFromData(UObject* _Data)
 
 	eID = pItem->GetItemID();
 	eSelectedSlot = pItem->GetEquiped();
+	eType = pItem->GetItemType();
 	// 아이템 이미지 세팅
 	FString ItemImgPath = pItem->GetItemImgPath();
 	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
@@ -84,40 +85,39 @@ void UUI_InvenItem::ItemBtnClicked()
 	// 장비 아이템 선택창에서 아이템 클릭 시
 	else
 	{
-		FInvenItemRow* pItemRow = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetInvenItemInfo(eID);
-		if (pItemRow->EquipedSlot == eSelectedSlot)
-		{
-			PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
-		}
-		else
-		{
-			PlaySound(GETMENUSOUND(EMenuSound::ITEM_EQUIP));
-		}
+		UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
 
-
-		GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->ChangeEquipItem(pItemRow->ID, eSelectedSlot);
-		FGameItemInfo* pInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(pItemRow->ID);
-		// 무기 및 방어구 교체 시
-		if ( pInfo->Type == EITEM_TYPE::WEAPON || pInfo->Type == EITEM_TYPE::ARM_HELM ||
-			pInfo->Type == EITEM_TYPE::ARM_CHEST || pInfo->Type == EITEM_TYPE::ARM_GAUNTLET ||
-			pInfo->Type == EITEM_TYPE::ARM_LEGGINGS)
+		if ( IsValid(pInvenMgr) )
 		{
-			m_StatUI->RenewBasePower();
+			FInvenItemRow* pItemRow = pInvenMgr->GetInvenItemInfo(eID);
+			if ( pItemRow->EquipedSlot == eSelectedSlot )
+			{
+				PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
+			}
+			else
+			{
+				PlaySound(GETMENUSOUND(EMenuSound::ITEM_EQUIP));
+			}
+			pInvenMgr->ChangeEquipItem(pItemRow->ID, eSelectedSlot);
+
+			FGameItemInfo* pInfo = pInvenMgr->GetItemInfo(pItemRow->ID);
+			// 무기 및 방어구 교체 시
+			if ( pInfo->Type == EITEM_TYPE::WEAPON || pInfo->Type == EITEM_TYPE::ARM_HELM ||
+				pInfo->Type == EITEM_TYPE::ARM_CHEST || pInfo->Type == EITEM_TYPE::ARM_GAUNTLET ||
+				pInfo->Type == EITEM_TYPE::ARM_LEGGINGS )
+			{
+				m_StatUI->RenewBasePower();
+			}
 		}
 	}
 }
 
 UUserWidget* UUI_InvenItem::MenuAnchorDataSetting()
 {
-	TSubclassOf<UUserWidget> pAnchorClass = LoadClass<UUserWidget>(nullptr, TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprint/UMG/Player/Menu/Inventory/BPC_UI_Item_SelectMenu.BPC_UI_Item_SelectMenu_C'"));
-
-	if (!IsValid(pAnchorClass))
-	{
-		return nullptr;
-	}
-
-	UUI_ItemSelectMenu* pWidget = Cast<UUI_ItemSelectMenu>(CreateWidget(GetWorld(), pAnchorClass));
+	UUI_ItemSelectMenu* pWidget = Cast<UUI_ItemSelectMenu>(CreateWidget(GetWorld(), m_ItemMenuAnchor->MenuClass, FName("Anchor")));
 	pWidget->SetbItemUseDelay(bItemUseDelay);
+
+	pWidget->SetSelectedItemType(eType);
 	pWidget->SetSelectedItemID(eID);
 	pWidget->SetSelectedItemSlot(eSelectedSlot);
 

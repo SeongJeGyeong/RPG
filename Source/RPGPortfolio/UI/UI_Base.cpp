@@ -10,10 +10,10 @@
 #include "UI_Message_Main.h"
 #include "UI_Message_Item.h"
 #include "Components/Image.h"
-#include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_StatMgr.h"
 #include "../Characters/Player_Base_Knight.h"
-#include "../Manager/GISubsystem_EquipMgr.h"
+#include "../Manager/GISubsystem_InvenMgr.h"
+#include "../Characters/Player_InvenComponent.h"
 
 void UUI_Base::NativeConstruct()
 {
@@ -78,13 +78,13 @@ void UUI_Base::BindStatMgr()
 	}
 }
 
-void UUI_Base::BindEquipMgr()
+void UUI_Base::BindInvenMgr()
 {
-	UGISubsystem_EquipMgr* pEquipMgr = GetGameInstance()->GetSubsystem<UGISubsystem_EquipMgr>();
-	if ( IsValid(pEquipMgr) )
+	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
+	if ( IsValid(pInvenMgr) )
 	{
-		pEquipMgr->OnRenewQS.AddUObject(this, &UUI_Base::HUD_RenewQuickSlotUI);
-		pEquipMgr->OnEmptyQS.AddUObject(this, &UUI_Base::EmptyQuickSlotUI);
+		pInvenMgr->OnRenewQS.AddUObject(this, &UUI_Base::HUD_RenewQuickSlotUI);
+		pInvenMgr->OnRenewNextQS.AddUObject(this, &UUI_Base::HUD_RenewNextQuickSlotUI);
 	}
 }
 
@@ -97,7 +97,6 @@ void UUI_Base::BindPlayerWidget(APlayer_Base_Knight* _Character)
 	_Character->OnEndOverlapItem.AddUObject(this, &UUI_Base::EndOverlapItem);
 	_Character->OnQSDelay.AddUObject(this, &UUI_Base::SetQuickSlotUIOpacity);
 	_Character->OnQSDelayRate.AddUObject(this, &UUI_Base::SetQuickSlotUIDelay);
-	_Character->OnChangeQS.AddUObject(this, &UUI_Base::HUD_RenewQuickSlotUI);
 }
 
 void UUI_Base::MenuVisibility(ESlateVisibility _Visibility)
@@ -176,14 +175,22 @@ void UUI_Base::RenewUI_ST(float _CurRatio)
 	m_UI_PlayerBar->SetPlayerSTRatio(_CurRatio);
 }
 
-void UUI_Base::HUD_RenewQuickSlotUI(int32 _idx)
+void UUI_Base::HUD_RenewQuickSlotUI(UItem_InvenData* _InvenItem)
 {
-	m_UI_QuickSlotMain->RenewLowerQuickSlot(_idx);
+	if ( _InvenItem != nullptr )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HUD_RenewQuickSlotUI : %s"), *_InvenItem->GetItemName());
+	}
+	m_UI_QuickSlotMain->RenewLowerQuickSlot(_InvenItem);
 }
 
-void UUI_Base::EmptyQuickSlotUI()
+void UUI_Base::HUD_RenewNextQuickSlotUI(UItem_InvenData* _InvenItem)
 {
-	m_UI_QuickSlotMain->EmptyLowerQuickSlot();
+	if ( _InvenItem != nullptr )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HUD_RenewNextQuickSlotUI : %s"), *_InvenItem->GetItemName());
+	}
+	m_UI_QuickSlotMain->RenewNextLowerQuickSlot(_InvenItem);
 }
 
 void UUI_Base::SetQuickSlotUIOpacity(bool _IsDelay)

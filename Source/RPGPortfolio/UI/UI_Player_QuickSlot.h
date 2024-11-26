@@ -8,6 +8,7 @@
 
 class UUI_Player_QuickSlotItem;
 class UProgressBar;
+class UItem_InvenData;
 
 /**
  * 
@@ -30,9 +31,9 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void InitLowerQuickSlot();
-	void RenewLowerQuickSlot(int32 _Idx);
-	void EmptyLowerQuickSlot();
+	void InitLowerQuickSlot(UItem_InvenData* _CurItem, UItem_InvenData* _NextItem);
+	void RenewLowerQuickSlot(UItem_InvenData* _InvenItem);
+	void RenewNextLowerQuickSlot(UItem_InvenData* _InvenItem);
 
 	/*	false면 아래쪽 슬롯 투명도 세팅
 		true면 위쪽 슬롯의 투명도 세팅	*/
