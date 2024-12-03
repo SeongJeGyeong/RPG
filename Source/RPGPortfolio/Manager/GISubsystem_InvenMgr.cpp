@@ -14,11 +14,6 @@ void UGISubsystem_InvenMgr::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		SetItemDataTable(ItemTable);
 	}
-	UDataAsset* ItemIcon = LoadObject<UDataAsset>(nullptr, TEXT("/Script/RPGPortfolio.DA_ItemCategoryIcon'/Game/Blueprint/DataAsset/BPC_DA_CategoryIcon.BPC_DA_CategoryIcon'"));
-	if ( IsValid(ItemIcon) )
-	{
-		SetInventoryIcon(ItemIcon);
-	}
 }
 
 void UGISubsystem_InvenMgr::Deinitialize()
@@ -30,7 +25,6 @@ void UGISubsystem_InvenMgr::Deinitialize()
 	OnAddEquipItemList.Clear();
 
 	OnRenewQS.Clear();
-	OnRenewNextQS.Clear();
 
 	Super::Deinitialize();
 }
@@ -50,15 +44,6 @@ void UGISubsystem_InvenMgr::SetItemDataTable(UDataTable* _ItemDataTable)
 	// 인벤토리 배열 크기 초기화
 	FInvenItemMap InvenStorage;
 	m_InvenStorage.Init({ InvenStorage }, (int32)EITEM_TYPE::END);
-}
-
-void UGISubsystem_InvenMgr::SetInventoryIcon(UDataAsset* _DataAsset)
-{
-	m_Icon = Cast<UDA_ItemCategoryIcon>(_DataAsset);
-	if ( IsValid(m_Icon) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("인벤토리 아이콘 로드 성공"));
-	}
 }
 
 FGameItemInfo* UGISubsystem_InvenMgr::GetItemInfo(EITEM_ID _ID)
@@ -98,31 +83,23 @@ UItem_InvenData* UGISubsystem_InvenMgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
 	return pItemData;
 }
 
-void UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
+FInvenItemRow* UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 {
 	//획득한 아이템과 동일한 ID의 아이템 정보를 가져온다
 	FGameItemInfo* pItemInfo = GetItemInfo(_ID);
 
 	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
 	// 없으면 인벤토리에 새 아이템을 추가한다.
-	// 있으면 인벤토리에 존재 하는 아이템의 스택을 1 올린다. 
 	FInvenItemRow* ItemRow = m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Find(_ID);
 	if ( ItemRow == nullptr )
 	{
-		m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Add(_ID, FInvenItemRow{ _ID, _Stack, EEQUIP_SLOT::EMPTY });
+		FInvenItemRow* NewItem = &m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Add(_ID, FInvenItemRow{ _ID, _Stack, EEQUIP_SLOT::EMPTY });
+		return NewItem;
 	}
-	else
-	{
-		ItemRow->Stack += _Stack;
-		// 퀵슬롯에 등록된 아이템이 추가되었을 경우 퀵슬롯의 아이템 개수를 갱신
-		if ( pItemInfo->Type == EITEM_TYPE::CONSUMABLE && ItemRow->EquipedSlot != EEQUIP_SLOT::EMPTY )
-		{
-			FInvenItemRow* EquipItemRow = m_EquipItemMap.Find(ItemRow->EquipedSlot);
-			EquipItemRow->Stack += _Stack;
 
-			RenewQuickSlotUI(ItemRow->EquipedSlot);
-		}
-	}
+	// 있으면 인벤토리에 존재하는 아이템의 스택을 1 올린다. 
+	ItemRow->Stack += _Stack;
+	return ItemRow;
 }
 
 void UGISubsystem_InvenMgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
@@ -197,6 +174,7 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		if ( _Type == EITEM_TYPE::CONSUMABLE )
 		{
 			UnEquipConsumeUI(_Slot);
+			RenewQuickSlotUI();
 		}
 		else
 		{
@@ -226,6 +204,7 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			{
 				// 기존에 장비되어있던 아이템 퀵슬롯에서 해제
 				UnEquipConsumeUI(pEquipedItemRow->EquipedSlot);
+				RenewQuickSlotUI();
 			}
 			else
 			{
@@ -241,6 +220,7 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
 			{
 				UnEquipConsumeUI(pItemRow->EquipedSlot);
+				RenewQuickSlotUI();
 			}
 			else
 			{
@@ -255,6 +235,7 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	if ( _Type == EITEM_TYPE::CONSUMABLE )
 	{
 		EquipConsumeUI(_Slot, *pItemRow);
+		RenewQuickSlotUI();
 	}
 	else
 	{
@@ -275,19 +256,13 @@ void UGISubsystem_InvenMgr::EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRo
 	UItem_InvenData* pItemData = GetInvenDataToItemRow(_ItemRow);
 	OnRenewEquipItem.Broadcast(_Slot, pItemData);	// 장비창 갱신
 
-	UE_LOG(LogTemp, Warning, TEXT("EquipQuickSlotArray"));
-	// 현재 퀵슬롯에 장착된 아이템이 지금 장착한 아이템 뿐일 경우
-	if ( !QuickSlotValidForIdx(CurQuickSlotIdx) )
+	// 현재 퀵슬롯에 장착된 아이템이 없을 경우
+	if ( GetQSItemForIndex(CurQuickSlotIdx) == nullptr )
 	{
-		UE_LOG(LogTemp, Warning, TEXT("퀵슬롯 아이템이 하나"));
+		// 지금 장착한 아이템을 현재 퀵슬롯에 설정
 		int32 Index = ConvertQuickSlotToIdx(_Slot);
 		CurQuickSlotIdx = Index;
 	}
-
-	// 장착한 아이템이 어느슬롯에 장착되건 현재 보고있는 퀵슬롯 기준으로 갱신하면 알아서 표시됨
-	// 퀵슬롯에 표시되는 아이템은 현재 퀵슬롯과 그 다음 슬롯중 아이템이 장착되어 있는 가장 가까운 슬롯인데, 
-	// 현재 퀵슬롯을 갱신할 때 바로 다음에 아이템이 장착되어 있는 슬롯을 찾아서 갱신하기 때문
-	RenewQuickSlotUI(_Slot);
 }
 
 void UGISubsystem_InvenMgr::UnEquipConsumeUI(EEQUIP_SLOT _Slot)
@@ -295,17 +270,11 @@ void UGISubsystem_InvenMgr::UnEquipConsumeUI(EEQUIP_SLOT _Slot)
 	SetEquipSlotMap(nullptr, _Slot);
 	OnRenewEquipItem.Broadcast(_Slot, nullptr);
 
-	UE_LOG(LogTemp, Warning, TEXT("UnEquipQuickSlotArray"));
 	if ( ConvertQuickSlotToIdx(_Slot) == CurQuickSlotIdx )
 	{
 		// 현재 퀵슬롯의 아이템을 장비해제 했을경우 다음 장착아이템이 있는 퀵슬롯으로 자리를 옮긴다.
-		UE_LOG(LogTemp, Warning, TEXT("다음 아이템 현재 퀵슬롯으로 이동"));
 		CurQuickSlotIdx = GetNextValidIndex();
 	}
-
-	EEQUIP_SLOT Slot = ConvertIdxToQuickSlot(CurQuickSlotIdx);
-	// 현재 퀵슬롯 ui 갱신
-	RenewQuickSlotUI(Slot);
 }
 
 void UGISubsystem_InvenMgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
@@ -373,50 +342,39 @@ void UGISubsystem_InvenMgr::DecreaseLowerSlotItem(EEQUIP_SLOT _Slot)
 	}
 
 	--pItem->Stack;
-	if ( pItem->Stack > 0 )
-	{
-		RenewQuickSlotUI(_Slot);
-	}
-	else
+	if ( pItem->Stack == 0 )
 	{
 		// 장비창에서 아이템 표시 삭제
 		UnEquipConsumeUI(_Slot);
 	}
+
+	RenewQuickSlotUI();
 }
 
-void UGISubsystem_InvenMgr::RenewQuickSlotUI(EEQUIP_SLOT _Slot)
+void UGISubsystem_InvenMgr::IncreaseEquipItemStack(EEQUIP_SLOT _Slot, int32 _Stack)
+{
+	FInvenItemRow* EquipItemRow = m_EquipItemMap.Find(_Slot);
+	EquipItemRow->Stack += _Stack;
+}
+
+void UGISubsystem_InvenMgr::RenewQuickSlotUI()
 {
 	FInvenItemRow* CurSlotItem = GetQSItemForIndex(CurQuickSlotIdx);
+	UItem_InvenData* pInvenItem = nullptr;
+	UItem_InvenData* pNextInvenItem = nullptr;
 	if ( CurSlotItem != nullptr )
 	{
-		UItem_InvenData* pInvenItem = GetInvenDataToItemRow(*CurSlotItem);
-		OnRenewQS.Broadcast(pInvenItem);
-	}
-	else
-	{
-		OnRenewQS.Broadcast(nullptr);
-	}
+		pInvenItem = GetInvenDataToItemRow(*CurSlotItem);
+	}	
+
 	int32 NextIdx = GetNextValidIndex();
 	if ( NextIdx != CurQuickSlotIdx )
 	{
 		FInvenItemRow* NextSlotItem = GetQSItemForIndex(NextIdx);
-		UItem_InvenData* pNextInvenItem = GetInvenDataToItemRow(*NextSlotItem);
-		OnRenewNextQS.Broadcast(pNextInvenItem);
+		pNextInvenItem = GetInvenDataToItemRow(*NextSlotItem);
 	}
-	else
-	{
-		OnRenewNextQS.Broadcast(nullptr);
-	}
-}
 
-UPaperSprite* UGISubsystem_InvenMgr::GetCategoryIcon(EITEM_TYPE _type)
-{
-	return 	m_Icon->GetCategoryIcon(_type);
-}
-
-UPaperSprite* UGISubsystem_InvenMgr::GetEquipSlotIcon(EEQUIP_SLOT _Slot)
-{
-	return m_Icon->GetEquipSlotIcon(_Slot);
+	OnRenewQS.Broadcast(pInvenItem, pNextInvenItem);
 }
 
 UItem_InvenData* UGISubsystem_InvenMgr::GetInvenDataToItemRow(const FInvenItemRow& _ItemRow)
@@ -454,6 +412,11 @@ FInvenItemRow* UGISubsystem_InvenMgr::GetQSItemForIndex(int32 _Idx)
 	}
 
 	return nullptr;
+}
+
+FInvenItemRow* UGISubsystem_InvenMgr::GetCurrentQSItem()
+{
+	return GetQSItemForIndex(CurQuickSlotIdx);
 }
 
 EITEM_TYPE UGISubsystem_InvenMgr::GetItemTypeFromSlot(EEQUIP_SLOT _Slot)
@@ -509,33 +472,6 @@ EITEM_TYPE UGISubsystem_InvenMgr::GetItemTypeFromSlot(EEQUIP_SLOT _Slot)
 	return _Type;
 }
 
-EEQUIP_SLOT UGISubsystem_InvenMgr::ConvertIdxToQuickSlot(int32 _Idx)
-{
-	EEQUIP_SLOT Slot = EEQUIP_SLOT::EMPTY;
-	switch ( _Idx )
-	{
-	case 0:
-		Slot = EEQUIP_SLOT::CONSUMABLE_1;
-		break;
-	case 1:
-		Slot = EEQUIP_SLOT::CONSUMABLE_2;
-		break;
-	case 2:
-		Slot = EEQUIP_SLOT::CONSUMABLE_3;
-		break;
-	case 3:
-		Slot = EEQUIP_SLOT::CONSUMABLE_4;
-		break;
-	case 4:
-		Slot = EEQUIP_SLOT::CONSUMABLE_5;
-		break;
-	default:
-		break;
-	}
-
-	return Slot;
-}
-
 int32 UGISubsystem_InvenMgr::GetNextValidIndex()
 {
 	int32 idx = CurQuickSlotIdx;
@@ -554,30 +490,6 @@ int32 UGISubsystem_InvenMgr::GetNextValidIndex()
 		}
 	}
 	return idx;
-}
-
-bool UGISubsystem_InvenMgr::QuickSlotValidForArr()
-{
-	for ( int32 i = 0; i < 5; ++i )
-	{
-		FInvenItemRow* Item = GetQSItemForIndex(i);
-		if ( Item != nullptr )
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool UGISubsystem_InvenMgr::QuickSlotValidForIdx(int32 _Idx)
-{
-	if ( GetQSItemForIndex(_Idx) != nullptr )
-	{
-		return true;
-	}
-
-	return false;
 }
 
 int32 UGISubsystem_InvenMgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)
@@ -608,4 +520,31 @@ int32 UGISubsystem_InvenMgr::ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot)
 	}
 
 	return Index;
+}
+
+EEQUIP_SLOT UGISubsystem_InvenMgr::ConvertIdxToQuickSlot(int32 _Idx)
+{
+	EEQUIP_SLOT Slot = EEQUIP_SLOT::EMPTY;
+	switch ( _Idx )
+	{
+	case 0:
+		Slot = EEQUIP_SLOT::CONSUMABLE_1;
+		break;
+	case 1:
+		Slot = EEQUIP_SLOT::CONSUMABLE_2;
+		break;
+	case 2:
+		Slot = EEQUIP_SLOT::CONSUMABLE_3;
+		break;
+	case 3:
+		Slot = EEQUIP_SLOT::CONSUMABLE_4;
+		break;
+	case 4:
+		Slot = EEQUIP_SLOT::CONSUMABLE_5;
+		break;
+	default:
+		break;
+	}
+
+	return Slot;
 }

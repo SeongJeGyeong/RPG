@@ -14,8 +14,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddInvenItemDelegate, UObject*);							//
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenewEquipItemDelegate, EEQUIP_SLOT, UItem_InvenData*); // 장비창 장착된 아이템 갱신 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddEquipItemListDelegate, UObject*);						// 장비 아이템리스트 추가 델리게이트
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnRenewQSDelegate, UItem_InvenData*); // 퀵슬롯 갱신 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnRenewNextQSDelegate, UItem_InvenData*); // 다음 퀵슬롯 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenewQSDelegate, UItem_InvenData*, UItem_InvenData*); // 퀵슬롯 갱신 델리게이트
 
 class UPaperSprite;
 class UItem_InvenData;
@@ -35,9 +34,6 @@ private:
 	UPROPERTY()
 	TMap<EEQUIP_SLOT, FInvenItemRow> m_EquipItemMap;			// 플레이어가 장비중인 아이템 맵
 
-	UPROPERTY()
-	class UDA_ItemCategoryIcon* m_Icon;
-
 	int32 CurQuickSlotIdx = 0;
 
 public:
@@ -49,8 +45,7 @@ public:
 	FOnClearEquipListDelegate OnClearEquipList;
 	FOnAddEquipItemListDelegate OnAddEquipItemList;
 	// UI_Base
-	FOnRenewQSDelegate OnRenewQS;			
-	FOnRenewNextQSDelegate OnRenewNextQS;
+	FOnRenewQSDelegate OnRenewQS;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -58,7 +53,6 @@ public:
 
 private:
 	void SetItemDataTable(UDataTable* _ItemDataTable);
-	void SetInventoryIcon(UDataAsset* _DataAsset);
 	void EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow);
 	void UnEquipConsumeUI(EEQUIP_SLOT _Slot);
 	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
@@ -66,7 +60,7 @@ private:
 	void SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot);
 
 public:
-	void AddGameItem(EITEM_ID _ID, uint32 _Stack);
+	FInvenItemRow* AddGameItem(EITEM_ID _ID, uint32 _Stack);
 	void SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID);
 
 	void ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
@@ -79,23 +73,21 @@ public:
 	void RenewEquipItemListUI(EITEM_TYPE _Type);
 	void DecreaseInventoryItem(EITEM_ID _ID);
 	void DecreaseLowerSlotItem(EEQUIP_SLOT _Slot);
+	void IncreaseEquipItemStack(EEQUIP_SLOT _Slot, int32 _Stack);
 
-	void RenewQuickSlotUI(EEQUIP_SLOT _Slot);
+	void RenewQuickSlotUI();
 
-	UPaperSprite* GetCategoryIcon(EITEM_TYPE _type);
-	UPaperSprite* GetEquipSlotIcon(EEQUIP_SLOT _Slot);
 	class UItem_InvenData* GetInvenDataToItemRow(const FInvenItemRow& _ItemRow);
 
 	FInvenItemRow* GetQSItemForIndex(int32 _Idx);
+	FInvenItemRow* GetCurrentQSItem();
 
 	EITEM_TYPE GetItemTypeFromSlot(EEQUIP_SLOT _Slot);
-	EEQUIP_SLOT ConvertIdxToQuickSlot(int32 _Idx);
 
-	int32 GetCurrentIndex() { return CurQuickSlotIdx; }
+	int32 GetCurrentIndex() const { return CurQuickSlotIdx; }
 	int32 GetNextValidIndex();
 
-	void SetCurrentIndex(int32 _CurrentIdx) { CurQuickSlotIdx = _CurrentIdx; }
-	bool QuickSlotValidForArr();
-	bool QuickSlotValidForIdx(int32 _Idx);
+	void SetCurrentIndex(const int32& _CurrentIdx) { CurQuickSlotIdx = _CurrentIdx; }
 	int32 ConvertQuickSlotToIdx(EEQUIP_SLOT _Slot);
+	EEQUIP_SLOT ConvertIdxToQuickSlot(int32 _Idx);
 };

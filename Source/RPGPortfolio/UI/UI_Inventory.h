@@ -11,6 +11,7 @@ class UTextBlock;
 class UButton;
 class UImage;
 class UPlayer_InvenComponent;
+class UDA_ItemCategoryIcon;
 
 /**
  * 
@@ -38,11 +39,13 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UImage*					m_Category_Img;
 
+	UPROPERTY()
+	UDA_ItemCategoryIcon* m_Icon;
+
 	EITEM_TYPE			eCategory;
 
 public:
 	void BindInvenMgr();
-	void BindInvenComponent(UPlayer_InvenComponent* _InvenComp);
 	void InventoryOpen(bool _Open);
 	void AddInventoryItem(UObject* _ItemData);
 	void Clear();

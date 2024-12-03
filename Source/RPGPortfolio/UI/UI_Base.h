@@ -7,6 +7,7 @@
 #include "UI_Base.generated.h"
 
 class UItem_InvenData;
+class UPlayer_InvenComponent;
 /**
  * 
  */
@@ -47,6 +48,7 @@ public:
 
 	void BindStatMgr();
 	void BindInvenMgr();
+	void BindInvenComp(UPlayer_InvenComponent* _Comp);
 	void BindPlayerWidget(class APlayer_Base_Knight* _Character);
 
 	void MenuVisibility(ESlateVisibility _Visibility);
@@ -54,9 +56,8 @@ public:
 
 	void SetMainMessageUI(FText _Command, FText _Action);
 	void ShowMainMessageUI(bool _bShow);
-
 	void ShowItemMessageUI(bool _bShow);
-
+	void ShowItemAcquireMessage(FString _Name, int32 _Stack, UTexture2D* _Img);
 	void SetVisibilityItemMessageUI();
 
 	void RenewAmountSoul(int32 _GainedSoul);
@@ -64,10 +65,10 @@ public:
 	void RenewUI_MP(float _CurRatio);
 	void RenewUI_ST(float _CurRatio);
 
-	void HUD_RenewQuickSlotUI(UItem_InvenData* _InvenItem);
-	void HUD_RenewNextQuickSlotUI(UItem_InvenData* _InvenItem);
+	void HUD_RenewQuickSlotUI(UItem_InvenData* _CurItem, UItem_InvenData* _NextItem);
 	void SetQuickSlotUIOpacity(bool _IsDelay);
 	void SetQuickSlotUIDelay(float _DelayPercnet);
+	void PlayQuickSlotChangeAnim();
 
 	void BeginOverlapInteract(FText _Command, FText _Action);
 	void EndOverlapItem();

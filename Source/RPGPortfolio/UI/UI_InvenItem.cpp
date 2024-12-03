@@ -78,7 +78,7 @@ void UUI_InvenItem::ItemBtnClicked()
 	if (bAnchorActive)
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		bItemUseDelay = pPlayer->GetbItemDelay();
+		bItemUseDelay = pPlayer->GetIsDelayTime();
 		m_ItemMenuAnchor->Open(true);
 		PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 	}

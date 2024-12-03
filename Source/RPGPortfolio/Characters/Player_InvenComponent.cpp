@@ -6,7 +6,6 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "../UI/UI_Base.h"
-#include "../UI/UI_Player_QuickSlot.h"
 #include "../UI/UI_Inventory.h"
 
 UPlayer_InvenComponent::UPlayer_InvenComponent()
@@ -32,30 +31,9 @@ void UPlayer_InvenComponent::BeginPlay()
 			return;
 		}
 
-		UUI_Player_QuickSlot* QuickSlotUI = pGameMode->GetMainHUD()->GetQuickSlotUI();
-		pGameMode->GetInventoryUI()->BindInvenComponent(this);
+		pGameMode->GetMainHUD()->BindInvenComp(this);
 
-		int32 CurIdx = m_InvenMgr->GetCurrentIndex();
-		FInvenItemRow* CurItemRow = m_InvenMgr->GetQSItemForIndex(CurIdx);
-		if ( CurItemRow == nullptr )
-		{
-			QuickSlotUI->InitLowerQuickSlot(nullptr, nullptr);
-		}
-		else
-		{
-			UItem_InvenData* pCurInvenItem = m_InvenMgr->GetInvenDataToItemRow(*CurItemRow);
-			int32 NextIdx = m_InvenMgr->GetNextValidIndex();
-			if ( CurIdx == NextIdx )
-			{
-				QuickSlotUI->InitLowerQuickSlot(pCurInvenItem, nullptr);
-			}
-			else
-			{
-				FInvenItemRow* NextItemRow = m_InvenMgr->GetQSItemForIndex(NextIdx);
-				UItem_InvenData* pNextInvenItem = m_InvenMgr->GetInvenDataToItemRow(*NextItemRow);
-				QuickSlotUI->InitLowerQuickSlot(pCurInvenItem, pNextInvenItem);
-			}
-		}
+		m_InvenMgr->RenewQuickSlotUI();
 	}
 }
 
@@ -66,7 +44,9 @@ void UPlayer_InvenComponent::ChangeQuickSlot()
 		int32 Idx = m_InvenMgr->GetNextValidIndex();
 		m_InvenMgr->SetCurrentIndex(Idx);
 		EEQUIP_SLOT Slot = m_InvenMgr->ConvertIdxToQuickSlot(Idx);
-		m_InvenMgr->RenewQuickSlotUI(Slot);
+		m_InvenMgr->RenewQuickSlotUI();
+
+		OnQSChangeAnim.Broadcast();
 	}
 }
 
@@ -74,8 +54,7 @@ FInvenItemRow* UPlayer_InvenComponent::GetQuickSlotItem()
 {
 	if ( IsValid(m_InvenMgr) )
 	{
-		int32 iCurIdx = m_InvenMgr->GetCurrentIndex();
-		FInvenItemRow* pItem = m_InvenMgr->GetQSItemForIndex(iCurIdx);
+		FInvenItemRow* pItem = m_InvenMgr->GetCurrentQSItem();
 		return pItem;
 	}
 
@@ -106,7 +85,39 @@ void UPlayer_InvenComponent::DecreaseInventoryItem(EITEM_ID _Id, EEQUIP_SLOT _Sl
 	}
 }
 
-void UPlayer_InvenComponent::CloseInventory()
+void UPlayer_InvenComponent::AcquireDroppedItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img)
 {
-	OnInventoryOpen.Broadcast(false);
+	FInvenItemRow* pItemRow = m_InvenMgr->AddGameItem(_Id, _Stack);
+	FGameItemInfo* pItemInfo = m_InvenMgr->GetItemInfo(_Id);
+	OnAcquireItem.Broadcast(pItemInfo->ItemName, _Stack, _Img);
+
+	// 퀵슬롯에 등록된 아이템이 추가되었을 경우 퀵슬롯의 아이템 개수를 갱신
+	if ( pItemInfo->Type == EITEM_TYPE::CONSUMABLE && pItemRow->EquipedSlot != EEQUIP_SLOT::EMPTY )
+	{
+		m_InvenMgr->IncreaseEquipItemStack(pItemRow->EquipedSlot, _Stack);
+		m_InvenMgr->RenewQuickSlotUI();
+	}
+}
+
+void UPlayer_InvenComponent::ItemDelaytime(float _DelayPercent)
+{
+	GetOwner()->GetWorldTimerManager().ClearTimer(ItemDelayTimer);
+	bItemDelay = true;
+	OnQSDelay.Broadcast(true);
+	OnQSDelayRate.Broadcast(1.f);
+	fDelayRate = _DelayPercent;
+
+	GetOwner()->GetWorldTimerManager().SetTimer(ItemDelayTimer, FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
+		{
+			fDelayRate -= 0.01f;
+			float UIRate = FMath::Clamp(fDelayRate / _DelayPercent, 0.f, _DelayPercent);
+			OnQSDelayRate.Broadcast(UIRate);
+			if ( fDelayRate <= 0.f )
+			{
+				bItemDelay = false;
+				OnQSDelay.Broadcast(false);
+				GetOwner()->GetWorldTimerManager().ClearTimer(ItemDelayTimer);
+			}
+		})
+	,0.01f, true);
 }

@@ -31,7 +31,6 @@ private:
 public:
 	virtual void NativeConstruct() override;
 
-	void InitLowerQuickSlot(UItem_InvenData* _CurItem, UItem_InvenData* _NextItem);
 	void RenewLowerQuickSlot(UItem_InvenData* _InvenItem);
 	void RenewNextLowerQuickSlot(UItem_InvenData* _InvenItem);
 
@@ -39,4 +38,6 @@ public:
 		true면 위쪽 슬롯의 투명도 세팅	*/
 	void SetQuickSlotOpacity(float Alpha, bool UorL);
 	void SetLowerSlotDelay(float _DelayPercent);
+	void PlayQuickSlotAnimation();
+
 };

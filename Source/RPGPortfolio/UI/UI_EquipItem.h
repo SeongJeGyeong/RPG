@@ -33,6 +33,9 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = ( BindWidgetOptional, AllowPrivateAccess = "true" ))
 	UImage* m_BackSlotImg;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Brush", meta = (AllowPrivateAccess = "true" ))
+	class UPaperSprite* SlotImage;
+
 	// 장비창 메인 화면의 위젯들. 블루프린트에서 참조받는다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = ( AllowPrivateAccess = true ))
 	UTextBlock* ItemSlotText;

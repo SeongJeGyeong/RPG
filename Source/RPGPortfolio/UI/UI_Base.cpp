@@ -84,19 +84,26 @@ void UUI_Base::BindInvenMgr()
 	if ( IsValid(pInvenMgr) )
 	{
 		pInvenMgr->OnRenewQS.AddUObject(this, &UUI_Base::HUD_RenewQuickSlotUI);
-		pInvenMgr->OnRenewNextQS.AddUObject(this, &UUI_Base::HUD_RenewNextQuickSlotUI);
 	}
+}
+
+void UUI_Base::BindInvenComp(UPlayer_InvenComponent* _Comp)
+{
+	_Comp->OnAcquireItem.AddUObject(this, &UUI_Base::ShowItemAcquireMessage);
+	_Comp->OnQSDelay.AddUObject(this, &UUI_Base::SetQuickSlotUIOpacity);
+	_Comp->OnQSDelayRate.AddUObject(this, &UUI_Base::SetQuickSlotUIDelay);
+	_Comp->OnQSChangeAnim.AddUObject(this, &UUI_Base::PlayQuickSlotChangeAnim);
 }
 
 void UUI_Base::BindPlayerWidget(APlayer_Base_Knight* _Character)
 {
 	_Character->OnSetHUDVisibility.AddUObject(this, &UUI_Base::SetVisibility);
+	// UI_Menu_Main
 	_Character->OnMenuOpen.AddUObject(this, &UUI_Base::MenuVisibility);	
+	// UI_Message_Main, UI_Message_Item
 	_Character->OnCloseItemMessageBox.AddUObject(this, &UUI_Base::SetVisibilityItemMessageUI);
 	_Character->OnBeginOverlapInteract.AddUObject(this, &UUI_Base::BeginOverlapInteract);
 	_Character->OnEndOverlapItem.AddUObject(this, &UUI_Base::EndOverlapItem);
-	_Character->OnQSDelay.AddUObject(this, &UUI_Base::SetQuickSlotUIOpacity);
-	_Character->OnQSDelayRate.AddUObject(this, &UUI_Base::SetQuickSlotUIDelay);
 }
 
 void UUI_Base::MenuVisibility(ESlateVisibility _Visibility)
@@ -146,6 +153,13 @@ void UUI_Base::ShowItemMessageUI(bool _bShow)
 	}
 }
 
+void UUI_Base::ShowItemAcquireMessage(FString _Name, int32 _Stack, UTexture2D* _Img)
+{
+	GetItemMessageUI()->SetItemMessage(_Name, _Img, _Stack);
+	ShowItemMessageUI(true);
+	ShowMainMessageUI(true);
+}
+
 void UUI_Base::SetVisibilityItemMessageUI()
 {
 	if ( m_UI_MessageBox_Item->GetVisibility() == ESlateVisibility::HitTestInvisible)
@@ -175,22 +189,10 @@ void UUI_Base::RenewUI_ST(float _CurRatio)
 	m_UI_PlayerBar->SetPlayerSTRatio(_CurRatio);
 }
 
-void UUI_Base::HUD_RenewQuickSlotUI(UItem_InvenData* _InvenItem)
+void UUI_Base::HUD_RenewQuickSlotUI(UItem_InvenData* _CurItem, UItem_InvenData* _NextItem)
 {
-	if ( _InvenItem != nullptr )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HUD_RenewQuickSlotUI : %s"), *_InvenItem->GetItemName());
-	}
-	m_UI_QuickSlotMain->RenewLowerQuickSlot(_InvenItem);
-}
-
-void UUI_Base::HUD_RenewNextQuickSlotUI(UItem_InvenData* _InvenItem)
-{
-	if ( _InvenItem != nullptr )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HUD_RenewNextQuickSlotUI : %s"), *_InvenItem->GetItemName());
-	}
-	m_UI_QuickSlotMain->RenewNextLowerQuickSlot(_InvenItem);
+	m_UI_QuickSlotMain->RenewLowerQuickSlot(_CurItem);
+	m_UI_QuickSlotMain->RenewNextLowerQuickSlot(_NextItem);
 }
 
 void UUI_Base::SetQuickSlotUIOpacity(bool _IsDelay)
@@ -208,6 +210,11 @@ void UUI_Base::SetQuickSlotUIOpacity(bool _IsDelay)
 void UUI_Base::SetQuickSlotUIDelay(float _DelayPercnet)
 {
 	m_UI_QuickSlotMain->SetLowerSlotDelay(_DelayPercnet);
+}
+
+void UUI_Base::PlayQuickSlotChangeAnim()
+{
+	m_UI_QuickSlotMain->PlayQuickSlotAnimation();
 }
 
 void UUI_Base::BeginOverlapInteract(FText _Command, FText _Action)

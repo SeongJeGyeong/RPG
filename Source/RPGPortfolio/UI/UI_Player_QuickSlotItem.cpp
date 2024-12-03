@@ -4,7 +4,6 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "../Item/Item_InvenData.h"
-#include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_Player_QuickSlotItem::NativeConstruct()
 {

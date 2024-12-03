@@ -13,9 +13,8 @@
 #include "UI_PlayerStat.h"
 #include "UI_InvenItem.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
-#include "../Manager/GISubsystem_StatMgr.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
-#include "../Characters/Player_InvenComponent.h"
+#include "../System/DataAsset/DA_ItemCategoryIcon.h"
 
 void UUI_Inventory::NativeConstruct()
 {
@@ -75,8 +74,18 @@ void UUI_Inventory::NativeConstruct()
 	}
 
 	eCategory = EITEM_TYPE::ALL;
-	SetCategoryUI(eCategory);
-	
+
+	UDataAsset* ItemIcon = LoadObject<UDataAsset>(nullptr, TEXT("/Script/RPGPortfolio.DA_ItemCategoryIcon'/Game/Blueprint/DataAsset/BPC_DA_CategoryIcon.BPC_DA_CategoryIcon'"));
+	if ( IsValid(ItemIcon) )
+	{
+		m_Icon = Cast<UDA_ItemCategoryIcon>(ItemIcon);
+		if ( IsValid(m_Icon) )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("인벤토리 아이콘 로드 성공"));
+			SetCategoryUI(eCategory);
+		}
+	}
+
 	Super::NativeConstruct();
 }
 
@@ -145,11 +154,6 @@ void UUI_Inventory::BindInvenMgr()
 		InvenManager->OnClearInventoryList.AddUObject(this, &UUI_Inventory::Clear);
 		InvenManager->OnAddInvenItem.AddUObject(this, &UUI_Inventory::AddInventoryItem);
 	}
-}
-
-void UUI_Inventory::BindInvenComponent(UPlayer_InvenComponent* _InvenComp)
-{
-	_InvenComp->OnInventoryOpen.AddUObject(this, &UUI_Inventory::InventoryOpen);
 }
 
 void UUI_Inventory::InventoryOpen(bool _Open)
@@ -248,8 +252,8 @@ void UUI_Inventory::SetCategoryUI(const EITEM_TYPE _Type)
 	default:
 		break;
 	}
-
-	UPaperSprite* pSprite = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetCategoryIcon(_Type);
+	
+	UPaperSprite* pSprite = m_Icon->GetCategoryIcon(_Type);
 	if ( IsValid(pSprite) )
 	{
 		m_Category_Img->SetBrushResourceObject(pSprite);

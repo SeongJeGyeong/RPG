@@ -20,9 +20,6 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnHUDVisibilityDelegate, ESlateVisibility);
 DECLARE_MULTICAST_DELEGATE(FOnCloseItemMessageBoxDelegate);								// 아이템 메시지박스 닫기 델리게이트
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBeginOverlapInteractDelegate, FText, FText);	// 상호작용 오버랩 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnEndOverlapItemDelegate);									// 아이템 오버랩 해제 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayRateDelegate, float);						// 퀵슬롯 딜레이 갱신 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayDelegate, bool);							// 퀵슬롯 사용 대기상태 델리게이트
-
 
 class UAnimInstance_Knight;
 class UPlayer_CameraArm;
@@ -98,8 +95,6 @@ private:
 	bool bEnableAtkInput;	// 공격 입력 가능한 상태 체크용
 	bool bAtkTrace;			// 공격 판정 체크
 
-	bool bItemDelay;		// 아이템 사용 딜레이 체크용
-
 	bool bInputGuard;		// 가드 키 입력 상태
 	bool bHoldGuard;		// 방패 방어 상태(가드를 완전히 올린 상태에서만 true)
 	float fGuardWeight;		// 가드 애니메이션 블렌드 웨이트
@@ -109,10 +104,8 @@ private:
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
 	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
-	FTimerHandle ItemDelayTimer;
 	FTimerHandle DeadTimer;
 
-	float fDelayRate;
 	FVector PrevTraceLoc;
 	bool bDead;
 
@@ -123,8 +116,6 @@ public:
 	FOnCloseItemMessageBoxDelegate OnCloseItemMessageBox;
 	FOnBeginOverlapInteractDelegate OnBeginOverlapInteract;
 	FOnEndOverlapItemDelegate OnEndOverlapItem;
-	FOnQSDelayRateDelegate OnQSDelayRate;
-	FOnQSDelayDelegate OnQSDelay;
 
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
@@ -142,7 +133,7 @@ public:
 
 	void SetbEnableAtkInput(const bool& _EnableAtkInput);
 	// 아이템 사용 딜레이
-	bool GetbItemDelay() const { return bItemDelay; }
+	bool GetIsDelayTime() const;
 
 	bool GetbInputGuard() const { return bInputGuard; }
 	void SetbInputGuard(const bool& _InputGuard) { bInputGuard = _InputGuard; }
@@ -206,7 +197,6 @@ public:
 	void ResetCamera(FRotator _Rotate);
 	void ShotProjectile();
 	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
-	void ItemDelaytime(float _DelayPercent);
 	void SetVisibilityMenuUI(bool _Visibility);
 
 	void ResetVarsOnHitState();
@@ -222,6 +212,7 @@ public:
 	void GainMonsterSoul(int32 _GainedSoul);
 
 	void CloseInventory();
+	void AcquireItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img);
 
 private:
 	void InvincibleCheck(bool _Invinc);	// 무적시간 체크

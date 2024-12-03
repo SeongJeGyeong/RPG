@@ -4,10 +4,6 @@
 #include "Item_Dropped_Base.h"
 #include "NiagaraComponent.h"
 #include "Components/SphereComponent.h"
-#include "../UI/UI_Base.h"
-#include "Kismet/GameplayStatics.h"
-#include "../RPGPortfolioGameModeBase.h"
-#include "../UI/UI_Message_Item.h"
 #include "../Header/Struct.h"
 #include "../GameInstance_Base.h"
 #include "../Characters/Player_Base_Knight.h"
@@ -68,19 +64,12 @@ void AItem_Dropped_Base::LoadImg()
 
 void AItem_Dropped_Base::Interaction(AActor* _InteractedActor)
 {
-	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(pGameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("AItem_Dropped_Base : GameMode Not Found"));
-		return;
-	}
-	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->AddGameItem(m_IID, m_Stack);
-	FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(m_IID);
-	UUI_Base* pMainUI = pGameMode->GetMainHUD();
-	pMainUI->ShowItemMessageUI(true);
 	UTexture2D* Img = m_Img.IsPending() ? m_Img.LoadSynchronous() : m_Img.Get();
-	pMainUI->GetItemMessageUI()->SetItemMessage(pItemInfo->ItemName, Img, m_Stack);
-	pMainUI->ShowMainMessageUI(true);
+	APlayer_Base_Knight* Player = Cast<APlayer_Base_Knight>(_InteractedActor);
+	if ( IsValid(Player) )
+	{
+		Player->AcquireItem(m_IID, m_Stack, Img);
+	}
 
 	Destroy();
 }

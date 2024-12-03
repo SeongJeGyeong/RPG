@@ -9,9 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
-#include "../UI/UI_FadeScreen.h"
 #include "../System/FadeViewportClient.h"
-#include "../Characters/Player_Base_Knight.h"
 
 // Sets default values
 AInteraction_Lever::AInteraction_Lever()
@@ -107,5 +105,6 @@ void AInteraction_Lever::EndLevelSequence()
 	if ( IsValid(m_TriggeredActor) )
 	{
 		m_TriggeredActor->EnableInput(NULL);
+		m_TriggeredActor = nullptr;
 	}
 }

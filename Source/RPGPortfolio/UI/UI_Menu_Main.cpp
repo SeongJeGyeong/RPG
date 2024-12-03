@@ -7,7 +7,7 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
-#include "../Manager/GISubsystem_InvenMgr.h"
+#include "../Header/Enum.h"
 
 void UUI_Menu_Main::NativeConstruct()
 {
@@ -78,7 +78,6 @@ void UUI_Menu_Main::EquipBtnUnHovered()
 void UUI_Menu_Main::InventoryBtnClicked()
 {
 	OnInventoryUIOpen.Broadcast(true);
-	GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->RenewInventoryUI(EITEM_TYPE::ALL);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	PlaySound(GETMENUSOUND(EMenuSound::MENU_OPEN));
 }

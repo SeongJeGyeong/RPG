@@ -495,12 +495,6 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
 		return;
 	}
-	APlayerController* pController = Cast<APlayerController>(GetController());
-	if ( !IsValid(pController) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController Not Found"));
-		return;
-	}
 
 	// 세부메뉴가 열려있을 경우
 	if (pGameMode->IsSubMenuUIOpened())
@@ -558,7 +552,7 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		return;
 	}
 
-	if ( !bItemDelay )
+	if ( !m_InvenComponent->GetbItemDelay() )
 	{
 		FInvenItemRow* pItem = m_InvenComponent->GetQuickSlotItem();
 		if ( pItem == nullptr )
@@ -984,32 +978,10 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 
 	Play_PlayerSound(SoundEnum);
 	Play_PlayerMontage(EPlayerMontage::USEITEM);
-	SetState(EPlayerStateType::ACTION);
 	// 아이템 사용후 대기시간 on
-	ItemDelaytime(2.f);
-}
+	m_InvenComponent->ItemDelaytime(2.f);
 
-void APlayer_Base_Knight::ItemDelaytime(float _DelayPercent)
-{
-	GetWorldTimerManager().ClearTimer(ItemDelayTimer);
-	bItemDelay = true;
-	OnQSDelay.Broadcast(true);
-	OnQSDelayRate.Broadcast(1.f);
-	fDelayRate = _DelayPercent;
-
-	GetWorldTimerManager().SetTimer(ItemDelayTimer, FTimerDelegate::CreateWeakLambda(this, [_DelayPercent, this]
-		{
-			fDelayRate -= 0.01f;
-			float UIRate = FMath::Clamp(fDelayRate / _DelayPercent, 0.f, _DelayPercent);
-			OnQSDelayRate.Broadcast(UIRate);
-			if ( fDelayRate <= 0.f )
-			{
-				bItemDelay = false;
-				OnQSDelay.Broadcast(false);
-				GetWorldTimerManager().ClearTimer(ItemDelayTimer);
-			}
-		})
-	,0.01f, true);
+	SetState(EPlayerStateType::ACTION);
 }
 
 void APlayer_Base_Knight::SetVisibilityMenuUI(bool _Visibility)
@@ -1209,7 +1181,18 @@ void APlayer_Base_Knight::GainMonsterSoul(int32 _GainedSoul)
 
 void APlayer_Base_Knight::CloseInventory()
 {
-	m_InvenComponent->CloseInventory();
+	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if ( !IsValid(pGameMode) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
+		return;
+	}
+	pGameMode->InventoryUI_SetVisibility(false);
+}
+
+void APlayer_Base_Knight::AcquireItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img)
+{
+	m_InvenComponent->AcquireDroppedItem(_Id, _Stack, _Img);
 }
 
 // 무적시간 동안 데미지 안받도록 설정
@@ -1362,4 +1345,9 @@ void APlayer_Base_Knight::SetAttackTrace(const bool& _AtkTrace)
 void APlayer_Base_Knight::SetbEnableAtkInput(const bool& _EnableAtkInput)
 {
 	bEnableAtkInput = _EnableAtkInput;
+}
+
+bool APlayer_Base_Knight::GetIsDelayTime() const
+{
+	return m_InvenComponent->GetbItemDelay();
 }
