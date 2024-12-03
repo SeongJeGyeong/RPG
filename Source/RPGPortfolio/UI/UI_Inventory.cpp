@@ -94,7 +94,7 @@ void UUI_Inventory::OnTileHovered(UObject* _ItemData, bool _Hovered)
 	if (_Hovered)
 	{
 		UUI_InvenItem* ItemUI = Cast<UUI_InvenItem>(m_ItemTileView->GetEntryWidgetFromItem(_ItemData));
-		ItemUI->SetAnchorActive(true);	// 인벤토리에서는 메뉴앵커 표시 되도록
+		ItemUI->SetAnchorActive(true);	// 인벤토리에서 메뉴앵커 표시 되도록
 		UItem_InvenData* pData = Cast<UItem_InvenData>(_ItemData);
 		m_ItemName->SetText(FText::FromString(pData->GetItemName()));
 		m_ItemName->SetVisibility(ESlateVisibility::HitTestInvisible);

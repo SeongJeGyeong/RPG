@@ -31,8 +31,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void ShotSkillProj(FVector _SpawnLoc, FRotator _SpawnRot, FVector _ShotVec);
-
 	FSkillAsset* GetEquippedSkill() const { return m_Skill; }
 	ESkillName GetSkillName() const { return m_SkillName; }
+
+	void ShotProjectile();
 };

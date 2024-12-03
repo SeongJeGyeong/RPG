@@ -56,6 +56,10 @@ void AItem_Dropped_Base::BeginPlay()
 void AItem_Dropped_Base::LoadImg()
 {
 	FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(m_IID);
+	if ( pItemInfo == nullptr )
+	{
+		return;
+	}
 	m_Img = FSoftObjectPath(pItemInfo->IconImgPath);
 	m_Img.ToSoftObjectPath().PostLoadPath(nullptr);
 	UGameInstance_Base* pGameInst = Cast<UGameInstance_Base>(GetGameInstance());

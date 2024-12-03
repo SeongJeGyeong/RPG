@@ -47,13 +47,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_CameraArm* m_SArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_SkillComponent* m_SkillComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_StatComponent* m_StatComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_InvenComponent* m_InvenComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
@@ -92,7 +92,7 @@ private:
 private:
 	bool bIsAttacking;		// 공격 입력 체크
 	bool bHeavyHold;		// 강공격 체크용
-	bool bEnableAtkInput;	// 공격 입력 가능한 상태 체크용
+	bool bEnableComboInput;	// 콤보 공격 입력 가능한 상태 체크용
 	bool bAtkTrace;			// 공격 판정 체크
 
 	bool bInputGuard;		// 가드 키 입력 상태
@@ -131,7 +131,7 @@ public:
 	uint8 GetCurrentCombo() const { return CurrentCombo; }
 	void SetCurrentCombo(const uint8& _Combo) { CurrentCombo = _Combo; }
 
-	void SetbEnableAtkInput(const bool& _EnableAtkInput);
+	void SetbEnableComboInput(const bool& _EnableAtkInput);
 	// 아이템 사용 딜레이
 	bool GetIsDelayTime() const;
 
@@ -190,14 +190,12 @@ public:
 	void AttackHitCheck();	// 어택 트레이스용
 	void AttackStart();
 
-	float GetConsumeStaminaForMontage(EPlayerMontage _Montage); // 애니메이션별 스태미나 소비
 	uint8 GetHitDirection(FVector _MonVec);
 	bool GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType); // 적 공격 방어
 	void BreakLockOn();
 	void ResetCamera(FRotator _Rotate);
-	void ShotProjectile();
-	void UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
-	void SetVisibilityMenuUI(bool _Visibility);
+	void UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
+	void SetInputMode(bool _Visibility);
 
 	void ResetVarsOnHitState();
 	void ClearMontageRelatedTimer(); // 몽타주 관련 타이머 clear
@@ -210,7 +208,6 @@ public:
 	void PlayHitAnimation(uint8 _Dir, EATTACK_WEIGHT _Weight);
 
 	void GainMonsterSoul(int32 _GainedSoul);
-
 	void CloseInventory();
 	void AcquireItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img);
 

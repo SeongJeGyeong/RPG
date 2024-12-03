@@ -25,6 +25,6 @@ void State_AttackWait::Update(APlayer_Base_Knight* Character, float DeltaTime)
 
 void State_AttackWait::Exit(APlayer_Base_Knight* Character)
 {
-	Character->SetbEnableAtkInput(false);
+	Character->SetbEnableComboInput(false);
 	Character->SetbIsAttacking(false);
 }

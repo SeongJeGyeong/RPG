@@ -49,8 +49,8 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		pPlayer->CloseInventory();
-		pPlayer->SetVisibilityMenuUI(false);
-		pPlayer->UseItem(m_ID, m_Slot);
+		pPlayer->SetInputMode(false);
+		pPlayer->UseInventoryItem(m_ID, m_Slot);
 	}
 	else
 	{

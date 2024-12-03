@@ -100,14 +100,14 @@ void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 // 다음 공격 입력 끝
 void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
-	OnEnableAtkInput.Broadcast(false);
+	OnEnableComboInput.Broadcast(false);
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckStart()
 {
 	OnSetAtkTrace.Broadcast(true);
-	OnEnableAtkInput.Broadcast(true);
+	OnEnableComboInput.Broadcast(true);
 }
 
 void UAnimInstance_Knight::AnimNotify_HitCheckEnd()

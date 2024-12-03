@@ -7,7 +7,7 @@
 
 void State_Attack::Enter(APlayer_Base_Knight* Character)
 {
-	Character->SetbEnableAtkInput(false);
+	Character->SetbEnableComboInput(false);
 	Character->SetbIsAttacking(false);
 	uint8 Combo = Character->GetCurrentCombo();
 

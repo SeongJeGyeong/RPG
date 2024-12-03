@@ -89,7 +89,11 @@ void UUI_InvenItem::ItemBtnClicked()
 
 		if ( IsValid(pInvenMgr) )
 		{
-			FInvenItemRow* pItemRow = pInvenMgr->GetInvenItemInfo(eID);
+			FInvenItemRow* pItemRow = pInvenMgr->GetInvenItemRow(eID);
+			if ( pItemRow == nullptr )
+			{
+				return;
+			}
 			if ( pItemRow->EquipedSlot == eSelectedSlot )
 			{
 				PlaySound(GETMENUSOUND(EMenuSound::ITEM_UNEQUIP));
@@ -99,10 +103,17 @@ void UUI_InvenItem::ItemBtnClicked()
 				PlaySound(GETMENUSOUND(EMenuSound::ITEM_EQUIP));
 			}
 			pInvenMgr->ChangeEquipItem(pItemRow->ID, eSelectedSlot);
-
 			FGameItemInfo* pInfo = pInvenMgr->GetItemInfo(pItemRow->ID);
+			if ( pInfo == nullptr )
+			{
+				return;
+			}
+			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
+			{
+				pInvenMgr->RenewQuickSlotUI();
+			}
 			// 무기 및 방어구 교체 시
-			if ( pInfo->Type == EITEM_TYPE::WEAPON || pInfo->Type == EITEM_TYPE::ARM_HELM ||
+			else if ( pInfo->Type == EITEM_TYPE::WEAPON || pInfo->Type == EITEM_TYPE::ARM_HELM ||
 				pInfo->Type == EITEM_TYPE::ARM_CHEST || pInfo->Type == EITEM_TYPE::ARM_GAUNTLET ||
 				pInfo->Type == EITEM_TYPE::ARM_LEGGINGS )
 			{

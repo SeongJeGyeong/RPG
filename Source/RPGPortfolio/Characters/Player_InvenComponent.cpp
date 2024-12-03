@@ -61,7 +61,7 @@ FInvenItemRow* UPlayer_InvenComponent::GetQuickSlotItem()
 	return nullptr;
 }
 
-FGameItemInfo* UPlayer_InvenComponent::GetItemInfo(EITEM_ID _Id)
+FGameItemInfo* UPlayer_InvenComponent::GetInventoryItemInfo(EITEM_ID _Id)
 {
 	if ( IsValid(m_InvenMgr) )
 	{
@@ -81,6 +81,7 @@ void UPlayer_InvenComponent::DecreaseInventoryItem(EITEM_ID _Id, EEQUIP_SLOT _Sl
 		if ( _Slot != EEQUIP_SLOT::EMPTY )
 		{
 			m_InvenMgr->DecreaseLowerSlotItem(_Slot);
+			m_InvenMgr->RenewQuickSlotUI();
 		}
 	}
 }
@@ -89,6 +90,10 @@ void UPlayer_InvenComponent::AcquireDroppedItem(EITEM_ID _Id, int32 _Stack, UTex
 {
 	FInvenItemRow* pItemRow = m_InvenMgr->AddGameItem(_Id, _Stack);
 	FGameItemInfo* pItemInfo = m_InvenMgr->GetItemInfo(_Id);
+	if ( pItemRow == nullptr || pItemInfo == nullptr )
+	{
+		return;
+	}
 	OnAcquireItem.Broadcast(pItemInfo->ItemName, _Stack, _Img);
 
 	// 퀵슬롯에 등록된 아이템이 추가되었을 경우 퀵슬롯의 아이템 개수를 갱신

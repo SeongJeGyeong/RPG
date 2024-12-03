@@ -26,6 +26,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	float GetConsumeStaminaForState(EPlayerStateType _State); // 상태별 스태미나 소비
+	
 	bool IsHPZero();
 	bool IsStaminaZero();
 	bool IsEnoughStamina(float _Consumption);

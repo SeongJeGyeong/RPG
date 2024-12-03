@@ -91,9 +91,9 @@ void APlayer_Base_Knight::PostInitializeComponents()
 		m_AnimInst->OnInvincibleState.AddUObject(this, &APlayer_Base_Knight::InvincibleCheck);
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
 		m_AnimInst->OnDead.AddUObject(this, &APlayer_Base_Knight::PlayerDead);
-		m_AnimInst->OnShotProj.AddUObject(this, &APlayer_Base_Knight::ShotProjectile);
+		m_AnimInst->OnShotProj.AddUObject(m_SkillComponent, &UPlayer_SkillComponent::ShotProjectile);
 		m_AnimInst->OnSetState.AddUObject(this, &APlayer_Base_Knight::SetState);
-		m_AnimInst->OnEnableAtkInput.AddUObject(this, &APlayer_Base_Knight::SetbEnableAtkInput);
+		m_AnimInst->OnEnableComboInput.AddUObject(this, &APlayer_Base_Knight::SetbEnableComboInput);
 		m_AnimInst->OnSetAtkTrace.AddUObject(this, &APlayer_Base_Knight::SetAttackTrace);
 	}
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayer_Base_Knight::ActionTriggerBeginOverlap);
@@ -414,14 +414,14 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	}
 
 	// 공격중인 상태에서 다음 공격 입력 기간이 아닐경우
-	if ( !bEnableAtkInput && CurrentCombo != 1 )
+	if ( CurrentCombo > 1 && !bEnableComboInput)
 	{
 		return;
 	}
 
 	bIsAttacking = _Instance.GetValue().Get<bool>();
 
-	// 공격 중일 경우 어택 스테이트에서 다음 콤보 발동 처리
+	// 첫 공격을 시작할 경우
 	if ( CurrentCombo == 1 )
 	{
 		AttackStart();
@@ -446,7 +446,7 @@ void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::DODGE_FW);
+	float fConsumption = m_StatComponent->GetConsumeStaminaForState(EPlayerStateType::DODGE);
 	// 현재 스태미나가 소비량보다 적을 경우 회피 불가
 	if ( !m_StatComponent->IsEnoughStamina(fConsumption))
 	{
@@ -503,7 +503,7 @@ void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
 		return;
 	}
 
-	SetVisibilityMenuUI(!pGameMode->GetMainHUD()->IsOpendMenu());
+	SetInputMode(!pGameMode->GetMainHUD()->IsOpendMenu());
 }
 
 void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
@@ -561,10 +561,11 @@ void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instanc
 		}
 		else
 		{
-			UseItem(pItem->ID, pItem->EquipedSlot);
+			UseInventoryItem(pItem->ID, pItem->EquipedSlot);
 		}
 	}
 }
+
 void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 {
 	if ( !IsValid(m_AnimInst) )
@@ -593,7 +594,6 @@ void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
 	m_StatComponent->DecreasePlayerStamina(Skill->Stamina_Consumption);
 	m_AnimInst->Montage_Play(Skill->Animation);
 	SetState(EPlayerStateType::USESKILL_1);
-	// ShotProjectile로
 }
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////// 인풋액션 함수 //////////////////////////////
@@ -791,71 +791,25 @@ void APlayer_Base_Knight::AttackHitCheck()
 
 void APlayer_Base_Knight::AttackStart()
 {
-	// 점프공격
-	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP )
+	EPlayerStateType State = EPlayerStateType::ATTACK;
+
+	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP &&
+	 GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
 	{
-		if ( GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
-		{
-			float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::JUMPATTACK);
-			bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
-			if ( bIsAttacking )
-			{
-				m_StatComponent->DecreasePlayerStamina(fConsumption);
-				SetState(EPlayerStateType::JUMPATTACK);
-			}
-		}
+		State = EPlayerStateType::JUMPATTACK;
 	}
 	else
 	{
-		if ( bHeavyHold )
-		{
-			float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::HEAVYATTACK);
-			bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
-			if ( bIsAttacking )
-			{
-				m_StatComponent->DecreasePlayerStamina(fConsumption);
-				SetState(EPlayerStateType::HEAVYATTACK);
-			}
-		}
-		else
-		{
-			float fConsumption = GetConsumeStaminaForMontage(EPlayerMontage::ATTACK);
-			bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
-			if ( bIsAttacking )
-			{
-				// 약공격
-				m_StatComponent->DecreasePlayerStamina(fConsumption);
-				SetState(EPlayerStateType::ATTACK);
-			}
-		}
+		State = bHeavyHold ? EPlayerStateType::HEAVYATTACK : EPlayerStateType::ATTACK;
 	}
-}
 
-float APlayer_Base_Knight::GetConsumeStaminaForMontage(EPlayerMontage _Montage)
-{
-	float fConsumption = 0.f;
-	switch ( _Montage )
+	float fConsumption = m_StatComponent->GetConsumeStaminaForState(State);
+	bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
+	if ( bIsAttacking )
 	{
-	case EPlayerMontage::DODGE_FW:
-		fConsumption = 10.f;
-		break;
-	case EPlayerMontage::ATTACK:
-		fConsumption = 10.f;
-		break;
-	case EPlayerMontage::HEAVYATTACK:
-		fConsumption = 15.f;
-		break;
-	case EPlayerMontage::JUMPATTACK:
-		fConsumption = 15.f;
-		break;
-	case EPlayerMontage::SLASH_CUTTER:
-		fConsumption = 20.f;
-		break;
-	default:
-		break;
+		m_StatComponent->DecreasePlayerStamina(fConsumption);
+		SetState(State);
 	}
-
-	return fConsumption;
 }
 
 uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
@@ -931,24 +885,14 @@ void APlayer_Base_Knight::ResetCamera(FRotator _Rotate)
 	}
 }
 
-void APlayer_Base_Knight::ShotProjectile()
-{
-	// 투사체 생성위치	
-	FVector ProjectileLocation = GetActorLocation() + FVector(0.f, 0.f, 10.f) + GetActorForwardVector() * 200.f;
-
-	// 투사체 발사 방향
-	FVector vDir = GetActorForwardVector() * 1000.f;
-	m_SkillComponent->ShotSkillProj(ProjectileLocation, GetActorRotation(), vDir);
-}
-
-void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
+void APlayer_Base_Knight::UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	EPlayerSound SoundEnum = EPlayerSound::EMPTY;
 
-	FGameItemInfo* pItemInfo = m_InvenComponent->GetItemInfo(_ID);
+	FGameItemInfo* pItemInfo = m_InvenComponent->GetInventoryItemInfo(_ID);
 	if ( pItemInfo == nullptr )
 	{
-		UE_LOG(LogTemp, Error, TEXT("UseItem : 존재하지 않는 아이템"));
+		UE_LOG(LogTemp, Error, TEXT("UseInventoryItem : 존재하지 않는 아이템"));
 		return;
 	}
 
@@ -973,18 +917,17 @@ void APlayer_Base_Knight::UseItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	{
 		EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	}
-
-	m_InvenComponent->DecreaseInventoryItem(_ID, _Slot);
-
 	Play_PlayerSound(SoundEnum);
 	Play_PlayerMontage(EPlayerMontage::USEITEM);
+
+	m_InvenComponent->DecreaseInventoryItem(_ID, _Slot);
 	// 아이템 사용후 대기시간 on
 	m_InvenComponent->ItemDelaytime(2.f);
 
 	SetState(EPlayerStateType::ACTION);
 }
 
-void APlayer_Base_Knight::SetVisibilityMenuUI(bool _Visibility)
+void APlayer_Base_Knight::SetInputMode(bool _Visibility)
 {
 	APlayerController* pController = Cast<APlayerController>(GetController());
 	if ( !IsValid(pController) )
@@ -1022,7 +965,7 @@ void APlayer_Base_Knight::ResetVarsOnHitState()
 	// 현재 행동상태 해제
 	ClearMontageRelatedTimer();
 	bAtkTrace = false;
-	bEnableAtkInput = false;
+	bEnableComboInput = false;
 }
 
 void APlayer_Base_Knight::ClearMontageRelatedTimer()
@@ -1342,9 +1285,9 @@ void APlayer_Base_Knight::SetAttackTrace(const bool& _AtkTrace)
 	}
 }
 
-void APlayer_Base_Knight::SetbEnableAtkInput(const bool& _EnableAtkInput)
+void APlayer_Base_Knight::SetbEnableComboInput(const bool& _EnableAtkInput)
 {
-	bEnableAtkInput = _EnableAtkInput;
+	bEnableComboInput = _EnableAtkInput;
 }
 
 bool APlayer_Base_Knight::GetIsDelayTime() const

@@ -53,20 +53,27 @@ void UPlayer_SkillComponent::BeginPlay()
 	}
 }
 
-void UPlayer_SkillComponent::ShotSkillProj(FVector _SpawnLoc, FRotator _SpawnRot, FVector _ShotVec)
+void UPlayer_SkillComponent::ShotProjectile()
 {
 	USubsys_ObjectPool* ObjectPool = GetOwner()->GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-	if (!IsValid(ObjectPool))
+	if ( !IsValid(ObjectPool) )
 	{
 		UE_LOG(LogTemp, Error, TEXT("오브젝트 풀 가져오기 실패"));
 		return;
 	}
-	AProj_Player_Cutter* pProjectile = ObjectPool->SpawnObjFromPool<AProj_Player_Cutter>(m_Skill->Projectile, _SpawnLoc, _SpawnRot, GetOwner());
+
+	// 투사체 생성위치	
+	FVector ProjectileLocation = GetOwner()->GetActorLocation() + FVector(0.f, 0.f, 10.f) + GetOwner()->GetActorForwardVector() * 200.f;
+	AProj_Player_Cutter* pProjectile = ObjectPool->SpawnObjFromPool<AProj_Player_Cutter>(m_Skill->Projectile, ProjectileLocation, GetOwner()->GetActorRotation(), GetOwner());
 	if ( IsValid(pProjectile) )
 	{
 		UGISubsystem_StatMgr* StatMgr = GetOwner()->GetWorld()->GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
-		if(IsValid(StatMgr)) pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, StatMgr->GetPlayerBasePower().MagicAtk);
-		pProjectile->LaunchMotion(_ShotVec);
+		if ( IsValid(StatMgr) ) pProjectile->SetProjDamage(EATTACK_TYPE::MAGIC_RANGE, StatMgr->GetPlayerBasePower().MagicAtk);
+
+		// 투사체 발사 방향
+		FVector vDir = GetOwner()->GetActorForwardVector() * 1000.f;
+
+		pProjectile->LaunchMotion(vDir);
 	}
 	else
 	{

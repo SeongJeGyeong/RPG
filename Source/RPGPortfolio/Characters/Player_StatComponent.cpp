@@ -21,6 +21,30 @@ void UPlayer_StatComponent::BeginPlay()
 	}
 }
 
+float UPlayer_StatComponent::GetConsumeStaminaForState(EPlayerStateType _State)
+{
+	float fConsumption = 0.f;
+	switch ( _State )
+	{
+	case EPlayerStateType::DODGE:
+		fConsumption = 10.f;
+		break;
+	case EPlayerStateType::ATTACK:
+		fConsumption = 10.f;
+		break;
+	case EPlayerStateType::HEAVYATTACK:
+		fConsumption = 15.f;
+		break;
+	case EPlayerStateType::JUMPATTACK:
+		fConsumption = 15.f;
+		break;
+	default:
+		break;
+	}
+
+	return fConsumption;
+}
+
 bool UPlayer_StatComponent::IsHPZero()
 {
 	return  m_StatMgr->GetPlayerBasePower().CurHP <= 0.f;

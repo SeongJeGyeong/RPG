@@ -13,8 +13,7 @@ DECLARE_MULTICAST_DELEGATE(FOnClearEquipListDelegate);											// 장비창 �
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddInvenItemDelegate, UObject*);							// 인벤토리 아이템 추가 델리게이트
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenewEquipItemDelegate, EEQUIP_SLOT, UItem_InvenData*); // 장비창 장착된 아이템 갱신 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddEquipItemListDelegate, UObject*);						// 장비 아이템리스트 추가 델리게이트
-
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenewQSDelegate, UItem_InvenData*, UItem_InvenData*); // 퀵슬롯 갱신 델리게이트
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRenewQSDelegate, UItem_InvenData*, UItem_InvenData*);	// 퀵슬롯 갱신 델리게이트
 
 class UPaperSprite;
 class UItem_InvenData;
@@ -32,7 +31,7 @@ private:
 	UPROPERTY()
 	TArray<FInvenItemMap> m_InvenStorage;				// 플레이어가 인벤토리에 소지 중인 아이템 맵
 	UPROPERTY()
-	TMap<EEQUIP_SLOT, FInvenItemRow> m_EquipItemMap;			// 플레이어가 장비중인 아이템 맵
+	TMap<EEQUIP_SLOT, FInvenItemRow> m_EquipItemMap;	// 플레이어가 장비중인 아이템 맵
 
 	int32 CurQuickSlotIdx = 0;
 
@@ -53,10 +52,7 @@ public:
 
 private:
 	void SetItemDataTable(UDataTable* _ItemDataTable);
-	void EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow);
-	void UnEquipConsumeUI(EEQUIP_SLOT _Slot);
-	void RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow);
-
+	void UnEquipCurQuickSlot(EEQUIP_SLOT _Slot);
 	void SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SLOT _Slot);
 
 public:
@@ -66,7 +62,7 @@ public:
 	void ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 
 	FGameItemInfo* GetItemInfo(EITEM_ID _ID);
-	FInvenItemRow* GetInvenItemInfo(EITEM_ID _ID);
+	FInvenItemRow* GetInvenItemRow(EITEM_ID _ID);
 	UItem_InvenData* GetEquipItemFromSlot(EEQUIP_SLOT _Slot);
 
 	void RenewInventoryUI(EITEM_TYPE _Type);

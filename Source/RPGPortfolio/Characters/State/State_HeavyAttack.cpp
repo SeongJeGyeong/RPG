@@ -6,7 +6,7 @@
 
 void State_HeavyAttack::Enter(APlayer_Base_Knight* Character)
 {
-	Character->SetbEnableAtkInput(false);
+	Character->SetbEnableComboInput(false);
 	Character->SetbIsAttacking(false);
 	Character->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 	uint8 Combo = Character->GetCurrentCombo();

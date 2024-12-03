@@ -14,6 +14,10 @@ void UGISubsystem_InvenMgr::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		SetItemDataTable(ItemTable);
 	}
+
+	// 인벤토리 배열 크기 초기화
+	FInvenItemMap InvenStorage;
+	m_InvenStorage.Init({ InvenStorage }, (int32)EITEM_TYPE::END);
 }
 
 void UGISubsystem_InvenMgr::Deinitialize()
@@ -41,9 +45,6 @@ void UGISubsystem_InvenMgr::SetItemDataTable(UDataTable* _ItemDataTable)
 	{
 		m_MapItemInfo.Add(arrTableData[i]->ID, *arrTableData[i]);
 	}
-	// 인벤토리 배열 크기 초기화
-	FInvenItemMap InvenStorage;
-	m_InvenStorage.Init({ InvenStorage }, (int32)EITEM_TYPE::END);
 }
 
 FGameItemInfo* UGISubsystem_InvenMgr::GetItemInfo(EITEM_ID _ID)
@@ -58,13 +59,19 @@ FGameItemInfo* UGISubsystem_InvenMgr::GetItemInfo(EITEM_ID _ID)
 	return pItemInfo;
 }
 
-FInvenItemRow* UGISubsystem_InvenMgr::GetInvenItemInfo(EITEM_ID _ID)
+FInvenItemRow* UGISubsystem_InvenMgr::GetInvenItemRow(EITEM_ID _ID)
 {
-	FGameItemInfo* pItemInfo = GetItemInfo(_ID);
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+	if ( nullptr == pItemInfo )
+	{
+		UE_LOG(LogTemp, Error, TEXT("GetInvenItemRow : 해당하는 아이템 정보를 찾을 수 없음"));
+		return nullptr;
+	}
+
 	FInvenItemRow* pInvenItemRow = m_InvenStorage[ (int32)pItemInfo->Type ].StorageMap.Find(_ID);
 	if ( nullptr == pInvenItemRow )
 	{
-		UE_LOG(LogTemp, Error, TEXT("GetInvenItemInfo : 해당하는 아이템 정보를 찾을 수 없음"));
+		UE_LOG(LogTemp, Error, TEXT("GetInvenItemRow : 인벤토리에서 아이템 정보를 찾을 수 없음"));
 		return nullptr;
 	}
 
@@ -86,7 +93,12 @@ UItem_InvenData* UGISubsystem_InvenMgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
 FInvenItemRow* UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 {
 	//획득한 아이템과 동일한 ID의 아이템 정보를 가져온다
-	FGameItemInfo* pItemInfo = GetItemInfo(_ID);
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+	if ( nullptr == pItemInfo )
+	{
+		UE_LOG(LogTemp, Error, TEXT("AddGameItem : 해당하는 아이템 정보를 찾을 수 없음"));
+		return nullptr;
+	}
 
 	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
 	// 없으면 인벤토리에 새 아이템을 추가한다.
@@ -105,7 +117,12 @@ FInvenItemRow* UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
 void UGISubsystem_InvenMgr::SubGameItem(EEQUIP_SLOT _Slot, EITEM_ID _ID)
 {
 	//삭제할 아이템과 동일한 ID의 아이템 정보를 가져온다
-	FGameItemInfo* pItemInfo = GetItemInfo(_ID);
+	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
+	if ( nullptr == pItemInfo )
+	{
+		UE_LOG(LogTemp, Error, TEXT("SubGameItem : 해당하는 아이템 정보를 찾을 수 없음"));
+		return;
+	}
 
 	// 인벤토리에 해당 아이디의 아이템이 이미 존재하는지 검사
 	// 없으면 아무것도 수행하지 않고, 있으면 인벤토리에서 삭제한다.
@@ -162,132 +179,93 @@ void UGISubsystem_InvenMgr::RenewEquipItemListUI(EITEM_TYPE _Type)
 void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 {
 	EITEM_TYPE _Type = GetItemTypeFromSlot(_Slot);
-
 	FInvenItemRow* pItemRow = m_InvenStorage[ (int32)_Type ].StorageMap.Find(_ID);
-
 	// 이미 해당슬롯에 장비중인 아이템을 다시 클릭할 경우 장비슬롯을 EMPTY로 바꾼다.
 	if ( pItemRow->EquipedSlot == _Slot )
 	{
-		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
-		RenewEquipItemListUI(_Type);
 		// 장비슬롯에서 장착해제 처리되어 아이템이 표시안되도록 변경한다.
 		if ( _Type == EITEM_TYPE::CONSUMABLE )
 		{
-			UnEquipConsumeUI(_Slot);
-			RenewQuickSlotUI();
+			UnEquipCurQuickSlot(_Slot);
 		}
 		else
 		{
-			RenewEquipItemUI(_Slot, nullptr);
-			SetEquipSlotMap(nullptr, _Slot);
 			UGISubsystem_StatMgr* StatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 			if ( IsValid(StatMgr) )
 			{
-				FGameItemInfo* pInfo = GetItemInfo(_ID);
+				FGameItemInfo* pInfo = m_MapItemInfo.Find(_ID);
 				StatMgr->SetEquipFigure(pInfo, false);
 				StatMgr->SetAtkAndDef();
 			}
 		}
 
+		SetEquipSlotMap(nullptr, _Slot);
+		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
+		RenewEquipItemListUI(_Type);
+		OnRenewEquipItem.Broadcast(_Slot, nullptr);
 		return;
 	}
+
 	// 장비슬롯에 아이템이 장착되는 경우
-	else
+	FGameItemInfo* ItemInfo = m_MapItemInfo.Find(pItemRow->ID);
+	// 해당 장비슬롯에 다른 아이템이 장착되어있을 경우 기존에 장착되어있던 아이템의 장비슬롯을 EMPTY로 바꾼다.
+	FInvenItemRow* pSlotItemRow = m_EquipItemMap.Find(_Slot);
+	if ( pSlotItemRow != nullptr )
 	{
-		FGameItemInfo* pInfo = GetItemInfo(pItemRow->ID);
-		// 해당 장비슬롯에 다른 아이템이 장착되어있을 경우 기존에 장착되어있던 아이템의 장비슬롯을 EMPTY로 바꾼다.
-		FInvenItemRow* pSlotItemRow = m_EquipItemMap.Find(_Slot);
-		if ( pSlotItemRow != nullptr )
+		FInvenItemRow* pEquipedItemRow = m_InvenStorage[ (int32)_Type ].StorageMap.Find(pSlotItemRow->ID);
+		pEquipedItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
+		if ( ItemInfo->Type == EITEM_TYPE::CONSUMABLE )
 		{
-			FInvenItemRow* pEquipedItemRow = m_InvenStorage[ (int32)_Type ].StorageMap.Find(pSlotItemRow->ID);
-			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
-			{
-				// 기존에 장비되어있던 아이템 퀵슬롯에서 해제
-				UnEquipConsumeUI(pEquipedItemRow->EquipedSlot);
-				RenewQuickSlotUI();
-			}
-			else
-			{
-				RenewEquipItemUI(pEquipedItemRow->EquipedSlot, nullptr);
-			}
-
-			pEquipedItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
+			UnEquipCurQuickSlot(_Slot);
 		}
-
-		// 장착할 아이템이 다른 장비슬롯에 장비되어있을 경우 해당 장비슬롯에서 장착해제 처리한다.
-		if ( pItemRow->EquipedSlot != EEQUIP_SLOT::EMPTY )
-		{
-			if ( pInfo->Type == EITEM_TYPE::CONSUMABLE )
-			{
-				UnEquipConsumeUI(pItemRow->EquipedSlot);
-				RenewQuickSlotUI();
-			}
-			else
-			{
-				RenewEquipItemUI(pItemRow->EquipedSlot, nullptr);
-			}
-		}
-		pItemRow->EquipedSlot = _Slot;
 	}
 
+	// 장착할 아이템이 다른 장비슬롯에 장비되어있을 경우 해당 장비슬롯에서 장착해제 처리한다.
+	if ( pItemRow->EquipedSlot != EEQUIP_SLOT::EMPTY )
+	{
+		if ( ItemInfo->Type == EITEM_TYPE::CONSUMABLE )
+		{
+			UnEquipCurQuickSlot(pItemRow->EquipedSlot);
+		}
+		SetEquipSlotMap(nullptr, pItemRow->EquipedSlot);
+		OnRenewEquipItem.Broadcast(pItemRow->EquipedSlot, nullptr);
+	}
+
+	// 아이템 장착 처리
+	pItemRow->EquipedSlot = _Slot;
 	RenewEquipItemListUI(_Type);
 	SetEquipSlotMap(pItemRow, _Slot);
+	UItem_InvenData* pItemData = GetInvenDataToItemRow(*pItemRow);
+	OnRenewEquipItem.Broadcast(_Slot, pItemData);	// 장비창 갱신
+
 	if ( _Type == EITEM_TYPE::CONSUMABLE )
 	{
-		EquipConsumeUI(_Slot, *pItemRow);
-		RenewQuickSlotUI();
+		// 현재 퀵슬롯에 장착된 아이템이 없을 경우
+		if ( GetQSItemForIndex(CurQuickSlotIdx) == nullptr )
+		{
+			// 지금 장착한 아이템을 현재 퀵슬롯에 설정
+			int32 Index = ConvertQuickSlotToIdx(_Slot);
+			CurQuickSlotIdx = Index;
+		}
 	}
 	else
 	{
-		RenewEquipItemUI(_Slot, pItemRow);
-
 		UGISubsystem_StatMgr* pStatMgr = GetGameInstance()->GetSubsystem<UGISubsystem_StatMgr>();
 		if ( IsValid(pStatMgr) )
 		{
-			FGameItemInfo* pInfo = GetItemInfo(_ID);
+			FGameItemInfo* pInfo = m_MapItemInfo.Find(_ID);
 			pStatMgr->SetEquipFigure(pInfo, true);
 			pStatMgr->SetAtkAndDef();
 		}
 	}
 }
 
-void UGISubsystem_InvenMgr::EquipConsumeUI(EEQUIP_SLOT _Slot, const FInvenItemRow& _ItemRow)
+void UGISubsystem_InvenMgr::UnEquipCurQuickSlot(EEQUIP_SLOT _Slot)
 {
-	UItem_InvenData* pItemData = GetInvenDataToItemRow(_ItemRow);
-	OnRenewEquipItem.Broadcast(_Slot, pItemData);	// 장비창 갱신
-
-	// 현재 퀵슬롯에 장착된 아이템이 없을 경우
-	if ( GetQSItemForIndex(CurQuickSlotIdx) == nullptr )
-	{
-		// 지금 장착한 아이템을 현재 퀵슬롯에 설정
-		int32 Index = ConvertQuickSlotToIdx(_Slot);
-		CurQuickSlotIdx = Index;
-	}
-}
-
-void UGISubsystem_InvenMgr::UnEquipConsumeUI(EEQUIP_SLOT _Slot)
-{
-	SetEquipSlotMap(nullptr, _Slot);
-	OnRenewEquipItem.Broadcast(_Slot, nullptr);
-
 	if ( ConvertQuickSlotToIdx(_Slot) == CurQuickSlotIdx )
 	{
 		// 현재 퀵슬롯의 아이템을 장비해제 했을경우 다음 장착아이템이 있는 퀵슬롯으로 자리를 옮긴다.
 		CurQuickSlotIdx = GetNextValidIndex();
-	}
-}
-
-void UGISubsystem_InvenMgr::RenewEquipItemUI(EEQUIP_SLOT _Slot, FInvenItemRow* _ItemRow)
-{
-	if ( _ItemRow == nullptr )
-	{
-		OnRenewEquipItem.Broadcast(_Slot, nullptr);
-
-	}
-	else
-	{
-		UItem_InvenData* pItemData = GetInvenDataToItemRow(*_ItemRow);
-		OnRenewEquipItem.Broadcast(_Slot, pItemData);
 	}
 }
 
@@ -306,7 +284,6 @@ void UGISubsystem_InvenMgr::SetEquipSlotMap(FInvenItemRow* _InvenItem, EEQUIP_SL
 void UGISubsystem_InvenMgr::DecreaseInventoryItem(EITEM_ID _ID)
 {
 	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
-
 	if ( nullptr == pItemInfo )
 	{
 		UE_LOG(LogTemp, Error, TEXT("DecreaseInventoryItem : 해당하는 아이템 정보를 찾을 수 없음"));
@@ -345,10 +322,10 @@ void UGISubsystem_InvenMgr::DecreaseLowerSlotItem(EEQUIP_SLOT _Slot)
 	if ( pItem->Stack == 0 )
 	{
 		// 장비창에서 아이템 표시 삭제
-		UnEquipConsumeUI(_Slot);
+		UnEquipCurQuickSlot(_Slot);
+		SetEquipSlotMap(nullptr, _Slot);
+		OnRenewEquipItem.Broadcast(_Slot, nullptr);
 	}
-
-	RenewQuickSlotUI();
 }
 
 void UGISubsystem_InvenMgr::IncreaseEquipItemStack(EEQUIP_SLOT _Slot, int32 _Stack)
@@ -380,7 +357,7 @@ void UGISubsystem_InvenMgr::RenewQuickSlotUI()
 UItem_InvenData* UGISubsystem_InvenMgr::GetInvenDataToItemRow(const FInvenItemRow& _ItemRow)
 {
 	UItem_InvenData* ItemData = NewObject<UItem_InvenData>();
-	FGameItemInfo* Info = GetItemInfo(_ItemRow.ID);
+	FGameItemInfo* Info = m_MapItemInfo.Find(_ItemRow.ID);
 
 	ItemData->SetItemImgPath(Info->IconImgPath);
 	ItemData->SetItemName(Info->ItemName);

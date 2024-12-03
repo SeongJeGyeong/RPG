@@ -13,7 +13,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayRateDelegate, float);								// �
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnQSDelayDelegate, bool);									// 퀵슬롯 사용 대기상태 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnQSChangeAnimDelegate);											// 퀵슬롯 변경 애니메이션 재생 델리게이트
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom) )
 class RPGPORTFOLIO_API UPlayer_InvenComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -44,7 +44,7 @@ public:
 	bool GetbItemDelay() const { return bItemDelay; }
 	void ChangeQuickSlot();
 	FInvenItemRow* GetQuickSlotItem();
-	FGameItemInfo* GetItemInfo(EITEM_ID _Id);
+	FGameItemInfo* GetInventoryItemInfo(EITEM_ID _Id);
 	void DecreaseInventoryItem(EITEM_ID _Id, EEQUIP_SLOT _Slot);
 	void AcquireDroppedItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img);
 

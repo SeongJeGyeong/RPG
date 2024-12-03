@@ -12,7 +12,7 @@ class APlayer_Base_Knight;
 class UCharacterMovementComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInvincibleDelegate, bool);				// 무적시간 체크 델리게이트
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnableAtkInputDelegate, const bool&);	// 공격입력 유효성 체크 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnableComboInputDelegate, const bool&);	// 콤보공격 입력 유효성 체크 델리게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetAtkTraceDelegate, const bool&);		// 공격 트레이스 활성화 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnJumpAtkDelegate);									// 점프공격 델리게이트
 DECLARE_MULTICAST_DELEGATE(FOnDeadDelegate);
@@ -93,7 +93,7 @@ public:
 
 public:
 	FOnInvincibleDelegate	OnInvincibleState;
-	FOnEnableAtkInputDelegate OnEnableAtkInput;
+	FOnEnableComboInputDelegate OnEnableComboInput;
 	FOnSetAtkTraceDelegate	OnSetAtkTrace;
 	FOnJumpAtkDelegate		OnJumpAtk;
 	FOnDeadDelegate			OnDead;
