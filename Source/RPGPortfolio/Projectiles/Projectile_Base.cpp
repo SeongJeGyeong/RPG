@@ -63,15 +63,6 @@ void AProjectile_Base::SetActiveOnSpawn(const bool& _Active)
 	}
 }
 
-void AProjectile_Base::ProjReturnToPool()
-{
-	if ( IsValid(GetWorld()) )
-	{
-		USubsys_ObjectPool* ObjectPool = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-		ObjectPool->ReturnObjToPool(this);
-	}
-}
-
 void AProjectile_Base::ProjDeactive()
 {
 	SetActorHiddenInGame(true);
@@ -79,15 +70,9 @@ void AProjectile_Base::ProjDeactive()
 	SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
 	m_ProjectileMovement->StopMovementImmediately();
 
-	ProjReturnToPool();
-}
-
-void AProjectile_Base::OnSpawnObjFromPool(bool _Activate)
-{
-	SetActiveOnSpawn(_Activate);
-}
-
-void AProjectile_Base::OnReturnObjToPool()
-{
-
+	if ( IsValid(GetWorld()) )
+	{
+		USubsys_ObjectPool* ObjectPool = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
+		ObjectPool->ReturnObjToPool(this);
+	}
 }

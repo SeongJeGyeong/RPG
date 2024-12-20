@@ -100,16 +100,16 @@ public:
 	FOnSetStateDelegate		OnSetState;
 	FOnShotProjDelegate		OnShotProj;
 
+	UFUNCTION()
+	void AnimNotify_HitCheckStart();
+	UFUNCTION()
+	void AnimNotify_HitCheckEnd();
+
 	// 다음콤보 체크
 	UFUNCTION()
 	void AnimNotify_NextAttackStart();
 	UFUNCTION()
 	void AnimNotify_NextCheckEnd();
-
-	UFUNCTION()
-	void AnimNotify_HitCheckStart();
-	UFUNCTION()
-	void AnimNotify_HitCheckEnd();
 
 	UFUNCTION()
 	void AnimNotify_InvincibleOn();

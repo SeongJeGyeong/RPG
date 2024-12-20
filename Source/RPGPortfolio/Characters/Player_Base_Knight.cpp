@@ -154,6 +154,7 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 		CurrentState->Update(this, DeltaTime);
 	}
 
+	// 상태에 관계없이 가드 웨이트를 실시간으로 감소/증감 시키기 위해 tick함수에 만듬
 	if ( bInputGuard && (CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::GUARD) )
 	{
 		fGuardWeight = FMath::Clamp(fGuardWeight + DeltaTime * 10.f, 0.f, 1.f);
@@ -370,7 +371,6 @@ void APlayer_Base_Knight::SprintAction(const FInputActionInstance& _Instance)
 	{
 		return;
 	}
-
 	// 스테미너가 0일 경우 달리기 불가
 	if ( m_StatComponent->IsStaminaZero() )
 	{
@@ -520,16 +520,6 @@ void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
 
 	if (!OverlapInteractionArr.IsEmpty())
 	{
-		if ( OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->_getUObject()->IsA(AItem_Dropped_Base::StaticClass()) )
-		{
-			Play_PlayerMontage(EPlayerMontage::ACTION_ITEM);
-			Play_PlayerSound(EPlayerSound::GETITEM);
-		}
-		else
-		{
-			Play_PlayerMontage(EPlayerMontage::ACTION_PROP);
-		}
-
 		SetState(EPlayerStateType::ACTION);
 		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction(this);
 	}
@@ -663,11 +653,7 @@ void APlayer_Base_Knight::PlayerDead()
 
 float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if ( bDead )
-	{
-		return 0.f;
-	}
-
+	if (bDead) return 0.f;
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>( &DamageEvent );
@@ -699,10 +685,10 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 				Monster->PlayAtkBlockedAnim();
 			}
 		}
-
 		return 0.f;
 	}
 
+	// HP 감소
 	m_StatComponent->DecreasePlayerHP(pDamageType->GetAtkType(), FinalDamage);
 	if ( m_StatComponent->IsHPZero() && !bDead )
 	{
@@ -721,14 +707,12 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	{
 		pEffectMgr->SpawnHitEffect(GetMesh(), PointDamageEvent->HitInfo.BoneName, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.f));
 	}
-
 	// 피격 몽타주 재생
-	SetState(EPlayerStateType::HIT);
 	PlayHitAnimation(HitDir, pDamageType->GetAtkWeight());
-
 	// 피격 사운드 재생
 	Play_PlayerSound(EPlayerSound::HIT);
 
+	SetState(EPlayerStateType::HIT);
 	return 0.0f;
 }
 
@@ -794,7 +778,7 @@ void APlayer_Base_Knight::AttackStart()
 	EPlayerStateType State = EPlayerStateType::ATTACK;
 
 	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP &&
-	 GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
+		 GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
 	{
 		State = EPlayerStateType::JUMPATTACK;
 	}
@@ -822,11 +806,8 @@ uint8 APlayer_Base_Knight::GetHitDirection(FVector _MonVec)
 	// 외적을 이용해 방향을 판별
 	FVector vCross = FVector::CrossProduct(GetActorForwardVector(), _MonVec);
 
-	if ( vCross.Z < 0.f )
-	{
-		// 적이 왼쪽에 있을 경우 각도가 음수가 되도록 만듬
-		fAngle *= -1;
-	}
+	// 적이 왼쪽에 있을 경우 각도가 음수가 되도록 만듬
+	if ( vCross.Z < 0.f ) fAngle *= -1;
 
 	// 4방향을 int로 반환
 	uint8 iDir = 4;	// 후
@@ -853,6 +834,7 @@ bool APlayer_Base_Knight::GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _Weight
 	if (m_StatComponent->IsStaminaZero())
 	{
 		// 방어 풀리고 경직상태 되도록
+		fGuardWeight = 0.f;
 		SetState(EPlayerStateType::GUARDBREAK);
 		return false;
 	}
@@ -989,7 +971,6 @@ void APlayer_Base_Knight::PlayerMotionWarping(EPlayerMontage _MontageType, float
 void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _EndTime)
 {
 	FVector PlayerLoc = GetActorLocation();
-	//m_AnimInst->RootMotionMode = ERootMotionMode::RootMotionFromMontagesOnly;
 	if ( GetbIsLockOn() )
 	{
 		const FVector TargetLoc = m_SArm->GetLockOnTargetLocation();
@@ -1001,7 +982,6 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 			if ( Distance >= 200.f )
 			{
 				// 락온 대상과의 거리가 2m 이상 2.5m 이하면 translation on
-				// 캐릭터가 대상 앞 1m 거리로 워프하도록 하여 공격 모션의 이동 거리 때문에 적의 뒤까지 이동하지 않도록
 				MoveLoc = ( ( PlayerLoc - TargetLoc ).GetSafeNormal() * 200.f ) + TargetLoc;
 			}
 			else
@@ -1010,13 +990,36 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 				// 완전히 멈추지는 않고 조금 전진함
 				MoveLoc = PlayerLoc;
 			}
-			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), true, true, true);
+			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(
+				m_MWComponent, 
+				_Anim, 
+				0.f, 
+				_EndTime, 
+				TEXT("AttackWarp"), 
+				EWarpPointAnimProvider::None, 
+				FTransform(), 
+				TEXT("None"), 
+				true, 
+				true, 
+				true
+			);
 		} 
 		else
 		{
 			// 락온 대상과의 거리가 2.5m 보다 크면 translation off
 			// 루트모션의 기본 이동거리를 유지한다.
-			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
+			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(
+				m_MWComponent, 
+				_Anim, 0.f, 
+				_EndTime, 
+				TEXT("AttackWarp"), 
+				EWarpPointAnimProvider::None, 
+				FTransform(), 
+				TEXT("None"), 
+				false, 
+				true, 
+				true
+			);
 		}
 
 		FRotator TargetRot = FRotationMatrix::MakeFromX( (TargetLoc - PlayerLoc).GetSafeNormal() ).Rotator();
@@ -1035,7 +1038,19 @@ void APlayer_Base_Knight::MotionWarping_Attack(UAnimSequenceBase* _Anim, float _
 		else
 		{
 			const FRotator TargetRot = FRotationMatrix::MakeFromX(InputVector).Rotator();
-			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(m_MWComponent, _Anim, 0.f, _EndTime, TEXT("AttackWarp"), EWarpPointAnimProvider::None, FTransform(), TEXT("None"), false, true, true);
+			URootMotionModifier_SkewWarp::AddRootMotionModifierSkewWarp(
+				m_MWComponent, 
+				_Anim, 
+				0.f, 
+				_EndTime, 
+				TEXT("AttackWarp"), 
+				EWarpPointAnimProvider::None, 
+				FTransform(), 
+				TEXT("None"), 
+				false, 
+				true, 
+				true
+			);
 			m_MWComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("AttackWarp"), FVector::ZeroVector, TargetRot);
 		}
 	}
@@ -1135,6 +1150,8 @@ void APlayer_Base_Knight::CloseInventory()
 
 void APlayer_Base_Knight::AcquireItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img)
 {
+	Play_PlayerMontage(EPlayerMontage::ACTION_ITEM);
+	Play_PlayerSound(EPlayerSound::GETITEM);
 	m_InvenComponent->AcquireDroppedItem(_Id, _Stack, _Img);
 }
 
@@ -1146,42 +1163,33 @@ void APlayer_Base_Knight::InvincibleCheck(bool _Invinc)
 
 void APlayer_Base_Knight::ActionTriggerBeginOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index, bool _bFromSweep, const FHitResult& _HitResult)
 {
-	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-	if ( TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))) )
+	if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
 	{
-		if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
-		{
-			TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
+		TScriptInterface<IPlayerInteraction> Interaction = TScriptInterface<IPlayerInteraction>(_OtherActor);
 
-			OnBeginOverlapInteract.Broadcast(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
-			OverlapInteractionArr.Emplace(Interaction);
-		}
+		OnBeginOverlapInteract.Broadcast(Interaction->GetCommand_Key(), Interaction->GetCommand_Name());
+		OverlapInteractionArr.Emplace(Interaction);
 	}
 }
 
 void APlayer_Base_Knight::ActionTriggerEndOverlap(UPrimitiveComponent* _PrimitiveCom, AActor* _OtherActor, UPrimitiveComponent* _OtherPrimitiveCom, int32 _Index)
 {
-	FName TriggerName = _OtherPrimitiveCom->GetCollisionProfileName();
-
-	if ( TriggerName.IsEqual(FName(TEXT("InteractionTrigger"))) )
+	if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
 	{
-		if ( _OtherActor->GetClass()->ImplementsInterface(UPlayerInteraction::StaticClass()) )
+		// 오버랩 상태의 트리거에서 떨어지거나 아이템을 습득하여 트리거 오버랩이 끝났을 때
+		for ( int32 i = 0; i < OverlapInteractionArr.Num(); ++i )
 		{
-			// 오버랩 상태의 트리거에서 떨어지거나 아이템을 습득하여 트리거 오버랩이 끝났을 때
-			for ( int32 i = 0; i < OverlapInteractionArr.Num(); ++i )
+			if ( OverlapInteractionArr[ i ]->_getUObject()->GetName().Equals(_OtherActor->GetName()) )
 			{
-				if ( OverlapInteractionArr[ i ]->_getUObject()->GetName().Equals(_OtherActor->GetName()) )
-				{
-					OverlapInteractionArr.RemoveAt(i);
-					break;
-				}
+				OverlapInteractionArr.RemoveAt(i);
+				break;
 			}
+		}
 
-			if ( OverlapInteractionArr.IsEmpty() )
-			{
-				// 아이템 습득 메시지가 표시중일 때
-				OnEndOverlapItem.Broadcast();
-			}
+		if ( OverlapInteractionArr.IsEmpty() )
+		{
+			// 아이템 습득 메시지가 표시중일 때
+			OnEndOverlapItem.Broadcast();
 		}
 	}
 }

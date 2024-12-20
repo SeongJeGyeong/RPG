@@ -86,7 +86,6 @@ private:
 	UPROPERTY()
 	TArray<AActor*> HitActorArr;
 
-	// UObject 클래스와는 호환이 안되므로 일반 c++ 클래스를 추상클래스로 만들어 사용
 	TUniquePtr<StateMachine> CurrentState;
 
 private:
@@ -119,7 +118,6 @@ public:
 
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
-	UDA_PlayerSound* GetSoundDA() const { return m_PlayerSound; }
 	UPlayer_StatComponent* GetStatComp() const { return m_StatComponent; }
 
 	bool GetbIsAttacking() const { return bIsAttacking; }
@@ -135,12 +133,10 @@ public:
 	// 아이템 사용 딜레이
 	bool GetIsDelayTime() const;
 
-	bool GetbInputGuard() const { return bInputGuard; }
 	void SetbInputGuard(const bool& _InputGuard) { bInputGuard = _InputGuard; }
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
 	void SetbHoldGuard(const bool& _HoldGuard);
 	float GetfGuardWeight() const { return fGuardWeight; }
-	void SetfGuardWeight(const float& _GuardWeight) { fGuardWeight = _GuardWeight; }
 
 	UCameraComponent* GetCamera() const { return m_Cam; }
 

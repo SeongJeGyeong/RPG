@@ -96,3 +96,14 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
 	ProjDeactive();
 }
+
+void AProj_GS_Spiderling::OnSpawnObjFromPool(bool _Activate)
+{
+	SetActiveOnSpawn(_Activate);
+	m_Particle->ActivateSystem();
+}
+
+void AProj_GS_Spiderling::OnReturnObjToPool()
+{
+	m_Particle->DeactivateSystem();
+}

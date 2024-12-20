@@ -24,6 +24,5 @@ void State_Idle::Update(APlayer_Base_Knight* Character, float DeltaTime)
 
 void State_Idle::Exit(APlayer_Base_Knight* Character)
 {
-	//Character->SetfGuardWeight(0.f);
 	Character->SetbHoldGuard(false);
 }

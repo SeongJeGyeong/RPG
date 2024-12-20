@@ -26,7 +26,7 @@ private:
 	class ULevelSequencePlayer* m_SeqPlayer;	// 레벨시퀀스 플레이하는 객체
 
 	UPROPERTY()
-	AActor* m_TriggeredActor;
+	class APlayer_Base_Knight* m_TriggeredActor;
 
 	FText tCommand_Key;
 	FText tCommand_Name;

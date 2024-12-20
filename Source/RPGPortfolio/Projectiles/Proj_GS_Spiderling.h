@@ -12,7 +12,7 @@
  * 
  */
 UCLASS()
-class RPGPORTFOLIO_API AProj_GS_Spiderling : public AProjectile_Base
+class RPGPORTFOLIO_API AProj_GS_Spiderling : public AProjectile_Base, public IPoolableObj
 {
 	GENERATED_BODY()
 	
@@ -40,4 +40,6 @@ public:
 	UFUNCTION()
 	void OnHitProj(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
+	virtual void OnSpawnObjFromPool(bool _Activate) override;
+	virtual void OnReturnObjToPool() override;
 };

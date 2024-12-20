@@ -8,7 +8,6 @@ void State_GuardBreak::Enter(APlayer_Base_Knight* Character)
 {
 	Character->Play_PlayerMontage(EPlayerMontage::GUARDBREAK);
 	Character->SetbHoldGuard(false);
-	Character->SetfGuardWeight(0.f);
 	Character->SetbInputGuard(false);
 }
 

@@ -12,7 +12,7 @@
 class UFXSystemAsset;
 
 UCLASS()
-class RPGPORTFOLIO_API AProjectile_Base : public AActor, public IPoolableObj
+class RPGPORTFOLIO_API AProjectile_Base : public AActor
 {
 	GENERATED_BODY()
 	
@@ -64,11 +64,4 @@ public:
 
 	UFUNCTION()
 	void ProjDeactive();
-
-	void ProjReturnToPool();
-
-public:
-	virtual void OnSpawnObjFromPool(bool _Activate) override;
-	virtual void OnReturnObjToPool() override;
-
 };

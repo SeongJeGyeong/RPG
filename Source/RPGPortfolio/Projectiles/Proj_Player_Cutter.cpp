@@ -53,3 +53,14 @@ void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 	UGameplayStatics::ApplyPointDamage(Hit.GetActor(), fAtkDamage, Hit.Normal, Hit, GetOwner()->GetInstigatorController(), this, DamageTypeBase);
 	ProjDeactive();
 }
+
+void AProj_Player_Cutter::OnSpawnObjFromPool(bool _Activate)
+{
+	SetActiveOnSpawn(_Activate);
+	m_BaseNiagara->ActivateSystem();
+}
+
+void AProj_Player_Cutter::OnReturnObjToPool()
+{
+	m_BaseNiagara->Deactivate();
+}

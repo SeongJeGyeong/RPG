@@ -10,6 +10,7 @@
 #include "../RPGPortfolioGameModeBase.h"
 #include "../UI/UI_Base.h"
 #include "../System/FadeViewportClient.h"
+#include "../Characters/Player_Base_Knight.h"
 
 // Sets default values
 AInteraction_Lever::AInteraction_Lever()
@@ -49,36 +50,32 @@ void AInteraction_Lever::Tick(float DeltaTime)
 
 void AInteraction_Lever::Interaction(AActor* _InteractedActor)
 {
-	if (IsValid(m_LevelSeq))
+	m_TriggeredActor = Cast<APlayer_Base_Knight>(_InteractedActor);
+	if ( !IsValid(m_LevelSeq) || !IsValid(m_TriggeredActor) )
 	{
-		FMovieSceneSequencePlaybackSettings Settings = {};
-		Settings.bRestoreState = false;
-		Settings.bDisableMovementInput = true;
-		ALevelSequenceActor* pSequenceActor = nullptr;
+		UE_LOG(LogTemp, Error, TEXT("시퀀스 재생 오브젝트와 상호작용 실패"));
+		return;
+	}
 
-		if (!IsValid(m_SeqPlayer))
-		{
-			m_SeqPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), m_LevelSeq, Settings, pSequenceActor);
-			// 레벨시퀀스 종료시 호출할 Delegate 등록
-			m_SeqPlayer->OnFinished.AddDynamic(this, &AInteraction_Lever::EndLevelSequence);
-			ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-			if ( IsValid(GameMode) )
-			{
-				GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
-				GameMode->GetMainHUD()->ShowMainMessageUI(false);
-			}
-			m_TriggeredActor = _InteractedActor;
-			if ( IsValid(m_TriggeredActor) )
-			{
-				m_TriggeredActor->DisableInput(NULL);
-			}
+	FMovieSceneSequencePlaybackSettings Settings = {};
+	Settings.bRestoreState = false;
+	Settings.bDisableMovementInput = true;
+	ALevelSequenceActor* pSequenceActor = nullptr;
 
-			m_SeqPlayer->Play();
-		}
-		else
+	m_SeqPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), m_LevelSeq, Settings, pSequenceActor);
+	if ( IsValid(m_SeqPlayer) )
+	{
+		// 레벨시퀀스 종료시 호출할 Delegate 등록
+		m_SeqPlayer->OnFinished.AddDynamic(this, &AInteraction_Lever::EndLevelSequence);
+		ARPGPortfolioGameModeBase* GameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+		if ( IsValid(GameMode) )
 		{
-			return;
+			GameMode->GetMainHUD()->SetVisibility(ESlateVisibility::Hidden);
+			GameMode->GetMainHUD()->ShowMainMessageUI(false);
 		}
+		m_TriggeredActor->Play_PlayerMontage(EPlayerMontage::ACTION_PROP);
+		m_TriggeredActor->DisableInput(NULL);
+		m_SeqPlayer->Play();
 	}
 }
 

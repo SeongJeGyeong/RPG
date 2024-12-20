@@ -94,6 +94,7 @@ void UPlayer_InvenComponent::AcquireDroppedItem(EITEM_ID _Id, int32 _Stack, UTex
 	{
 		return;
 	}
+	// 획득한 아이템 정보 메시지 UI로 표시
 	OnAcquireItem.Broadcast(pItemInfo->ItemName, _Stack, _Img);
 
 	// 퀵슬롯에 등록된 아이템이 추가되었을 경우 퀵슬롯의 아이템 개수를 갱신

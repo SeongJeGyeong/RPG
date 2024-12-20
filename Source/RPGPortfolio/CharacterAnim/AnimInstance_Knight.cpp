@@ -92,6 +92,18 @@ void UAnimInstance_Knight::NativeUpdateAnimation(float _DT)
 	Super::NativeUpdateAnimation(_DT);
 }
 
+void UAnimInstance_Knight::AnimNotify_HitCheckStart()
+{
+	OnSetAtkTrace.Broadcast(true);
+	OnEnableComboInput.Broadcast(true);
+}
+
+void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
+{
+	OnSetAtkTrace.Broadcast(false);
+}
+
+// 다음 공격 입력 시작
 void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 {
 	OnSetState.Broadcast(EPlayerStateType::ATTACK_WAIT);
@@ -102,17 +114,6 @@ void UAnimInstance_Knight::AnimNotify_NextCheckEnd()
 {
 	OnEnableComboInput.Broadcast(false);
 	OnSetState.Broadcast(EPlayerStateType::IDLE);
-}
-
-void UAnimInstance_Knight::AnimNotify_HitCheckStart()
-{
-	OnSetAtkTrace.Broadcast(true);
-	OnEnableComboInput.Broadcast(true);
-}
-
-void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
-{
-	OnSetAtkTrace.Broadcast(false);
 }
 
 void UAnimInstance_Knight::AnimNotify_InvincibleOn()
