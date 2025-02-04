@@ -135,16 +135,15 @@ void AMonster_Base::BeginPlay()
 	TArray<FMonsterItemDropTable*> DropTableArr;
 	m_ItemTable->GetAllRows(str, DropTableArr);
 	// 랜덤으로 드롭아이템 지정
-	float fRandNum = FMath::RandRange(1.f, 100.f);
+	int32 iRandNum = FMath::RandRange(1, 100);
 	for ( int32 i = 0; i < DropTableArr.Num(); ++i )
 	{
-		if ( DropTableArr[ i ]->ProbabilityBottom < fRandNum && fRandNum < DropTableArr[ i ]->ProbabilityTop )
+		if ( DropTableArr[ i ]->ProbabilityBottom <= iRandNum && iRandNum <= DropTableArr[ i ]->ProbabilityTop )
 		{
 			FGameItemInfo* pItemInfo = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>()->GetItemInfo(DropTableArr[ i ]->Item);
 			if ( pItemInfo != nullptr )
 			{
 				m_DropItemInfo.ID = DropTableArr[ i ]->Item;
-				UE_LOG(LogTemp, Warning, TEXT("dropstack : %d"), DropTableArr[ i ]->Stack);
 				m_DropItemInfo.Stack = DropTableArr[ i ]->Stack;
 			}
 			break;
@@ -308,7 +307,6 @@ void AMonster_Base::MonsterDead(AController* _EventInstigator)
 
 	AItem_Dropped_Base* pDropItem = GetWorld()->SpawnActor<AItem_Dropped_Base>(Item, vDropLoc, Rotator, SpawnParams);
 	pDropItem->SetDropItemID(m_DropItemInfo.ID);
-	UE_LOG(LogTemp, Warning, TEXT("dropstack 2 : %d"), m_DropItemInfo.Stack);
 	pDropItem->SetDropItemStack(m_DropItemInfo.Stack);
 	pDropItem->LoadImg();
 

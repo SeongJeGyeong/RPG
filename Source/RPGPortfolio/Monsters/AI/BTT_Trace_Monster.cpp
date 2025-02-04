@@ -86,7 +86,7 @@ void UBTT_Trace_Monster::TickTask(UBehaviorTreeComponent& _OwnComp, uint8* _Node
 
 	FVector vRecentDest = _OwnComp.GetBlackboardComponent()->GetValueAsVector(m_RecentTargetPos.SelectedKeyName);
 
-	// 타겟의 최근 위치와 타겟의 현재 위치가 1m 이상 차이나면 최근 위치를 재설정
+	// 타겟의 최근 위치와 타겟의 현재 위치가 재설정 거리 이상 차이나면 최근 위치를 재설정
 	if (m_RevaluateRange < FVector::Distance(pTarget->GetActorLocation(), vRecentDest))
 	{
 		pController->MoveToLocation(pTarget->GetActorLocation());

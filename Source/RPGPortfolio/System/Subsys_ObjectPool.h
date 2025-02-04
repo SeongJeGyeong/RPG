@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Interface/PoolableObj.h"
 #include "../Header/Enum.h"
 #include "../Characters/State/StateMachine.h"
 #include "CoreMinimal.h"
@@ -37,7 +38,7 @@ private:
 	/* TMap 안에 TArray를 넣으면 UPROPERTY 리플렉션을 달 수 없으므로
 	구조체에 TArray 객체를 넣고 TMap에 구조체를 넣어 구현한다. */
 	UPROPERTY()
-	TMap<UClass*, FObjectPoolArr> ObjPools;
+	TMap<UClass*, FObjectPoolArr> ObjPools;		// 클래스별로 오브젝트를 담아놓는 풀을 만든다.
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -66,7 +67,6 @@ bool USubsys_ObjectPool::PreLoadObjFromPool(TSubclassOf<AActor> _ObjClass, int32
 	for ( int32 i = 0; i < _Quantity; ++i )
 	{
 		FObjectPoolArr* PoolArr = &ObjPools.FindOrAdd(_ObjClass);
-
 		FActorSpawnParameters param = {};
 		param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		param.Owner = _Owner;

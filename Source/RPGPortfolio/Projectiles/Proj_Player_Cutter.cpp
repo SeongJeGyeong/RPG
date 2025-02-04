@@ -57,7 +57,8 @@ void AProj_Player_Cutter::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 void AProj_Player_Cutter::OnSpawnObjFromPool(bool _Activate)
 {
 	SetActiveOnSpawn(_Activate);
-	m_BaseNiagara->ActivateSystem();
+	// PreLoad일 경우 이펙트는 비활성화
+	if (_Activate) m_BaseNiagara->ActivateSystem();
 }
 
 void AProj_Player_Cutter::OnReturnObjToPool()

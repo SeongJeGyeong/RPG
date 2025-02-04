@@ -141,7 +141,7 @@ void UGameInstance_Base::ASyncLoadDataAsset(FSoftObjectPath _AssetPath)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("AsyncLoading"));
+				UE_LOG(LogTemp, Warning, TEXT("AsyncLoadNotFinished"));
 			}
 		}
 	, 0.1f, true);

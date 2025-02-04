@@ -100,7 +100,8 @@ void AProj_GS_Spiderling::OnHitProj(UPrimitiveComponent* HitComponent, AActor* O
 void AProj_GS_Spiderling::OnSpawnObjFromPool(bool _Activate)
 {
 	SetActiveOnSpawn(_Activate);
-	m_Particle->ActivateSystem();
+	// PreLoad일 경우 이펙트는 비활성화
+	if (_Activate) m_Particle->ActivateSystem();
 }
 
 void AProj_GS_Spiderling::OnReturnObjToPool()
