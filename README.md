@@ -11,7 +11,7 @@
 
 # 설명
 <details>
-    <summary>플레이어 입력</summary>
+    <summary>## 플레이어 입력</summary>
 
 # 설명
 
