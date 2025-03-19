@@ -21,8 +21,6 @@ private:
 public:
 	ULockOnTargetComponent();
 
-	void SetLockOnMarkVisibility(bool _Visible);
-
 	void SetLockOn(bool _LockOn);
 	bool IsOwnerDead();	
 };

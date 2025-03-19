@@ -27,11 +27,6 @@ ULockOnTargetComponent::ULockOnTargetComponent()
 	SphereRadius = 5.f;
 }
 
-void ULockOnTargetComponent::SetLockOnMarkVisibility(bool _Visible)
-{
-	m_LockOnMark->SetVisibility(_Visible);
-}
-
 void ULockOnTargetComponent::SetLockOn(bool _LockOn)
 {
 	if (GetOwner()->IsA(AMonster_Base::StaticClass()))
