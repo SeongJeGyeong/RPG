@@ -33,6 +33,7 @@ https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa
 
 ## 2. 락온
 ![Image](https://github.com/user-attachments/assets/a459849d-8a1b-4887-9781-5210f2505f7f)
+![Image](https://github.com/user-attachments/assets/3be2630e-bbd2-40d7-9654-009aa67d03bf)
 <details>
     <summary>접기/펼치기</summary>
 
