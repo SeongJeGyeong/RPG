@@ -18,7 +18,7 @@
 ### 설명
 ![Image](https://github.com/user-attachments/assets/c79926c1-2b21-4cf2-8c0f-186ceaa3642d)
 https://github.com/SeongJeGyeong/RPG/blob/e123c9818fcb3b99c2a1e79b749d361a62392c5f/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L80-L85
-
+https://github.com/SeongJeGyeong/RPG/blob/e123c9818fcb3b99c2a1e79b749d361a62392c5f/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L169-L239
 
 </details>
 
