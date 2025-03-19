@@ -13,6 +13,6 @@
 <details>
     <summary>플레이어 입력</summary>
 
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+설명
 
 </details>
