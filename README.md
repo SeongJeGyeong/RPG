@@ -9,11 +9,11 @@
 # 시연 영상
 [![Video Label](http://img.youtube.com/vi/HorUYzrwmZI/0.jpg)](https://youtu.be/HorUYzrwmZI)
 
-# 설명
+# 기능 설명
 
 ## 1. 플레이어 입력 로직
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
 
 ---
 플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
@@ -45,7 +45,7 @@ https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa
 ## 2. 락온
 ![Image](https://github.com/user-attachments/assets/3be2630e-bbd2-40d7-9654-009aa67d03bf)
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
 
 ---
 락온은 Player_CameraArm와 LockOnTargetComponent를 이용해 구현했습니다.
@@ -108,7 +108,7 @@ https://github.com/SeongJeGyeong/RPG/blob/7e3778cfaea6e92e17ba9f8dff82f1efc71214
 ## 3. 상호 작용
 ![Image](https://github.com/user-attachments/assets/d4cfa8f7-2d45-433a-bec6-8e1534362906)
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
 
 ---
 언리얼 인터페이스 클래스를 상속하여 상호 작용 가능한 오브젝트를 만들었습니다.
@@ -138,7 +138,7 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 
 ## 4. 인벤토리 & 장비 & 아이템
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
 
 ---
 UGameInstanceSubsystem 클래스를 상속받아 인벤토리 매니저 클래스를 구현하여 레벨이 변경되어도 인벤토리 정보가 유지되도록 만들었습니다.
@@ -193,11 +193,21 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/UI/UI_InvenItem.cpp#L126-L136
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/UI/UI_ItemSelectMenu.cpp#L46-L59
 </details>
+
+장비창에서는 현재 장비된 아이템 목록을 표시합니다. 장비 슬롯을 클릭 시 인벤토리에서 해당 슬롯에 장비 가능한 아이템 리스트를 표시합니다.
+
+![Image](https://github.com/user-attachments/assets/6dc6e8b0-83f2-40d6-9c61-3f481bbff4af)
+![Image](https://github.com/user-attachments/assets/d0a4fffa-e8f3-4646-85d8-80f040be73d2)
+
+퀵슬롯에 장착된 아이템은 단축키를 통해 변경 및 사용이 가능합니다. 퀵슬롯으로 아이템 사용 시에도 인벤토리에서 사용할 때와 동일하게 사용 대기시간을 가집니다.
+
+![Image](https://github.com/user-attachments/assets/16e1b66c-af2b-431a-b251-bb6a1bb43a78)
+
 </details>
 
 ## 5. 공격 & 피격 시스템
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
 
 ### 설명
 
@@ -205,7 +215,7 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 
 ## 6. 투사체
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
 
 ### 설명
 
@@ -213,7 +223,15 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 
 ## 7. 몬스터 AI
 <details>
-    <summary>접기/펼치기</summary>
+    <summary>보기</summary>
+
+### 설명
+
+</details>
+
+## 8. Foot IK
+<details>
+    <summary>보기</summary>
 
 ### 설명
 
