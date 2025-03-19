@@ -15,7 +15,7 @@
 <details>
     <summary>접기/펼치기</summary>
 
-
+---
 플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
 
 ![Image](https://github.com/user-attachments/assets/ac1cf159-d8f7-4f12-a07d-b816e5e0760a)
@@ -39,7 +39,7 @@ https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa
 <details>
     <summary>접기/펼치기</summary>
 
-
+---
 락온은 Player_CameraArm와 LockOnTargetComponent를 이용해 구현했습니다.
 
 ![Image](https://github.com/user-attachments/assets/4c0d2a80-145c-417e-8dc6-2f954246e2fe)
@@ -82,11 +82,11 @@ https://github.com/SeongJeGyeong/RPG/blob/7e3778cfaea6e92e17ba9f8dff82f1efc71214
 </details>
 
 ## 3. 상호 작용
-![Image](https://github.com/user-attachments/assets/5d387d95-b04b-474e-ba07-77c7d63f99be)
+![Image](https://github.com/user-attachments/assets/d4cfa8f7-2d45-433a-bec6-8e1534362906)
 <details>
     <summary>접기/펼치기</summary>
 
-
+---
 언리얼 인터페이스 클래스를 상속하여 상호 작용 가능한 오브젝트를 만들었습니다.
 
 https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/System/Interface/PlayerInteraction.h#L17-L25
@@ -108,6 +108,7 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 <details>
     <summary>접기/펼치기</summary>
 
+---
 UGameInstanceSubsystem 클래스를 상속받아 인벤토리 매니저 클래스를 구현하여 레벨이 변경되어도 인벤토리 정보가 유지되도록 만들었습니다.
 아이템들의 정보는 데이터 테이블을 통해 관리하고, 인벤토리 매니저가 초기화될 때 테이블에서 아이템 정보를 가져와 Tmap 컨테이너에 저장합니다.
 ![Image](https://github.com/user-attachments/assets/e54d9ebd-cd32-4e35-b5aa-cc18bcab0c8d)
