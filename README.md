@@ -17,6 +17,9 @@
 
 ### 설명
 ![Image](https://github.com/user-attachments/assets/c79926c1-2b21-4cf2-8c0f-186ceaa3642d)
+
+플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
+![Image](https://github.com/user-attachments/assets/ac1cf159-d8f7-4f12-a07d-b816e5e0760a)
 https://github.com/SeongJeGyeong/RPG/blob/e123c9818fcb3b99c2a1e79b749d361a62392c5f/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L80-L85
 https://github.com/SeongJeGyeong/RPG/blob/e123c9818fcb3b99c2a1e79b749d361a62392c5f/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L169-L239
 
