@@ -155,11 +155,11 @@ void APlayer_Base_Knight::Tick(float DeltaTime)
 	}
 
 	// 상태에 관계없이 가드 웨이트를 실시간으로 감소/증감 시키기 위해 tick함수에 만듬
-	if ( bInputGuard && (CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::GUARD) )
+	if ( bInputGuard && CurrentState->GetStateType() == EPlayerStateType::IDLE )
 	{
 		fGuardWeight = FMath::Clamp(fGuardWeight + DeltaTime * 10.f, 0.f, 1.f);
 	}
-	else
+	else if( CurrentState->GetStateType() != EPlayerStateType::GUARD )
 	{
 		fGuardWeight = FMath::Clamp(fGuardWeight - DeltaTime * 15.f, 0.f, 1.f);
 	}
@@ -193,7 +193,8 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::JumpAction);
 				break;
 			case EInputActionType::SPRINT:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SprintAction);
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Started, this, &APlayer_Base_Knight::SprintStart);
+				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Completed, this, &APlayer_Base_Knight::SprintEnd);
 				break;
 			case EInputActionType::GUARD:
 				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::GuardAction);
@@ -288,7 +289,7 @@ bool APlayer_Base_Knight::IsPossibleStateTransition(EPlayerStateType _State)
 					   CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK );
 		break;
 	case EPlayerStateType::JUMPATTACK:
-		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::JUMP );
+		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::JUMP && GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f );
 		break;
 	case EPlayerStateType::ACTION:
 		IsPossible = ( (CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT) && !bInputGuard );
@@ -365,7 +366,7 @@ void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
 	}
 }
 
-void APlayer_Base_Knight::SprintAction(const FInputActionInstance& _Instance)
+void APlayer_Base_Knight::SprintStart()
 {
 	if ( !IsPossibleStateTransition(EPlayerStateType::SPRINT) )
 	{
@@ -377,19 +378,22 @@ void APlayer_Base_Knight::SprintAction(const FInputActionInstance& _Instance)
 		return;
 	}
 	// 이동 중에만 토글되도록
-	if (GetCharacterMovement()->Velocity.Size2D() <= 0.f || GetCharacterMovement()->GetCurrentAcceleration().IsZero() )
+	if ( GetCharacterMovement()->Velocity.Size2D() <= 0.f || GetCharacterMovement()->GetCurrentAcceleration().IsZero() )
 	{
 		return;
 	}
 
-	if ( _Instance.GetValue().Get<bool>() )
+	SetState(EPlayerStateType::SPRINT);
+}
+
+void APlayer_Base_Knight::SprintEnd()
+{
+	if ( !IsPossibleStateTransition(EPlayerStateType::SPRINT) )
 	{
-		SetState(EPlayerStateType::SPRINT);
+		return;
 	}
-	else
-	{
-		SetState(EPlayerStateType::IDLE);
-	}
+
+	SetState(EPlayerStateType::IDLE);
 }
 
 void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
@@ -424,7 +428,7 @@ void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
 	// 첫 공격을 시작할 경우
 	if ( CurrentCombo == 1 )
 	{
-		AttackStart();
+		AttackStart(State);
 	}
 }
 
@@ -773,26 +777,14 @@ void APlayer_Base_Knight::AttackHitCheck()
 	}
 }
 
-void APlayer_Base_Knight::AttackStart()
+void APlayer_Base_Knight::AttackStart(EPlayerStateType _State)
 {
-	EPlayerStateType State = EPlayerStateType::ATTACK;
-
-	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP &&
-		 GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f )
-	{
-		State = EPlayerStateType::JUMPATTACK;
-	}
-	else
-	{
-		State = bHeavyHold ? EPlayerStateType::HEAVYATTACK : EPlayerStateType::ATTACK;
-	}
-
-	float fConsumption = m_StatComponent->GetConsumeStaminaForState(State);
+	float fConsumption = m_StatComponent->GetConsumeStaminaForState(_State);
 	bIsAttacking = m_StatComponent->IsEnoughStamina(fConsumption);
 	if ( bIsAttacking )
 	{
 		m_StatComponent->DecreasePlayerStamina(fConsumption);
-		SetState(State);
+		SetState(_State);
 	}
 }
 

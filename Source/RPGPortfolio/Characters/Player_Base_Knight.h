@@ -143,6 +143,8 @@ public:
 	// 락온 토글 상태 확인
 	bool GetbIsLockOn() const;
 
+	bool GetbHeavyHold() const { return bHeavyHold; }
+
 protected:
 	virtual void PostInitializeComponents() override;
 	// Called when the game starts or when spawned
@@ -161,7 +163,8 @@ private:
 	void MoveAction(const FInputActionInstance& _Instance);
 	void RotateAction(const FInputActionInstance& _Instance);
 	void JumpAction(const FInputActionInstance& _Instance);
-	void SprintAction(const FInputActionInstance& _Instance);
+	void SprintStart();
+	void SprintEnd();
 	void GuardAction(const FInputActionInstance& _Instance);
 	void AttackAction(const FInputActionInstance& _Instance);
 	void HeavyAttack(const FInputActionInstance& _Instance);
@@ -184,8 +187,7 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void AttackHitCheck();	// 어택 트레이스용
-	void AttackStart();
-
+	void AttackStart(EPlayerStateType _State);
 	uint8 GetHitDirection(FVector _MonVec);
 	bool GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType); // 적 공격 방어
 	void BreakLockOn();

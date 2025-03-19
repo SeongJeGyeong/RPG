@@ -12,7 +12,8 @@ void State_AttackWait::Update(APlayer_Base_Knight* Character, float DeltaTime)
 {
 	if ( Character->GetbIsAttacking() )
 	{
-		Character->AttackStart();
+		EPlayerStateType State = Character->GetbHeavyHold() ? EPlayerStateType::HEAVYATTACK : EPlayerStateType::ATTACK;
+		Character->AttackStart(State);
 		return;
 	}
 

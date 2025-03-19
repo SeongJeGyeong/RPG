@@ -103,7 +103,7 @@ void UAnimInstance_Knight::AnimNotify_HitCheckEnd()
 	OnSetAtkTrace.Broadcast(false);
 }
 
-// 다음 공격 입력 시작
+// 다음 공격 시작
 void UAnimInstance_Knight::AnimNotify_NextAttackStart()
 {
 	OnSetState.Broadcast(EPlayerStateType::ATTACK_WAIT);
