@@ -11,7 +11,55 @@
 
 # 설명
 
-## 플레이어 입력 로직
+## 1. 플레이어 입력 로직
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
+
+</details>
+
+## 2. 락온
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
+
+</details>
+
+## 3. 상호 작용
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
+
+</details>
+
+## 4. 인벤토리 & 장비 & 아이템
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
+
+</details>
+
+## 5. 공격 & 피격 시스템
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
+
+</details>
+
+## 6. 투사체
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
+
+</details>
+
+## 7. 몬스터 AI
 <details>
     <summary>접기/펼치기</summary>
 
