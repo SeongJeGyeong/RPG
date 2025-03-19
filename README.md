@@ -16,6 +16,7 @@
     <summary>접기/펼치기</summary>
 
 ### 설명
+![Image](https://github.com/user-attachments/assets/c79926c1-2b21-4cf2-8c0f-186ceaa3642d)
 
 </details>
 
