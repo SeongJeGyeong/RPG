@@ -10,9 +10,11 @@
 [![Video Label](http://img.youtube.com/vi/HorUYzrwmZI/0.jpg)](https://youtu.be/HorUYzrwmZI)
 
 # 설명
-<details>
-    <summary>## 플레이어 입력</summary>
 
-# 설명
+## 플레이어 입력 로직
+<details>
+    <summary>접기/펼치기</summary>
+
+### 설명
 
 </details>
