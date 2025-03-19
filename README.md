@@ -13,6 +13,6 @@
 <details>
     <summary>플레이어 입력</summary>
 
-설명
+# 설명
 
 </details>
