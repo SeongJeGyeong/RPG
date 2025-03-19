@@ -8,3 +8,11 @@
 
 # 시연 영상
 [![Video Label](http://img.youtube.com/vi/HorUYzrwmZI/0.jpg)](https://youtu.be/HorUYzrwmZI)
+
+# 설명
+<details>
+    <summary>플레이어 입력</summary>
+
+<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
+
+</details>
