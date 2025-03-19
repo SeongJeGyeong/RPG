@@ -15,13 +15,17 @@
 <details>
     <summary>접기/펼치기</summary>
 
-### 설명
-![Image](https://github.com/user-attachments/assets/c79926c1-2b21-4cf2-8c0f-186ceaa3642d)
-
 플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
 ![Image](https://github.com/user-attachments/assets/ac1cf159-d8f7-4f12-a07d-b816e5e0760a)
 https://github.com/SeongJeGyeong/RPG/blob/e6a45169d92dfc23bffdefdebd49f5f7d1d23db7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L80-L85
 https://github.com/SeongJeGyeong/RPG/blob/e6a45169d92dfc23bffdefdebd49f5f7d1d23db7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L169-L240
+
+플레이어의 입력 로직은 상태 패턴을 사용해 구현했습니다.
+![Image](https://github.com/user-attachments/assets/c79926c1-2b21-4cf2-8c0f-186ceaa3642d)
+
+추상클래스로 선언한 StateMachine 클래스를 상속받아 상태 클래스들을 만들어 구현했습니다.스테이트 클래스는 Tunique_Ptr로 선언해 상태를 변경할 때 마다 클래스를 새로 선언하지 않고 오브젝트 풀에서 풀링하여 재사용 하도록 만들었습니다.
+![image](https://github.com/user-attachments/assets/5b8f48cc-894a-424a-8deb-1df8384b740c)
+
 
 </details>
 
