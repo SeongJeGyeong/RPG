@@ -20,6 +20,7 @@
 </details>
 
 ## 2. 락온
+![Image](https://github.com/user-attachments/assets/a459849d-8a1b-4887-9781-5210f2505f7f)
 <details>
     <summary>접기/펼치기</summary>
 
