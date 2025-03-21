@@ -204,19 +204,20 @@ https://github.com/SeongJeGyeong/RPG/blob/dea1fea8d96c99679d439b3f07cdc70afc189c
 
 </details>
 
-## 5. 공격 & 피격 시스템
+## 5. 공격
 ![Image](https://github.com/user-attachments/assets/2eda975c-f5bf-49f0-919a-8d4b6b18f501)
 <details>
     <summary>보기</summary>
-
-### 5-1. 공격
+    
 공격 발동 시 공격 타입에 따라 스태미나 소모량을 측정하고 스탯 컴포넌트를 통해 스탯 매니저에서 현재 스태미나가 충분한지 판단합니다.
 
-충분할 경우 스태미나를 소모하고 공격 상태에 들어갑니다.
-https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L780-L789
+충분할 경우 스태미나를 소모하고 공격 상태에 들어가고, 현재 콤보에 따라 다른 몽타주를 실행합니다.(점프공격 제외)
+<details>
+    <summary>코드</summary>
 
-공격 상태에 진입하면 현재 콤보에 따라 다른 몽타주를 실행합니다.(점프공격 제외)
+https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L780-L789
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/State/State_Attack.cpp#L8-L36
+</details>
 
 애님 노티파이를 이용해 공격 몽타주의 각 타이밍 마다 로직을 실행합니다.
 ![Image](https://github.com/user-attachments/assets/4d1a19e8-9ae2-464f-9008-b03f6da0972e)
@@ -224,20 +225,41 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 HitCheck 구간 동안 Tick 함수 내에서 Sweep으로 피격 대상을 검출합니다.
 
 똑같은 대상이 여러 번 공격당하는 걸 방지하기 위해 히트한 액터를 배열에 넣고 체크하도록 만들었습니다.
+<details>
+    <summary>코드</summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L724-L778
+</details>
 
 공격을 통해 소모된 스태미나는 스탯 매니저에서 타이머를 이용해 일정 시간 뒤 회복을 시작합니다.
+<details>
+    <summary>코드</summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Manager/GISubsystem_StatMgr.cpp#L103-L113
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Manager/GISubsystem_StatMgr.cpp#L121-L139
+</details>
 
 모션워핑 플러그인을 적용하여 공격 몽타주 재생 중 이동 키를 입력하는 것으로 방향 전환이 가능하도록 만들었습니다.Translation과 Rotation 설정을 유동적으로 바꾸기 위해 C++에서 Modifier를 설정합니다.
 락온 중일 경우에는 방향 전환이 불가능하지만, 모션워핑을 통해 적과의 거리를 유지하도록 만들었습니다. 적과 약 2m의 거리를 유지하도록 몽타주의 루트 모션을 조정합니다.
+<details>
+    <summary>코드</summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L963-L1049
+</details>
 
 UDamageType 클래스를 상속받은 커스텀 클래스로 공격에 타입과 중량 정보를 추가할 수 있도록 만들었습니다.
-https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/System/DamageType_Base.h#L14-L27
+<details>
+    <summary>코드</summary>
 
-### 5-2. 피격
+https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/System/DamageType_Base.h#L14-L27
+</details>
+
+</details>
+
+## 6. 몬스터 피격
+<details>
+    <summary>보기</summary
+                   
 몬스터가 플레이어에게 피격 시 타격감을 주기 위해 타이머를 이용해 플레이어에게 역경직을 주었습니다.
 ![Image](https://github.com/user-attachments/assets/0a6a92a0-e8fb-4a33-9b41-d8a16f35aefe)
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L609-L625
@@ -260,10 +282,28 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 
 사망한 몬스터의 메시는 머티리얼 함수를 이용해 일정시간 뒤 서서히 사라지도록 만들었습니다.
 
+</details>
+
+## 7. 플레이어 피격 & 가드, 회피
+<details>
+    <summary>보기</summary
+
+플레이어는 피격 시 피격된 방향에 따라 다른 몽타주를 재생합니다.
+
+공중에 있거나, 공격의 중량 타입에 따라서도 다른 몽타주를 재생합니다.
+
+가드 키를 누르는 동안, 플레이어는 정면에서 오는 공격을 가드할 수 있습니다.
+
+공격을 가드 시 데미지에 비례해 스태미나를 소모합니다.
+
+스태미나가 부족한 상태에서 가드 시 가드 브레이크 상태가 되며 잠시동안 무방비 상태가 됩니다.
+
+회피 입력을 통해 일정 시간동안 적의 공격 판정을 무시할 수 있습니다.
 
 </details>
 
-## 6. 투사체
+## 8. 투사체
+![Image](https://github.com/user-attachments/assets/235bd184-fd34-44d1-9141-0ac87676021a)
 <details>
     <summary>보기</summary>
 
@@ -279,7 +319,7 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 
 </details>
 
-## 7. 몬스터 AI
+## 9. 몬스터 AI
 <details>
     <summary>보기</summary>
 
@@ -292,7 +332,7 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 
 </details>
 
-## 8. Foot IK
+## 10. Foot IK
 <details>
     <summary>보기</summary>
 
