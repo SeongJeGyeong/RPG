@@ -239,7 +239,7 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 
 모션워핑 플러그인을 적용하여 공격 몽타주 재생 중 이동 키를 입력하는 것으로 방향 전환이 가능하도록 만들었습니다.<br/>
 Translation과 Rotation 설정을 유동적으로 바꾸기 위해 C++에서 Modifier를 설정합니다.<br/>
-락온 중일 경우에는 방향 전환이 불가능하지만, 모션워핑을 통해 적과의 거리를 유지하도록 만들었습니다. 적과 약 2m의 거리를 유지하도록 몽타주의 루트 모션을 조정합니다.
+락온 중일 경우에는 방향 전환이 불가능하지만, 모션워핑을 통해 적과 일정 거리를 유지하도록 만들었습니다.
 <details>
     <summary>코드</summary>
 
@@ -260,19 +260,33 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
     <summary>보기</summary
                    
 몬스터가 플레이어에게 피격 시 타격감을 주기 위해 타이머를 이용해 플레이어에게 역경직을 주었습니다.
+
 ![Image](https://github.com/user-attachments/assets/0a6a92a0-e8fb-4a33-9b41-d8a16f35aefe)
+<details>
+    <summary>코드</summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L609-L625
+</details>
 
 ApplyPointDamage 함수를 이용해 몬스터가 피격당한 위치 정보를 보내고, 해당 위치에 피격 이펙트가 발생하도록 만들었습니다.<br/>
 일반 몬스터의 경우 타임라인을 이용해 메시가 진동하도록 만들었습니다.
 
 ![Image](https://github.com/user-attachments/assets/88e02a72-46c5-4a9f-a573-ec798a5c4ce7)
+<details>
+    <summary>코드</summary>
+    
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Monsters/Monster_Base.cpp#L224-L239
+</details>
 
 보스 몬스터의 경우 피직스 에셋을 만들고, 피격당한 본에 잠시동안 피직스를 활성화시켜 피격당한 부위가 흔들리도록 만들었습니다.
+
 ![Image](https://github.com/user-attachments/assets/179bf2e1-d758-4062-a3bd-cb356fe213c4)
 ![Image](https://github.com/user-attachments/assets/7ef41c17-90b5-4279-b473-def505cad04c)
+<details>
+    <summary>코드</summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L430-L453
+</details>
 
 몬스터가 사망할 경우 아이템을 드랍합니다.<br/>
 아이템은 구간 확률을 이용해 몬스터의 아이템 드랍 데이터테이블에 있는 아이템 중 랜덤으로 드랍되도록 만들었습니다.
@@ -305,16 +319,23 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 <details>
     <summary>보기</summary>
 
-### 설명
 플레이어나 몬스터가 사용하는 투사체 클래스는 오브젝트 풀 패턴을 사용하여 투사체를 재사용할 수 있도록 만들었습니다.
+<details>
+    <summary>코드</summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/Projectiles/Proj_Player_Cutter.h#L11-L23
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/Projectiles/Proj_GS_Spiderling.h#L15-L28
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L89-L116
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.cpp#L51-L66
+</details>
+
 
 투사체를 미리 일정 수량 스폰해두고 오브젝트 풀에 담아놓는 함수를 구현하여 런타임 중에 투사체가 스폰되는 경우를 줄일 수 있도록 만들습니다.
-https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L59-L87
+<details>
+    <summary>코드</summary>
 
+https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L59-L87
+</details>
 </details>
 
 ## 9. 몬스터 AI
