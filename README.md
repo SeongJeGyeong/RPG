@@ -210,6 +210,7 @@ https://github.com/SeongJeGyeong/RPG/blob/dea1fea8d96c99679d439b3f07cdc70afc189c
     <summary>보기</summary>
     
 공격 발동 시 공격 타입에 따라 스태미나 소모량을 측정하고 스탯 컴포넌트를 통해 스탯 매니저에서 현재 스태미나가 충분한지 판단합니다.
+
 충분할 경우 스태미나를 소모하고 공격 상태에 들어가고, 현재 콤보에 따라 다른 몽타주를 실행합니다.(점프공격 제외)
 <details>
     <summary>코드</summary>
