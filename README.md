@@ -140,6 +140,7 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 </details>
 
 ## 4. 인벤토리 & 장비 & 아이템
+![Image](https://github.com/user-attachments/assets/254f79e0-540d-4388-b1e5-fa2c63f2ca38)
 <details>
     <summary>보기</summary>
 
@@ -162,13 +163,6 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Characters/Player_InvenComponent.cpp#L89-L106
 </details>
 
-인벤토리 매니저에서 아이템 ID를 통해 아이템 정보를 조회하고 인벤토리에 해당 아이템이 존재하는지 확인 후 인벤토리 스토리지에 추가하거나 수량을 올립니다.
-<details>
-    <summary>코드</summary>
-    
-https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.cpp#L93-L115
-</details>
-
 인벤토리 매니저와 위젯간에는 델리게이트를 통해 연결하여 UI를 갱신하도록 만들었습니다.
 <details>
     <summary>코드</summary>
@@ -179,16 +173,20 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 
 인벤토리의 타일 뷰 위젯에 표시된 아이템에 커서를 올리면 아이템 정보를 표시합니다.
 
-![Image](https://github.com/user-attachments/assets/d3d07aa2-937d-4aaa-b0ab-47c5cabf80e8)
+![Image](https://github.com/user-attachments/assets/254f79e0-540d-4388-b1e5-fa2c63f2ca38)
 <details>
     <summary>코드</summary>
     
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/UI/UI_Inventory.cpp#L92-L113
 </details>
 
+카테고리를 변경하는 것으로 해당 카테고리의 아이템만 표시할 수 있습니다.
+
+![Image](https://github.com/user-attachments/assets/42555cf8-2c6a-4c94-9638-ec0c4174c003)
+
 아이템을 클릭하면 메뉴 앵커를 생성하고 메뉴 앵커의 사용 버튼을 클릭하여 인벤토리에서 아이템을 사용할 수 있습니다.
 
-![Image](https://github.com/user-attachments/assets/1d1ac15f-61b3-4592-9b9d-785f330b4082)
+![Image](https://github.com/user-attachments/assets/26603ad2-fc18-48d7-b3e3-9711ee7df0d6)
 <details>
     <summary>코드</summary>
     
@@ -197,7 +195,10 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/UI/UI_ItemSelectMenu.cpp#L46-L59
 </details>
 
-장비창에서는 현재 장비된 아이템 목록을 표시합니다. 장비 슬롯을 클릭 시 인벤토리에서 해당 슬롯에 장비 가능한 아이템 리스트를 표시합니다.
+장비창에서는 현재 장비된 아이템 목록을 표시합니다.
+장비 슬롯을 클릭 시 인벤토리에서 해당 슬롯에 장비 가능한 아이템 리스트를 표시하고 아이템을 클릭하면 장착할 수 있습니다.
+
+![Image](https://github.com/user-attachments/assets/3d3fdae2-c091-44d2-8f3a-27db6d10a1b3)
 
 ![Image](https://github.com/user-attachments/assets/6dc6e8b0-83f2-40d6-9c61-3f481bbff4af)
 ![Image](https://github.com/user-attachments/assets/d0a4fffa-e8f3-4646-85d8-80f040be73d2)
