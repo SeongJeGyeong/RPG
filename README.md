@@ -188,8 +188,10 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 ![Image](https://github.com/user-attachments/assets/42555cf8-2c6a-4c94-9638-ec0c4174c003)
 <details>
     <summary>코드</summary>
-    
-https://github.com/SeongJeGyeong/R비
+
+https://github.com/SeongJeGyeong/RPG/blob/dea1fea8d96c99679d439b3f07cdc70afc189cce/Source/RPGPortfolio/UI/UI_Inventory.cpp#L115-L147
+</details>
+
 장비창에서는 현재 장비된 아이템 목록을 표시합니다.
 장비 슬롯을 클릭 시 인벤토리에서 해당 슬롯에 장비 가능한 아이템 리스트를 표시하고 아이템을 클릭하면 장착할 수 있습니다.
 
