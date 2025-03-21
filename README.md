@@ -93,6 +93,7 @@ https://github.com/SeongJeGyeong/RPG/blob/7e3778cfaea6e92e17ba9f8dff82f1efc71214
 ![Image](https://github.com/user-attachments/assets/1c68484b-3807-4791-83a4-a2917f988568)
 
 현재 픽셀의 위치와 주변 픽셀의 위치의 CustomStencil 값을 계산하는 머티리얼 함수를 작성합니다.
+
 ![Image](https://github.com/user-attachments/assets/17d7b56b-62e9-4865-9faa-5f41f82e1ece)
 
 포스트 프로세스용 머티리얼을 생성하고 함수를 통해 출력받은 값을 이용해
@@ -149,6 +150,7 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 
 UGameInstanceSubsystem 클래스를 상속받아 인벤토리 매니저 클래스를 구현하여 레벨이 변경되어도 인벤토리 정보가 유지되도록 만들었습니다.<br/>
 아이템들의 정보는 데이터 테이블을 통해 관리하고, 인벤토리 매니저가 초기화될 때 테이블에서 아이템 정보를 가져와 Tmap 컨테이너에 저장합니다.
+
 ![Image](https://github.com/user-attachments/assets/e54d9ebd-cd32-4e35-b5aa-cc18bcab0c8d)
 <details>
     <summary>코드</summary>
@@ -219,6 +221,7 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 </details>
 
 애님 노티파이를 이용해 공격 몽타주의 각 타이밍 마다 로직을 실행합니다.
+
 ![Image](https://github.com/user-attachments/assets/4d1a19e8-9ae2-464f-9008-b03f6da0972e)
 
 HitCheck 구간 동안 Tick 함수 내에서 Sweep으로 피격 대상을 검출합니다.<br/>
@@ -288,11 +291,19 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L430-L453
 </details>
 
-몬스터가 사망할 경우 아이템을 드랍합니다.<br/>
+몬스터가 사망할 경우 아이템을 드랍합니다.
+
+![Image](https://github.com/user-attachments/assets/273e7734-be66-4031-8864-d75c6172ab90)
+
+
 아이템은 구간 확률을 이용해 몬스터의 아이템 드랍 데이터테이블에 있는 아이템 중 랜덤으로 드랍되도록 만들었습니다.
 
+![Image](https://github.com/user-attachments/assets/2b97cb57-10ad-458f-a0e6-a9577655013d)
 
 사망한 몬스터의 메시는 머티리얼 함수를 이용해 일정시간 뒤 서서히 사라지도록 만들었습니다.
+
+![Image](https://github.com/user-attachments/assets/99a7c86c-dccf-4490-a155-468d9b7c49d9)
+
 
 </details>
 
@@ -344,9 +355,11 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 
 ### 설명
 일반 몬스터의 비헤이비어 트리입니다.
+
 ![Image](https://github.com/user-attachments/assets/88ef3384-97ab-4c59-9997-ac0bb4655208)
 
 보스 몬스터의 비헤이비어 트리입니다.
+
 ![Image](https://github.com/user-attachments/assets/05e22d10-078d-4281-a98b-9cb24de19ba7)
 
 </details>
