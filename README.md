@@ -220,7 +220,8 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
     <summary>보기</summary>
 
 ### 공격
-공격 발동 시 공격 타입에 따라 스태미나 소모량을 측정하고 스탯 컴포넌트를 통해 스탯 매니저에서 현재 스태미나가 충분한지 판단합니다. 
+공격 발동 시 공격 타입에 따라 스태미나 소모량을 측정하고 스탯 컴포넌트를 통해 스탯 매니저에서 현재 스태미나가 충분한지 판단합니다.
+
 충분할 경우 스태미나를 소모하고 공격 상태에 들어갑니다.
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L780-L789
 
@@ -231,6 +232,7 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 ![Image](https://github.com/user-attachments/assets/4d1a19e8-9ae2-464f-9008-b03f6da0972e)
 
 HitCheck 구간 동안 Tick 함수 내에서 Sweep으로 피격 대상을 검출합니다.
+
 똑같은 대상이 여러 번 공격당하는 걸 방지하기 위해 히트한 액터를 배열에 넣고 체크하도록 만들었습니다.
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L724-L778
 
@@ -251,13 +253,14 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L609-L625
 
 ApplyPointDamage 함수를 이용해 몬스터가 피격당한 위치 정보를 보내고, 해당 위치에 피격 이펙트가 발생하도록 만들었습니다.
+
 일반 몬스터의 경우 타임라인을 이용해 메시가 진동하도록 만들었습니다.
 ![Image](https://github.com/user-attachments/assets/88e02a72-46c5-4a9f-a573-ec798a5c4ce7)
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Monsters/Monster_Base.cpp#L224-L239
 
 보스 몬스터의 경우 피직스 에셋을 만들고, 피격당한 본에 잠시동안 피직스를 활성화시켜 피격당한 부위가 흔들리도록 만들었습니다.
 ![Image](https://github.com/user-attachments/assets/179bf2e1-d758-4062-a3bd-cb356fe213c4)
-![Image](https://github.com/user-attachments/assets/0445634f-61d4-4860-9e8d-9c99d39672d6)
+![Image](https://github.com/user-attachments/assets/7ef41c17-90b5-4279-b473-def505cad04c)
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L430-L453
 
 </details>
