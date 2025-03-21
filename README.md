@@ -112,6 +112,9 @@ https://github.com/SeongJeGyeong/RPG/blob/7e3778cfaea6e92e17ba9f8dff82f1efc71214
 
 ---
 언리얼 인터페이스 클래스를 상속하여 상호 작용 가능한 오브젝트를 만들었습니다.
+
+![Image](https://github.com/user-attachments/assets/16d04358-41a7-40f6-9908-47bfeb65a32d)
+![Image](https://github.com/user-attachments/assets/ef037b21-fea8-4381-86cb-6426792fce9e)
 <details>
     <summary>코드</summary>
 
@@ -120,9 +123,6 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/Item/Item_Dropped_Base.cpp#L69-L79
 https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/InteractionProps/Interaction_Lever.cpp#L51-L80
 </details>
-
-![Image](https://github.com/user-attachments/assets/16d04358-41a7-40f6-9908-47bfeb65a32d)
-![Image](https://github.com/user-attachments/assets/ef037b21-fea8-4381-86cb-6426792fce9e)
 
 캐릭터가 상호 작용 가능한 오브젝트에 오버랩될 경우 상호 작용 텍스트를 표시하고 오브젝트를 상호작용 배열에 추가합니다.
 <details>
