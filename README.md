@@ -390,6 +390,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
 <details>
     <summary><b>보기</b></summary>
 
+---
 플레이어나 몬스터가 사용하는 투사체 클래스는 오브젝트 풀 패턴을 사용하여 투사체를 재사용할 수 있도록 만들었습니다.
 <details>
     <summary><b>코드</b></summary>
@@ -399,7 +400,6 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L89-L116
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.cpp#L51-L66
 </details>
-
 
 투사체를 미리 일정 수량 스폰해두고 오브젝트 풀에 담아놓는 함수를 구현하여 런타임 중에 투사체가 스폰되는 경우를 줄일 수 있도록 만들습니다.
 <details>
@@ -413,11 +413,12 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 <details>
     <summary><b>보기</b></summary>
 
-### 설명
+---
 일반 몬스터의 비헤이비어 트리입니다.
 
 ![Image](https://github.com/user-attachments/assets/88ef3384-97ab-4c59-9997-ac0bb4655208)
 
+---
 보스 몬스터의 비헤이비어 트리입니다.
 
 ![Image](https://github.com/user-attachments/assets/05e22d10-078d-4281-a98b-9cb24de19ba7)
@@ -429,5 +430,16 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
     <summary><b>보기</b></summary>
 
 ### 설명
+
+</details>
+
+## 트러블 슈팅
+<details>
+    <summary><b>보기</b></summary>
+
+히트 체크 촘촘하게 만든 것
+애니메이션 스레드 세이프
+IK 리타기팅
+가비지 컬렉션
 
 </details>
