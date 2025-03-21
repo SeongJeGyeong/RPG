@@ -207,12 +207,10 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 
 ![Image](https://github.com/user-attachments/assets/3d3fdae2-c091-44d2-8f3a-27db6d10a1b3)
 
-![Image](https://github.com/user-attachments/assets/6dc6e8b0-83f2-40d6-9c61-3f481bbff4af)
-![Image](https://github.com/user-attachments/assets/d0a4fffa-e8f3-4646-85d8-80f040be73d2)
-
 퀵슬롯에 장착된 아이템은 단축키를 통해 변경 및 사용이 가능합니다. 퀵슬롯으로 아이템 사용 시에도 인벤토리에서 사용할 때와 동일하게 사용 대기시간을 가집니다.
 
-![Image](https://github.com/user-attachments/assets/16e1b66c-af2b-431a-b251-bb6a1bb43a78)
+![Image](https://github.com/user-attachments/assets/4a483782-15d8-48c0-a502-3fc80517f55b)
+![Image](https://github.com/user-attachments/assets/2bff713e-c9a2-4805-a4b8-f141bc446f64)
 
 </details>
 
