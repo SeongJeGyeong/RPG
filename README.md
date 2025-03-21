@@ -210,7 +210,6 @@ https://github.com/SeongJeGyeong/RPG/blob/dea1fea8d96c99679d439b3f07cdc70afc189c
     <summary>보기</summary>
     
 공격 발동 시 공격 타입에 따라 스태미나 소모량을 측정하고 스탯 컴포넌트를 통해 스탯 매니저에서 현재 스태미나가 충분한지 판단합니다.
-
 충분할 경우 스태미나를 소모하고 공격 상태에 들어가고, 현재 콤보에 따라 다른 몽타주를 실행합니다.(점프공격 제외)
 <details>
     <summary>코드</summary>
@@ -223,7 +222,6 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 ![Image](https://github.com/user-attachments/assets/4d1a19e8-9ae2-464f-9008-b03f6da0972e)
 
 HitCheck 구간 동안 Tick 함수 내에서 Sweep으로 피격 대상을 검출합니다.
-
 똑같은 대상이 여러 번 공격당하는 걸 방지하기 위해 히트한 액터를 배열에 넣고 체크하도록 만들었습니다.
 <details>
     <summary>코드</summary>
@@ -239,7 +237,8 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Manager/GISubsystem_StatMgr.cpp#L121-L139
 </details>
 
-모션워핑 플러그인을 적용하여 공격 몽타주 재생 중 이동 키를 입력하는 것으로 방향 전환이 가능하도록 만들었습니다.Translation과 Rotation 설정을 유동적으로 바꾸기 위해 C++에서 Modifier를 설정합니다.
+모션워핑 플러그인을 적용하여 공격 몽타주 재생 중 이동 키를 입력하는 것으로 방향 전환이 가능하도록 만들었습니다.
+Translation과 Rotation 설정을 유동적으로 바꾸기 위해 C++에서 Modifier를 설정합니다.
 락온 중일 경우에는 방향 전환이 불가능하지만, 모션워핑을 통해 적과의 거리를 유지하도록 만들었습니다. 적과 약 2m의 거리를 유지하도록 몽타주의 루트 모션을 조정합니다.
 <details>
     <summary>코드</summary>
