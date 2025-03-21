@@ -13,7 +13,7 @@
 
 ## 1. 플레이어 입력 로직
 <details>
-    <summary>보기</summary>
+     ### <summary>보기</summary>
 
 ---
 플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
