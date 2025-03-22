@@ -12,6 +12,7 @@
 # 기능 설명
 
 ## 1. 플레이어 입력 로직
+![Image](https://github.com/user-attachments/assets/fa0e758b-42ae-4a48-bff1-2c0352a9fa48)
 <details>
 <summary><b>보기</b></summary>
 
@@ -271,13 +272,12 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 </details>
 
 ## 6. 몬스터 피격
+![Image](https://github.com/user-attachments/assets/0a6a92a0-e8fb-4a33-9b41-d8a16f35aefe)
 <details>
     <summary><b>보기</b></summary>
 
 ---
 몬스터가 플레이어에게 피격 시 타격감을 주기 위해 타이머를 이용해 플레이어에게 역경직을 주었습니다.
-
-![Image](https://github.com/user-attachments/assets/0a6a92a0-e8fb-4a33-9b41-d8a16f35aefe)
 <details>
     <summary><b>코드</b></summary>
 
@@ -336,14 +336,12 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
 </details>
 
 ## 7. 플레이어 피격 & 가드, 회피
+![Image](https://github.com/user-attachments/assets/02a66082-39a4-459e-a08f-a94d8e2d9320)
 <details>
     <summary><b>보기</b></summary>
 
 ---
-플레이어는 피격 시 피격된 방향에 따라 다른 몽타주를 재생합니다.
-
-![Image](https://github.com/user-attachments/assets/02a66082-39a4-459e-a08f-a94d8e2d9320)
-
+플레이어는 피격 시 피격된 방향에 따라 다른 몽타주를 재생합니다.<br/>
 공중에 있거나, 공격의 중량 타입에 따라서도 다른 몽타주를 재생합니다.
 
 ![Image](https://github.com/user-attachments/assets/0b91f62c-2762-49b0-8360-7497bc700954)
@@ -410,6 +408,7 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 </details>
 
 ## 9. 몬스터 AI
+![Image](https://github.com/user-attachments/assets/85e2d625-45c6-45fa-9b93-d758829ddde5)
 <details>
     <summary><b>보기</b></summary>
 
