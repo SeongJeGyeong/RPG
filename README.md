@@ -418,14 +418,49 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 
 ![Image](https://github.com/user-attachments/assets/88ef3384-97ab-4c59-9997-ac0bb4655208)
 
+일반 몬스터의 경우, 플레이어에게 FGenericTeamId를 부여하고 몬스터의 AIController에 AIPerceptionComponent를 부착하여 시야를 이용해 플레이어를 탐지하도록 만들었습니다.<br/>
+플레이어가 탐지되지 않은 상태라면, 몬스터는 스폰 지점을 기준으로 주변을 랜덤하게 배회합니다.
+
+![Image](https://github.com/user-attachments/assets/e333a83d-f2be-411c-83b9-9a18e36fc56e)
+
+몬스터가 플레이어를 탐지하면 Trace_Monster 노드로 플레이어를 추적합니다. 노드의 TickTask에서 타겟이 된 플레이어와의 거리와 위치를 체크합니다.
+
+![Image](https://github.com/user-attachments/assets/7d03093a-a6bd-4c7e-9d07-04dfdf5ac207)
+
+추적 중인 플레이어가 탐지 범위에서 벗어났을 경우, 몬스터는 가장 최근에 플레이어를 탐지한 위치까지 이동하며 플레이어를 찾습니다. 플레이어를 찾지 못할 경우 추적을 중단하고 스폰 지점 근처를 배회하는 루틴으로 돌아갑니다.
+
+![Image](https://github.com/user-attachments/assets/0aa76e25-d71d-45c1-9276-fb16116c0af1)
+
+플레이어가 공격 범위 안에 들어오면 공격 노드를 실행하고, 실행 후 플레이어를 바라보며 일정 시간 대기합니다.<br/>
+대기 후에 플레이어가 아직 공격 범위 안에 있을 경우 다시 공격하며, 범위 밖에 있을 경우 플레이어 주변을 돌며 잠시동안 대치 상태를 이룹니다.<br/>
+대치 상태 종료 후 공격 범위 안에 있으면 공격을, 밖에 있으면 추적을 실행합니다.
+
+![Image](https://github.com/user-attachments/assets/35f47e1a-411d-48cd-bb81-a74ae827f483)
+
 ---
 보스 몬스터의 비헤이비어 트리입니다.
 
 ![Image](https://github.com/user-attachments/assets/05e22d10-078d-4281-a98b-9cb24de19ba7)
 
+보스 1페이즈의 경우 플레이어의 방향이 몬스터 정면 60도 반경 기준으로 왼쪽, 오른쪽, 정면 중 어디에 있는지에 따라 사용할 공격 패턴을 결정하도록 만들었습니다.<br/>
+플레이어의 방향을 판별 후 각 방향에 맞는 공격 애니메이션을 재생합니다. 공격 후 일정 시간 대기한 뒤, 플레이어가 공격 범위 안에 있는지에 따라 공격 또는 추적을 실행합니다.
+
+![Image](https://github.com/user-attachments/assets/85e2d625-45c6-45fa-9b93-d758829ddde5)
+
+보스의 체력이 50% 이하가 되면 2페이즈가 시작되며, 기존의 패턴에 더해 돌진과 투사체를 발사하는 2개의 패턴이 추가됩니다. 랜덤 함수와 플레이어와의 거리를 사용해 어떤 패턴을 사용할 지 판별합니다.<br/>
+2페이즈의 돌진 패턴의 경우 애님 노티파이를 이용해 일정 시간 동안 일직선으로 돌진하도록 만들었습니다. 돌진하는 동안은 보스의 몸체를 중심으로 구형의 공격 판정을 발생시키며, 돌진이 끝나는 타이밍에 보스를 중심으로 더 큰 구형의 공격 판정을 한 번 발생시킵니다.
+
+![Image](https://github.com/user-attachments/assets/13e5ac38-2057-4d34-9add-b05322ce43bd)
+
+투사체 발사 패턴의 경우 SuggestProjectileVelocity_CustomArc 함수를 이용하여 플레이어 위치를 향해 포물선을 그리며 발사되도록 만들었습니다. 또한 플레이어에게 적중하지 않았을 경우 바닥의 일정 범위에 장판을 생성해 범위 내에 다시 공격 판정을 가하도록 만들었습니다.
+
+![Image](https://github.com/user-attachments/assets/4d89c39a-442a-4539-ad33-0088129aef7f)
+
 </details>
 
 ## 10. Foot IK
+![Image](https://github.com/user-attachments/assets/7f0de238-a277-4380-bfff-b59b8dc1b443)
+![Image](https://github.com/user-attachments/assets/92ca0dbe-68fd-4139-98e0-91ddddeff22a)
 <details>
     <summary><b>보기</b></summary>
 
