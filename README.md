@@ -577,8 +577,8 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 
 플레이어가 공중에 떠 있거나 몽타주를 재생중일 때는 컨트롤릭 내부의 함수를 실행하지 않도록 만들었습니다.
 
-![Image](https://github.com/user-attachments/assets/e91e9396-caa7-409a-8287-bad0d50c7664)
-![Image](https://github.com/user-attachments/assets/52ff204d-c712-40b4-9c95-859b0713e7ec)
+![Image](https://github.com/user-attachments/assets/c11b1df7-9066-4c06-905c-570b3551bb98)
+![Image](https://github.com/user-attachments/assets/9da5dfb7-d67a-48aa-b4ba-1d1d00282190)
 
 FootTrace 함수 내부에 Aim Math를 이용해 Foot 본의 벡터에서 바닥의 HitNormal 벡터로의 트랜스폼을 얻어 IK Foot 본의 회전 정보를 가져오는 로직을 추가했습니다.
 
@@ -586,6 +586,7 @@ FootTrace 함수 내부에 Aim Math를 이용해 Foot 본의 벡터에서 바닥
 
 FootTrace에서 얻은 회전 정보를 이용해 IK Foot 본을 보간하며 회전시키는 로직을 추가했습니다.<br/>
 발각도 회전 기능은 플레이어의 속도가 100보다 낮을 경우에만 작동하도록 만들었습니다.
+
 ![Image](https://github.com/user-attachments/assets/d2f6027c-4d54-447e-adf6-943d23dde38d)
 
 </details>
