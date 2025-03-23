@@ -674,6 +674,88 @@ https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac279
 
 ---
 
-애니메이션 스레드 세이프
+### 4. 애니메이션 스레드 세이프
+
+언리얼 엔진은 여러 스레드로 구성되어 있고, 게임의 기
+![Image](https://github.com/user-attachments/assets/22e05132-1d44-49ae-aa87-dcb1b4b405d8)
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L726-L751
+</details>
+
+---
+
+### 2. IK 리타기팅
+
+캐릭터 애니메이션의 경우 IK 리타기터를 이용하여 다른 스켈레톤의 애니메이션을 리타겟팅하여 사용하였습니다.
+
+![Image](https://github.com/user-attachments/assets/b0530178-2ced-4bf1-b807-fc621c124a01)
+
+다만 애니메이션을 리타겟팅할 때, 원본 스켈레톤의 IK용 본의 경우 계층구조에서 동 떨어져 있지만 IK를 적용할 본의 위치와 회전 정보가 일치하도록 애니메이션 제작자가 임의로 조정하여 만든 본이기 때문에<br/>
+이를 리타겟팅할 경우 위치나 회전이 어긋나게 되는 상황이 발생했습니다.
+
+![Image](https://github.com/user-attachments/assets/1873c95b-6395-4f68-ab24-6159d47df69b)
+![Image](https://github.com/user-attachments/assets/6f88f7bb-707b-48a9-bd69-ce7a18674ab5)
+
+컨트롤 릭에서 Set Transform 노드로 매 틱마다 IK 본의 트랜스폼을 적용할 본과 일치시킬 수도 있지만,<br/>
+혹시 모를 오류가 생길 가능성을 방지하기 위해 애니메이션 시퀀스의 FK 컨트롤 릭으로 편집 기능을 사용해<br/>
+IK 본의 모든 키프레임을 IK를 적용할 본의 위치, 회전과 일치시켜 IK 본의 위치 자체를 재설정할 수 있었습니다.
+
+![Image](https://github.com/user-attachments/assets/0b9f223e-9930-4613-bd4e-cdf209a8ac3f)
+![Image](https://github.com/user-attachments/assets/ba1f8021-a574-4b8a-8925-f4ebf763bc69)
+![Image](https://github.com/user-attachments/assets/cc20ecc8-6a66-46eb-8098-3460e2f07abb)
+
+---
+
+### 3. 가비지 컬렉션(GC)
+
+언리얼 엔진의 경우 마크-스윕 방식의 가비지 컬렉션 기능을 탑재하고 있습니다. 런타임에 일정 시간마다 Reference Graph를 순회하며, 사용되지 않는 메모리를 자동으로 해제함으로써 메모리를 자동으로 관리하고 메모리 누수를 방지합니다.<br/>
+개발 초기에는 가비지 컬렉션에 대해 알지 못해 인벤토리와 퀵슬롯 아이템을 관리하는 컨테이너 변수를 가비지 컬렉션 대상에 추가하지 않아 아직 사용중인 메모리가 해제되는 경우가 발생하여,<br/>
+가끔씩 데이터가 이상하게 표시되거나 메모리에 접근하는 순간 크래시가 나는 등 곤혹을 겪었습니다.<br/>
+멤버 변수를 가비지 컬렉션이 자동 해제하지 않도록 만들기 위해서 일반적으로는 UPROPERTY 리플렉션을 사용하지만, 중첩 컨테이너, 구조체 포인터 등 블루프린트상에 노출 할 수 없는 형식의 변수는 UPROPERTY 리플렉션을 달 수 없었습니다.
+
+![Image](https://github.com/user-attachments/assets/af740b47-176f-4d67-bd1e-0d19ba6189a6)
+![Image](https://github.com/user-attachments/assets/f9282144-692f-47ee-b8c7-367cc3a757b9)
+
+인벤토리의 경우 아이템 조회의 편리성을 위해 중첩된 컨테이너를 사용하고 싶었기에 인터넷에서 정보를 알아본 결과,<br/>
+구조체 안에 컨테이너를 선언하고 해당 구조체 유형의 컨테이너를 선언하는 방법으로 중첩 컨테이너에 UPROPERTY 리플렉션을 사용할 수 있도록 만들 수 있었습니다.<br/>
+이를 이용해 인벤토리 및 오브젝트 풀의 중첩 컨테이너를 구현하였습니다.<br/>
+
+인벤토리
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.h#L31-L32
+https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Header/Struct.h#L235-L241
+https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Header/Struct.h#L225-L233
+</details>
+<br/>
+
+오브젝트 풀
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L40-L41
+https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L12-L24
+</details>
+
+---
+
+### 4. 애니메이션 스레드 세이프
+
+애니메이션 블루프린트에서 액터 등의 외부 객체의 변수를 가져와서 사용할 경우,<br/>
+게임 스레드에서 애니메이션 스레드로 변수를 안전하게 전달하기 위한 방법이 필요합니다.<br/>
+FAnimInstanceProxy 구조체를 이용하여 플레이어 액터 내부에서 실시간으로 변동되는 변수를 가져와<br/>
+애니메이션 블루프린트에서 사용할 수 있도록 처리를 거친 뒤 AnimInstance 클래스의 변수를 갱신해주는 것으로<br/>
+변수를 안전하게 애니메이션 블루프린트로 전달할 수 있도록 만들었습니다.
+
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/53392531863dd373cdabea0a7620095e6fe350be/Source/RPGPortfolio/CharacterAnim/AnimInstance_Knight.h#L22-L56
+https://github.com/SeongJeGyeong/RPG/blob/53392531863dd373cdabea0a7620095e6fe350be/Source/RPGPortfolio/CharacterAnim/AnimInstance_Knight.cpp#L11-L73
+</details>
+
 
 </details>
