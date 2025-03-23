@@ -441,6 +441,7 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/AIC_Monster_Base.cpp#L82-L94
 </details>
 
+
 플레이어가 탐지되지 않은 상태라면, 몬스터는 스폰 지점을 기준으로 주변을 랜덤하게 배회합니다.
 
 ![Image](https://github.com/user-attachments/assets/e333a83d-f2be-411c-83b9-9a18e36fc56e)
@@ -450,6 +451,7 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_NextPos_Monster.cpp#L20-L53
 </details>
 
+
 몬스터가 플레이어를 탐지하면 Trace_Monster 노드로 플레이어를 추적합니다.
 
 ![Image](https://github.com/user-attachments/assets/7d03093a-a6bd-4c7e-9d07-04dfdf5ac207)
@@ -458,6 +460,7 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_Trace_Monster.cpp#L22-L47
 </details>
+
 
 Trace_Monster 노드의 TickTask에서 타겟이 된 플레이어와의 거리와 위치를 체크합니다.<br/>
 추적 중인 플레이어가 탐지 범위에서 벗어났을 경우, 몬스터는 가장 최근에 플레이어를 탐지한 위치까지 이동하며 플레이어를 찾습니다.<br/>
@@ -470,6 +473,7 @@ Trace_Monster 노드의 TickTask에서 타겟이 된 플레이어와의 거리�
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_Trace_Monster.cpp#L49-L97
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_LoseTarget_Monster.cpp#L10-L21
 </details>
+
 
 플레이어가 공격 범위 안에 들어오면 공격 노드를 실행하고, 실행 후 플레이어를 바라보며 일정 시간 대기합니다.<br/>
 대기 후에 플레이어가 아직 공격 범위 안에 있을 경우 다시 공격하며, 범위 밖에 있을 경우 플레이어 주변을 돌며 잠시동안 대치 상태를 이룹니다.<br/>
