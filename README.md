@@ -440,8 +440,8 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Characters/Player_Base_Knight.h#L222
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/AIC_Monster_Base.cpp#L82-L94
 </details>
-
 <br/>
+
 플레이어가 탐지되지 않은 상태라면, 몬스터는 스폰 지점을 기준으로 주변을 랜덤하게 배회합니다.
 
 ![Image](https://github.com/user-attachments/assets/e333a83d-f2be-411c-83b9-9a18e36fc56e)
@@ -450,8 +450,8 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
     
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_NextPos_Monster.cpp#L20-L53
 </details>
-
 <br/>
+
 몬스터가 플레이어를 탐지하면 Trace_Monster 노드로 플레이어를 추적합니다.
 
 ![Image](https://github.com/user-attachments/assets/7d03093a-a6bd-4c7e-9d07-04dfdf5ac207)
