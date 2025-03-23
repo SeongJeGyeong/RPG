@@ -61,6 +61,7 @@ https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa
     
 https://github.com/SeongJeGyeong/RPG/blob/aefae85385cf8c711bd623c7ad25993b3e4dceac/Source/RPGPortfolio/Characters/Player_CameraArm.cpp#L205-L233
 </details>
+<br/>
 
 타겟 배열의 컴포넌트 중 가장 정면에 가까운 컴포넌트를 락온 대상으로 합니다. 단, 카메라 중앙 기준 50도 이내에 있는 컴포넌트들은 거리가 더 가까운 컴포넌트를 우선적으로 락온합니다.
 <details>
@@ -87,6 +88,7 @@ https://github.com/SeongJeGyeong/RPG/blob/aefae85385cf8c711bd623c7ad25993b3e4dce
 
 https://github.com/SeongJeGyeong/RPG/blob/7e3778cfaea6e92e17ba9f8dff82f1efc7121474/Source/RPGPortfolio/System/Component/LockOnTargetComponent.cpp#L30-L44
 </details>
+<br/>
 
 몬스터가 락온 중일 때만 커스텀 뎁스 패스 렌더를 활성화하여 락온 중인 적에게 붉은 외곽선을 표시하도록 만들었습니다.
 
@@ -94,6 +96,12 @@ https://github.com/SeongJeGyeong/RPG/blob/7e3778cfaea6e92e17ba9f8dff82f1efc71214
 ![Image](https://github.com/user-attachments/assets/7dba4672-0500-44bc-947e-1f97f41a1ac3)
 ![Image](https://github.com/user-attachments/assets/df17e708-5872-4de3-8e3d-627c0574267f)
 ![Image](https://github.com/user-attachments/assets/1c68484b-3807-4791-83a4-a2917f988568)
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/9cc2f76824f01a62a2472774d01e99760da45067/Source/RPGPortfolio/Monsters/Monster_Base.cpp#L368-L372
+</details>
+<br/>
 
 현재 픽셀의 위치와 주변 픽셀의 위치의 CustomStencil 값을 계산하는 머티리얼 함수를 작성합니다.
 
@@ -129,6 +137,7 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/Item/Item_Dropped_Base.cpp#L69-L79
 https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/InteractionProps/Interaction_Lever.cpp#L51-L80
 </details>
+<br/>
 
 캐릭터가 상호 작용 가능한 오브젝트에 오버랩될 경우 상호 작용 텍스트를 표시하고 오브젝트를 상호작용 배열에 추가합니다.
 <details>
@@ -136,6 +145,7 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
     
 https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L1156-L1165
 </details>
+<br/>
 
 상호작용 키를 입력 시 현재 오버랩된 상호 작용 오브젝트중 가장 최근에 오버랩된 오브젝트의 Interaction 함수를 실행합니다.
 <details>
@@ -163,6 +173,7 @@ UGameInstanceSubsystem 클래스를 상속받아 인벤토리 매니저 클래�
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.cpp#L8-L21
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.cpp#L36-L48
 </details>
+<br/>
 
 플레이어 캐릭터는 Player_InvenComponent를 통해 인벤토리 매니저와 통신합니다.<br/>
 플레이어가 아이템을 획득할 경우 인벤토리 컴포넌트를 통해 인벤토리 매니저로 아이템 ID와 수량을 전달합니다. 퀵슬롯에 등록된 아이템의 경우 퀵슬롯 UI도 갱신합니다.
@@ -171,6 +182,7 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
     
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Characters/Player_InvenComponent.cpp#L89-L106
 </details>
+<br/>
 
 인벤토리 매니저와 위젯간에는 델리게이트를 통해 연결하여 UI를 갱신하도록 만들었습니다.
 <details>
@@ -189,6 +201,7 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
     
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/UI/UI_Inventory.cpp#L92-L113
 </details>
+<br/>
 
 카테고리를 변경하는 것으로 해당 카테고리의 아이템만 표시할 수 있습니다.
 
@@ -211,6 +224,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
 https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/UI/UI_EquipItemList.cpp#L46-L77
 https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/UI/UI_InvenItem.cpp#L85-L123
 </details>
+<br/>
 
 퀵슬롯에 장착된 아이템은 단축키를 통해 변경 및 사용이 가능합니다. 퀵슬롯으로 아이템 사용 시에도 인벤토리에서 사용할 때와 동일하게 사용 대기시간을 가집니다.
 
@@ -240,6 +254,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L780-L789
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/State/State_Attack.cpp#L8-L36
 </details>
+<br/>
 
 애님 노티파이를 이용해 공격 몽타주의 각 타이밍 마다 로직을 실행합니다.
 
@@ -252,6 +267,7 @@ HitCheck 구간 동안 Tick 함수 내에서 Sweep으로 피격 대상을 검출
 
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L724-L778
 </details>
+<br/>
 
 공격을 통해 소모된 스태미나는 스탯 매니저에서 타이머를 이용해 일정 시간 뒤 회복을 시작합니다.
 <details>
@@ -260,6 +276,7 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Manager/GISubsystem_StatMgr.cpp#L103-L113
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Manager/GISubsystem_StatMgr.cpp#L121-L139
 </details>
+<br/>
 
 모션워핑 플러그인을 적용하여 공격 몽타주 재생 중 이동 키를 입력하는 것으로 방향 전환이 가능하도록 만들었습니다.<br/>
 Translation과 Rotation 설정을 유동적으로 바꾸기 위해 C++에서 Modifier를 설정합니다.<br/>
@@ -269,6 +286,7 @@ Translation과 Rotation 설정을 유동적으로 바꾸기 위해 C++에서 Mod
 
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L963-L1049
 </details>
+<br/>
 
 UDamageType 클래스를 상속받은 커스텀 클래스로 공격에 타입과 중량 정보를 추가할 수 있도록 만들었습니다.
 <details>
@@ -292,6 +310,7 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 
 https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08c8/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L609-L625
 </details>
+<br/>
 
 ApplyPointDamage 함수를 이용해 몬스터가 피격당한 위치 정보를 보내고, 해당 위치에 피격 이펙트가 발생하도록 만들었습니다.<br/>
 일반 몬스터의 경우 타임라인을 이용해 메시가 진동하도록 만들었습니다.
@@ -323,6 +342,7 @@ https://github.com/SeongJeGyeong/RPG/blob/9343c33f06e2285e7ccec42f9158c05a646e08
 
 https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/Monsters/Monster_Base.cpp#L299-L311
 </details>
+<br/>
 
 아이템은 구간 확률을 이용해 몬스터의 아이템 드랍 데이터테이블에 있는 아이템 중 랜덤으로 드랍되도록 만들었습니다.<br/>
 드랍되는 아이템의 지정은 몬스터 BeginPlay 시점에 결정됩니다.
@@ -333,6 +353,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
     
 https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/Monsters/Monster_Base.cpp#L134-L151
 </details>
+<br/>
 
 사망한 몬스터의 메시는 머티리얼 함수를 이용해 일정시간 뒤 서서히 사라지도록 만들었습니다.
 
@@ -411,6 +432,7 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L89-L116
 https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c3d/Source/RPGPortfolio/System/Subsys_ObjectPool.cpp#L51-L66
 </details>
+<br/>
 
 투사체를 미리 일정 수량 스폰해두고 오브젝트 풀에 담아놓는 함수를 구현하여 런타임 중에 투사체가 스폰되는 경우를 줄일 수 있도록 만들습니다.
 <details>
@@ -460,8 +482,8 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_Trace_Monster.cpp#L22-L47
 </details>
-
 <br/>
+
 Trace_Monster 노드의 TickTask에서 타겟이 된 플레이어와의 거리와 위치를 체크합니다.<br/>
 추적 중인 플레이어가 탐지 범위에서 벗어났을 경우, 몬스터는 가장 최근에 플레이어를 탐지한 위치까지 이동하며 플레이어를 찾습니다.<br/>
 플레이어를 찾지 못할 경우 추적을 중단하고 스폰 지점 근처를 배회하는 루틴으로 돌아갑니다.
@@ -473,8 +495,8 @@ Trace_Monster 노드의 TickTask에서 타겟이 된 플레이어와의 거리�
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_Trace_Monster.cpp#L49-L97
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_LoseTarget_Monster.cpp#L10-L21
 </details>
-
 <br/>
+
 플레이어가 공격 범위 안에 들어오면 공격 노드를 실행하고, 실행 후 플레이어를 바라보며 일정 시간 대기합니다.<br/>
 대기 후에 플레이어가 아직 공격 범위 안에 있을 경우 다시 공격하며, 범위 밖에 있을 경우 플레이어 주변을 돌며 잠시동안 대치 상태를 이룹니다.<br/>
 대치 상태 종료 후 공격 범위 안에 있으면 공격을, 밖에 있으면 추적을 실행합니다.
@@ -505,6 +527,7 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTS_GS_AttackPattern.cpp#L16-L56
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTT_GS_Attack.cpp#L79-L98
 </details>
+<br/>
 
 보스의 체력이 50% 이하가 되면 2페이즈가 시작되며, 기존의 패턴에 더해 돌진과 투사체를 발사하는 2개의 패턴이 추가됩니다.<br/>
 랜덤 함수와 플레이어와의 거리를 사용해 어떤 패턴을 사용할 지 판별합니다.<br/>
@@ -514,6 +537,7 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTT_GS_P2_PatternSelect.cpp#L10-L42
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTT_GS_Attack.cpp#L39-L77
 </details>
+<br/>
 
 2페이즈의 돌진 패턴의 경우 애님 노티파이를 이용해 일정 시간 동안 일직선으로 돌진하도록 만들었습니다.<br/>
 돌진하는 동안은 보스의 몸체를 중심으로 구형의 공격 판정을 발생시키며,<br/>
@@ -525,6 +549,7 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L114-L143
 </details>
+<br/>
 
 투사체 발사 패턴의 경우 SuggestProjectileVelocity_CustomArc 함수를 이용하여 플레이어 위치를 향해 포물선을 그리며 발사되도록 만들었습니다.<br/>
 또한 플레이어에게 적중하지 않았을 경우 바닥의 일정 범위에 장판을 생성해 범위 내에 다시 공격 판정을 가하도록 만들었습니다.
@@ -548,11 +573,20 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 
 언리얼 삼인칭 샘플 프로젝트의 컨트롤 릭을 사용한 Foot IK에 바닥 경사면에 맞춰 발바닥 각도를 보간하는 기능을 추가했습니다.
 
-플레이어가 공중에 떠 있거나 몽타주를 재생중일 때, 플레이어의 속도가 100보다 높을 때는 컨트롤릭 내부의 함수를 실행하지 않도록 만들었습니다.
+![Image](https://github.com/user-attachments/assets/e566ecbb-0da3-4939-991a-577d0b3ceb5d)
 
-FootTrace 함수 내부에서 Ik 본의 트랜스폼과 Axis을 가져온 뒤, ik 본의 위치 조금 앞에서(y+5) root 본의 z축 높이 +30 ~ -50사이의 공간을 트레이스 합니다.
+플레이어가 공중에 떠 있거나 몽타주를 재생중일 때는 컨트롤릭 내부의 함수를 실행하지 않도록 만들었습니다.
 
-트레이스에 Hit했을 경우 Aim Math를 이용해 Foot 본의 벡터에서 바닥의 HitNormal 벡터로의 트랜스폼을 얻어 회전 정보와 위치 값을 가져옵니다. Hit하지 않았을 경우 IK 본의 원래 트랜스폼을 반환합니다.
+![Image](https://github.com/user-attachments/assets/e91e9396-caa7-409a-8287-bad0d50c7664)
+![Image](https://github.com/user-attachments/assets/52ff204d-c712-40b4-9c95-859b0713e7ec)
+
+FootTrace 함수 내부에 Aim Math를 이용해 Foot 본의 벡터에서 바닥의 HitNormal 벡터로의 트랜스폼을 얻어 IK Foot 본의 회전 정보를 가져오는 로직을 추가했습니다.
+
+![Image](https://github.com/user-attachments/assets/4c44c151-391c-4706-9677-442f22f67bc7)
+
+FootTrace에서 얻은 회전 정보를 이용해 IK Foot 본을 보간하며 회전시키는 로직을 추가했습니다.<br/>
+발각도 회전 기능은 플레이어의 속도가 100보다 낮을 경우에만 작동하도록 만들었습니다.
+![Image](https://github.com/user-attachments/assets/d2f6027c-4d54-447e-adf6-943d23dde38d)
 
 </details>
 
