@@ -434,35 +434,55 @@ https://github.com/SeongJeGyeong/RPG/blob/5341336b919167acacbb6d0c15519b8988ae8c
 
 일반 몬스터의 경우, 플레이어에게 FGenericTeamId를 부여하고 몬스터의 AIController에 AIPerceptionComponent를 부착하여<br/>
 시야를 이용해 플레이어를 탐지하도록 만들었습니다.
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Characters/Player_Base_Knight.h#L222
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/AIC_Monster_Base.cpp#L82-L94
+</details>
 
 플레이어가 탐지되지 않은 상태라면, 몬스터는 스폰 지점을 기준으로 주변을 랜덤하게 배회합니다.
 
 ![Image](https://github.com/user-attachments/assets/e333a83d-f2be-411c-83b9-9a18e36fc56e)
+<details>
+    <summary><b>코드</b></summary>
+    
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_NextPos_Monster.cpp#L20-L53
+</details>
 
 몬스터가 플레이어를 탐지하면 Trace_Monster 노드로 플레이어를 추적합니다.
 
 ![Image](https://github.com/user-attachments/assets/7d03093a-a6bd-4c7e-9d07-04dfdf5ac207)
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_Trace_Monster.cpp#L22-L47
+</details>
 
 Trace_Monster 노드의 TickTask에서 타겟이 된 플레이어와의 거리와 위치를 체크합니다.<br/>
 추적 중인 플레이어가 탐지 범위에서 벗어났을 경우, 몬스터는 가장 최근에 플레이어를 탐지한 위치까지 이동하며 플레이어를 찾습니다.<br/>
 플레이어를 찾지 못할 경우 추적을 중단하고 스폰 지점 근처를 배회하는 루틴으로 돌아갑니다.
 
 ![Image](https://github.com/user-attachments/assets/0aa76e25-d71d-45c1-9276-fb16116c0af1)
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_Trace_Monster.cpp#L49-L97
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_LoseTarget_Monster.cpp#L10-L21
+</details>
 
 플레이어가 공격 범위 안에 들어오면 공격 노드를 실행하고, 실행 후 플레이어를 바라보며 일정 시간 대기합니다.<br/>
 대기 후에 플레이어가 아직 공격 범위 안에 있을 경우 다시 공격하며, 범위 밖에 있을 경우 플레이어 주변을 돌며 잠시동안 대치 상태를 이룹니다.<br/>
 대치 상태 종료 후 공격 범위 안에 있으면 공격을, 밖에 있으면 추적을 실행합니다.
 
 ![Image](https://github.com/user-attachments/assets/35f47e1a-411d-48cd-bb81-a74ae827f483)
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Undead_Assassin/BTT_UA_Atk_Melee.cpp#L13-L25
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_TurnToTarget_Monster.cpp#L16-L38
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/BTT_AroundTarget.cpp#L20-L81
+</details>
 
 ---
 보스 몬스터의 비헤이비어 트리입니다.
@@ -475,26 +495,42 @@ https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39dd
 공격 후 일정 시간 대기한 뒤, 플레이어가 공격 범위 안에 있는지에 따라 공격 또는 추적을 실행합니다.
 
 ![Image](https://github.com/user-attachments/assets/85e2d625-45c6-45fa-9b93-d758829ddde5)
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTS_GS_AttackPattern.cpp#L16-L56
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTT_GS_Attack.cpp#L79-L98
+</details>
 
 보스의 체력이 50% 이하가 되면 2페이즈가 시작되며, 기존의 패턴에 더해 돌진과 투사체를 발사하는 2개의 패턴이 추가됩니다.<br/>
 랜덤 함수와 플레이어와의 거리를 사용해 어떤 패턴을 사용할 지 판별합니다.<br/>
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTT_GS_P2_PatternSelect.cpp#L10-L42
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/AI/Boss/Spider/BTT_GS_Attack.cpp#L39-L77
+</details>
 
 2페이즈의 돌진 패턴의 경우 애님 노티파이를 이용해 일정 시간 동안 일직선으로 돌진하도록 만들었습니다.<br/>
 돌진하는 동안은 보스의 몸체를 중심으로 구형의 공격 판정을 발생시키며,<br/>
 돌진이 끝나는 타이밍에 보스를 중심으로 더 큰 구형의 공격 판정을 한 번 발생시킵니다.
 
 ![Image](https://github.com/user-attachments/assets/13e5ac38-2057-4d34-9add-b05322ce43bd)
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L114-L143
+</details>
 
 투사체 발사 패턴의 경우 SuggestProjectileVelocity_CustomArc 함수를 이용하여 플레이어 위치를 향해 포물선을 그리며 발사되도록 만들었습니다.<br/>
 또한 플레이어에게 적중하지 않았을 경우 바닥의 일정 범위에 장판을 생성해 범위 내에 다시 공격 판정을 가하도록 만들었습니다.
 
 ![Image](https://github.com/user-attachments/assets/4d89c39a-442a-4539-ad33-0088129aef7f)
+<details>
+    <summary><b>코드</b></summary>
+
 https://github.com/SeongJeGyeong/RPG/blob/cdd54970524f3ff3c8a8c08c3dac8dbf2b39ddf3/Source/RPGPortfolio/Projectiles/Proj_GS_Spiderling.cpp#L34-L98
+</details>
 
 </details>
 
