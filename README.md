@@ -645,7 +645,7 @@ https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac279
 인벤토리의 경우 아이템 조회의 편리성을 위해 중첩된 컨테이너를 사용하고 싶었기에 인터넷에서 정보를 알아본 결과, 구조체 안에 컨테이너를 선언하고 해당 구조체 유형의 컨테이너를 선언하는 방법으로 중첩 컨테이너에 UPROPERTY 리플렉션을 사용할 수 있도록 만들 수 있었습니다.<br/>
 이를 이용해 인벤토리 및 오브젝트 풀의 중첩 컨테이너를 가비지 컬렉션에서 관리할 수 있도록 만들었습니다.<br/>
 
-인벤토리
+<b>인벤토리</b>
 <details>
     <summary><b>코드</b></summary>
 
@@ -655,7 +655,7 @@ https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac279
 </details>
 <br/>
 
-오브젝트 풀
+<b>오브젝트 풀</b>
 <details>
     <summary><b>코드</b></summary>
 
