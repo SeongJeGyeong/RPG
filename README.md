@@ -597,9 +597,9 @@ FootTrace에서 얻은 회전 정보를 이용해 IK Foot 본을 보간하며 �
 
 ### 1. 히트 판정
 
-공격의 히트 판정을 공격 모션에 맞춰 갱신하기 위해 SweepMultiByChannel 함수는 Tick 함수에서 내부에서 실행됩니다.<br/>
+공격의 히트 판정을 공격 모션에 맞춰 갱신하기 위해 SweepMultiByChannel 함수는 Tick 함수 내부에서 실행됩니다.<br/>
 다만 Tick 함수에서 Sweep 함수를 실행하게 되면 실행 빈도가 프레임에 의존하게 됩니다.<br/>
-소울라이크 게임처럼 세밀한 히트박스를 구현하기 위해 무기의 콜리전 모양에만 맞춰 Sweep 함수를 실행할 경우, 렉으로 인해 프레임 간의 간격이 커질수록 Sweep 사이의 공백이 커지는 '터널링 현상'에 의해 공격 대상을 제대로 검출하지 못하는 문제가 발생합니다.
+소울라이크 게임처럼 세밀한 히트박스를 구현하기 위해 무기의 콜리전 모양에만 맞춰 Sweep 함수를 실행할 경우, 렉으로 인해 프레임 간의 간격이 커질수록 히트박스 사이의 공백이 커지는 '터널링 현상'에 의해 공격 대상을 제대로 검출하지 못하는 문제가 발생합니다.
 
 ![Image](https://github.com/user-attachments/assets/708e0030-1c87-4495-823e-7994c04b9748)
 
@@ -625,7 +625,7 @@ https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac279
 ![Image](https://github.com/user-attachments/assets/1873c95b-6395-4f68-ab24-6159d47df69b)
 ![Image](https://github.com/user-attachments/assets/6f88f7bb-707b-48a9-bd69-ce7a18674ab5)
 
-컨트롤 릭에서 Set Transform 노드로 매 틱마다 IK 본의 트랜스폼을 적용할 본과 일치시킬 수도 있지만, 혹시 모를 오류가 생길 가능성을 방지하기 위해 애니메이션 시퀀스의 FK 컨트롤 릭으로 편집 기능을 사용해 IK 본의 모든 키프레임을 IK를 적용할 본의 위치, 회전과 일치시켜 IK 본의 위치 자체를 재설정할 수 있었습니다.
+컨트롤 릭에서 Set Transform 노드로 매 틱마다 IK 본의 트랜스폼을 적용할 본과 일치시킬 수도 있지만, 혹시 모를 오류가 생길 가능성을 방지하기 위해 애니메이션 시퀀스의 'FK 컨트롤 릭으로 편집'기능을 사용해 IK 본의 모든 키프레임을 IK를 적용할 본의 위치, 회전과 일치시켜 IK 본의 위치 자체를 재설정할 수 있었습니다.
 
 ![Image](https://github.com/user-attachments/assets/0b9f223e-9930-4613-bd4e-cdf209a8ac3f)
 ![Image](https://github.com/user-attachments/assets/ba1f8021-a574-4b8a-8925-f4ebf763bc69)
@@ -643,7 +643,7 @@ https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac279
 ![Image](https://github.com/user-attachments/assets/f9282144-692f-47ee-b8c7-367cc3a757b9)
 
 인벤토리의 경우 아이템 조회의 편리성을 위해 중첩된 컨테이너를 사용하고 싶었기에 인터넷에서 정보를 알아본 결과, 구조체 안에 컨테이너를 선언하고 해당 구조체 유형의 컨테이너를 선언하는 방법으로 중첩 컨테이너에 UPROPERTY 리플렉션을 사용할 수 있도록 만들 수 있었습니다.<br/>
-이를 이용해 인벤토리 및 오브젝트 풀의 중첩 컨테이너를 구현하였습니다.<br/>
+이를 이용해 인벤토리 및 오브젝트 풀의 중첩 컨테이너를 가비지 컬렉션에서 관리할 수 있도록 만들었습니다.<br/>
 
 인벤토리
 <details>
