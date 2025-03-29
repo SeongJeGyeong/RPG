@@ -625,7 +625,7 @@ https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac279
 
 https://github.com/SeongJeGyeong/RPG/blob/2c3126280eaffbe379cbb1cccc4865b79f37804c/Source/RPGPortfolio/GameInstance_Base.cpp#L129-L148
 https://github.com/SeongJeGyeong/RPG/blob/2c3126280eaffbe379cbb1cccc4865b79f37804c/Source/RPGPortfolio/Item/Item_Dropped_Base.cpp#L56-L67
-https://github.com/SeongJeGyeong/RPG/blob/2c3126280eaffbe379cbb1cccc4865b79f37804c/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L58-L59
+https://github.com/SeongJeGyeong/RPG/blob/09a7defccc64e0f29f94b28ed66d00839543f379/Source/RPGPortfolio/Monsters/Boss_GreaterSpider.cpp#L45-L59
 </details>
 
 ---
