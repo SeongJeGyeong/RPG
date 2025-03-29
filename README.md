@@ -595,7 +595,7 @@ FootTrace에서 얻은 회전 정보를 이용해 IK Foot 본을 보간하며 �
 <details>
     <summary><b>보기</b></summary>
 
-### 1. 히트 판정
+### 1. 터널링 현상
 
 공격의 히트 판정을 공격 모션에 맞춰 갱신하기 위해 SweepMultiByChannel 함수는 Tick 함수 내부에서 실행됩니다.<br/>
 다만 Tick 함수에서 Sweep 함수를 실행하게 되면 실행 빈도가 프레임에 의존하게 됩니다.<br/>
