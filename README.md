@@ -423,6 +423,14 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
     <summary><b>보기</b></summary>
 
 ---
+플레이어는 SkillComponent를 통해 스킬을 관리하고, 투사체를 발사하는 스킬의 경우도 SkillComponent를 통해 투사체를 생성합니다.
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/cf76e65ca653d50f427900984d33dda8e6f65dba/Source/RPGPortfolio/Characters/Player_SkillComponent.cpp#L56-L82
+</details>
+<br/>
+
 플레이어나 몬스터가 사용하는 투사체 클래스는 오브젝트 풀 패턴을 사용하여 투사체를 재사용할 수 있도록 만들었습니다.
 <details>
     <summary><b>코드</b></summary>
