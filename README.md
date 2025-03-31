@@ -261,7 +261,7 @@ https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd
 ![Image](https://github.com/user-attachments/assets/4d1a19e8-9ae2-464f-9008-b03f6da0972e)
 
 HitCheck 구간 동안 Tick 함수 내에서 Sweep으로 피격 대상을 검출합니다.<br/>
-똑같은 대상이 여러 번 공격당하는 걸 방지하기 위해 히트한 액터를 배열에 넣고 체크하도록 만들었습니다.
+똑같은 대상이 한번의 공격에 여러 번 피격당하는 걸 방지하기 위해 히트한 액터를 배열에 넣고 체크하도록 만들었습니다.
 <details>
     <summary><b>코드</b></summary>
 
