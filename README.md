@@ -599,6 +599,23 @@ FootTrace에서 얻은 회전 정보를 이용해 IK Foot 본을 보간하며 �
 
 ---
 
+## 11. 설정
+![Image](https://github.com/user-attachments/assets/071a7479-126d-446b-af5a-ca92e21acfdb)
+<details>
+    <summary><b>보기</b></summary>
+
+UGameUserSettings와 USoundClass를 사용해 게임의 그래픽 품질과 사운드를 설정할 수 있게 만들었습니다.
+
+<details>
+    <summary><b>코드</b></summary>
+
+https://github.com/SeongJeGyeong/RPG/blob/3ef06f6efe3be1ea38de67deaecbc23fad150a5b/Source/RPGPortfolio/UI/UI_GameSettingBox.cpp#L234-L342
+https://github.com/SeongJeGyeong/RPG/blob/3ef06f6efe3be1ea38de67deaecbc23fad150a5b/Source/RPGPortfolio/UI/UI_Settings_GPanel.cpp#L62-L83
+</details>
+</details>
+
+---
+
 ## 트러블 슈팅
 <details>
     <summary><b>보기</b></summary>
