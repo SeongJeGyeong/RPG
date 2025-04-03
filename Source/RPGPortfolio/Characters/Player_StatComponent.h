@@ -46,4 +46,6 @@ public:
 	void GainSoul(int32 _Soul);
 
 	void HoldGuard(bool _IsGuard);
+
+	void ResetPlayer();
 };

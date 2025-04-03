@@ -643,6 +643,7 @@ void APlayer_Base_Knight::PlayerDead()
 			DeadUI->SetRenderOpacity(DeadUI->GetRenderOpacity() + 0.003f);
 			if ( DeadUI->GetRenderOpacity() >= 1.f )
 			{
+				m_StatComponent->ResetPlayer();
 				UGameInstance_Base* GameInst = Cast<UGameInstance_Base>(GetGameInstance());
 				if ( IsValid(GameInst) )
 				{

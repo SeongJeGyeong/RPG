@@ -16,15 +16,6 @@ void UUI_Message_Item::NativeConstruct()
 	}
 }
 
-void UUI_Message_Item::SetItemMessage(FString _ItemName, FString _ItemImgPath, int32 _Stack)
-{
-	FString ItemImgPath = _ItemImgPath;
-	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
-	m_ItemImg->SetBrushFromTexture(pTex2D);
-	m_ItemName->SetText(FText::FromString(_ItemName));
-	m_ItemQnt->SetText(FText::FromString(FString::Printf(TEXT("%d"), _Stack)));
-}
-
 void UUI_Message_Item::SetItemMessage(FString _ItemName, UTexture2D* _Texture, int32 _Stack)
 {
 	m_ItemImg->SetBrushFromTexture(_Texture);

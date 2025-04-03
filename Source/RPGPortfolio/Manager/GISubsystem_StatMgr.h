@@ -45,7 +45,7 @@ public:
 	virtual void Deinitialize() override;
 
 	int32 GetPlayerLevel() const { return PlayerStat.Level; }
-	//int32 GetPlayerSoul() const { return PlayerBasePower.AmountOfSoul; }
+	int32 GetPlayerSoul() const { return PlayerBasePower.AmountOfSoul; }
 	FString GetPlayerName() const { return PlayerStat.PlayerName; }
 
 	FCharacterStatSheet GetPlayerStatus() const { return PlayerStat; }

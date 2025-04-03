@@ -151,3 +151,11 @@ void UPlayer_StatComponent::HoldGuard(bool _IsGuard)
 	m_StatMgr->SetbSTRecovSlowly(_IsGuard);
 }
 
+void UPlayer_StatComponent::ResetPlayer()
+{
+	m_StatMgr->SetPlayerCurrentHP(m_StatMgr->GetPlayerBasePower().MaxHP);
+	m_StatMgr->SetPlayerCurrentMP(m_StatMgr->GetPlayerBasePower().MaxMP);
+	m_StatMgr->SetPlayerCurrentStamina(m_StatMgr->GetPlayerBasePower().MaxStamina);
+	m_StatMgr->PlayerGainSoul(-(m_StatMgr->GetPlayerSoul()));	
+}
+

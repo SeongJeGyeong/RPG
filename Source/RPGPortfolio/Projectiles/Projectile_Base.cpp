@@ -67,8 +67,8 @@ void AProjectile_Base::ProjDeactive()
 {
 	SetActorHiddenInGame(true);
 	GetWorldTimerManager().ClearTimer(LifeTimeTimer);
-	SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
 	m_ProjectileMovement->StopMovementImmediately();
+	SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
 
 	if ( IsValid(GetWorld()) )
 	{
