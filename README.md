@@ -684,7 +684,7 @@ https://github.com/SeongJeGyeong/RPG/blob/09a7defccc64e0f29f94b28ed66d00839543f3
 
 https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/Manager/Inventory_Mgr.cpp#L501-L520
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipMain.cpp#L146
-https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.h#L26
+https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/UI/UI_EquipItem.h#L25-L27
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L48-L64
 </details>
 
