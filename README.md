@@ -682,7 +682,7 @@ https://github.com/SeongJeGyeong/RPG/blob/09a7defccc64e0f29f94b28ed66d00839543f3
 <details>
     <summary><b>코드</b></summary>
 
-https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/Manager/Inventory_Mgr.cpp#L445-L464C37
+https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/Manager/Inventory_Mgr.cpp#L501-L520
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipMain.cpp#L146
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.h#L26
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L48-L64
@@ -693,6 +693,7 @@ NewObject<>() 함수로 생성한 객체는 delete 등의 키워드를 통해 �
 1) UPROPERTY()를 통해 가비지 컬렉션에서 참조를 인식할 수 있게 만들기
 2) TStrongObjectPtr로 강한 참조를 유지하기
 3) AddToRoot()를 통해 객체를 가비지 컬렉션 대상에서 제외하기
+
 등의 방법을 통해 객체를 안전하게 유지할 수 있다는 것을 배울 수 있었습니다.<br/>
 가비지 컬렉션이나 NewObject의 사양에 대해 잘 알지 못했기 때문에 문제를 해결하는데 꽤 애를 먹었지만, 덕분에 가비지 컬렉션에 대한 것과 포인터의 메모리 관리의 중요성에 대해 배울 수 있었습니다.
 
