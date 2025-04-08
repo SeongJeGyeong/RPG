@@ -677,32 +677,25 @@ https://github.com/SeongJeGyeong/RPG/blob/09a7defccc64e0f29f94b28ed66d00839543f3
 ### 4. 가비지 컬렉션(GC)
 
 언리얼 엔진의 경우 마크-스윕 방식의 가비지 컬렉션 기능을 탑재하고 있습니다. 런타임에 일정 시간마다 레퍼런스 그래프를 순회하며, 사용되지 않는 메모리를 자동으로 해제함으로써 메모리를 자동으로 관리하고 메모리 누수를 방지합니다.<br/>
-개발 초기에는 가비지 컬렉션에 대해 알지 못해 인벤토리와 퀵슬롯 아이템을 관리하는 컨테이너 변수를 가비지 컬렉션 대상에 추가하지 않아 아직 사용중인 메모리가 해제되는 경우가 발생하여, 가끔씩 데이터가 이상하게 표시되거나 메모리에 접근하는 순간 크래시가 나는 등 곤혹을 겪었습니다.<br/>
-멤버 변수를 가비지 컬렉션이 자동 해제하지 않도록 만들기 위해서 일반적으로는 UPROPERTY 리플렉션을 사용하지만, 중첩 컨테이너, 구조체 포인터 등 블루프린트상에 노출 할 수 없는 형식의 변수는 UPROPERTY 리플렉션을 달 수 없었습니다.
+개발 초기에는 가비지 컬렉션에 대해 알지 못해 NewObject<>() 함수로 생성한 객체를 UPROPERTY()를 선언하지 않은 멤버 변수에 저장하여, GC에서 객체를 가리키는 강한 참조가 존재하지 않는 것으로 판단, 메모리의 객체를 삭제하여 댕글링 포인터가 발생하고 말았습니다.<br/>
 
-![Image](https://github.com/user-attachments/assets/af740b47-176f-4d67-bd1e-0d19ba6189a6)
-![Image](https://github.com/user-attachments/assets/f9282144-692f-47ee-b8c7-367cc3a757b9)
-
-인벤토리의 경우 아이템 조회의 편리성을 위해 중첩된 컨테이너를 사용하고 싶었기에 인터넷에서 정보를 알아본 결과, 구조체 안에 컨테이너를 선언하고 해당 구조체 유형의 컨테이너를 선언하는 방법으로 중첩 컨테이너에 UPROPERTY 리플렉션을 사용할 수 있도록 만들 수 있었습니다.<br/>
-이를 이용해 인벤토리 및 오브젝트 풀의 중첩 컨테이너를 가비지 컬렉션에서 관리할 수 있도록 만들었습니다.<br/>
-
-<b>인벤토리</b>
 <details>
     <summary><b>코드</b></summary>
 
-https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.h#L31-L32
-https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Header/Struct.h#L235-L241
-https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/Header/Struct.h#L225-L233
+https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/Manager/Inventory_Mgr.cpp#L501-L520
+https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipMain.cpp#L146
+https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/UI/UI_EquipItem.h#L25-L27
+https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L48-L64
 </details>
-<br/>
 
-<b>오브젝트 풀</b>
-<details>
-    <summary><b>코드</b></summary>
 
-https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L40-L41
-https://github.com/SeongJeGyeong/RPG/blob/d00397c86079246317d275188060e3347ac27947/Source/RPGPortfolio/System/Subsys_ObjectPool.h#L12-L24
-</details>
+NewObject<>() 함수로 생성한 객체는 delete 등의 키워드를 통해 삭제할 수 없고 가비지 컬렉션에 의해 삭제되기 때문에<br/>
+1) UPROPERTY()를 통해 가비지 컬렉션에서 참조를 인식할 수 있게 만들기
+2) TStrongObjectPtr로 강한 참조를 유지하기
+3) AddToRoot()를 통해 객체를 가비지 컬렉션 대상에서 제외하기
+
+등의 방법을 통해 객체를 안전하게 유지할 수 있다는 것을 배울 수 있었습니다.<br/>
+가비지 컬렉션이나 NewObject의 사양에 대해 잘 알지 못했기 때문에 문제를 해결하는데 꽤 애를 먹었지만, 덕분에 가비지 컬렉션에 대한 것과 포인터의 메모리 관리의 중요성에 대해 배울 수 있었습니다.
 
 ---
 
