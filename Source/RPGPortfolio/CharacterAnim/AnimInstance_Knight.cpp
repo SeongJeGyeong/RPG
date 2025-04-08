@@ -33,18 +33,11 @@ void FAnimInstanceProxy_Knight::PreUpdate(UAnimInstance* _InAnimInstance, float 
 
 	if (Player)
 	{
-		FVector Vec = Player->GetActorRotation().UnrotateVector(Player->GetLastMovementInputVector());
-
 		fGuardBlendWeight = Player->GetfGuardWeight();
-		vLocalVelocity.X = Vec.GetSafeNormal().X;
-		vLocalVelocity.Y = Vec.GetSafeNormal().Y;
-		if ( Player->GetCharacterMovement()->MaxWalkSpeed >= 600.f )
-		{
-			vLocalVelocity.X *= 2;
-			vLocalVelocity.Y *= 2;
-		}
 		bIsLockOn = Player->GetbIsLockOn();
+		vLocalVelocity = Player->GetActorRotation().UnrotateVector(Player->GetLastMovementInputVector());
 		vLocalVelocity.Z = Player->GetRootComponent()->GetRelativeRotation().UnrotateVector(Movement->Velocity).Z;
+		fMaxSpeed = Movement->MaxWalkSpeed;
 		fMoveSpeed = Movement->Velocity.Size2D();
 		vCurAcceleration = Movement->GetCurrentAcceleration();
 	}
@@ -56,6 +49,14 @@ void FAnimInstanceProxy_Knight::Update(float _DeltaSeconds)
 
 	if ( Player )
 	{
+		vLocalVelocity.X = vLocalVelocity.GetSafeNormal().X;
+		vLocalVelocity.Y = vLocalVelocity.GetSafeNormal().Y;
+		if ( fMaxSpeed >= 600.f )
+		{
+			vLocalVelocity.X *= 2;
+			vLocalVelocity.Y *= 2;
+		}
+
 		if ( 0.f < fMoveSpeed && !vCurAcceleration.IsZero() )
 		{
 			AnimInstance->m_bIsMove = true;
@@ -64,17 +65,12 @@ void FAnimInstanceProxy_Knight::Update(float _DeltaSeconds)
 		{
 			AnimInstance->m_bIsMove = false;
 		}
+
 		AnimInstance->m_fMoveSpeed = fMoveSpeed;
 		AnimInstance->m_vLocalVelocity = vLocalVelocity;
-
 		AnimInstance->m_fGuardBlendWeight = fGuardBlendWeight;
 		AnimInstance->m_bIsLockOn = bIsLockOn;
 	}
-}
-
-void FAnimInstanceProxy_Knight::PostUpdate(UAnimInstance* _InAnimInstance) const
-{
-	Super::PostUpdate(_InAnimInstance);
 }
 
 void UAnimInstance_Knight::NativeInitializeAnimation()

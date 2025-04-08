@@ -26,9 +26,8 @@ struct RPGPORTFOLIO_API FAnimInstanceProxy_Knight : public FAnimInstanceProxy
 
 protected:
 	virtual void InitializeObjects(UAnimInstance* _InAnimInstance) override;
-	virtual void PreUpdate(UAnimInstance* _InAnimInstance, float _DeltaSeconds) override;
-	virtual void Update(float _DeltaSeconds) override;
-	virtual void PostUpdate(UAnimInstance* _InAnimInstance) const override;
+	virtual void PreUpdate(UAnimInstance* _InAnimInstance, float _DeltaSeconds) override;	// 게임 스레드
+	virtual void Update(float _DeltaSeconds) override;										// 워커 스레드
 
 	UPROPERTY()
 	TObjectPtr<UAnimInstance_Knight> AnimInstance;
@@ -38,6 +37,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ref")
 	TObjectPtr<UCharacterMovementComponent> Movement;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Data")
+	float fMaxSpeed;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "Data")
 	float fMoveSpeed;
@@ -87,9 +89,6 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadWrite, Category = "Data")
 	float m_fGuardBlendWeight;// 가드 애니메이션 블렌드용 수치
-
-public:
-	float GetGuardBlendWeight() const { return m_fGuardBlendWeight; }
 
 public:
 	FOnInvincibleDelegate	OnInvincibleState;
