@@ -8,6 +8,7 @@
 
 # 시연 영상
 [![Video Label](http://img.youtube.com/vi/HorUYzrwmZI/0.jpg)](https://youtu.be/HorUYzrwmZI)
+<br/>
 이미지 클릭 시 유튜브 링크로 이동합니다.
 
 # 기능 설명
