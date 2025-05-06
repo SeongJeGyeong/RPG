@@ -3,6 +3,7 @@
 
 #include "State_AttackWait.h"
 #include "../Player_Base_Knight.h"
+#include "../Comp/Player_InputComponent.h"
 
 void State_AttackWait::Enter(APlayer_Base_Knight* Character)
 {
@@ -12,7 +13,7 @@ void State_AttackWait::Update(APlayer_Base_Knight* Character, float DeltaTime)
 {
 	if ( Character->GetbIsAttacking() )
 	{
-		EPlayerStateType State = Character->GetbHeavyHold() ? EPlayerStateType::HEAVYATTACK : EPlayerStateType::ATTACK;
+		EPlayerStateType State = Character->GetInputComp()->GetbHeavyHold() ? EPlayerStateType::HEAVYATTACK : EPlayerStateType::ATTACK;
 		Character->AttackStart(State);
 		return;
 	}
@@ -20,7 +21,7 @@ void State_AttackWait::Update(APlayer_Base_Knight* Character, float DeltaTime)
 	if ( !Character->GetLastMovementInputVector().IsZero() )
 	{
 		Character->GetMesh()->GetAnimInstance()->StopAllMontages(0.25f);
-		Character->SetState(EPlayerStateType::IDLE);
+		Character->GetInputComp()->SetState(EPlayerStateType::IDLE);
 	}
 }
 

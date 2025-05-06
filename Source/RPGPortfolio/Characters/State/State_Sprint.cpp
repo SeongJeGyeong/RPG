@@ -3,7 +3,8 @@
 
 #include "State_Sprint.h"
 #include "../Player_Base_Knight.h"
-#include "../Player_StatComponent.h"
+#include "../Comp/Player_StatComponent.h"
+#include "../Comp/Player_InputComponent.h"
 
 void State_Sprint::Enter(APlayer_Base_Knight* Character)
 {
@@ -14,14 +15,14 @@ void State_Sprint::Update(APlayer_Base_Knight* Character, float DeltaTime)
 {
 	if ( Character->GetCharacterMovement()->Velocity.Size2D() <= 0.f || Character->GetCharacterMovement()->GetCurrentAcceleration().IsZero() )
 	{
-		Character->SetState(EPlayerStateType::IDLE);
+		Character->GetInputComp()->SetState(EPlayerStateType::IDLE);
 		return;
 	}
 
 	Character->GetStatComp()->DecreasePlayerStamina(10.f * DeltaTime);
 	if ( Character->GetStatComp()->IsStaminaZero())
 	{
-		Character->SetState(EPlayerStateType::IDLE);
+		Character->GetInputComp()->SetState(EPlayerStateType::IDLE);
 		return;
 	}
 }

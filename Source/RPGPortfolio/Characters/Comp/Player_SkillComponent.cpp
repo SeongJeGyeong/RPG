@@ -2,10 +2,10 @@
 
 
 #include "Player_SkillComponent.h"
-#include "../Projectiles/Proj_Player_Cutter.h"
-#include "../System/Subsys_ObjectPool.h"
-#include "../Manager/GISubsystem_StatMgr.h"
-#include "../System/DataAsset/DA_PlayerSkill.h"
+#include "../../Projectiles/Proj_Player_Cutter.h"
+#include "../../System/Subsys_ObjectPool.h"
+#include "../../Manager/GISubsystem_StatMgr.h"
+#include "../../System/DataAsset/DA_PlayerSkill.h"
 
 // Sets default values for this component's properties
 UPlayer_SkillComponent::UPlayer_SkillComponent()

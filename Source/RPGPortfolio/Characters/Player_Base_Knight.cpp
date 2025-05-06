@@ -13,14 +13,12 @@
 #include "Engine/DamageEvents.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
 #include "../Manager/GISubsystem_EffectMgr.h"
-#include "Player_SkillComponent.h"
-#include "Player_StatComponent.h"
-#include "Player_InvenComponent.h"
-#include "../System/Subsys_ObjectPool.h"
+#include "Comp/Player_SkillComponent.h"
+#include "Comp/Player_StatComponent.h"
+#include "Comp/Player_InvenComponent.h"
+#include "Comp/Player_InputComponent.h"
 #include "MotionWarpingComponent.h"
 #include "RootMotionModifier_SkewWarp.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -54,6 +52,7 @@ APlayer_Base_Knight::APlayer_Base_Knight()
 	m_SkillComponent = CreateDefaultSubobject<UPlayer_SkillComponent>(TEXT("SkillComp"));
 	m_StatComponent = CreateDefaultSubobject<UPlayer_StatComponent>(TEXT("StatComp"));
 	m_InvenComponent = CreateDefaultSubobject<UPlayer_InvenComponent>(TEXT("InventoryComp"));
+	m_InputComponent = CreateDefaultSubobject<UPlayer_InputComponent>(TEXT("InputComp"));
 	m_MWComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarp"));
 
 	HitCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCollision"));
@@ -75,15 +74,20 @@ void APlayer_Base_Knight::PostInitializeComponents()
 		// 카메라 상하 범위 제한
 		pController->PlayerCameraManager->ViewPitchMin = -40.f;
 		pController->PlayerCameraManager->ViewPitchMax = 40.f;
+
 		ULocalPlayer* pLocalPlayer = pController->GetLocalPlayer();
 
-		// 향상된 입력 매핑 컨텍스트 추가
-		if ( pLocalPlayer && !m_IMC.IsNull() )
+		if ( pLocalPlayer )
 		{
-			UEnhancedInputLocalPlayerSubsystem* pSubsystem = pLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-			pSubsystem->AddMappingContext(m_IMC.LoadSynchronous(), 0);
+			// 향상된 입력 매핑 컨텍스트 추가
+			m_InputComponent->SetMappingContext(pLocalPlayer);
 		}
 	}
+
+	// AddUObject : 멀티캐스트 델리게이트(여러 함수 바인딩 가능)
+	// BindUObject : 싱글캐스트 델리게이트
+	m_InputComponent->OnQSChange.AddUObject(m_InvenComponent, &UPlayer_InvenComponent::ChangeQuickSlot);
+	m_InputComponent->OnConsumeStamina.BindUObject(m_StatComponent, &UPlayer_StatComponent::GetConsumeStaminaForState);
 
 	m_AnimInst = Cast<UAnimInstance_Knight>(GetMesh()->GetAnimInstance());
 	if ( IsValid(m_AnimInst) )
@@ -92,7 +96,7 @@ void APlayer_Base_Knight::PostInitializeComponents()
 		m_AnimInst->OnJumpAtk.AddUObject(this, &APlayer_Base_Knight::JumpAttack);
 		m_AnimInst->OnDead.AddUObject(this, &APlayer_Base_Knight::PlayerDead);
 		m_AnimInst->OnShotProj.AddUObject(m_SkillComponent, &UPlayer_SkillComponent::ShotProjectile);
-		m_AnimInst->OnSetState.AddUObject(this, &APlayer_Base_Knight::SetState);
+		m_AnimInst->OnSetState.AddUObject(m_InputComponent, &UPlayer_InputComponent::SetState);
 		m_AnimInst->OnEnableComboInput.AddUObject(this, &APlayer_Base_Knight::SetbEnableComboInput);
 		m_AnimInst->OnSetAtkTrace.AddUObject(this, &APlayer_Base_Knight::SetAttackTrace);
 	}
@@ -132,37 +136,12 @@ void APlayer_Base_Knight::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("플레이어 사운드 데이터에셋 로드 실패"));
 	}
-
-	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-	if (IsValid(PoolSubsystem))
-	{
-		CurrentState = PoolSubsystem->GetStateFromPool(EPlayerStateType::IDLE);
-	}
-	if ( CurrentState != nullptr )
-	{
-		CurrentState->Enter(this);
-	}
 }
 
 // Called every frame
 void APlayer_Base_Knight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (CurrentState)
-	{
-		CurrentState->Update(this, DeltaTime);
-	}
-
-	// 상태에 관계없이 가드 웨이트를 실시간으로 감소/증감 시키기 위해 tick함수에 만듬
-	if ( bInputGuard && CurrentState->GetStateType() == EPlayerStateType::IDLE )
-	{
-		fGuardWeight = FMath::Clamp(fGuardWeight + DeltaTime * 10.f, 0.f, 1.f);
-	}
-	else if( CurrentState->GetStateType() != EPlayerStateType::GUARD )
-	{
-		fGuardWeight = FMath::Clamp(fGuardWeight - DeltaTime * 15.f, 0.f, 1.f);
-	}
 }
 
 // Called to bind functionality to input
@@ -170,427 +149,16 @@ void APlayer_Base_Knight::SetupPlayerInputComponent(UInputComponent* PlayerInput
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	UE_LOG(LogTemp, Warning, TEXT("SetupPlayerInputComponent"));
+
 	UEnhancedInputComponent* InputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (nullptr == InputComp)
 	{
 		return;
 	}
 
-	if (!m_IA_Setting.IsNull())
-	{
-		UDA_InputAction* pIADA = m_IA_Setting.LoadSynchronous();
-		for (int32 i = 0; i < pIADA->IADataArr.Num(); ++i)
-		{
-			switch (pIADA->IADataArr[i].Type)
-			{
-			case EInputActionType::MOVE:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::MoveAction);
-				break;
-			case EInputActionType::ROTATION:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::RotateAction);
-				break;
-			case EInputActionType::JUMP:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::JumpAction);
-				break;
-			case EInputActionType::SPRINT:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Started, this, &APlayer_Base_Knight::SprintStart);
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Completed, this, &APlayer_Base_Knight::SprintEnd);
-				break;
-			case EInputActionType::GUARD:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::GuardAction);
-				break;
-			case EInputActionType::DODGE:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::DodgeAction);
-				break;
-			case EInputActionType::ATTACK:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::AttackAction);
-				break;
-			case EInputActionType::HEAVYTOGGLE:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::HeavyAttack);
-				break;
-			case EInputActionType::PARRY:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ParryAction);
-				break;
-			case EInputActionType::LOCKON:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::LockOnToggleAction);
-				break;
-			case EInputActionType::SWITCHLOCKON:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::SwitchLockOnTarget);
-				break;
-			case EInputActionType::OPENMENU:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::OpenMenu);
-				break;
-			case EInputActionType::ACTION:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::ActionCommand);
-				break;
-			case EInputActionType::QUICKSLOTCHANGE:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::QuickSlotChange);
-				break;
-			case EInputActionType::USELOWERQUICKSLOT:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::UseLowerQuickSlot);
-				break;
-			case EInputActionType::USESKILL_1:
-				InputComp->BindAction(pIADA->IADataArr[i].Action.LoadSynchronous(), ETriggerEvent::Triggered, this, &APlayer_Base_Knight::UseSkill_1);
-				break;
-			default:
-				break;
-			}
-		}
-	}
+	m_InputComponent->Init(InputComp);
 }
-
-void APlayer_Base_Knight::SetState(EPlayerStateType _StateType)
-{
-	// 기존 상태를 새로운 상태로 교체
-	CurrentState->Exit(this);
-	StateMachine* ReturnState = CurrentState.Release();
-	USubsys_ObjectPool* PoolSubsystem = GetWorld()->GetSubsystem<USubsys_ObjectPool>();
-	if ( !IsValid(PoolSubsystem) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("스테이트 풀 가져오기 실패"));
-		return;
-	}
-
-	PoolSubsystem->ReturnStateToPool(ReturnState->GetStateType(), ReturnState);
-	TUniquePtr<StateMachine> NewState = PoolSubsystem->GetStateFromPool(_StateType);
-	if (NewState != nullptr)
-	{
-		CurrentState = MoveTemp(NewState); //TUniquePtr는 복사가 불가능하므로, 소유권을 이전하려면 반드시 MoveTemp를 사용해 소유권을 이동해야 함
-		CurrentState->Enter(this);
-	}
-}
-
-bool APlayer_Base_Knight::IsPossibleStateTransition(EPlayerStateType _State)
-{
-	bool IsPossible = true;
-	switch ( _State )
-	{
-	case EPlayerStateType::IDLE:
-		IsPossible = (CurrentState->GetStateType() != EPlayerStateType::IDLE);
-		break;
-	case EPlayerStateType::ATTACK_WAIT:
-		IsPossible = (CurrentState->GetStateType() == EPlayerStateType::ATTACK || CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK);
-		break;
-	case EPlayerStateType::JUMP:
-	case EPlayerStateType::SPRINT:
-	case EPlayerStateType::DODGE:
-	case EPlayerStateType::USESKILL_1:
-	case EPlayerStateType::USEITEM:
-		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE ||
-					   CurrentState->GetStateType() == EPlayerStateType::SPRINT ||
-					   CurrentState->GetStateType() == EPlayerStateType::ATTACK_WAIT );
-		break;
-	case EPlayerStateType::ATTACK:
-	case EPlayerStateType::HEAVYATTACK:
-		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE ||
-					   CurrentState->GetStateType() == EPlayerStateType::SPRINT ||
-					   CurrentState->GetStateType() == EPlayerStateType::ATTACK_WAIT ||
-					   CurrentState->GetStateType() == EPlayerStateType::ATTACK ||
-					   CurrentState->GetStateType() == EPlayerStateType::HEAVYATTACK );
-		break;
-	case EPlayerStateType::JUMPATTACK:
-		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::JUMP && GetRootComponent()->GetRelativeRotation().UnrotateVector(GetCharacterMovement()->Velocity).Z >= 30.f );
-		break;
-	case EPlayerStateType::ACTION:
-		IsPossible = ( (CurrentState->GetStateType() == EPlayerStateType::IDLE || CurrentState->GetStateType() == EPlayerStateType::SPRINT) && !bInputGuard );
-		break;
-	case EPlayerStateType::GUARD:
-	case EPlayerStateType::GUARDBREAK:
-		IsPossible = ( CurrentState->GetStateType() == EPlayerStateType::IDLE );
-		break;
-	default:
-		break;
-	}
-
-	return IsPossible;
-}
-
-////////////////////////////// 인풋액션 함수 //////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-void APlayer_Base_Knight::MoveAction(const FInputActionInstance& _Instance)
-{
-	if ( Controller == NULL )
-	{
-		return;
-	}
-	
-	if ( CurrentState->GetStateType() == EPlayerStateType::JUMP || 
-		CurrentState->GetStateType() == EPlayerStateType::HIT || 
-		CurrentState->GetStateType() == EPlayerStateType::ACTION ||
-		CurrentState->GetStateType() == EPlayerStateType::GUARD ||
-		CurrentState->GetStateType() == EPlayerStateType::JUMPATTACK ||
-		CurrentState->GetStateType() == EPlayerStateType::USESKILL_1 ||
-		CurrentState->GetStateType() == EPlayerStateType::USEITEM )
-	{
-		return;
-	}
-
-	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
-	if ( vInput.X != 0.0f )
-	{
-		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
-		// 컨트롤러의 회전 행렬에서 x축이 가리키고 있는 방향을 구한다.
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, vInput.X);
-	}
-	if ( vInput.Y != 0.0f )
-	{
-		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
-		// 컨트롤러의 회전 행렬에서 y축이 가리키고 있는 방향을 구한다.
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, vInput.Y);
-	}
-}
-
-void APlayer_Base_Knight::RotateAction(const FInputActionInstance& _Instance)
-{
-	FVector2D vInput = _Instance.GetValue().Get<FVector2D>();
-
-	if (!m_SArm->IsLockedOn())
-	{
-		if (LockOnFailedTimer.IsValid())
-		{
-			GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
-		}
-
-		AddControllerYawInput(vInput.X);
-		AddControllerPitchInput(-vInput.Y);
-	}
-}
-
-void APlayer_Base_Knight::JumpAction(const FInputActionInstance& _Instance)
-{
-	if ( IsPossibleStateTransition(EPlayerStateType::JUMP) )
-	{
-		SetState(EPlayerStateType::JUMP);
-	}
-}
-
-void APlayer_Base_Knight::SprintStart()
-{
-	if ( !IsPossibleStateTransition(EPlayerStateType::SPRINT) )
-	{
-		return;
-	}
-	// 스테미너가 0일 경우 달리기 불가
-	if ( m_StatComponent->IsStaminaZero() )
-	{
-		return;
-	}
-	// 이동 중에만 토글되도록
-	if ( GetCharacterMovement()->Velocity.Size2D() <= 0.f || GetCharacterMovement()->GetCurrentAcceleration().IsZero() )
-	{
-		return;
-	}
-
-	SetState(EPlayerStateType::SPRINT);
-}
-
-void APlayer_Base_Knight::SprintEnd()
-{
-	if ( !IsPossibleStateTransition(EPlayerStateType::SPRINT) )
-	{
-		return;
-	}
-
-	SetState(EPlayerStateType::IDLE);
-}
-
-void APlayer_Base_Knight::GuardAction(const FInputActionInstance& _Instance)
-{
-	bInputGuard = _Instance.GetValue().Get<bool>();
-
-	SetbHoldGuard(bInputGuard);
-}
-
-void APlayer_Base_Knight::AttackAction(const FInputActionInstance& _Instance)
-{
-	if (!IsValid(m_AnimInst))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
-		return;
-	}
-
-	EPlayerStateType State = (CurrentState->GetStateType() == EPlayerStateType::JUMP) ? EPlayerStateType::JUMPATTACK : EPlayerStateType::ATTACK;
-	if ( !IsPossibleStateTransition(State) )
-	{
-		return;
-	}
-
-	// 공격중인 상태에서 다음 공격 입력 기간이 아닐경우
-	if ( CurrentCombo > 1 && !bEnableComboInput)
-	{
-		return;
-	}
-
-	bIsAttacking = _Instance.GetValue().Get<bool>();
-
-	// 첫 공격을 시작할 경우
-	if ( CurrentCombo == 1 )
-	{
-		AttackStart(State);
-	}
-}
-
-void APlayer_Base_Knight::HeavyAttack(const FInputActionInstance& _Instance)
-{
-	bHeavyHold = _Instance.GetValue().Get<bool>();
-}
-
-void APlayer_Base_Knight::DodgeAction(const FInputActionInstance& _Instance)
-{
-	if ( !IsValid(m_AnimInst) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
-		return;
-	}
-
-	if ( !IsPossibleStateTransition(EPlayerStateType::DODGE) )
-	{
-		return;
-	}
-
-	float fConsumption = m_StatComponent->GetConsumeStaminaForState(EPlayerStateType::DODGE);
-	// 현재 스태미나가 소비량보다 적을 경우 회피 불가
-	if ( !m_StatComponent->IsEnoughStamina(fConsumption))
-	{
-		return;
-	}
-
-	m_StatComponent->DecreasePlayerStamina(fConsumption);
-	SetState(EPlayerStateType::DODGE);
-}
-
-void APlayer_Base_Knight::ParryAction(const FInputActionInstance& _Instance)
-{
-	// 미구현
-}
-
-void APlayer_Base_Knight::LockOnToggleAction(const FInputActionInstance& _Instance)
-{
-	bool bTargetLocked = m_SArm->ToggleCameraLockOn(_Instance.GetValue().Get<bool>());
-	// 락온 중이 아닐 때 락온 대상을 찾지 못할 경우 카메라 리셋
-	if (!bTargetLocked)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
-		GetWorld()->GetTimerManager().SetTimer(LockOnFailedTimer, FTimerDelegate::CreateUObject(this, &APlayer_Base_Knight::ResetCamera, GetActorRotation()), 0.01f, true);
-	}
-}
-
-void APlayer_Base_Knight::SwitchLockOnTarget(const FInputActionInstance& _Instance)
-{
-	float SwitchDirection = _Instance.GetValue().Get<float>();
-
-	if (SwitchDirection > 0.f)
-	{
-		m_SArm->SwitchTarget(ELockOnDirection::Left);
-	}
-	else if (SwitchDirection < 0.f)
-	{
-		m_SArm->SwitchTarget(ELockOnDirection::Right);
-	}
-}
-
-void APlayer_Base_Knight::OpenMenu(const FInputActionInstance& _Instance)
-{
-	ARPGPortfolioGameModeBase* pGameMode = Cast<ARPGPortfolioGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if ( !IsValid(pGameMode) )
-	{
-		UE_LOG(LogTemp, Error, TEXT("GameMode Not Found"));
-		return;
-	}
-
-	// 세부메뉴가 열려있을 경우
-	if (pGameMode->IsSubMenuUIOpened())
-	{
-		pGameMode->CloseSubMenu();
-		return;
-	}
-
-	SetInputMode(!pGameMode->GetMainHUD()->IsOpendMenu());
-}
-
-void APlayer_Base_Knight::ActionCommand(const FInputActionInstance& _Instance)
-{
-	if ( !IsValid(m_AnimInst) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
-		return;
-	}
-	if ( !IsPossibleStateTransition(EPlayerStateType::ACTION) )
-	{
-		return;
-	}
-
-	if (!OverlapInteractionArr.IsEmpty())
-	{
-		SetState(EPlayerStateType::ACTION);
-		OverlapInteractionArr[OverlapInteractionArr.Num() - 1]->Interaction(this);
-	}
-	// 주변에 아이템이 없고 아이템 획득 메시지 표시된 상태일 때
-	else
-	{
-		OnCloseItemMessageBox.Broadcast();
-	}
-}
-
-void APlayer_Base_Knight::QuickSlotChange(const FInputActionInstance& _Instance)
-{
-	m_InvenComponent->ChangeQuickSlot();
-}
-
-void APlayer_Base_Knight::UseLowerQuickSlot(const FInputActionInstance& _Instance)
-{
-	if ( CurrentState->GetStateType() != EPlayerStateType::IDLE )
-	{
-		return;
-	}
-
-	if ( !m_InvenComponent->GetbItemDelay() )
-	{
-		FInvenItemRow* pItem = m_InvenComponent->GetQuickSlotItem();
-		if ( pItem == nullptr )
-		{
-			UE_LOG(LogTemp, Warning, TEXT("퀵슬롯에 지정된 아이템 없음"));
-		}
-		else
-		{
-			UseInventoryItem(pItem->ID, pItem->EquipedSlot);
-		}
-	}
-}
-
-void APlayer_Base_Knight::UseSkill_1(const FInputActionInstance& _Instance)
-{
-	if ( !IsValid(m_AnimInst) )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("애님인스턴스를 찾을 수 없음"));
-		return;
-	}
-
-	if ( !IsPossibleStateTransition(EPlayerStateType::USESKILL_1) )
-	{
-		return;
-	}
-
-	if ( m_SkillComponent->GetSkillName() == ESkillName::NONE )
-	{
-		return;
-	}
-	FSkillAsset* Skill = m_SkillComponent->GetEquippedSkill();
-
-	if ( !m_StatComponent->IsEnoughStamina(Skill->Stamina_Consumption) || !m_StatComponent->IsEnoughMP(Skill->MP_Consumption))
-	{
-		return;
-	}
-
-	m_StatComponent->DecreasePlayerMP(Skill->MP_Consumption);
-	m_StatComponent->DecreasePlayerStamina(Skill->Stamina_Consumption);
-	m_AnimInst->Montage_Play(Skill->Animation);
-	SetState(EPlayerStateType::USESKILL_1);
-}
-//////////////////////////////////////////////////////////////////////////
-////////////////////////////// 인풋액션 함수 //////////////////////////////
 
 void APlayer_Base_Knight::JumpAttack()
 {
@@ -717,7 +285,7 @@ float APlayer_Base_Knight::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	// 피격 사운드 재생
 	Play_PlayerSound(EPlayerSound::HIT);
 
-	SetState(EPlayerStateType::HIT);
+	m_InputComponent->SetState(EPlayerStateType::HIT);
 	return 0.0f;
 }
 
@@ -785,7 +353,7 @@ void APlayer_Base_Knight::AttackStart(EPlayerStateType _State)
 	if ( bIsAttacking )
 	{
 		m_StatComponent->DecreasePlayerStamina(fConsumption);
-		SetState(_State);
+		m_InputComponent->SetState(_State);
 	}
 }
 
@@ -827,8 +395,7 @@ bool APlayer_Base_Knight::GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _Weight
 	if (m_StatComponent->IsStaminaZero())
 	{
 		// 방어 풀리고 경직상태 되도록
-		fGuardWeight = 0.f;
-		SetState(EPlayerStateType::GUARDBREAK);
+		m_InputComponent->SetState(EPlayerStateType::GUARDBREAK);
 		return false;
 	}
 
@@ -841,23 +408,13 @@ bool APlayer_Base_Knight::GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _Weight
 		Play_PlayerMontage(EPlayerMontage::GUARD_HEAVY);
 	}
 
-	SetState(EPlayerStateType::GUARD);
+	m_InputComponent->SetState(EPlayerStateType::GUARD);
 	return true;
 }
 
 void APlayer_Base_Knight::BreakLockOn()
 {
 	m_SArm->BreakLockOnTarget();
-}
-
-void APlayer_Base_Knight::ResetCamera(FRotator _Rotate)
-{
-	FRotator NewRot = FMath::RInterpTo(GetControlRotation(), _Rotate, 0.01f, 10.f);
-	GetController()->SetControlRotation(NewRot);
-	if ( GetControlRotation().Equals(_Rotate, 1.f) )
-	{
-		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
-	}
 }
 
 void APlayer_Base_Knight::UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
@@ -893,13 +450,9 @@ void APlayer_Base_Knight::UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		EffectMgr->SpawnEffectAttached(pItemInfo->EffectType, GetMesh(), FName("Root"), FVector(0.f, 0.f, 1.f), FRotator(0.f), EAttachLocation::SnapToTargetIncludingScale, true);
 	}
 	Play_PlayerSound(SoundEnum);
-	Play_PlayerMontage(EPlayerMontage::USEITEM);
 
 	m_InvenComponent->DecreaseInventoryItem(_ID, _Slot);
-	// 아이템 사용후 대기시간 on
-	m_InvenComponent->ItemDelaytime(2.f);
-
-	SetState(EPlayerStateType::ACTION);
+	m_InputComponent->SetState(EPlayerStateType::USEITEM);
 }
 
 void APlayer_Base_Knight::SetInputMode(bool _Visibility)
@@ -1139,6 +692,7 @@ void APlayer_Base_Knight::CloseInventory()
 		return;
 	}
 	pGameMode->InventoryUI_SetVisibility(false);
+	SetInputMode(false);
 }
 
 void APlayer_Base_Knight::AcquireItem(EITEM_ID _Id, int32 _Stack, UTexture2D* _Img)
@@ -1269,6 +823,11 @@ void APlayer_Base_Knight::SetbHoldGuard(const bool& _ToggleGuard)
 		return;
 	}
 	m_StatComponent->HoldGuard(_ToggleGuard);
+}
+
+float APlayer_Base_Knight::GetfGuardWeight() const
+{
+	return m_InputComponent->GetGuardWeight();
 }
 
 bool APlayer_Base_Knight::GetbIsLockOn() const

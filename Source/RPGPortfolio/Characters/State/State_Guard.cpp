@@ -3,6 +3,7 @@
 
 #include "State_Guard.h"
 #include "../Player_Base_Knight.h"
+#include "../Comp/Player_InputComponent.h"
 
 void State_Guard::Enter(APlayer_Base_Knight* Character)
 {
@@ -13,7 +14,7 @@ void State_Guard::Update(APlayer_Base_Knight* Character, float DeltaTime)
 {
 	if ( !Character->GetMesh()->GetAnimInstance()->IsAnyMontagePlaying() )
 	{
-		Character->SetState(EPlayerStateType::IDLE);
+		Character->GetInputComp()->SetState(EPlayerStateType::IDLE);
 	}
 }
 

@@ -6,8 +6,6 @@
 #include "GenericTeamAgentInterface.h"
 #include "../System/DataAsset/DA_PlayerSound.h"
 #include "../System/DataAsset/DA_PlayerMontage.h"
-#include "../System/DataAsset/DA_InputAction.h"
-#include "InputMappingContext.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CoreMinimal.h"
@@ -26,6 +24,7 @@ class UPlayer_CameraArm;
 class UPlayer_SkillComponent;
 class UPlayer_StatComponent;
 class UPlayer_InvenComponent;
+class UPlayer_InputComponent;
 class ULockOnTargetComponent;
 class UMotionWarpingComponent;
 class UUI_Base;
@@ -56,14 +55,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UPlayer_InvenComponent* m_InvenComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
+	UPlayer_InputComponent* m_InputComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component", meta = ( AllowPrivateAccess = "true" ))
 	UMotionWarpingComponent* m_MWComponent;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UInputMappingContext> m_IMC;
-
-	UPROPERTY(EditAnywhere, Category = "Input", meta = ( AllowPrivateAccess = "true" ))
-	TSoftObjectPtr<UDA_InputAction>	m_IA_Setting;
 
 	UPROPERTY(EditAnywhere, Category = "Animation", meta = ( AllowPrivateAccess = "true" ))
 	UDA_PlayerMontage* m_PlayerMontage;
@@ -90,18 +86,14 @@ private:
 
 private:
 	bool bIsAttacking;		// 공격 입력 체크
-	bool bHeavyHold;		// 강공격 체크용
 	bool bEnableComboInput;	// 콤보 공격 입력 가능한 상태 체크용
 	bool bAtkTrace;			// 공격 판정 체크
 
-	bool bInputGuard;		// 가드 키 입력 상태
 	bool bHoldGuard;		// 방패 방어 상태(가드를 완전히 올린 상태에서만 true)
-	float fGuardWeight;		// 가드 애니메이션 블렌드 웨이트
 
 	uint8 CurrentCombo;		// 현재 공격 콤보
 
 	FTimerHandle JumpAtkTimer;		// 점프공격 타이머
-	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
 	FTimerHandle HitStiffTimer;		// 공격 적중시 모션 경직 타이머
 	FTimerHandle DeadTimer;
 
@@ -119,6 +111,12 @@ public:
 public:
 	UDA_PlayerMontage* GetMontageDA() const { return m_PlayerMontage; }
 	UPlayer_StatComponent* GetStatComp() const { return m_StatComponent; }
+	UPlayer_InvenComponent* GetInvenComp() const { return m_InvenComponent; }
+	UPlayer_SkillComponent* GetSkillComp() const { return m_SkillComponent; }
+	UPlayer_InputComponent* GetInputComp() const { return m_InputComponent; }
+
+	TArray<TScriptInterface<IPlayerInteraction>> GetInteractArr() const { return OverlapInteractionArr; }
+	TScriptInterface<IPlayerInteraction> GetInteractTop() const { return OverlapInteractionArr[OverlapInteractionArr.Num() - 1]; }
 
 	bool GetbIsAttacking() const { return bIsAttacking; }
 	void SetbIsAttacking(const bool& _IsAttacking) { bIsAttacking = _IsAttacking; }
@@ -129,21 +127,21 @@ public:
 	uint8 GetCurrentCombo() const { return CurrentCombo; }
 	void SetCurrentCombo(const uint8& _Combo) { CurrentCombo = _Combo; }
 
+	bool GetbEnableComboInput() const { return bEnableComboInput; }
 	void SetbEnableComboInput(const bool& _EnableAtkInput);
+
 	// 아이템 사용 딜레이
 	bool GetIsDelayTime() const;
 
-	void SetbInputGuard(const bool& _InputGuard) { bInputGuard = _InputGuard; }
 	// 가드상태(블렌드 중이 아니라 완전 가드모션중일 때만 true)
 	void SetbHoldGuard(const bool& _HoldGuard);
-	float GetfGuardWeight() const { return fGuardWeight; }
+	float GetfGuardWeight() const;
 
+	UPlayer_CameraArm* GetCameraArm() const { return m_SArm; }
 	UCameraComponent* GetCamera() const { return m_Cam; }
 
 	// 락온 토글 상태 확인
 	bool GetbIsLockOn() const;
-
-	bool GetbHeavyHold() const { return bHeavyHold; }
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -157,27 +155,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetState(EPlayerStateType _StateType);
-	bool IsPossibleStateTransition(EPlayerStateType _State);
 private:
-	void MoveAction(const FInputActionInstance& _Instance);
-	void RotateAction(const FInputActionInstance& _Instance);
-	void JumpAction(const FInputActionInstance& _Instance);
-	void SprintStart();
-	void SprintEnd();
-	void GuardAction(const FInputActionInstance& _Instance);
-	void AttackAction(const FInputActionInstance& _Instance);
-	void HeavyAttack(const FInputActionInstance& _Instance);
-	void DodgeAction(const FInputActionInstance& _Instance);
-	void ParryAction(const FInputActionInstance& _Instance);
-	void LockOnToggleAction(const FInputActionInstance& _Instance);
-	void SwitchLockOnTarget(const FInputActionInstance& _Instance);
-	void OpenMenu(const FInputActionInstance& _Instance);
-	void ActionCommand(const FInputActionInstance& _Instance);
-	void QuickSlotChange(const FInputActionInstance& _Instance);
-	void UseLowerQuickSlot(const FInputActionInstance& _Instance);
-	void UseSkill_1(const FInputActionInstance& _Instance);
-
 	void JumpAttack();
 	void ApplyPointDamage(FHitResult const& HitInfo, EATTACK_TYPE _AtkType, EPlayerMontage _AtkMontage);
 
@@ -191,7 +169,6 @@ public:
 	uint8 GetHitDirection(FVector _MonVec);
 	bool GuardEnemyAttack(float _Damage, EATTACK_WEIGHT _WeightType); // 적 공격 방어
 	void BreakLockOn();
-	void ResetCamera(FRotator _Rotate);
 	void UseInventoryItem(EITEM_ID _ID, EEQUIP_SLOT _Slot);
 	void SetInputMode(bool _Visibility);
 

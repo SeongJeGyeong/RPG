@@ -2,11 +2,11 @@
 
 
 #include "Player_InvenComponent.h"
-#include "../Manager/GISubsystem_InvenMgr.h"
-#include "../RPGPortfolioGameModeBase.h"
+#include "../../Manager/GISubsystem_InvenMgr.h"
+#include "../../RPGPortfolioGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "../UI/UI_Base.h"
-#include "../UI/UI_Inventory.h"
+#include "../../UI/UI_Base.h"
+#include "../../UI/UI_Inventory.h"
 
 UPlayer_InvenComponent::UPlayer_InvenComponent()
 {

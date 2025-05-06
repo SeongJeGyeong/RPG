@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Header/Enum.h"
+#include "../../Header/Enum.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Player_StatComponent.generated.h"

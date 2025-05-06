@@ -241,3 +241,26 @@ FVector UPlayer_CameraArm::GetLockOnTargetLocation() const
 {
 	return m_Target->GetComponentLocation();
 }
+
+void UPlayer_CameraArm::ResetCamera()
+{
+	GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+	GetWorld()->GetTimerManager().SetTimer(LockOnFailedTimer, [this]
+		{
+			FRotator NewRot = FMath::RInterpTo(m_Player->GetControlRotation(), m_Player->GetActorRotation(), 0.01f, 10.f);
+			m_Player->GetController()->SetControlRotation(NewRot);
+			if ( m_Player->GetControlRotation().Equals(m_Player->GetActorRotation(), 1.f) )
+			{
+				GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+			}
+		}
+	, 0.01f, true);
+}
+
+void UPlayer_CameraArm::CancelResetCamera()
+{
+	if ( LockOnFailedTimer.IsValid() )
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LockOnFailedTimer);
+	}
+}

@@ -163,7 +163,7 @@ void UUI_GameSettingBox::SetUserSettingValText(EWindowMode::Type _Val)
 
 EWindowMode::Type UUI_GameSettingBox::ChangeScreenMode(EWindowMode::Type _Type, bool _UpDown)
 {
-	EWindowMode::Type Mode;
+	EWindowMode::Type Mode = EWindowMode::Fullscreen;
 	switch ( _Type )
 	{
 	case EWindowMode::Fullscreen:

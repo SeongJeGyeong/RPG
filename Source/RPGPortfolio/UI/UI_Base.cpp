@@ -13,7 +13,7 @@
 #include "../Manager/GISubsystem_StatMgr.h"
 #include "../Characters/Player_Base_Knight.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
-#include "../Characters/Player_InvenComponent.h"
+#include "../Characters/Comp/Player_InvenComponent.h"
 
 void UUI_Base::NativeConstruct()
 {

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Header/Struct.h"
+#include "../../Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Player_SkillComponent.generated.h"

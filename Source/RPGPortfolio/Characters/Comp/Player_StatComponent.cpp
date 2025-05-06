@@ -2,7 +2,7 @@
 
 
 #include "Player_StatComponent.h"
-#include "../Manager/GISubsystem_StatMgr.h"
+#include "../../Manager/GISubsystem_StatMgr.h"
 
 UPlayer_StatComponent::UPlayer_StatComponent()
 {

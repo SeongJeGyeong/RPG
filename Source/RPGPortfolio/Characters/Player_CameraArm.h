@@ -29,6 +29,8 @@ private:
 	UPROPERTY()
 	class APlayer_Base_Knight* m_Player;
 
+	FTimerHandle LockOnFailedTimer;	// 락온 실패 타이머
+
 public:
 	// 록온 타겟 컴포넌트
 	UPROPERTY()
@@ -47,6 +49,8 @@ public:
 	bool IsLockedOn();
 	FVector GetLockOnTargetLocation() const;
 
+	void ResetCamera();
+	void CancelResetCamera();
 private:
 	void LockOnTarget(ULockOnTargetComponent* _TargetComponent);
 	TArray<class ULockOnTargetComponent*> GetDetectedTargets();
