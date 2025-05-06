@@ -695,7 +695,7 @@ https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9
 <details>
     <summary><b>코드</b></summary
 
-https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L237C39-L244
+https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L237-L244
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_ItemTooltip.cpp#L93-L183
 
 </details>
