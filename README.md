@@ -20,13 +20,14 @@
 
 ---
 플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
+InputComponent에서 입력을 바인딩하여 입력 함수들을 수행하도록 만들었습니다.
 
 ![Image](https://github.com/user-attachments/assets/ac1cf159-d8f7-4f12-a07d-b816e5e0760a)
 <details>
     <summary><b>코드</b></summary>
-            
-https://github.com/SeongJeGyeong/RPG/blob/e6a45169d92dfc23bffdefdebd49f5f7d1d23db7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L80-L85
-https://github.com/SeongJeGyeong/RPG/blob/e6a45169d92dfc23bffdefdebd49f5f7d1d23db7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L169-L240
+
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Comp/Player_InputComponent.cpp#L141-L148
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Comp/Player_InputComponent.cpp#L72-L139
 </details>
 
 ---
@@ -40,7 +41,7 @@ https://github.com/SeongJeGyeong/RPG/blob/e6a45169d92dfc23bffdefdebd49f5f7d1d23d
     <summary><b>코드</b></summary>
     
 https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa5e/Source/RPGPortfolio/Characters/State/StateMachine.h#L12-L19
-https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa5e/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L242-L261
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Comp/Player_InputComponent.cpp#L150-L169
 https://github.com/SeongJeGyeong/RPG/blob/dc9985124fc348ad43c38dda8fb034afaae7aa5e/Source/RPGPortfolio/System/Subsys_ObjectPool.cpp#L68-L83
 </details>
 </details>
@@ -152,8 +153,8 @@ https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c62
 상호작용 키를 입력 시 현재 오버랩된 상호 작용 오브젝트중 가장 최근에 오버랩된 오브젝트의 Interaction 함수를 실행합니다.
 <details>
     <summary><b>코드</b></summary>
-    
-https://github.com/SeongJeGyeong/RPG/blob/98bd45543d90aaa14750c3a5f6784e21042c6249/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L513-L535
+
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Comp/Player_InputComponent.cpp#L392-L414
 </details>
 </details>
 
@@ -189,8 +190,8 @@ https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75e
 인벤토리 매니저와 위젯간에는 델리게이트를 통해 연결하여 UI를 갱신하도록 만들었습니다.
 <details>
     <summary><b>코드</b></summary>
-    
-https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.h#L11-L16
+
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.h#L11-L16
 https://github.com/SeongJeGyeong/RPG/blob/ccb1873a8b70927de28a8f7a7867db97d5a75ef3/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.h#L39-L47
 </details>
 
@@ -235,7 +236,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
 <details>
     <summary><b>코드</b></summary>
 
-https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L537-L561
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Comp/Player_InputComponent.cpp#L416-L450
 https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/Characters/Player_InvenComponent.cpp#L40-L51
 </details>
 </details>
@@ -253,7 +254,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
 <details>
     <summary><b>코드</b></summary>
 
-https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L780-L789
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L349-L358
 https://github.com/SeongJeGyeong/RPG/blob/0a6422c40abf4239a9f12145d3a5b2ca86c3fd7a/Source/RPGPortfolio/Characters/State/State_Attack.cpp#L8-L36
 </details>
 <br/>
@@ -401,7 +402,7 @@ https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ce
     <summary><b>코드</b></summary>
 
 https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L680-L693
-https://github.com/SeongJeGyeong/RPG/blob/bc8e00d5616b22817422ac8f90474e9e34b3ceb7/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L822-L845
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Characters/Player_Base_Knight.cpp#L391-L413
 </details>
 
 ---
@@ -690,6 +691,7 @@ https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbb
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L48-L50
 
 </details>
+<br/>
 
 때문에 아이템에 커서를 호버해 아이템 정보 툴팁 위젯을 표시하는 경우, 이미지 및 글씨가 깨지는 오류나 크래시가 발생했습니다.
 <details>
@@ -699,12 +701,22 @@ https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_ItemTooltip.cpp#L93-L183
 
 </details>
+<br/>
 
+툴팁 표시를 위해 UItem_InvenData를 계속 멤버로 저장하고 있을 필요는 없으므로, 툴팁을 표시할 때마다 인벤토리 매니저에서 아이템 정보를 받아와 표시하는 방법으로 해결했습니다.
+<details>
+    <summary><b>코드</b></summary
 
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/Manager/GISubsystem_InvenMgr.cpp#L81-L89
+https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400d1/Source/RPGPortfolio/UI/UI_ItemTooltip.cpp#L49-L73
+</details>
+<br/>
+해결법 자체는 간단했지만, 가비지 컬렉션이나 NewObject의 사양에 대해 잘 알지 못했기 때문에 원인을 찾는데 꽤 애를 먹었습니다.<br/>
+하지만 그 덕분에 가비지 컬렉션에 대한 것과 포인터의 메모리 관리의 중요성에 대해 배울 수 있었습니다.<br/>
+<br/>
 NewObject<>() 함수로 생성한 객체는 delete 등의 키워드를 통해 삭제할 수 없고 가비지 컬렉션에 의해 삭제되기 때문에<br/>
 1) UPROPERTY()를 통해 가비지 컬렉션에서 참조를 인식할 수 있게 만들기
 2) TStrongObjectPtr로 강한 참조를 유지하기
 3) AddToRoot()를 통해 객체를 가비지 컬렉션 대상에서 제외하기
 
 등의 방법을 통해 객체를 안전하게 유지할 수 있다는 것을 배울 수 있었습니다.<br/>
-가비지 컬렉션이나 NewObject의 사양에 대해 잘 알지 못했기 때문에 문제를 해결하는데 꽤 애를 먹었지만, 덕분에 가비지 컬렉션에 대한 것과 포인터의 메모리 관리의 중요성에 대해 배울 수 있었습니다.
