@@ -679,7 +679,7 @@ https://github.com/SeongJeGyeong/RPG/blob/09a7defccc64e0f29f94b28ed66d00839543f3
 ### 4. 가비지 컬렉션(GC)
 
 언리얼 엔진의 경우 마크-스윕 방식의 가비지 컬렉션 기능을 탑재하고 있습니다. 런타임에 일정 시간마다 레퍼런스 그래프를 순회하며, 사용되지 않는 메모리를 자동으로 해제함으로써 메모리를 자동으로 관리하고 메모리 누수를 방지합니다.<br/>
-개발 초기에는 가비지 컬렉션에 대해 알지 못해 NewObject<>() 함수로 생성한 객체를 UPROPERTY()를 선언하지 않은 멤버 변수에 저장하여, GC에서 객체를 가리키는 강한 참조가 존재하지 않는 것으로 판단, 메모리의 객체를 삭제하여 댕글링 포인터가 발생하고 말았습니다.<br/>
+개발 초기에는 가비지 컬렉션에 대해 알지 못해 NewObject<>() 함수로 생성한 객체를 UPROPERTY()를 선언하지 않은 멤버 변수에 저장하여, GC에서 객체를 가리키는 강한 참조가 존재하지 않는 것으로 판단하고 메모리의 객체를 삭제하여 댕글링 포인터가 발생하고 말았습니다.<br/>
 
 <details>
     <summary><b>코드</b></summary>
@@ -687,7 +687,17 @@ https://github.com/SeongJeGyeong/RPG/blob/09a7defccc64e0f29f94b28ed66d00839543f3
 https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/Manager/Inventory_Mgr.cpp#L501-L520
 https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipMain.cpp#L146
 https://github.com/SeongJeGyeong/RPG/blob/e0f0f5452b194a8eab964c7ec03bd56e5aacbba2/Source/RPGPortfolio/UI/UI_EquipItem.h#L25-L27
-https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L48-L64
+https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L48-L50
+
+</details>
+
+때문에 아이템에 커서를 호버해 아이템 정보 툴팁 위젯을 표시하는 경우, 이미지 및 글씨가 깨지는 오류나 크래시가 발생했습니다.
+<details>
+    <summary><b>코드</b></summary
+
+https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_EquipItem.cpp#L237C39-L244
+https://github.com/SeongJeGyeong/RPG/blob/6d8ba6ba9a1251d707161d6a7f3b3d39d946d9cc/Source/RPGPortfolio/UI/UI_ItemTooltip.cpp#L93-L183
+
 </details>
 
 
