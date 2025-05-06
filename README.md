@@ -19,7 +19,7 @@
 <summary><b>보기</b></summary>
 
 ---
-플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.
+플레이어의 입력은 향상된 입력(Enhanced Input)플러그인을 이용해 구현했습니다.<br/>
 InputComponent에서 입력을 바인딩하여 입력 함수들을 수행하도록 만들었습니다.
 
 ![Image](https://github.com/user-attachments/assets/ac1cf159-d8f7-4f12-a07d-b816e5e0760a)
