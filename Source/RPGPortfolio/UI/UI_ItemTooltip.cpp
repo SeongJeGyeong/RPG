@@ -22,7 +22,59 @@ void UUI_ItemTooltip::NativeConstruct()
 
 void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 {
-	switch ( _InvenData->GetItemType() )
+	SetSelectedCategoryText(_InvenData->GetItemType());
+
+	m_Sel_ItemName->SetText(FText::FromString(_InvenData->GetItemName()));
+	m_Item_Desc->SetText(FText::FromString(_InvenData->GetItemDesc()));
+	m_Sel_CurQnt_Inven->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetItemQnt())));
+	m_Sel_MaxQnt_Inven->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetMaximumStack())));
+	m_Sel_CurQnt_Storage->SetText(FText::FromString(L"0"));
+	m_Sel_MaxQnt_Storage->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetMaximumStack())));
+	
+	m_PhysicAtk->SetText(GetStatText(_InvenData->GetPhysicAtkVal()));
+	m_PhysicDef->SetText(GetStatText(_InvenData->GetPhysicDefVal()));
+	m_MagicAtk->SetText(GetStatText(_InvenData->GetMagicAtkVal()));
+	m_MagicDef->SetText(GetStatText(_InvenData->GetMagicDefVal()));
+	m_Restore_HP->SetText(GetStatText(_InvenData->GetRestoreHP()));
+	m_Restore_MP->SetText(GetStatText(_InvenData->GetRestoreMP()));
+	m_Sel_Req_Str->SetText(GetStatText(_InvenData->GetRequireStr()));
+	m_Sel_Req_Dex->SetText(GetStatText(_InvenData->GetRequireDex()));
+	m_Sel_Req_Int->SetText(GetStatText(_InvenData->GetRequireInt()));
+
+	FString ItemImgPath = _InvenData->GetItemImgPath();
+	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+	m_Sel_ItemImg->SetBrushFromTexture(pTex2D);
+}
+
+void UUI_ItemTooltip::SetTooltipUI(FGameItemInfo* _Info, uint32 _Stack)
+{
+	SetSelectedCategoryText(_Info->Type);
+
+	m_Sel_ItemName->SetText(FText::FromString(_Info->ItemName));
+	m_Item_Desc->SetText(FText::FromString(_Info->Description));
+	m_Sel_CurQnt_Inven->SetText(FText::FromString(FString::Printf(TEXT("%d"), _Stack)));
+	m_Sel_MaxQnt_Inven->SetText(FText::FromString(FString::Printf(TEXT("%d"), _Info->Maximum_Stack)));
+	m_Sel_CurQnt_Storage->SetText(FText::FromString(L"0"));
+	m_Sel_MaxQnt_Storage->SetText(FText::FromString(FString::Printf(TEXT("%d"), _Info->Maximum_Stack)));
+
+	m_PhysicAtk->SetText(GetStatText(_Info->PhysicAtk));
+	m_PhysicDef->SetText(GetStatText(_Info->PhysicDef));
+	m_MagicAtk->SetText(GetStatText(_Info->MagicAtk));
+	m_MagicDef->SetText(GetStatText(_Info->MagicDef));
+	m_Restore_HP->SetText(GetStatText(_Info->Restore_HP));
+	m_Restore_MP->SetText(GetStatText(_Info->Restore_MP));
+	m_Sel_Req_Str->SetText(GetStatText(_Info->Require_Str));
+	m_Sel_Req_Dex->SetText(GetStatText(_Info->Require_Dex));
+	m_Sel_Req_Int->SetText(GetStatText(_Info->Require_Int));
+
+	FString ItemImgPath = _Info->IconImgPath;
+	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+	m_Sel_ItemImg->SetBrushFromTexture(pTex2D);
+}
+
+void UUI_ItemTooltip::SetSelectedCategoryText(const EITEM_TYPE& _Type)
+{
+	switch ( _Type )
 	{
 	case EITEM_TYPE::ACCESSORIE:
 		m_Sel_Category->SetText(FText::FromString(L"악세사리"));
@@ -63,97 +115,15 @@ void UUI_ItemTooltip::SetTooltipUI(UItem_InvenData* _InvenData)
 	default:
 		break;
 	};
-	//m_SubCategory
+}
 
-	m_Sel_ItemName->SetText(FText::FromString(_InvenData->GetItemName()));
-	m_Item_Desc->SetText(FText::FromString(_InvenData->GetItemDesc()));
-	m_Sel_CurQnt_Inven->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetItemQnt())));
-	m_Sel_MaxQnt_Inven->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetMaximumStack())));
-	m_Sel_CurQnt_Storage->SetText(FText::FromString(L"0"));
-	m_Sel_MaxQnt_Storage->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetMaximumStack())));
-	
-	if (0 > _InvenData->GetPhysicAtkVal())
+FText UUI_ItemTooltip::GetStatText(const float& _StatVal)
+{
+	FText StatTxt = FText::FromString(L"-");
+	if ( 0.f <= _StatVal )
 	{
-		m_PhysicAtk->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_PhysicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetPhysicAtkVal())));
-	}
-	
-	if (0 > _InvenData->GetPhysicDefVal() )
-	{
-		m_PhysicDef->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_PhysicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetPhysicDefVal())));
-	}
-	
-	if ( 0 > _InvenData->GetMagicAtkVal() )
-	{
-		m_MagicAtk->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_MagicAtk->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetMagicAtkVal())));
+		StatTxt = FText::FromString(FString::Printf(TEXT("%d"), (int32)_StatVal));
 	}
 
-	if ( 0 > _InvenData->GetMagicDefVal() )
-	{
-		m_MagicDef->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_MagicDef->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetMagicDefVal())));
-	}
-
-	if (0 > _InvenData->GetRestoreHP() )
-	{
-		m_Restore_HP->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_Restore_HP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetRestoreHP())));
-	}
-
-	if (0 > _InvenData->GetRestoreMP() )
-	{
-		m_Restore_MP->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_Restore_MP->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int32)_InvenData->GetRestoreMP())));
-	}
-	
-	if (0 > _InvenData->GetRequireStr() )
-	{
-		m_Sel_Req_Str->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_Sel_Req_Str->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetRequireStr())));
-	}
-
-	if (0 > _InvenData->GetRequireDex() )
-	{
-		m_Sel_Req_Dex->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_Sel_Req_Dex->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetRequireDex())));
-	}
-
-	if (0 > _InvenData->GetRequireInt())
-	{
-		m_Sel_Req_Int->SetText(FText::FromString(L"-"));
-	}
-	else
-	{
-		m_Sel_Req_Int->SetText(FText::FromString(FString::Printf(TEXT("%d"), _InvenData->GetRequireInt())));
-	}
-
-	FString ItemImgPath = _InvenData->GetItemImgPath();
-	UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
-	m_Sel_ItemImg->SetBrushFromTexture(pTex2D);
+	return StatTxt;
 }

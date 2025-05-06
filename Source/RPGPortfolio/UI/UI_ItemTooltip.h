@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Header/Struct.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_ItemTooltip.generated.h"
@@ -60,4 +61,8 @@ public:
 	virtual void NativeConstruct() override;
 
 	void SetTooltipUI(UItem_InvenData* _InvenData);
+	void SetTooltipUI(FGameItemInfo* _Info, uint32 Stack);
+
+	void SetSelectedCategoryText(const EITEM_TYPE& _Type);
+	FText GetStatText(const float& _StatVal);
 };

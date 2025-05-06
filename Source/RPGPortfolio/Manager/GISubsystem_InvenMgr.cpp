@@ -50,7 +50,7 @@ void UGISubsystem_InvenMgr::SetItemDataTable(UDataTable* _ItemDataTable)
 FGameItemInfo* UGISubsystem_InvenMgr::GetItemInfo(EITEM_ID _ID)
 {
 	FGameItemInfo* pItemInfo = m_MapItemInfo.Find(_ID);
-	if ( nullptr == pItemInfo )
+	if ( pItemInfo == nullptr )
 	{
 		UE_LOG(LogTemp, Error, TEXT("GetItemInfo : 해당하는 아이템 정보를 찾을 수 없음"));
 		return nullptr;
@@ -78,16 +78,14 @@ FInvenItemRow* UGISubsystem_InvenMgr::GetInvenItemRow(EITEM_ID _ID)
 	return pInvenItemRow;
 }
 
-UItem_InvenData* UGISubsystem_InvenMgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
+TOptional<TPair<uint32, FGameItemInfo*>> UGISubsystem_InvenMgr::GetEquipItemFromSlot(EEQUIP_SLOT _Slot)
 {
 	FInvenItemRow* pItemRow = m_EquipItemMap.Find(_Slot);
-	if ( pItemRow == nullptr )
-	{
-		return nullptr;
-	}
+	if ( pItemRow == nullptr ) return TOptional<TPair<uint32, FGameItemInfo*>>();
+	FGameItemInfo* pInfo = GetItemInfo(pItemRow->ID);
+	if ( pInfo == nullptr ) return TOptional<TPair<uint32, FGameItemInfo*>>();
 
-	UItem_InvenData* pItemData = GetInvenDataToItemRow(*pItemRow);
-	return pItemData;
+	return TPair<uint32, FGameItemInfo*>(pItemRow->Stack, pInfo);
 }
 
 FInvenItemRow* UGISubsystem_InvenMgr::AddGameItem(EITEM_ID _ID, uint32 _Stack)
@@ -202,7 +200,7 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 		SetEquipSlotMap(nullptr, _Slot);
 		pItemRow->EquipedSlot = EEQUIP_SLOT::EMPTY;
 		RenewEquipItemListUI(_Type);
-		OnRenewEquipItem.Broadcast(_Slot, nullptr);
+		OnRenewEquipItem.Broadcast(_Slot, FString());
 		return;
 	}
 
@@ -228,7 +226,7 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 			UnEquipCurQuickSlot(pItemRow->EquipedSlot);
 		}
 		SetEquipSlotMap(nullptr, pItemRow->EquipedSlot);
-		OnRenewEquipItem.Broadcast(pItemRow->EquipedSlot, nullptr);
+		OnRenewEquipItem.Broadcast(pItemRow->EquipedSlot, FString());
 	}
 
 	// 아이템 장착 처리
@@ -236,7 +234,8 @@ void UGISubsystem_InvenMgr::ChangeEquipItem(EITEM_ID _ID, EEQUIP_SLOT _Slot)
 	RenewEquipItemListUI(_Type);
 	SetEquipSlotMap(pItemRow, _Slot);
 	UItem_InvenData* pItemData = GetInvenDataToItemRow(*pItemRow);
-	OnRenewEquipItem.Broadcast(_Slot, pItemData);	// 장비창 갱신
+	FString ItemImgPath = GetItemImgFromSlot(pItemRow->EquipedSlot);
+	OnRenewEquipItem.Broadcast(_Slot, ItemImgPath);	// 장비창 갱신
 
 	if ( _Type == EITEM_TYPE::CONSUMABLE )
 	{
@@ -324,7 +323,7 @@ void UGISubsystem_InvenMgr::DecreaseLowerSlotItem(EEQUIP_SLOT _Slot)
 		// 장비창에서 아이템 표시 삭제
 		UnEquipCurQuickSlot(_Slot);
 		SetEquipSlotMap(nullptr, _Slot);
-		OnRenewEquipItem.Broadcast(_Slot, nullptr);
+		OnRenewEquipItem.Broadcast(_Slot, FString());
 	}
 }
 
@@ -524,4 +523,14 @@ EEQUIP_SLOT UGISubsystem_InvenMgr::ConvertIdxToQuickSlot(int32 _Idx)
 	}
 
 	return Slot;
+}
+
+FString UGISubsystem_InvenMgr::GetItemImgFromSlot(EEQUIP_SLOT _Slot)
+{
+	FInvenItemRow* pItemRow = m_EquipItemMap.Find(_Slot);
+	if ( pItemRow == nullptr ) return FString();
+	FGameItemInfo* pInfo = GetItemInfo(pItemRow->ID);
+	if ( pInfo == nullptr ) return FString();
+
+	return pInfo->IconImgPath;
 }

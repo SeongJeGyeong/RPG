@@ -9,7 +9,6 @@
 #include "UI_EquipItem.h"
 #include "UI_EquipItemList.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Item/Item_InvenData.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
 
 void UUI_EquipMain::NativeConstruct()
@@ -84,9 +83,8 @@ void UUI_EquipMain::AddItemInEquipList(UObject* _Data)
 	m_Equip_ItemListUI->AddEquipItemList(_Data);
 }
 
-void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, UItem_InvenData* _ItemData)
+void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, FString _ItemImgPath)
 {
-	UE_LOG(LogTemp, Warning, TEXT("RenewEquipItem"));
 	UUI_EquipItem* pEquipItem = nullptr;
 
 	switch (_Slot)
@@ -162,5 +160,5 @@ void UUI_EquipMain::RenewEquipItem(EEQUIP_SLOT _Slot, UItem_InvenData* _ItemData
 		UE_LOG(LogTemp, Error, TEXT("RenewEquipItem : 위젯 할당 실패"));
 		return;
 	}
-	pEquipItem->SetEquipItem(_ItemData);
+	pEquipItem->SetEquipItem(_ItemImgPath);
 }

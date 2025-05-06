@@ -53,7 +53,7 @@ public:
 	EEQUIP_SLOT GetSlotType() { return eSlotType; }
 	UButton* GetItemBtn() { return m_EquipItemBtn; }
 
-	void SetEquipItem(class UItem_InvenData* _ItemData);
+	void SetEquipItem(FString _ItemImgPath);
 
 	UFUNCTION()
 	void ItemBtnClicked();

@@ -6,6 +6,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Characters/Player_Base_Knight.h"
+#include "../Characters/Comp/Player_InputComponent.h"
 
 void UUI_ItemSelectMenu::NativeConstruct()
 {
@@ -40,6 +41,13 @@ void UUI_ItemSelectMenu::NativeConstruct()
 		}
 	}
 
+	APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if ( pPlayer->GetInputComp()->GetStateType() != EPlayerStateType::IDLE )
+	{
+		m_Txt_Use->SetColorAndOpacity(FLinearColor::FLinearColor(0.5f, 0.5f, 0.5f, 0.5f));
+		m_Btn_Use->SetIsEnabled(false);
+	}
+
 	Super::NativeConstruct();
 }
 
@@ -49,7 +57,6 @@ void UUI_ItemSelectMenu::UseBtnClicked()
 	{
 		APlayer_Base_Knight* pPlayer = Cast<APlayer_Base_Knight>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 		pPlayer->CloseInventory();
-		pPlayer->SetInputMode(false);
 		pPlayer->UseInventoryItem(m_ID, m_Slot);
 	}
 	else

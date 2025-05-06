@@ -7,9 +7,7 @@
 #include "Components/TextBlock.h"
 #include "UI_EquipItemList.h"
 #include "UI_ItemTooltip.h"
-#include "../Item/Item_InvenData.h"
 #include "../Manager/GISubsystem_SoundMgr.h"
-#include "../System/DataAsset/DA_ItemCategoryIcon.h"
 #include "PaperSprite.h"
 #include "../Manager/GISubsystem_InvenMgr.h"
 
@@ -33,11 +31,10 @@ void UUI_EquipItem::NativeConstruct()
 			UE_LOG(LogTemp, Error, TEXT("UUI_EquipItem : InvenMgr 가져오기 실패"));
 		}
 
-		UItem_InvenData* pItemInfo = pInvenMgr->GetEquipItemFromSlot(eSlotType);
-		if (pItemInfo != nullptr)
+		FString pItemImgPath = pInvenMgr->GetItemImgFromSlot(eSlotType);
+		if (!pItemImgPath.IsEmpty())
 		{
-			FString ItemImgPath = pItemInfo->GetItemImgPath();
-			UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+			UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *pItemImgPath);
 			m_EquipItemImg->SetBrushFromTexture(pTex2D);
 			m_EquipItemImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			m_EquipDishImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -56,17 +53,16 @@ void UUI_EquipItem::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UUI_EquipItem::SetEquipItem(UItem_InvenData* _ItemData)
+void UUI_EquipItem::SetEquipItem(FString _ItemImgPath)
 {
-	if (!IsValid(_ItemData))
+	if (_ItemImgPath.IsEmpty())
 	{
 		m_EquipItemImg->SetVisibility(ESlateVisibility::Hidden);
 		m_EquipDishImg->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
 	{
-		FString ItemImgPath = _ItemData->GetItemImgPath();
-		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *ItemImgPath);
+		UTexture2D* pTex2D = LoadObject<UTexture2D>(nullptr, *_ItemImgPath);
 		m_EquipItemImg->SetBrushFromTexture(pTex2D);
 		m_EquipItemImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		m_EquipDishImg->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -100,12 +96,12 @@ void UUI_EquipItem::ItemBtnHovered()
 	UGISubsystem_InvenMgr* pInvenMgr = GetGameInstance()->GetSubsystem<UGISubsystem_InvenMgr>();
 	if ( IsValid(pInvenMgr) )
 	{
-		UItem_InvenData* pItemInfo = pInvenMgr->GetEquipItemFromSlot(eSlotType);
-		if ( IsValid(ItemNameText) && IsValid(pItemInfo) )
+		TOptional<TPair<uint32, FGameItemInfo*>> pItemInfo = pInvenMgr->GetEquipItemFromSlot(eSlotType);
+		if ( IsValid(ItemNameText) && pItemInfo.IsSet() )
 		{
-			FString sItemName = pItemInfo->GetItemName();
+			FString sItemName = pItemInfo->Value->ItemName;
 			ItemNameText->SetText(FText::FromString(sItemName));
-			m_Tooltip->SetTooltipUI(pItemInfo);
+			m_Tooltip->SetTooltipUI(pItemInfo->Value, pItemInfo->Key);
 			m_Tooltip->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 

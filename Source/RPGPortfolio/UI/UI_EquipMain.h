@@ -41,5 +41,5 @@ public:
 	void CloseItemList();
 	void ClearEquipItemList();
 	void AddItemInEquipList(UObject* _Data);
-	void RenewEquipItem(EEQUIP_SLOT _Slot, class UItem_InvenData* _ItemData = nullptr);
+	void RenewEquipItem(EEQUIP_SLOT _Slot, FString _ItemImgPath);
 };
