@@ -715,8 +715,8 @@ https://github.com/SeongJeGyeong/RPG/blob/e085118260bfd3809730998cf1caa454d65400
 하지만 그 덕분에 가비지 컬렉션에 대한 것과 포인터의 메모리 관리의 중요성에 대해 배울 수 있었습니다.<br/>
 <br/>
 NewObject<>() 함수로 생성한 객체는 delete 등의 키워드를 통해 삭제할 수 없고 가비지 컬렉션에 의해 삭제되기 때문에<br/>
-1) UPROPERTY()를 통해 가비지 컬렉션에서 참조를 인식할 수 있게 만들기
-2) TStrongObjectPtr로 강한 참조를 유지하기
-3) AddToRoot()를 통해 객체를 가비지 컬렉션 대상에서 제외하기
-
+1) UPROPERTY()를 통해 가비지 컬렉션에서 참조를 인식할 수 있게 만들기<br/>
+2) TStrongObjectPtr로 강한 참조를 유지하기<br/>
+3) AddToRoot()를 통해 객체를 가비지 컬렉션 대상에서 제외하기<br/>
+<br/>
 등의 방법을 통해 객체를 안전하게 유지할 수 있다는 것을 배울 수 있었습니다.<br/>
